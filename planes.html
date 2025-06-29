@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mejora tu suscripción - FlashMed</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+  </style>
+</head>
+<body class="bg-white text-gray-800">
+    <!-- Header -->
+   <header class="bg-white py-4">
+  <div class="max-w-6xl mx-auto px-6 md:px-12 border-b border-gray-200 pb-4">
+    <div class="flex justify-between items-center">
+      <a href="index.html" class="flex items-center space-x-2">
+        <img src="./assets/logo.png" alt="FlashMed Logo" class="w-8 h-8 rounded-md">
+        <span class="text-xl font-semibold text-gray-800">Bancomicina</span>
+      </a>
+      <nav class="hidden md:flex space-x-6 text-gray-500 font-medium">
+        <a href="novedades.html" class="transition-colors hover:text-gray-700">Novedades</a>
+        <a href="soporte.html" class="transition-colors hover:text-gray-700">Soporte</a>
+        <a href="planes.html" class="transition-colors hover:text-gray-700">Planes</a>
+        <a href="#" class="transition-colors hover:text-gray-700">App</a>
+      </nav>
+      <button class="md:hidden p-2 rounded-md hover:bg-gray-200">
+        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+             xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6h16M4 12h16m-7 6h7"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+  <!-- Hero / Pricing Intro -->
+  <section class="flex-grow">
+    <div class="max-w-3xl mx-auto text-center px-4 py-12">
+      <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">Mejora tu suscripción</h1>
+      <p class="text-gray-600 mb-8">
+        Empieza a aprender Medicina de forma más eficaz y a mejorar tus resultados
+      </p>
+      <!-- Toggle Mensual/Anual -->
+      <!-- Toggle Mensual/Anual -->
+<div class="inline-flex items-center space-x-4 text-gray-600 mb-12">
+  <button id="btn-monthly" class="font-medium text-[#5B8999]">Mensual</button>
+  <span>|</span>
+  <button id="btn-yearly" class="font-medium hover:text-[#5B8999]">Anual</button>
+</div>
+
+      <!-- Pricing Cards (siempre en fila) -->
+      <div class="flex flex-row flex-nowrap items-start justify-center gap-6 px-2">
+        <!-- PLUS -->
+        <div class="bg-white rounded-3xl shadow-lg p-8 flex-1 min-w-0 flex flex-col
+                    transition transform hover:-translate-y-1 hover:shadow-2xl">
+          <h2 class="text-lg font-semibold text-center mb-4">PLUS</h2>
+          <div class="flex items-baseline justify-center mb-6 space-x-1">
+            <span class="price text-4xl font-extrabold text-teal-400"
+                  data-month="6,99" data-year="69,99">6,99</span>
+            <span class="text-xl text-gray-500">€</span>
+            <span class="period text-sm text-gray-500">/ mes</span>
+          </div>
+          <ul class="divide-y divide-gray-200 text-gray-700 flex-1">
+            <li class="py-3">✓ SIN LÍMITE DE REVISIONES</li>
+            <li class="py-3">✓ HASTA 5 ASIGNATURAS</li>
+            <li class="py-3">✓ HASTA 2 DISPOSITIVOS</li>
+            <li class="py-3">✓ PLANIFICADOR ESTRATÉGICO</li>
+            <li class="py-3">✓ BUSCADOR DE TARJETAS</li>
+          </ul>
+        </div>
+
+        <!-- PREMIUM -->
+        <div class="bg-[#5B8999] rounded-3xl shadow-lg p-8 flex-1 min-w-0 flex flex-col text-white
+                    transition transform hover:-translate-y-1 hover:shadow-2xl">
+          <h2 class="text-lg font-semibold text-center mb-4">PREMIUM</h2>
+          <div class="flex items-baseline justify-center mb-6 space-x-1">
+            <span class="price text-4xl font-extrabold"
+                  data-month="12,99" data-year="129,99">12,99</span>
+            <span class="text-xl">€</span>
+            <span class="period text-sm">/ mes</span>
+          </div>
+          <ul class="divide-y divide-gray-400 flex-1">
+            <li class="py-3">✓ SIN LÍMITE DE REVISIONES</li>
+            <li class="py-3">✓ PLANIFICADOR ESTRATÉGICO</li>
+            <li class="py-3">✓ SIN LÍMITE DE ASIGNATURAS</li>
+            <li class="py-3">✓ HASTA 3 DISPOSITIVOS</li>
+            <li class="py-3">✓ BUSCADOR AVANZADO</li>
+            <li class="py-3">✓ NOTAS DE TEXTO E IMAGEN</li>
+            <li class="py-3">✓ MNEMOTECNIAS</li>
+            <li class="py-3">✓ ETIQUETAS PERSONALES</li>
+          </ul>
+        </div>
+
+        <!-- PRO -->
+        <div class="bg-gray-900 rounded-3xl shadow-lg p-8 flex-1 min-w-0 flex flex-col text-white
+                    transition transform hover:-translate-y-1 hover:shadow-2xl">
+          <h2 class="text-lg font-semibold text-center mb-4">PRO</h2>
+          <div class="flex items-baseline justify-center mb-6 space-x-1">
+            <span class="price text-4xl font-extrabold text-yellow-400"
+                  data-month="17,99" data-year="179,99">17,99</span>
+            <span class="text-xl text-yellow-400">€</span>
+            <span class="period text-sm text-white">/ mes</span>
+          </div>
+          <ul class="divide-y divide-gray-700 flex-1">
+            <li class="py-3">✓ SIN LÍMITE DE REVISIONES</li>
+            <li class="py-3">✓ SIN LÍMITE DE ASIGNATURAS</li>
+            <li class="py-3">✓ HASTA 4 DISPOSITIVOS</li>
+            <li class="py-3">✓ PLANIFICADOR ESTRATÉGICO</li>
+            <li class="py-3">✓ BUSCADOR AVANZADO</li>
+            <li class="py-3">✓ NOTAS DE TEXTO E IMAGEN</li>
+            <li class="py-3">✓ MNEMOTECNIAS</li>
+            <li class="py-3">✓ ETIQUETAS PERSONALES</li>
+            <li class="py-3 text-yellow-400">✓ ESTADÍSTICAS Y EVOLUCIÓN</li>
+            <li class="py-3 text-yellow-400">✓ INFORMES DE RENDIMIENTO</li>
+            <li class="py-3 text-yellow-400">✓ MAZOS DE ALTO RENDIMIENTO</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const btnM = document.getElementById('btn-monthly');
+    const btnY = document.getElementById('btn-yearly');
+    function switchPlan(type) {
+      // Precios
+      document.querySelectorAll('.price').forEach(el => {
+        el.textContent = type === 'year' ? el.dataset.year : el.dataset.month;
+      });
+      // Período
+      document.querySelectorAll('.period').forEach(el => {
+        el.textContent = type === 'year' ? '/ año' : '/ mes';
+        // ajustar color del sufijo en Pro
+        if(el.closest('.bg-gray-900')) {
+          el.classList.toggle('text-white', type === 'month');
+          el.classList.toggle('text-yellow-400', type === 'year');
+        }
+      });
+      // Botones activo/inactivo
+      btnM.classList.toggle('text-blue-600', type === 'month');
+      btnM.classList.toggle('hover:text-blue-600', type === 'year');
+      btnY.classList.toggle('text-blue-600', type === 'year');
+      btnY.classList.toggle('hover:text-blue-600', type === 'month');
+    }
+    btnM.addEventListener('click', () => switchPlan('month'));
+    btnY.addEventListener('click', () => switchPlan('year'));
+  </script>
+
+  <footer class="w-full bg-white border-t border-gray-200 py-8 px-6 md:px-12 mt-8">
+  <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-start
+              text-sm text-gray-500 space-y-6 sm:space-y-0 sm:space-x-8">
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Productos</span>
+      <a href="#" class="transition-colors hover:text-gray-700">Aplicación</a>
+      <a href="planes.html" class="transition-colors hover:text-gray-700">Planes</a>
+    </div>
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Novedades</span>
+      <a href="blog.html" class="transition-colors hover:text-gray-700">Blog</a>
+      <a href="#" class="transition-colors hover:text-gray-700">Instagram</a>
+      <a href="#" class="transition-colors hover:text-gray-700">Twitter</a>
+      <a href="#" class="transition-colors hover:text-gray-700">Facebook</a>
+    </div>
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Recursos</span>
+      <a href="soporte.html" class="transition-colors hover:text-gray-700">Soporte</a>
+      <a href="guia.html" class="transition-colors hover:text-gray-700">Guía</a>
+      <a href="portal.html" class="transition-colors hover:text-gray-700">Portal</a>
+      <a href="contacto.html" class="transition-colors hover:text-gray-700">Contacto</a>
+    </div>
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Compañía</span>
+      <a href="avisolegal.html" class="transition-colors hover:text-gray-700">Aviso Legal</a>
+      <a href="terminos.html" class="transition-colors hover:text-gray-700">Términos del servicio</a>
+      <a href="privacidad.html" class="transition-colors hover:text-gray-700">Privacidad</a>
+      <a href="cookies.html" class="transition-colors hover:text-gray-700">Cookies</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

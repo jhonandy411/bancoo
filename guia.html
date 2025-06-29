@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bancomicina - Guía Rápida de Uso</title>
+    <!-- Carga de Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .menu-icon-placeholder {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            background-color: #6c757d; /* Color de marcador de posición */
+            border-radius: 0.25rem;
+            margin-right: 0.25rem;
+            vertical-align: middle;
+        }
+        /* Estilos base para los botones de las pestañas */
+        .tab-button {
+            color: #6b7280; /* text-gray-500 por defecto para texto inactivo */
+            position: relative; /* Necesario para posicionar el separador */
+            padding: 0.75rem 1.5rem; /* Relleno ajustado */
+            font-weight: 500; /* Medium font-weight */
+            transition: color 0.3s ease; /* Transición suave para el color del texto */
+            white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+        }
+        /* Estilos para la pestaña activa (verde azulado) */
+        .tab-button.active {
+            color: #20b2aa; /* Un verde azulado más vibrante, similar a LightSeaGreen */
+            border-bottom: 2px solid #20b2aa; /* Borde inferior del mismo color */
+        }
+        /* Estilos para el separador vertical (|) entre las pestañas */
+        .tab-button:not(:last-child)::after {
+            content: '|';
+            color: #d1d5db; /* text-gray-300 para el separador */
+            position: absolute;
+            right: -8px; /* Ajusta la posición del separador para que quede entre los botones */
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1rem; /* Tamaño del separador */
+            font-weight: 300; /* Hace la línea más delgada */
+        }
+        /* Estilo para la viñeta de lista personalizada */
+        .content-list li {
+            position: relative;
+            padding-left: 1.5rem; /* Espacio para la viñeta */
+        }
+        .content-list li::before {
+            content: '•';
+            color: #2563eb; /* Azul-700 */
+            font-size: 1.25em;
+            position: absolute;
+            left: 0;
+            top: 0;
+            line-height: inherit; /* Hereda la altura de línea para una mejor alineación */
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800">
+
+    <!-- Encabezado / Barra de Navegación -->
+     <header class="bg-white py-4">
+  <div class="max-w-6xl mx-auto px-6 md:px-12 border-b border-gray-200 pb-4">
+    <div class="flex justify-between items-center">
+      <a href="index.html" class="flex items-center space-x-2">
+        <img src="./assets/logo.png" alt="FlashMed Logo" class="w-8 h-8 rounded-md">
+        <span class="text-xl font-semibold text-gray-800">Bancomicina</span>
+      </a>
+      <nav class="hidden md:flex space-x-6 text-gray-500 font-medium">
+        <a href="novedades.html" class="transition-colors hover:text-gray-700">Novedades</a>
+        <a href="soporte.html" class="transition-colors hover:text-gray-700">Soporte</a>
+        <a href="planes.html" class="transition-colors hover:text-gray-700">Planes</a>
+        <a href="#" class="transition-colors hover:text-gray-700">App</a>
+      </nav>
+      <button class="md:hidden p-2 rounded-md hover:bg-gray-200">
+        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+             xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6h16M4 12h16m-7 6h7"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+    <!-- Contenedor Principal de Contenido -->
+<main class="w-full max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6 sm:p-8 md:p-12 mt-8 mb-8">
+        <!-- Icono Central Grande -->
+        <div class="flex justify-center mb-8">
+            <img src="./assets/logo.png" alt="FlashMed Icono Central" class="w-24 h-24 rounded-2xl">
+        </div>
+
+        <!-- Título -->
+        <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 text-center mb-6">Guía rápida de uso</h1>
+
+        <!-- Párrafos de Descripción -->
+        <p class="text-base sm:text-lg text-gray-700 text-left mb-4 leading-relaxed">
+            Bancomicina es una aplicación que va a permitirte memorizar todos los datos de tus asignaturas en tiempo
+            récord y no olvidarlos nunca.
+        </p>
+        <p class="text-base sm:text-lg text-gray-700 text-left mb-8 leading-relaxed">
+            Lo único que necesitas es dedicar unos pocos minutos del día a repasar. Merece la pena que dediques unos
+            segundos a comprender como funciona, porque te ahorrará muchas horas de estudio ineficaces.
+        </p>
+
+        <!-- Llamada a la Acción -->
+        <p >
+            ¡Vamos allá!
+        </p>
+
+        <!-- Navegación por Pestañas -->
+        <div class="flex justify-center border-b border-gray-200 mb-8">
+            <!-- NOTA: La clase 'active' inicial la gestionará JavaScript -->
+            <button id="ultra-rapida-tab" class="tab-button text-gray-600 px-6 py-3 font-medium transition-colors hover:text-blue-600">Guía ultra rápida</button>
+            <button id="rapida-tab" class="tab-button text-gray-600 px-6 py-3 font-medium transition-colors hover:text-blue-600">Guía rápida</button>
+            <button id="completa-tab" class="tab-button text-gray-600 px-6 py-3 font-medium transition-colors hover:text-blue-600">Guía completa</button>
+        </div>
+
+        <!-- Sección de Contenido -->
+        <div id="content-container" class="text-gray-700 text-base sm:text-lg text-left px-4">
+            <!-- Guía Ultra Rápida (contenido inicial) -->
+            <div id="guia-ultra-rapida-content">
+                <p class="mb-4">
+                    Cada vez que vayas a ponerte a estudiar, tendrás que marcar qué tipo
+                    de tarjetas quieres que la aplicación seleccione durante la sesión de
+                    estudio. Para ello, debes pulsar el botón de <span class="menu-icon-placeholder"></span> Menú y modificar las
+                    siguientes variables:
+                </p>
+
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-3">
+                        <strong class="font-semibold">Aislar temas.</strong> Si quieres estudiar una asignatura, sección o concepto
+                        concreto, debes indicarlos para que solo te aparezcan tarjetas de eso
+                        que quieres estudiar. Si en cambio quieres realizar un estudio
+                        transversal, selecciona <strong class="font-semibold">Todas en asignaturas</strong> para no filtrar las tarjetas.
+                    </li>
+                    <li class="mb-3">
+                        <strong class="font-semibold">Número de tarjetas.</strong> Debes seleccionar cuántas tarjetas nuevas
+                        quieres aprender, y cuántos datos aprendidos quieres revisar. Para
+                        modificar el número, puedes hacerlo arrastrando hacia arriba o
+                        abajo, o pulsando. Pulsa el botón de infinito si quieres estudiar todas
+                        las tarjetas sin límite, algo útil cuando quieres estudiar en
+                        profundidad un tema aislado.
+                    </li>
+                    <li class="mb-3">
+                        <strong class="font-semibold">Criterio de selección.</strong> La aplicación seleccionará el número de
+                        tarjetas nuevas y revisiones que hayas indicado según los criterios de
+                        <strong class="font-semibold">Prioridad</strong>. En el de tarjetas nuevas, lo ideal es el criterio de <strong class="font-semibold">Facilidad</strong>,
+                        que te hará aprender primero las bases de cada concepto para
+                        después ir añadiendo datos cada vez más específicos. Cuando quede
+                        poco tiempo para el examen, será más útil el criterio de <strong class="font-semibold">Rentabilidad</strong>,
+                        para priorizar aquellos datos que pueden caer en el examen con
+                        mayor probabilidad. El criterio de selección ideal para las revisiones
+                        es el de <strong class="font-semibold">Retención</strong>, ya hará que repases antes los datos que tienes
+                        mayor probabilidad de olvidar. Si te encuentras cerca del examen,
+                        puede que te interese seleccionar las revisiones por <strong class="font-semibold">Número de fallos</strong>
+                        o por <strong class="font-semibold">Rentabilidad</strong>.
+                    </li>
+                    <li class="mb-3">
+                        <strong class="font-semibold">Agrupar tarjetas.</strong> Marca la forma en la que se agruparán las tarjetas
+                        seleccionadas. Si prefieres un estudio focalizado por temas, agrupa
+                        las tarjetas por <strong class="font-semibold">Concepto o Sección</strong>. Si en cambio prefieres hacer un
+                        estudio más transversal, agrupa por <strong class="font-semibold">Mazo único o Asignatura</strong>.
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Guía Rápida -->
+            <div id="guia-rapida-content" class="hidden">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Cómo estudiar flashcards</h2>
+                <p class="mb-4">Cada flashcard te preguntará un dato concreto: debes pensarlo mentalmente y pulsar en la pantalla para mostrar la respuesta correcta. Después, tienes que indicar si has:</p>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Acertado:</strong> pulsa a la derecha de la pantalla.</li>
+                    <li class="mb-4"><strong class="font-semibold">Fallado:</strong> pulsa a la izquierda de la pantalla. La tarjeta pasará al montón de aprendiendo hasta que la aciertes.</li>
+                </ul>
+                <p class="mb-4">Como alternativa, utiliza los botones de abajo para marcar:</p>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Fácil:</strong> si te parece muy obvia y no quieres repasarla hasta dentro de bastantes días.</li>
+                    <li class="mb-4"><strong class="font-semibold">Difícil:</strong> si has acertado pero con dificultad y quieres repasarla dentro de pocos días.</li>
+                </ul>
+
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Funciones rápidas durante el estudio</h2>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Marcar como importante:</strong> podrás estudiar las tarjetas que marques en el mazo fijo con el nombre Importantes.</li>
+                    <li class="mb-2"><strong class="font-semibold">Marcar como difícil:</strong> podrás estudiar las tarjetas que marques en el mazo fijo con el nombre Difíciles.</li>
+                    <li class="mb-2"><strong class="font-semibold">Ocultar:</strong> pulsa este botón cuando no quieras volver a estudiar una tarjeta. Pasará a estar suspendida de forma indefinida, y no volverá a aparecer en tus sesiones de estudio. Podrás revisar y volver a activar las tarjetas en el mazo fijo con el nombre Ocultadas.</li>
+                    <li class="mb-4"><strong class="font-semibold">Apartar:</strong> pulsa este botón cuando te aparezca un dato que no quieres estudiar hoy. Se marcará como suspendida durante el día de hoy, y mañana volverá a estar activa y podrá aparecer en tu sesión de estudio. Podrás revisar y volver a activar las tarjetas en el mazo fijo con el nombre Apartadas.</li>
+                </ul>
+
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Número de tarjetas a estudiar</h2>
+                <p class="mb-4">Elige arrastrando hacia arriba o abajo el criterio según el cual se elegirán las flashcards en la sesión de estudio para:</p>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Número de tarjetas nuevas:</strong> arrastra el número hacia arriba o abajo para modificar el número de datos nuevos que quieres aprender en esta sesión de estudio. Pulsa sobre el número para subir de 5 en 5 o de 10 en 10.</li>
+                    <li class="mb-4"><strong class="font-semibold">Número de revisiones:</strong> arrastra para modificar el número de datos aprendidos que quieres repasar en esta sesión de estudio.</li>
+                </ul>
+
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Criterio de selección de tarjetas</h2>
+                <p class="mb-4">Elige arrastrando hacia arriba o abajo el criterio según el cual se elegirán el número que has marcado para la sesión de estudio de:</p>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Tarjetas nuevas</h3>
+                <p class="mb-2">Se pueden elegir según:</p>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Facilidad:</strong> prioriza tarjetas con conceptos básicos y clave sobre tarjetas con datos más difíciles y remotos.</li>
+                    <li class="mb-2"><strong class="font-semibold">Rentabilidad:</strong> aprende antes los datos más rentables que te permiten acertar preguntas.</li>
+                    <li class="mb-2"><strong class="font-semibold">Cubrir todo:</strong> realizará un reparto equitativo de los datos a aprender entre las distintas asignaturas.</li>
+                    <li class="mb-4"><strong class="font-semibold">Aleatorio:</strong> aprenderás datos nuevos de forma aleatoria.</li>
+                </ul>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Revisiones</h3>
+                <p class="mb-2">Se pueden elegir según:</p>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Retención:</strong> estudiar los aprendidos con mayor probabilidad de ser olvidados.</li>
+                    <li class="mb-2"><strong class="font-semibold">Rentabilidad:</strong> repasar los datos aprendidos más rentables que permiten acertar preguntas.</li>
+                    <li class="mb-2"><strong class="font-semibold">Más falladas:</strong> se priorizarán los datos aprendidos que han sido los datos aprendidos que han sido olvidados más veces en el pasado.</li>
+                    <li class="mb-4"><strong class="font-semibold">Aleatorio:</strong> los datos a repasar se seleccionan al azar.</li>
+                </ul>
+
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Filtrar y organizar las tarjetas</h2>
+                <p class="mb-4">Elige arrastrando hacia arriba o abajo los criterios para seleccionar y organizar las tarjetas a lo largo de la sesión de estudio.</p>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Aisla una asignatura, sección o concepto</h3>
+                <p class="mb-4">Pulsa las flechas para moverte entre niveles. Sólo se cargarán tarjetas de aquello que aísles. Marca Todas para no filtrar.</p>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Criterio para agrupar tarjetas</h3>
+                <p class="mb-4">Puedes agrupar todas las tarjetas que se han añadido a la sesión de estudio en un mazo único, o bien por Asignatura, Sección o Concepto.</p>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Criterio para ordenar los mazos</h3>
+                <p class="mb-4">Los mazos generados se pueden organizar según varios criterios:</p>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Personalizado:</strong> te permite modificar su posición, manteniendo pulsado el mazo y arrastrándolo hasta la posición deseada.</li>
+                    <li class="mb-2"><strong class="font-semibold">Nombre:</strong> los coloca en orden alfabético.</li>
+                    <li class="mb-2"><strong class="font-semibold">Nuevas:</strong> según el número de tarjetas nuevas.</li>
+                    <li class="mb-2"><strong class="font-semibold">Revisiones:</strong> según el número de revisiones.</li>
+                    <li class="mb-4"><strong class="font-semibold">Tarjetas:</strong> según la suma de tarjetas nuevas y revisiones.</li>
+                </ul>
+                <p class="mb-4">Pulsa la flecha para cambiar el sentido del orden.</p>
+            </div>
+
+            <!-- Guía Completa -->
+            <div id="guia-completa-content" class="hidden">
+                <p class="mb-4">Si visitas <strong>Menú > Ajustes</strong>, verás que puedes descargar flashcards en dos formatos de mazo:</p>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Mazos de Asignatura:</strong> contiene todos los datos memorizables de una asignatura. Lo ideal es estudiarlas a diario para asegurar que llevas el 100% memorizado al examen.</li>
+                    <li class="mb-4"><strong class="font-semibold">Mazos de Alto Rendimiento:</strong> contiene flashcards muy rentables para preparar el MIR. Lo ideal es estudiarlo antes de los exámenes, para asegurar que dominas lo más rentable.</li>
+                </ul>
+                <p class="mb-4">Cada <strong>asignatura</strong> se agrupa en varias <strong>secciones</strong>, y cada sección en varios <strong>conceptos</strong>.</p>
+
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Cómo estudiar flashcards</h2>
+                <p class="mb-4">Cada flashcard te preguntará un <strong>dato concreto</strong>: debes pensarlo mentalmente y <strong>pulsar en la pantalla</strong> para mostrar la respuesta correcta. Después, tienes que indicar si has:</p>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Acertado:</strong> pulsa a la <strong>derecha</strong> de la pantalla.</li>
+                    <li class="mb-4"><strong class="font-semibold">Fallado:</strong> pulsa a la <strong>izquierda</strong> de la pantalla. La tarjeta pasará al montón de aprendiendo hasta que la aciertes.</li>
+                </ul>
+                <p class="mb-4">Como alternativa, utiliza los botones de abajo para marcar:</p>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Fácil:</strong> si te parece muy obvia y no quieres repasarla hasta dentro de bastantes días.</li>
+                    <li class="mb-4"><strong class="font-semibold">Difícil:</strong> si has acertado pero con dificultad y quieres repasarla dentro de pocos días.</li>
+                </ul>
+
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Tu sesión de estudio</h2>
+                <p class="mb-4">Cada vez que utilices la app debes crear una sesión de estudio, que contará con tres tipos de datos:</p>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Tarjetas nuevas:</strong> datos que no has estudiado nunca dentro de la aplicación y vas a ver por primera vez</li>
+                    <li class="mb-2"><strong class="font-semibold">Aprendiendo:</strong> datos estudiados recientemente que debes repasar para que pasen a considerarse como memorizados</li>
+                    <li class="mb-4"><strong class="font-semibold">Revisiones:</strong> datos memorizados que debes repasar para no olvidarlos y recordarlos cada vez durante más tiempo</li>
+                </ul>
+                <p class="mb-4">Las flashcards pueden pertenecer a su vez a algunos de estos grupos:</p>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Dominadas:</strong> flashcards con muy baja probabilidad de ser olvidadas, que necesitan repasarse con muy poca frecuencia.</li>
+                    <li class="mb-2"><strong class="font-semibold">Olvidadas:</strong> son datos que han sido memorizados y la última vez que los revisaste los fallaste.</li>
+                    <li class="mb-4"><strong class="font-semibold">Suspendidas:</strong> tarjetas que has ocultado o apartado durante tu estudio y que ya no se cargan en la sesión de estudio.</li>
+                </ul>
+
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Funciones rápidas durante el estudio</h2>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Marcar como importante:</strong> podrás estudiar las tarjetas que marques en el mazo fijo con el nombre <strong>Importantes</strong>.</li>
+                    <li class="mb-2"><strong class="font-semibold">Marcar como difícil:</strong> podrás estudiar las tarjetas que marques en el mazo fijo con el nombre <strong>Difíciles</strong>.</li>
+                    <li class="mb-2"><strong class="font-semibold">Ocultar:</strong> pulsa este botón cuando no quieras volver a estudiar una tarjeta. Pasará a estar suspendida de forma indefinida, y no volverá a aparecer en tus sesiones de estudio. Podrás revisar y volver a activar las tarjetas en el mazo fijo con el nombre <strong>Ocultadas</strong>.</li>
+                    <li class="mb-4"><strong class="font-semibold">Apartar:</strong> pulsa este botón cuando te aparezca un dato que no quieres estudiar hoy. Se marcará como suspendida durante el día de hoy, y mañana volverá a estar activa y podrá aparecer en tu sesión de estudio. Podrás revisar y volver a activar las tarjetas en el mazo fijo con el nombre <strong>Apartadas</strong>.</li>
+                </ul>
+
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Función doble check</h2>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Activado:</strong> cada vez que aciertes un tarjeta nueva pasará a estar en Aprendiendo hasta que la vuelvas a acertar pasados unos minutos. Ideal si estás empezando a estudiar el examen.</li>
+                    <li class="mb-4"><strong class="font-semibold">Desactivado:</strong> cuando aciertes una tarjeta nueva pasará directamente a <strong>Aprendidas</strong>. Ideal si estás cerca del examen y tienes poco tiempo.</li>
+                </ul>
+
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Número de tarjetas a estudiar</h2>
+                <p class="mb-4">Elige arrastrando hacia arriba o abajo el criterio según el cual se elegirán las flashcards en la sesión de estudio para:</p>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Número de tarjetas nuevas:</strong> arrastra el número hacia arriba o abajo para modificar el número de datos nuevos que quieres aprender en esta sesión de estudio. Pulsa sobre el número para subir de 5 en 5 o de 10 en 10.</li>
+                    <li class="mb-4"><strong class="font-semibold">Número de revisiones:</strong> arrastra para modificar el número de datos aprendidos que quieres repasar en esta sesión de estudio.</li>
+                </ul>
+
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Criterio de selección de tarjetas</h2>
+                <p class="mb-4">Elige arrastrando hacia arriba o abajo el criterio según el cual se elegirán el número que has marcado para la sesión de estudio de:</p>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Tarjetas nuevas</h3>
+                <p class="mb-2">Se pueden elegir según:</p>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Facilidad:</strong> prioriza tarjetas con conceptos básicos y clave sobre tarjetas con datos más difíciles y remotos.</li>
+                    <li class="mb-2"><strong class="font-semibold">Rentabilidad:</strong> aprende antes los datos más rentables que te permiten acertar preguntas.</li>
+                    <li class="mb-2"><strong class="font-semibold">Cubrir todo:</strong> realizará un reparto equitativo de los datos a aprender entre las distintas asignaturas.</li>
+                    <li class="mb-4"><strong class="font-semibold">Aleatorio:</strong> aprenderás datos nuevos de forma aleatoria.</li>
+                </ul>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Revisiones</h3>
+                <p class="mb-2">Se pueden elegir según:</p>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Retención:</strong> estudiar los aprendidos con mayor probabilidad de ser olvidados.</li>
+                    <li class="mb-2"><strong class="font-semibold">Rentabilidad:</strong> repasar los datos aprendidos más rentables que permiten acertar preguntas.</li>
+                    <li class="mb-2"><strong class="font-semibold">Más falladas:</strong> se priorizarán los datos aprendidos que han sido los datos aprendidos que han sido olvidados más veces en el pasado.</li>
+                    <li class="mb-4"><strong class="font-semibold">Aleatorio:</strong> los datos a repasar se seleccionan al azar.</li>
+                </ul>
+
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Filtrar y organizar las tarjetas</h2>
+                <p class="mb-4">Elige arrastrando hacia arriba o abajo los criterios para seleccionar y organizar las tarjetas a lo largo de la sesión de estudio.</p>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Aisla una asignatura, sección o concepto</h3>
+                <p class="mb-4">Pulsa las flechas para moverte entre niveles. Sólo se cargarán tarjetas de aquello que aísles. Marca <strong>Todas</strong> para no filtrar.</p>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Criterio para agrupar tarjetas</h3>
+                <p class="mb-4">Puedes agrupar todas las tarjetas que se han añadido a la sesión de estudio en un mazo único, o bien por Asignatura, Sección o Concepto.</p>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Criterio para ordenar los mazos</h3>
+                <p class="mb-4">Los mazos generados se pueden organizar según varios criterios:</p>
+                <ul class="list-none p-0 content-list">
+                    <li class="mb-2"><strong class="font-semibold">Personalizado:</strong> te permite modificar su posición, manteniendo pulsado el mazo y arrastrándolo hasta la posición deseada.</li>
+                    <li class="mb-2"><strong class="font-semibold">Nombre:</strong> los coloca en orden alfabético.</li>
+                    <li class="mb-2"><strong class="font-semibold">Nuevas:</strong> según el número de tarjetas nuevas.</li>
+                    <li class="mb-2"><strong class="font-semibold">Revisiones:</strong> según el número de revisiones.</li>
+                    <li class="mb-4"><strong class="font-semibold">Tarjetas:</strong> según la suma de tarjetas nuevas y revisiones.</li>
+                </ul>
+                <p class="mb-4">Pulsa la flecha para cambiar el sentido del orden.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Pie de página -->
+    <footer class="w-full bg-white border-t border-gray-200 py-8 px-6 md:px-12 mt-8">
+  <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-start
+              text-sm text-gray-500 space-y-6 sm:space-y-0 sm:space-x-8">
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Productos</span>
+      <a href="#" class="transition-colors hover:text-gray-700">Aplicación</a>
+      <a href="planes.html" class="transition-colors hover:text-gray-700">Planes</a>
+    </div>
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Novedades</span>
+      <a href="blog.html" class="transition-colors hover:text-gray-700">Blog</a>
+      <a href="#" class="transition-colors hover:text-gray-700">Instagram</a>
+      <a href="#" class="transition-colors hover:text-gray-700">Twitter</a>
+      <a href="#" class="transition-colors hover:text-gray-700">Facebook</a>
+    </div>
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Recursos</span>
+      <a href="soporte.html" class="transition-colors hover:text-gray-700">Soporte</a>
+      <a href="guia.html" class="transition-colors hover:text-gray-700">Guía</a>
+      <a href="portal.html" class="transition-colors hover:text-gray-700">Portal</a>
+      <a href="contacto.html" class="transition-colors hover:text-gray-700">Contacto</a>
+    </div>
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Compañía</span>
+      <a href="avisolegal.html" class="transition-colors hover:text-gray-700">Aviso Legal</a>
+      <a href="terminos.html" class="transition-colors hover:text-gray-700">Términos del servicio</a>
+      <a href="privacidad.html" class="transition-colors hover:text-gray-700">Privacidad</a>
+      <a href="cookies.html" class="transition-colors hover:text-gray-700">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+    <!-- JavaScript para manejar las pestañas -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ultraRapidaTab = document.getElementById('ultra-rapida-tab');
+            const rapidaTab = document.getElementById('rapida-tab');
+            const completaTab = document.getElementById('completa-tab');
+
+            const guiaUltraRapidaContent = document.getElementById('guia-ultra-rapida-content');
+            const guiaRapidaContent = document.getElementById('guia-rapida-content');
+            const guiaCompletaContent = document.getElementById('guia-completa-content');
+
+            // Función para mostrar la pestaña activa y ocultar las demás
+            const showTab = (tabName) => {
+                // Ocultar todos los contenidos
+                guiaUltraRapidaContent.classList.add('hidden');
+                guiaRapidaContent.classList.add('hidden');
+                guiaCompletaContent.classList.add('hidden');
+
+                // Quitar la clase 'active' de todos los botones
+                ultraRapidaTab.classList.remove('active');
+                rapidaTab.classList.remove('active');
+                completaTab.classList.remove('active');
+
+                // Mostrar el contenido de la pestaña seleccionada y activar su botón
+                if (tabName === 'ultra-rapida') {
+                    guiaUltraRapidaContent.classList.remove('hidden');
+                    ultraRapidaTab.classList.add('active');
+                } else if (tabName === 'rapida') {
+                    guiaRapidaContent.classList.remove('hidden');
+                    rapidaTab.classList.add('active');
+                } else if (tabName === 'completa') {
+                    guiaCompletaContent.classList.remove('hidden');
+                    completaTab.classList.add('active');
+                }
+            };
+
+            // Añadir event listeners a los botones
+            ultraRapidaTab.addEventListener('click', () => showTab('ultra-rapida'));
+            rapidaTab.addEventListener('click', () => showTab('rapida'));
+            completaTab.addEventListener('click', () => showTab('completa'));
+
+            // Mostrar la guía ultra rápida por defecto al cargar la página
+            showTab('ultra-rapida');
+        });
+    </script>
+</body>
+</html>

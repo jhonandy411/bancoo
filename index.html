@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashMed - Tu App de Estudio de Medicina</title>
+    <!-- Tailwind CSS CDN (se carga desde un CDN para simplificar el uso de clases de utilidad) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter (se utiliza la fuente Inter para una mejor legibilidad y estética) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        html {
+  min-width: 33.33vw;
+  overflow-x: auto;
+}
+        /* Estilos generales del cuerpo, aplicando la fuente Inter a toda la página */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Contenedor del mockup del teléfono para permitir posicionamiento relativo y efectos */
+        .phone-mockup-container {
+            position: relative;
+            z-index: 10; /* Asegura que el teléfono esté por encima del fondo difuminado */
+        }
+        /* Fondo difuminado para el mockup del teléfono, creando un efecto de brillo y profundidad */
+        .phone-mockup-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* Centra el fondo respecto a su contenedor */
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #e0f2fe 0%, #ffffff 100%); /* Gradiente de azul claro a blanco */
+            border-radius: 1.5rem; /* Bordes redondeados para coincidir con el diseño del teléfono */
+            filter: blur(40px); /* Aplica un desenfoque para el efecto de brillo suave */
+            opacity: 0.7; /* Establece la transparencia para un efecto más sutil */
+            z-index: -1; /* Envía el fondo detrás del mockup del teléfono */
+        }
+        /* Ajuste responsivo del tamaño del fondo difuminado para pantallas más pequeñas (móviles) */
+        @media (max-width: 768px) {
+            .phone-mockup-bg {
+                width: 90%;
+                height: 90%;
+            }
+        }
+        /* Contenedor flexible para las calificaciones de estrellas, asegurando que estén alineadas */
+        .star-rating {
+            display: flex;
+            align-items: center; /* Alinea verticalmente los íconos de estrella */
+        }
+        /* Estilo para los íconos de estrella SVG: color y tamaño */
+        .star-rating svg {
+            color: #facc15; /* Color amarillo intenso (Tailwind yellow-400) */
+            width: 16px; /* Ancho del ícono */
+            height: 16px; /* Alto del ícono */
+        }
+
+        /* Estilos específicos para el contenedor principal del carrusel de testimonios */
+        .testimonial-carousel-container {
+            position: relative;
+            height: 450px; /* Altura fija del área visible del carrusel. ¡Importante ajustar según el diseño! */
+            overflow: hidden; /* Oculta cualquier contenido que se desborde del contenedor (esencial para el carrusel) */
+            display: flex; /* Utiliza flexbox para la disposición interna del contenido del carrusel */
+            flex-direction: column; /* Organiza los elementos del carrusel en una columna vertical */
+            align-items: center; /* Centra horizontalmente las tarjetas de testimonio dentro del contenedor */
+        }
+        /* Estilos para el contenedor interno del carrusel que se desplaza */
+        .testimonial-carousel-inner {
+    display: flex;
+    flex-wrap: wrap;          /* permite varias filas */
+    flex-direction: row;  
+    justify-content: center;     /* apila en filas */
+    width: 100%;
+    will-change: transform;
+}
+        /* Estilos para cada tarjeta individual de testimonio dentro del carrusel */
+        .testimonial-card {
+    flex: 0 0 calc(50% - 1rem); /* ocupa la mitad menos el margen */
+    margin: 0.5rem; 
+             width: 100%;
+             max-width: 400px; /* Limita el ancho máximo de cada tarjeta para un diseño consistente */
+             background-color: #f9fafb; /* Color de fondo gris claro (Tailwind bg-gray-50) */
+             padding: 1.5rem; /* Espaciado interno de la tarjeta */
+             border-radius: 0.75rem; /* Bordes redondeados para un aspecto moderno */
+             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Sombra suave para darle profundidad */
+             text-align: left; /* Alineación del texto a la izquierda dentro de la tarjeta */
+             margin-bottom: 1rem; /* Espacio entre las tarjetas. ¡Crucial para el cálculo preciso del scroll cíclico! */
+             flex-shrink: 0; /* Evita que las tarjetas se encojan en un contenedor flex */
+             user-select: none; /* Evita la selección de texto no deseada durante el desplazamiento */
+        }
+
+        /* Ajustes responsivos para la altura del carrusel en diferentes tamaños de pantalla */
+        @media (min-width: 768px) {
+            .testimonial-carousel-container {
+                height: 500px; /* Aumenta la altura del carrusel para pantallas medianas (tablets) */
+            }
+        }
+        @media (min-width: 1024px) {
+            .testimonial-carousel-container {
+                height: 550px; /* Aumenta aún más la altura para pantallas grandes (escritorio) */
+            }
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800">
+
+
+    <header class="bg-white py-4">
+  <div class="max-w-6xl mx-auto px-6 md:px-12 border-b border-gray-200 pb-4">
+    <div class="flex justify-between items-center">
+      <a href="index.html" class="flex items-center space-x-2">
+        <img src="./assets/logo.png" alt="FlashMed Logo" class="w-8 h-8 rounded-md">
+        <span class="text-xl font-semibold text-gray-800">Bancomicina</span>
+      </a>
+      <nav class="hidden md:flex space-x-6 text-gray-500 font-medium">
+        <a href="novedades.html" class="transition-colors hover:text-gray-700">Novedades</a>
+        <a href="soporte.html" class="transition-colors hover:text-gray-700">Soporte</a>
+        <a href="planes.html" class="transition-colors hover:text-gray-700">Planes</a>
+        <a href="#" class="transition-colors hover:text-gray-700">App</a>
+      </nav>
+      <button class="md:hidden p-2 rounded-md hover:bg-gray-200">
+        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+             xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6h16M4 12h16m-7 6h7"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+    <!-- Sección Principal (Hero) de la página, destacando el mensaje clave de la aplicación -->
+    <main class="text-center py-16 md:py-24 px-4">
+        <div class="mb-8 flex flex-col items-center">
+  <!-- Logo y texto -->
+<div class="flex items-center mb-4 space-x-4">
+  <img src="./assets/logo.png" alt="Logo Bancomicina" class="w-16 h-16">
+  <span class="text-5xl font-extrabold text-gray-900">Bancomicina</span>
+</div>
+
+  <h1 class="text-2xl md:text-4xl font-bold leading-tight text-gray-900 mb-4 text-center">
+  La app para estudiantes de Medicina <br class="hidden sm:inline"> que te permite memorizarlo todo
+</h1>
+  <p class="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto text-center">
+    Aumenta tu velocidad de aprendizaje<br>
+    Recuerda lo que estudias a largo plazo<br>
+    Acierta todas las preguntas del examen
+  </p>
+  <button class="inline-flex items-center text-[#319795] font-semibold text-lg hover:text-[#2c807e] transition-colors duration-200 mx-auto space-x-2">
+  <svg xmlns="http://www.w3.org/2000/svg"
+       class="w-5 h-5"
+       fill="none"
+       viewBox="0 0 24 24"
+       stroke="currentColor"
+       stroke-width="2">
+    <path stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2m-4-6l-4 4m0 0l-4-4m4 4V4" />
+  </svg>
+  <span>Descarga la aplicación</span>
+</button>
+</div>
+
+
+
+
+
+        <!-- Sección de Imagen del Mockup del Teléfono, destacando la interfaz de la aplicación -->
+<div class="relative max-w-md mx-auto mt-16 md:mt-24 phone-mockup-container">
+    <!-- Efecto de brillo de fondo que realza el mockup del teléfono -->
+    <div class="phone-mockup-bg"></div>
+    <!-- Imagen principal del teléfono sin fondo, sombra ni bordes redondeados -->
+    <img src="assets/celu.png"
+         alt="Interfaz de la aplicación FlashMed en un teléfono"
+         class="relative z-20 w-full h-auto">
+</div>
+
+<!-- Sección "Estudia con Flashcards", con fondo más oscuro y sin margen superior -->
+<section
+  class="bg-gray-200 py-16 md:py-12 px-4 mt-0
+         w-screen
+         relative left-1/2 -translate-x-1/2"
+>
+  <div class="container mx-auto text-center">
+    <h2 class="text-2xl md:text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center space-x-3">
+      <img src="assets/flashcards-icon.jpeg"
+           alt="Flashcards"
+           class="w-16 h-14 md:w-20 md:h-16">
+      <span>Estudia con Flashcards</span>
+    </h2>
+    <p class="text-lg text-gray-600 mb-12 max-w-2xl mx-auto">
+      Instala la aplicación en todos tus dispositivos y<br>
+      retoma el estudio donde lo dejaste
+    </p>
+
+<div class="flex flex-wrap justify-center items-start gap-2 sm:gap-4 md:gap-6 lg:gap-8">      <!-- Para Móvil -->
+      <div class="w-full sm:w-1/2 lg:w-1/3 max-w-xs flex flex-col items-center">
+        <img src="assets/iphone-mock.jpeg"
+             alt="FlashMed en Móvil"
+             class="h-48 w-auto object-contain mb-4">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Para Móvil</h3>
+        <p class="text-gray-600 mb-4">Descarga Gratis<br>+18.000 Flashcards</p>
+        <div class="flex flex-col items-center space-y-3 w-full">
+          <img src="assets/app-store-download.jpeg"
+               alt="Descargar en la App Store"
+               class="h-12 w-auto">
+          <img src="assets/google-play-download.jpeg"
+               alt="Descargar en Google Play"
+               class="h-12 w-auto">
+        </div>
+      </div>
+
+      <!-- Para Tablet -->
+      <div class="w-full sm:w-1/2 lg:w-1/3 max-w-xs flex flex-col items-center">
+        <img src="assets/ipad-mock.jpeg"
+             alt="FlashMed en Tablet"
+             class="h-48 w-auto object-contain mb-4">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Para Tablet</h3>
+        <p class="text-gray-600 mb-4">Descarga Gratis<br>+18.000 Flashcards</p>
+        <div class="flex flex-col items-center space-y-3 w-full">
+          <img src="assets/app-store-download.jpeg"
+               alt="Descargar en la App Store"
+               class="h-12 w-auto">
+          <img src="assets/google-play-download.jpeg"
+               alt="Descargar en Google Play"
+               class="h-12 w-auto">
+        </div>
+      </div>
+
+      <!-- Para Ordenador -->
+      <div class="w-full sm:w-1/2 lg:w-1/3 max-w-xs flex flex-col items-center">
+        <img src="assets/mac-mock.png"
+             alt="FlashMed en Ordenador"
+             class="h-48 w-auto object-contain mb-4">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Para Ordenador</h3>
+        <p class="text-gray-600 mb-4">Descarga Gratis<br>+18.000 Flashcards</p>
+        <div class="flex flex-col items-center space-y-3 w-full">
+          <img src="assets/mac-app-store-download.jpeg"
+               alt="Descargar en la Mac App Store"
+               class="h-12 w-auto">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+    <!-- Sección de Testimonios - Implementada como un Carrusel Vertical Automático -->
+<section class="bg-white py-16 md:py-24 px-4">
+  <div class="w-full text-center">
+    <h2 class="flex items-center justify-center space-x-3 text-2xl md:text-4xl font-bold text-gray-900 mb-4">
+      <img src="assets/logo.png"
+           alt="FlashMed Logo"
+           class="w-8 h-8 md:w-10 md:h-10">
+      <span>La app que todos utilizan</span>
+    </h2>
+    <p class="text-lg text-gray-600 mb-12">
+      +300.000 Estudiantes como tú han logrado grandes resultados con la aplicación
+            </p>
+
+    <div class="relative w-full">
+      <div class="testimonial-carousel-container rounded-none shadow-lg w-full">
+                    <div id="testimonial-carousel-inner" class="testimonial-carousel-inner">
+                        <!-- Cada testimonio se define directamente como una 'testimonial-card' -->
+                        <!-- Testimonio 1 -->
+                        <div class="testimonial-card">
+                            <p class="text-sm text-gray-500 mb-2">Espectacular aplicación, súper intuitiva y fácil de utilizar</p>
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm mr-2">R</div>
+                                <span class="font-semibold text-gray-800">Rafa1639</span>
+                            </div>
+                            <div class="star-rating">
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                            </div>
+                            <p class="mt-4 text-gray-700 text-sm">Llevo dos semanas usando la app a diario para el MIR y me han oído mucho de las sorpresas en los simulacros. Pienso seguir estudiando con la app porque es lo que mejores resultados me está dando para mejorar notas.</p>
+                        </div>
+                        <!-- Testimonio 2 -->
+                        <div class="testimonial-card">
+                            <p class="text-sm text-gray-500 mb-2">Los mejores mazos los de Cardio, Digestivo y Hemato. Lo bueno es que suben tarjetas nuevas todos los días! Enhorabuena por el currazo!</p>
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm mr-2">G</div>
+                                <span class="font-semibold text-gray-800">Gonzov</span>
+                            </div>
+                            <div class="star-rating">
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                            </div>
+                            <p class="mt-4 text-gray-700 text-sm">Tuve un problema de sincronización con la cuenta y la pasarela de pagos. Aunque al principio me supuso problemas (era algo inusual), me dieron todas las facilidades posibles y una SOLUCIÓN. Un 10 por el equipo de soporte!</p>
+                        </div>
+                        <!-- Testimonio 3 -->
+                        <div class="testimonial-card">
+                            <p class="text-sm text-gray-500 mb-2">Práctica. Atención al cliente de 10. Rápidos y eficientes! Han resuelto mis dudas súper rápido y de forma satisfactoria. Muy recomendable!!</p>
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm mr-2">A</div>
+                                <span class="font-semibold text-gray-800">Andrea Vásquez</span>
+                            </div>
+                            <div class="star-rating">
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                            </div>
+                            <p class="mt-4 text-gray-700 text-sm">Y respecto al precio, proporcional al servicio que ofrecen y la cantidad de actualizaciones que hacen diariamente para estar a la última de las necesidades que va requiriendo la preparación. Chapeu!</p>
+                        </div>
+                        <!-- Testimonio 4 -->
+                        <div class="testimonial-card">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm mr-2">A</div>
+                                <span class="font-semibold text-gray-800">Albans93</span>
+                            </div>
+                            <div class="star-rating">
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                            </div>
+                            <p class="mt-4 text-gray-700 text-sm">Cuando tuve problemas me prestaron excelente atención y ya puedo usar muy bien la app. ¡Gracias!</p>
+                        </div>
+                        <!-- Testimonio 5 -->
+                        <div class="testimonial-card">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm mr-2">I</div>
+                                <span class="font-semibold text-gray-800">Isabel Brambila</span>
+                            </div>
+                            <div class="star-rating">
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                            </div>
+                            <p class="mt-4 text-gray-700 text-sm">No suelo escribir reseñas, pero esta app lo merece. Es super completa y recibe actualizaciones semanales. Me ha salvado en los repasos express antes de los simulacros.</p>
+                        </div>
+                        <!-- Testimonio 6 -->
+                        <div class="testimonial-card">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm mr-2">D</div>
+                                <span class="font-semibold text-gray-800">Dani Paredes</span>
+                            </div>
+                            <div class="star-rating">
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                            </div>
+                            <p class="mt-4 text-gray-700 text-sm">No suelo escribir reseñas, pero esta app lo merece. Es super completa y recibe actualizaciones semanales. Me ha salvado en los repasos express antes de los simulacros.</p>
+                        </div>
+                        <!-- Testimonio 7 -->
+                        <div class="testimonial-card">
+                            <p class="text-sm text-gray-500 mb-2">Me gusta mucho que puedan marcar tarjetas como difíciles y repasarlas después. Muy útil para repasar justo antes del simulacro.</p>
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm mr-2">E</div>
+                                <span class="font-semibold text-gray-800">Estefanía M.</span>
+                            </div>
+                            <div class="star-rating">
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                            </div>
+                            <p class="mt-4 text-gray-700 text-sm">Los mazos están muy muy bien escritos. Me ha sorprendido la calidad y el enfoque práctico. Lo recomiendo sin dudar.</p>
+                        </div>
+                        <!-- Testimonio 8 -->
+                        <div class="testimonial-card">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-sm mr-2">L</div>
+                                <span class="font-semibold text-gray-800">Laura Menéndez</span>
+                            </div>
+                            <div class="star-rating">
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                                <svg class="star-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.071 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.033a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l-2.8-2.033a1 1 0 00-1.176 0l-2.8 2.033c-.783.57-1.838-.197-1.538-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72a1 1 0 01.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path></svg>
+                            </div>
+                            <p class="mt-4 text-gray-700 text-sm">Después de probar varias apps de estudio para el MIR, esta es la única que me ha enganchado de verdad. El sistema de repetición espaciada funciona genial. Muy top.</p>
+                        </div>
+                    </div>
+                </div>
+
+                
+            </div>
+        </div>
+    </section>
+
+
+
+
+
+
+
+
+
+
+    
+
+<footer class="w-full bg-white border-t border-gray-200 py-8 px-6 md:px-12 mt-8">
+  <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-start
+              text-sm text-gray-500 space-y-6 sm:space-y-0 sm:space-x-8">
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Productos</span>
+      <a href="#" class="transition-colors hover:text-gray-700">Aplicación</a>
+      <a href="planes.html" class="transition-colors hover:text-gray-700">Planes</a>
+    </div>
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Novedades</span>
+      <a href="blog.html" class="transition-colors hover:text-gray-700">Blog</a>
+      <a href="#" class="transition-colors hover:text-gray-700">Instagram</a>
+      <a href="#" class="transition-colors hover:text-gray-700">Twitter</a>
+      <a href="#" class="transition-colors hover:text-gray-700">Facebook</a>
+    </div>
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Recursos</span>
+      <a href="soporte.html" class="transition-colors hover:text-gray-700">Soporte</a>
+      <a href="guia.html" class="transition-colors hover:text-gray-700">Guía</a>
+      <a href="portal.html" class="transition-colors hover:text-gray-700">Portal</a>
+      <a href="contacto.html" class="transition-colors hover:text-gray-700">Contacto</a>
+    </div>
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Compañía</span>
+      <a href="avisolegal.html" class="transition-colors hover:text-gray-700">Aviso Legal</a>
+      <a href="terminos.html" class="transition-colors hover:text-gray-700">Términos del servicio</a>
+      <a href="privacidad.html" class="transition-colors hover:text-gray-700">Privacidad</a>
+      <a href="cookies.html" class="transition-colors hover:text-gray-700">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+    
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // **1. Obtener referencias a los elementos clave del DOM**
+            const carouselInner = document.getElementById('testimonial-carousel-inner');
+            // Convertir NodeList a Array para usar métodos de array como forEach
+            const initialCards = Array.from(document.querySelectorAll('#testimonial-carousel-inner > .testimonial-card'));
+            const prevButton = document.getElementById('prevTestimonial');
+            const nextButton = document.getElementById('nextTestimonial');
+            const carouselContainer = document.querySelector('.testimonial-carousel-container');
+
+            // **2. Variables de estado y configuración del carrusel**
+            let scrollPosition = 0; // Almacena la posición actual de desplazamiento vertical del carrusel
+            const scrollSpeed = 0.6; // Velocidad de desplazamiento en píxeles por frame. Ajustar para más lento/rápido
+            let animationFrameId; // Almacena el ID del frame de animación para poder cancelarlo (usado con requestAnimationFrame)
+            let autoScrollPaused = false; // Bandera booleana para controlar si el auto-desplazamiento está en pausa
+            let totalOriginalHeight = 0; // Almacenará la altura total combinada de todas las tarjetas de testimonios originales
+
+            // **3. Calcular la altura total de las tarjetas originales y clonarlas para el bucle cíclico**
+            // Iterar sobre cada tarjeta de testimonio original para calcular su altura total (incluyendo el margen inferior).
+            // Esto es CRUCIAL para que el bucle cíclico sepa cuándo "reiniciar" la posición de desplazamiento
+            // sin que el usuario perciba un salto o un espacio en blanco.
+            initialCards.forEach(card => {
+                // `offsetHeight` devuelve la altura visible del elemento, incluyendo padding y border.
+                // `parseFloat(window.getComputedStyle(card).marginBottom)` obtiene el valor numérico del margen inferior.
+                totalOriginalHeight += card.offsetHeight + parseFloat(window.getComputedStyle(card).marginBottom);
+            });
+
+            // Clonar y añadir las tarjetas originales varias veces al final del carrusel.
+            // Esta duplicación es la técnica clave para lograr un desplazamiento cíclico PERFECTAMENTE SUAVE.
+            // Al tener copias idénticas del contenido original al final, podemos "teletransportar"
+            // el carrusel de vuelta al principio cuando las copias entran en vista, sin que el usuario lo note.
+            const numClones = 2; // Número de veces que se duplica el conjunto original de tarjetas
+            for (let i = 0; i < numClones; i++) {
+                initialCards.forEach(card => {
+                    carouselInner.appendChild(card.cloneNode(true)); // `cloneNode(true)` clona el elemento y todo su contenido (hijos)
+                });
+            }
+
+            // **4. Función principal de animación del carrusel (`animate`)**
+            /**
+             * Esta función se encarga de animar el desplazamiento vertical del carrusel.
+             * Utiliza `requestAnimationFrame` para un movimiento suave y eficiente,
+             * ya que sincroniza las animaciones con la tasa de refresco del navegador.
+             */
+            const animate = () => {
+                // Si el auto-desplazamiento está en pausa (por ejemplo, porque el ratón está sobre el carrusel),
+                // simplemente se solicita el siguiente frame sin mover el carrusel.
+                // Esto mantiene el ciclo de requestAnimationFrame activo, listo para reanudar el movimiento.
+                if (autoScrollPaused) {
+                    animationFrameId = requestAnimationFrame(animate);
+                    return; // Sale de la función sin actualizar la posición
+                }
+
+                // Incrementar la posición de desplazamiento por el valor de `scrollSpeed`.
+                // Esto crea un movimiento constante y fluido, pixel a pixel.
+                scrollPosition += scrollSpeed;
+
+                // Lógica para crear el bucle cíclico (sin interrupciones ni espacios en blanco):
+                // Si la posición de desplazamiento actual (`scrollPosition`) ha superado la altura total
+                // del conjunto de testimonios ORIGINALES (`totalOriginalHeight`), significa que el primer
+                // conjunto de contenido clonado ya está visible (o a punto de estarlo) en la parte superior
+                // del `carouselContainer`.
+                // En este momento, reseteamos `scrollPosition` a 0. Debido a que el `carouselInner` contiene
+                // copias idénticas de las tarjetas originales justo después del conjunto original, este "reinicio"
+                // instantáneo de la posición no es perceptible para el usuario, creando la ilusión de un bucle infinito.
+                if (scrollPosition >= totalOriginalHeight) {
+                    scrollPosition = 0; // Reinicia la posición de desplazamiento al principio
+                }
+
+                // Aplicar la transformación CSS para mover el `carouselInner` verticalmente.
+                // Un valor negativo en `translateY` desplaza el contenido hacia arriba.
+                carouselInner.style.transform = `translateY(-${scrollPosition}px)`;
+
+                // Solicitar el siguiente frame de animación. Esto crea un bucle continuo de animación.
+                animationFrameId = requestAnimationFrame(animate);
+            };
+
+            // **5. Iniciar la animación del carrusel cuando el DOM está completamente cargado.**
+            animationFrameId = requestAnimationFrame(animate);
+
+            // **6. Control de Interacción del Usuario (Pausa/Reanudar Auto-desplazamiento)**
+
+            // Pausar el auto-desplazamiento cuando el cursor del ratón entra en el área visible del carrusel.
+            carouselContainer.addEventListener('mouseover', () => {
+                autoScrollPaused = true;
+            });
+
+            // Reanudar el auto-desplazamiento cuando el cursor del ratón sale del área visible del carrusel.
+            carouselContainer.addEventListener('mouseout', () => {
+                autoScrollPaused = false;
+            });
+
+            // **7. Funcionalidad para los Botones de Navegación Manual**
+            // Nota: La navegación manual con los botones causará un "salto" instantáneo
+            // a la siguiente/anterior vista, ya que el carrusel está optimizado para el
+            // auto-scroll suave y no usa transiciones CSS para los cambios de posición.
+
+            // Event listener para el botón "Anterior"
+            prevButton.addEventListener('click', () => {
+                autoScrollPaused = true; // Pausar el auto-desplazamiento durante la interacción manual del usuario.
+
+                // Para ir al testimonio anterior, retrocedemos la posición de desplazamiento
+                // por la altura total del contenedor visible del carrusel. Esto simula
+                // el "paso" a la "pantalla" anterior de testimonios.
+                scrollPosition -= carouselContainer.offsetHeight;
+
+                // Si la nueva posición de desplazamiento es menor que 0 (es decir, intentamos ir
+                // más allá del principio lógico), ajustamos la posición al final del contenido
+                // original para mantener el bucle cíclico en la navegación manual.
+                if (scrollPosition < 0) {
+                    scrollPosition = totalOriginalHeight - carouselContainer.offsetHeight;
+                    // Asegurarse de que la posición no sea negativa si el contenido original
+                    // es más pequeño que la altura del contenedor (caso poco común pero posible).
+                    if (scrollPosition < 0) scrollPosition = 0;
+                }
+
+                // Aplicar la transformación de desplazamiento instantáneamente.
+                carouselInner.style.transform = `translateY(-${scrollPosition}px)`;
+
+                // Reanudar el auto-desplazamiento después de un breve retraso (0.5 segundos)
+                // para darle al usuario tiempo de procesar la interacción antes de que se mueva de nuevo.
+                setTimeout(() => { autoScrollPaused = false; }, 500);
+            });
+
+            // Event listener para el botón "Siguiente"
+            nextButton.addEventListener('click', () => {
+                autoScrollPaused = true; // Pausar el auto-desplazamiento durante la interacción manual.
+
+                // Para ir al testimonio siguiente, avanzamos la posición de desplazamiento
+                // por la altura total del contenedor visible del carrusel.
+                scrollPosition += carouselContainer.offsetHeight;
+
+                // Si la nueva posición de desplazamiento excede la altura total del contenido
+                // original, la reseteamos a 0 para volver al principio del bucle cíclico.
+                if (scrollPosition >= totalOriginalHeight) {
+                    scrollPosition = 0;
+                }
+
+                // Aplicar la transformación de desplazamiento instantáneamente.
+                carouselInner.style.transform = `translateY(-${scrollPosition}px)`;
+
+                // Reanudar el auto-desplazamiento después de un breve retraso.
+                setTimeout(() => { autoScrollPaused = false; }, 500);
+            });
+        });
+    </script>
+
+    <!-- JavaScript para manejar las pestañas -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ultraRapidaTab = document.getElementById('ultra-rapida-tab');
+            const rapidaTab = document.getElementById('rapida-tab');
+            const completaTab = document.getElementById('completa-tab');
+
+            const guiaUltraRapidaContent = document.getElementById('guia-ultra-rapida-content');
+            const guiaRapidaContent = document.getElementById('guia-rapida-content');
+            const guiaCompletaContent = document.getElementById('guia-completa-content');
+
+            // Función para mostrar la pestaña activa y ocultar las demás
+            const showTab = (tabName) => {
+                // Ocultar todos los contenidos
+                guiaUltraRapidaContent.classList.add('hidden');
+                guiaRapidaContent.classList.add('hidden');
+                guiaCompletaContent.classList.add('hidden');
+
+                // Quitar la clase 'active' de todos los botones
+                ultraRapidaTab.classList.remove('active');
+                rapidaTab.classList.remove('active');
+                completaTab.classList.remove('active');
+
+                // Mostrar el contenido de la pestaña seleccionada y activar su botón
+                if (tabName === 'ultra-rapida') {
+                    guiaUltraRapidaContent.classList.remove('hidden');
+                    ultraRapidaTab.classList.add('active');
+                } else if (tabName === 'rapida') {
+                    guiaRapidaContent.classList.remove('hidden');
+                    rapidaTab.classList.add('active');
+                } else if (tabName === 'completa') {
+                    guiaCompletaContent.classList.remove('hidden');
+                    completaTab.classList.add('active');
+                }
+            };
+
+            // Añadir event listeners a los botones
+            ultraRapidaTab.addEventListener('click', () => showTab('ultra-rapida'));
+            rapidaTab.addEventListener('click', () => showTab('rapida'));
+            completaTab.addEventListener('click', () => showTab('completa'));
+
+            // Mostrar la guía ultra rápida por defecto al cargar la página
+            showTab('ultra-rapida');
+        });
+    </script>
+
+</body>
+</html>

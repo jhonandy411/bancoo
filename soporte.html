@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soporte FlashMed</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Configuración de Tailwind para colores y tipografía -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            primary: '#319795',      // Teal oscuro
+            primaryLight: '#E6FFFA', // Teal muy claro
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #EDF2F7; /* Gris muy claro de fondo general */
+    }
+  </style>
+</head>
+<body class="bg-white text-gray-800">
+    <!-- Header -->
+   <header class="bg-white py-4">
+  <div class="max-w-6xl mx-auto px-6 md:px-12 border-b border-gray-200 pb-4">
+    <div class="flex justify-between items-center">
+      <a href="index.html" class="flex items-center space-x-2">
+        <img src="./assets/logo.png" alt="FlashMed Logo" class="w-8 h-8 rounded-md">
+        <span class="text-xl font-semibold text-gray-800">Bancomicina</span>
+      </a>
+      <nav class="hidden md:flex space-x-6 text-gray-500 font-medium">
+        <a href="novedades.html" class="transition-colors hover:text-gray-700">Novedades</a>
+        <a href="soporte.html" class="transition-colors hover:text-gray-700">Soporte</a>
+        <a href="planes.html" class="transition-colors hover:text-gray-700">Planes</a>
+        <a href="#" class="transition-colors hover:text-gray-700">App</a>
+      </nav>
+      <button class="md:hidden p-2 rounded-md hover:bg-gray-200">
+        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+             xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6h16M4 12h16m-7 6h7"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+    <!-- Contenido principal -->
+<main class="text-center py-16 md:py-24 px-4 max-w-4xl mx-auto"> 
+       <a href="guia.html" class="block transform transition-transform duration-300 hover:scale-[1.02]">
+  <!-- Tarjeta "Aumenta tu Productividad" -->
+  <div class="bg-gray-100/20 border border-gray-200 rounded-lg p-6 mb-8 flex flex-col md:flex-row items-center justify-between">
+    <div class="flex items-center space-x-4 mb-4 md:mb-0">
+      <div class="flex items-center gap-2">
+        <div class="flex items-center justify-center">
+          <img src="assets/a.png" alt="Ícono A" class="w-10 h-10">
+        </div>
+        <div class="flex items-center justify-center">
+          <img src="assets/b.png" alt="Ícono B" class="w-10 h-10">
+        </div>
+        <div class="flex items-center justify-center">
+          <img src="assets/c.png" alt="Ícono C" class="w-10 h-10">
+        </div>
+        <div class="flex items-center justify-center">
+          <img src="assets/d.png" alt="Ícono D" class="w-10 h-10">
+        </div>
+      </div>
+    </div>
+    <div class="flex-1 text-center md:text-left md:ml-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-1">
+        Aumenta tu Productividad con Bancomicina
+      </h2>
+      <p class="text-gray-600 text-sm mb-2">
+        Guía rápida para sacar el máximo partido a Bancomicina
+      </p>
+      <span class="text-primary text-sm font-medium hover:underline">
+        Leer más
+      </span>
+    </div>
+    <div class="hidden md:block text-gray-400">
+      <!-- Flecha de navegación -->
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+           xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 5l7 7-7 7"></path>
+      </svg>
+    </div>
+  </div>
+</a>
+
+      <!-- Preguntas Frecuentes -->
+      <div class="bg-gray-100/20 border border-gray-200 rounded-lg shadow p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+          Preguntas Frecuentes
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-700">
+          <ul class="space-y-2">
+            <li>
+              <a href="#" class="flex items-start hover:text-primary">
+                <span class="mr-2 text-primary">•</span>
+                ¿Cómo cambio mi Plan de suscripción?
+              </a>
+            </li>
+            <li>
+              <a href="#" class="flex items-start hover:text-primary">
+                <span class="mr-2 text-primary">•</span>
+                He olvidado la contraseña
+              </a>
+            </li>
+            <li>
+              <a href="#" class="flex items-start hover:text-primary">
+                <span class="mr-2 text-primary">•</span>
+                ¿Para qué sirve el doble check?
+              </a>
+            </li>
+            <li>
+              <a href="#" class="flex items-start hover:text-primary">
+                <span class="mr-2 text-primary">•</span>
+                ¿Por qué me aparecen mazos vacíos?
+              </a>
+            </li>
+          </ul>
+          <ul class="space-y-2">
+            <li>
+              <a href="#" class="flex items-start hover:text-primary">
+                <span class="mr-2 text-primary">•</span>
+                ¿Qué son las tarjetas dominadas?
+              </a>
+            </li>
+            <li>
+              <a href="#" class="flex items-start hover:text-primary">
+                <span class="mr-2 text-primary">•</span>
+                Cómo estudiar el MIR con FlashMed
+              </a>
+            </li>
+            <li>
+              <a href="#" class="flex items-start hover:text-primary">
+                <span class="mr-2 text-primary">•</span>
+                La pantalla de estudio se queda en blanco
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
+        <!-- Artículos de Soporte -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300">
+            Artículos de Soporte
+          </h3>
+          <ul class="space-y-2 text-sm text-gray-700">
+            <li class="flex items-start">
+              <span class="mr-2 text-primary">•</span> Ver todos los artículos
+            </li>
+            <li class="flex items-start">
+              <span class="mr-2 text-primary">•</span> Doble check
+            </li>
+            <li class="flex items-start">
+              <span class="mr-2 text-primary">•</span> Cómo crear mazos
+            </li>
+            <li class="flex items-start">
+              <span class="mr-2 text-primary">•</span> Técnicas de estudio
+            </li>
+          </ul>
+        </div>
+
+        <!-- Primeros pasos -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300">
+            Primeros pasos
+          </h3>
+          <ul class="space-y-2 text-sm text-gray-700">
+            <li class="flex items-start">
+              <span class="mr-2 text-primary">•</span> Doble check
+            </li>
+            <li class="flex items-start">
+              <span class="mr-2 text-primary">•</span> Mazos vacíos
+            </li>
+            <li class="flex items-start">
+              <span class="mr-2 text-primary">•</span> Tarjetas dominadas
+            </li>
+          </ul>
+        </div>
+
+        <!-- Mi cuenta -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300">
+            Mi cuenta
+          </h3>
+          <ul class="space-y-2 text-sm text-gray-700">
+            <li class="flex items-start">
+              <span class="mr-2 text-primary">•</span> Restablecer mi contraseña
+            </li>
+            <li class="flex items-start">
+              <span class="mr-2 text-primary">•</span> Modificar Plan de Suscripción
+            </li>
+            <li class="flex items-start">
+              <span class="mr-2 text-primary">•</span> Eliminar mi cuenta
+            </li>
+          </ul>
+        </div>
+
+        <!-- Solución de problemas -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300">
+            Solución de problemas
+          </h3>
+          <ul class="space-y-2 text-sm text-gray-700">
+            <li class="flex items-start">
+              <span class="mr-2 text-primary">•</span> Problemas de sincronización
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Contacto -->
+      <div class="text-center mt-8 py-4">
+        <p class="text-lg text-gray-700 mb-4">
+          ¿No has encontrado lo que estabas buscando?
+        </p>
+        <a href="contacto.html" class="bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-6 rounded-lg shadow transition duration-300 ease-in-out inline-block">
+  Contacta con Nosotros
+</a>
+      </div>
+
+    </main>
+  </div>
+
+
+<footer class="w-full bg-white border-t border-gray-200 py-8 px-6 md:px-12 mt-8">
+  <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-start
+              text-sm text-gray-500 space-y-6 sm:space-y-0 sm:space-x-8">
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Productos</span>
+      <a href="#" class="transition-colors hover:text-gray-700">Aplicación</a>
+      <a href="planes.html" class="transition-colors hover:text-gray-700">Planes</a>
+    </div>
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Novedades</span>
+      <a href="blog.html" class="transition-colors hover:text-gray-700">Blog</a>
+      <a href="#" class="transition-colors hover:text-gray-700">Instagram</a>
+      <a href="#" class="transition-colors hover:text-gray-700">Twitter</a>
+      <a href="#" class="transition-colors hover:text-gray-700">Facebook</a>
+    </div>
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Recursos</span>
+      <a href="soporte.html" class="transition-colors hover:text-gray-700">Soporte</a>
+      <a href="guia.html" class="transition-colors hover:text-gray-700">Guía</a>
+      <a href="portal.html" class="transition-colors hover:text-gray-700">Portal</a>
+      <a href="contacto.html" class="transition-colors hover:text-gray-700">Contacto</a>
+    </div>
+    <div class="flex flex-col space-y-2 text-left">
+      <span class="font-semibold text-gray-800 mb-1">Compañía</span>
+      <a href="avisolegal.html" class="transition-colors hover:text-gray-700">Aviso Legal</a>
+      <a href="terminos.html" class="transition-colors hover:text-gray-700">Términos del servicio</a>
+      <a href="privacidad.html" class="transition-colors hover:text-gray-700">Privacidad</a>
+      <a href="cookies.html" class="transition-colors hover:text-gray-700">Cookies</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
