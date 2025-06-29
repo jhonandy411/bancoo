@@ -10,9 +10,9 @@
     body { font-family: 'Inter', sans-serif; }
   </style>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <!-- Firebase compat SDK (funciona sin módulos) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
@@ -105,7 +105,7 @@
     const loginForm = document.getElementById("login-form");
     const registerBtn = document.getElementById("register-btn");
 
-    // Login
+    // Login con email
     loginForm.addEventListener("submit", function (e) {
       e.preventDefault();
       const email = emailInput.value;
@@ -139,19 +139,23 @@
         });
     });
 
-    // Login con Google
+    // Google Sign-In con redirección (más compatible en GitHub Pages)
     document.getElementById("google-signin").addEventListener("click", () => {
       const provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithPopup(provider)
-        .then((result) => {
-          console.log("Sesión con Google iniciada");
-          window.location.href = "usuario.html";
-        })
-        .catch((error) => {
-          console.error("Error en autenticación con Google", error);
-          alert("Error al iniciar sesión con Google: " + error.message);
-        });
+      firebase.auth().signInWithRedirect(provider);
     });
+
+    // Procesar resultado de redirección (si lo hay)
+    firebase.auth().getRedirectResult()
+      .then((result) => {
+        if (result.user) {
+          window.location.href = "usuario.html";
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        alert("Error con Google: " + error.message);
+      });
   </script>
 </body>
 </html>
