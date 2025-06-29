@@ -10,7 +10,7 @@
     body { font-family: 'Inter', sans-serif; }
   </style>
 
-  <!-- ✅ Firebase compat SDK -->
+  <!-- Firebase compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script>
@@ -105,6 +105,13 @@
     const loginForm = document.getElementById("login-form");
     const registerBtn = document.getElementById("register-btn");
 
+    // Si el usuario ya está autenticado, lo redirige
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        window.location.href = "usuario.html";
+      }
+    });
+
     // Login
     loginForm.addEventListener("submit", function (e) {
       e.preventDefault();
@@ -139,13 +146,13 @@
         });
     });
 
-    // Login con Google (redirección)
+    // Login con Google (signInWithRedirect para compatibilidad total)
     document.getElementById("google-signin").addEventListener("click", () => {
       const provider = new firebase.auth.GoogleAuthProvider();
       firebase.auth().signInWithRedirect(provider);
     });
 
-    // Manejar el resultado de la redirección
+    // Resultado del login con Google (redirigido)
     firebase.auth().getRedirectResult()
       .then((result) => {
         if (result.user) {
