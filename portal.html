@@ -10,7 +10,7 @@
     body { font-family: 'Inter', sans-serif; }
   </style>
 
-  <!-- Firebase compat SDK (funciona sin módulos) -->
+  <!-- ✅ Firebase compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script>
@@ -105,7 +105,7 @@
     const loginForm = document.getElementById("login-form");
     const registerBtn = document.getElementById("register-btn");
 
-    // Login con email
+    // Login
     loginForm.addEventListener("submit", function (e) {
       e.preventDefault();
       const email = emailInput.value;
@@ -139,13 +139,13 @@
         });
     });
 
-    // Google Sign-In con redirección (más compatible en GitHub Pages)
+    // Login con Google (redirección)
     document.getElementById("google-signin").addEventListener("click", () => {
       const provider = new firebase.auth.GoogleAuthProvider();
       firebase.auth().signInWithRedirect(provider);
     });
 
-    // Procesar resultado de redirección (si lo hay)
+    // Manejar el resultado de la redirección
     firebase.auth().getRedirectResult()
       .then((result) => {
         if (result.user) {
@@ -153,7 +153,6 @@
         }
       })
       .catch((error) => {
-        console.error(error);
         alert("Error con Google: " + error.message);
       });
   </script>
