@@ -153,15 +153,11 @@
     });
 
     // Resultado del login con Google (redirigido)
-    firebase.auth().getRedirectResult()
-      .then((result) => {
-        if (result.user) {
-          window.location.href = "usuario.html";
-        }
-      })
-      .catch((error) => {
-        alert("Error con Google: " + error.message);
-      });
+    firebase.auth().onAuthStateChanged((user) => {
+  if (user) {
+    window.location.href = "usuario.html";
+  }
+});
   </script>
 </body>
 </html>
