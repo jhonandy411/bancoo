@@ -105,14 +105,7 @@
     const loginForm = document.getElementById("login-form");
     const registerBtn = document.getElementById("register-btn");
 
-    // Si el usuario ya está autenticado, lo redirige
-    firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        window.location.href = "usuario.html";
-      }
-    });
-
-    // Login
+    // Login con email y contraseña
     loginForm.addEventListener("submit", function (e) {
       e.preventDefault();
       const email = emailInput.value;
@@ -127,7 +120,7 @@
         });
     });
 
-    // Registro
+    // Registro de usuario
     registerBtn.addEventListener("click", () => {
       const email = emailInput.value;
       const password = passwordInput.value;
@@ -146,18 +139,27 @@
         });
     });
 
-    // Login con Google (signInWithRedirect para compatibilidad total)
+    // Login con Google
     document.getElementById("google-signin").addEventListener("click", () => {
       const provider = new firebase.auth.GoogleAuthProvider();
       firebase.auth().signInWithRedirect(provider);
     });
 
-    // Resultado del login con Google (redirigido)
+    // Detecta redirección exitosa desde Google
+    firebase.auth().getRedirectResult().then((result) => {
+      if (result.user) {
+        window.location.href = "usuario.html";
+      }
+    }).catch((error) => {
+      console.error("Error en redirect con Google:", error.message);
+    });
+
+    // Si ya está logueado, redirige
     firebase.auth().onAuthStateChanged((user) => {
-  if (user) {
-    window.location.href = "usuario.html";
-  }
-});
+      if (user) {
+        window.location.href = "usuario.html";
+      }
+    });
   </script>
 </body>
 </html>
