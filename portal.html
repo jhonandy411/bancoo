@@ -23,6 +23,12 @@
       appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
     };
     firebase.initializeApp(firebaseConfig);
+
+    // Recordar sesión iniciada
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      .catch((error) => {
+        console.error("Error al establecer la persistencia:", error);
+      });
   </script>
 </head>
 <body class="bg-gray-50">
@@ -99,6 +105,7 @@
   const userSection = document.getElementById("user-section");
   const userEmailDisplay = document.getElementById("user-email");
 
+  // Mostrar u ocultar contraseña
   togglePassword.addEventListener("click", () => {
     const isPassword = passwordInput.type === "password";
     passwordInput.type = isPassword ? "text" : "password";
@@ -115,14 +122,17 @@
               -1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>`;
   });
 
+  // Iniciar sesión
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const email = emailInput.value;
     const password = passwordInput.value;
+    localStorage.setItem("lastEmail", email); // Guardar email
     firebase.auth().signInWithEmailAndPassword(email, password)
       .catch(error => alert("Error al iniciar sesión: " + error.message));
   });
 
+  // Registrarse
   registerBtn.addEventListener("click", () => {
     const email = emailInput.value;
     const password = passwordInput.value;
@@ -130,36 +140,44 @@
       alert("Completa el email y la contraseña.");
       return;
     }
+    localStorage.setItem("lastEmail", email); // Guardar email
     firebase.auth().createUserWithEmailAndPassword(email, password)
       .catch(error => alert("Error al registrarse: " + error.message));
   });
 
+  // Google login
   document.getElementById("google-signin").addEventListener("click", () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     firebase.auth().signInWithRedirect(provider);
   });
 
+  // Resultado redirección Google
   firebase.auth().getRedirectResult().then((result) => {
     if (result.user) {
       mostrarPanelUsuario(result.user);
     }
   });
 
+  // Estado de sesión
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
       mostrarPanelUsuario(user);
     } else {
       loginSection.classList.remove("hidden");
       userSection.classList.add("hidden");
+      const lastEmail = localStorage.getItem("lastEmail");
+      if (lastEmail) emailInput.value = lastEmail; // Autocompletar
     }
   });
 
+  // Mostrar panel usuario
   function mostrarPanelUsuario(user) {
     loginSection.classList.add("hidden");
     userSection.classList.remove("hidden");
     userEmailDisplay.innerText = `Estás logueado como: ${user.email}`;
   }
 
+  // Cerrar sesión
   document.getElementById("logout").addEventListener("click", () => {
     firebase.auth().signOut();
   });
