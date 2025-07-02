@@ -24,11 +24,9 @@
     };
     firebase.initializeApp(firebaseConfig);
 
-    // Recordar sesión iniciada
+    // Persistencia local para mantener sesión
     firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-      .catch((error) => {
-        console.error("Error al establecer la persistencia:", error);
-      });
+      .catch((error) => console.error("Error en persistencia:", error));
   </script>
 </head>
 <body class="bg-gray-50">
@@ -94,92 +92,85 @@
   </div>
 </div>
 
+<!-- SCRIPT -->
 <script>
-  const emailInput = document.getElementById("email");
-  const passwordInput = document.getElementById("password");
-  const loginForm = document.getElementById("login-form");
-  const registerBtn = document.getElementById("register-btn");
-  const togglePassword = document.getElementById("togglePassword");
-  const eyeIcon = document.getElementById("eyeIcon");
-  const loginSection = document.getElementById("login-section");
-  const userSection = document.getElementById("user-section");
-  const userEmailDisplay = document.getElementById("user-email");
+  document.addEventListener("DOMContentLoaded", () => {
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const loginForm = document.getElementById("login-form");
+    const registerBtn = document.getElementById("register-btn");
+    const togglePassword = document.getElementById("togglePassword");
+    const eyeIcon = document.getElementById("eyeIcon");
+    const loginSection = document.getElementById("login-section");
+    const userSection = document.getElementById("user-section");
+    const userEmailDisplay = document.getElementById("user-email");
 
-  // Mostrar u ocultar contraseña
-  togglePassword.addEventListener("click", () => {
-    const isPassword = passwordInput.type === "password";
-    passwordInput.type = isPassword ? "text" : "password";
-    eyeIcon.innerHTML = isPassword
-      ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-           d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7
-               a10.05 10.05 0 012.222-3.592m2.305-1.927A9.956 9.956 0 0112 5
-               c4.478 0 8.268 2.943 9.542 7a9.956 9.956 0 01-1.432 2.572M15 12
-               a3 3 0 01-4.243 2.829M9.879 9.879A3 3 0 0115 12m6 6L3 3"/>`
-      : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-           d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-           d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7
-              -1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>`;
-  });
+    togglePassword.addEventListener("click", () => {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      eyeIcon.innerHTML = isPassword
+        ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+             d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7
+                 a10.05 10.05 0 012.222-3.592m2.305-1.927A9.956 9.956 0 0112 5
+                 c4.478 0 8.268 2.943 9.542 7a9.956 9.956 0 01-1.432 2.572M15 12
+                 a3 3 0 01-4.243 2.829M9.879 9.879A3 3 0 0115 12m6 6L3 3"/>`
+        : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7
+                -1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>`;
+    });
 
-  // Iniciar sesión
-  loginForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const email = emailInput.value;
-    const password = passwordInput.value;
-    localStorage.setItem("lastEmail", email); // Guardar email
-    firebase.auth().signInWithEmailAndPassword(email, password)
-      .catch(error => alert("Error al iniciar sesión: " + error.message));
-  });
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      localStorage.setItem("lastEmail", email);
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .catch(error => alert("Error al iniciar sesión: " + error.message));
+    });
 
-  // Registrarse
-  registerBtn.addEventListener("click", () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
-    if (!email || !password) {
-      alert("Completa el email y la contraseña.");
-      return;
+    registerBtn.addEventListener("click", () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      if (!email || !password) {
+        alert("Completa el email y la contraseña.");
+        return;
+      }
+      localStorage.setItem("lastEmail", email);
+      firebase.auth().createUserWithEmailAndPassword(email, password)
+        .catch(error => alert("Error al registrarse: " + error.message));
+    });
+
+    document.getElementById("google-signin").addEventListener("click", () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      firebase.auth().signInWithRedirect(provider);
+    });
+
+    firebase.auth().getRedirectResult().then((result) => {
+      if (result.user) mostrarPanelUsuario(result.user);
+    });
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        mostrarPanelUsuario(user);
+      } else {
+        loginSection.classList.remove("hidden");
+        userSection.classList.add("hidden");
+        const lastEmail = localStorage.getItem("lastEmail");
+        if (lastEmail) emailInput.value = lastEmail;
+      }
+    });
+
+    function mostrarPanelUsuario(user) {
+      loginSection.classList.add("hidden");
+      userSection.classList.remove("hidden");
+      userEmailDisplay.innerText = `Estás logueado como: ${user.email}`;
     }
-    localStorage.setItem("lastEmail", email); // Guardar email
-    firebase.auth().createUserWithEmailAndPassword(email, password)
-      .catch(error => alert("Error al registrarse: " + error.message));
-  });
 
-  // Google login
-  document.getElementById("google-signin").addEventListener("click", () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithRedirect(provider);
-  });
-
-  // Resultado redirección Google
-  firebase.auth().getRedirectResult().then((result) => {
-    if (result.user) {
-      mostrarPanelUsuario(result.user);
-    }
-  });
-
-  // Estado de sesión
-  firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-      mostrarPanelUsuario(user);
-    } else {
-      loginSection.classList.remove("hidden");
-      userSection.classList.add("hidden");
-      const lastEmail = localStorage.getItem("lastEmail");
-      if (lastEmail) emailInput.value = lastEmail; // Autocompletar
-    }
-  });
-
-  // Mostrar panel usuario
-  function mostrarPanelUsuario(user) {
-    loginSection.classList.add("hidden");
-    userSection.classList.remove("hidden");
-    userEmailDisplay.innerText = `Estás logueado como: ${user.email}`;
-  }
-
-  // Cerrar sesión
-  document.getElementById("logout").addEventListener("click", () => {
-    firebase.auth().signOut();
+    document.getElementById("logout").addEventListener("click", () => {
+      firebase.auth().signOut();
+    });
   });
 </script>
 </body>
