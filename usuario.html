@@ -2,58 +2,55 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Usuario - Bancomicina</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login con Google</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style> body { font-family: 'Inter', sans-serif; } </style>
+  <style>body { font-family: sans-serif; }</style>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCk8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+      authDomain: "bancomicina-62bfe.firebaseapp.com",
+      projectId: "bancomicina-62bfe",
+      storageBucket: "bancomicina-62bfe.appspot.com",
+      messagingSenderId: "737254665977",
+      appId: "1:737254665977:web:dbafbc616ad9d96fae7c28",
+      measurementId: "G-VJ006XMN9G"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    window.onload = () => {
+      const loginBtn = document.getElementById("loginBtn");
+      const messageDiv = document.getElementById("message");
+
+      loginBtn.addEventListener("click", async () => {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        try {
+          const result = await firebase.auth().signInWithPopup(provider);
+          const user = result.user;
+          messageDiv.innerHTML = `<h2 class="text-2xl font-bold text-green-600">Bienvenido, ${user.displayName}</h2>`;
+          loginBtn.style.display = "none";
+        } catch (error) {
+          console.error(error);
+          alert("Error al iniciar sesión");
+        }
+      });
+    };
+  </script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
-
-<div class="bg-white shadow-lg rounded-lg p-8 max-w-md w-full text-center">
-  <h1 class="text-2xl font-bold text-gray-800 mb-4">Bienvenido a Bancomicina</h1>
-  <p id="user-email" class="text-gray-600 mb-6">Cargando...</p>
-  <button id="logout"
-          class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md font-semibold transition">
-    Cerrar sesión
-  </button>
-</div>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import {
-    getAuth, onAuthStateChanged, signOut
-  } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
-    authDomain: "bancomicina-62bfe.firebaseapp.com",
-    projectId: "bancomicina-62bfe",
-    storageBucket: "bancomicina-62bfe.appspot.com",
-    messagingSenderId: "737254665977",
-    appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28",
-    measurementId: "G-VJ006XMN9G"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  const userEmail = document.getElementById("user-email");
-
-  // Mostrar datos si está logueado, si no, volver a login
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      userEmail.innerText = `Estás logueado como: ${user.email}`;
-    } else {
-      window.location.href = "index.html";
-    }
-  });
-
-  // Logout
-  document.getElementById("logout").addEventListener("click", () => {
-    signOut(auth);
-  });
-</script>
-
+<body class="bg-gray-50 flex items-center justify-center min-h-screen">
+  <div class="text-center space-y-6">
+    <h1 class="text-3xl font-bold text-gray-800">Iniciar sesión con Google</h1>
+    <button id="loginBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow">
+      Continuar con Google
+    </button>
+    <div id="message" class="mt-6"></div>
+  </div>
 </body>
 </html>
