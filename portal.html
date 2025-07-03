@@ -32,15 +32,16 @@
 
   <script>
     // Configuración Firebase corregida
-    const firebaseConfig = {
-      apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
-      authDomain: "bancomicina-62bfe.firebaseapp.com",
-      projectId: "bancomicina-62bfe",
-      storageBucket: "bancomicina-62bfe.appspot.com", // ✅ CORREGIDO
-      messagingSenderId: "737254665977",
-      appId: "1:737254665977:web:e0910657389c2f71ae7c28",
-      measurementId: "G-NBNRP41XBC"
-    };
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+  authDomain: "bancomicina-62bfe.firebaseapp.com",
+  projectId: "bancomicina-62bfe",
+  storageBucket: "bancomicina-62bfe.firebasestorage.app",
+  messagingSenderId: "737254665977",
+  appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28",
+  measurementId: "G-VJ006XMN9G"
+};
 
     // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
