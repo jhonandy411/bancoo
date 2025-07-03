@@ -8,8 +8,8 @@
   <style>body { font-family: sans-serif; }</style>
 
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
   <script>
     const firebaseConfig = {
@@ -22,7 +22,6 @@
       measurementId: "G-VJ006XMN9G"
     };
 
-    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
 
     window.onload = () => {
@@ -31,14 +30,16 @@
 
       loginBtn.addEventListener("click", async () => {
         const provider = new firebase.auth.GoogleAuthProvider();
+
         try {
           const result = await firebase.auth().signInWithPopup(provider);
           const user = result.user;
+          console.log("Usuario:", user);
           messageDiv.innerHTML = `<h2 class="text-2xl font-bold text-green-600">Bienvenido, ${user.displayName}</h2>`;
           loginBtn.style.display = "none";
         } catch (error) {
-          console.error(error);
-          alert("Error al iniciar sesión");
+          console.error("Error en login:", error);
+          alert("Error al iniciar sesión. Ver consola.");
         }
       });
     };
