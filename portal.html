@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login con Google - Bancomicina</title>
+  <title>Login Google - Bancomicina</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>body { font-family: 'Inter', sans-serif; }</style>
 
-  <!-- Firebase SDK (compat) desde CDN -->
+  <!-- Firebase compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
-  <!-- Contenedor de login -->
+  <!-- Login -->
   <div id="login-container" class="bg-white p-8 rounded shadow text-center space-y-4">
     <h1 class="text-2xl font-semibold">Iniciar sesión</h1>
     <button onclick="loginWithGoogle()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow">
@@ -22,7 +22,7 @@
     </button>
   </div>
 
-  <!-- Contenedor de bienvenida -->
+  <!-- Bienvenida -->
   <div id="welcome-container" class="hidden text-center space-y-4">
     <h2 id="welcome-message" class="text-2xl font-semibold text-gray-800"></h2>
     <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
@@ -31,22 +31,22 @@
   </div>
 
   <script>
-    // Configuración del proyecto Firebase
+    // Configuración Firebase actualizada
     const firebaseConfig = {
       apiKey: "AIzaSyCk8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
       authDomain: "bancomicina-62bfe.firebaseapp.com",
       projectId: "bancomicina-62bfe",
       storageBucket: "bancomicina-62bfe.appspot.com",
       messagingSenderId: "737254665977",
-      appId: "1:737254665977:web:dbafbc616ad9d96fae7c28",
-      measurementId: "G-VJ006XMN9G"
+      appId: "1:737254665977:web:e0910657389c2f71ae7c28",
+      measurementId: "G-NBNRP41XBC"
     };
 
     // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    // Función de login
+    // Login
     function loginWithGoogle() {
       firebase.auth().signInWithPopup(provider)
         .then(result => {
@@ -58,7 +58,7 @@
         });
     }
 
-    // Función de logout
+    // Logout
     function logout() {
       firebase.auth().signOut().then(() => {
         document.getElementById('login-container').classList.remove('hidden');
@@ -66,14 +66,14 @@
       });
     }
 
-    // Mostrar bienvenida
+    // Mostrar nombre
     function mostrarBienvenida(nombre) {
       document.getElementById('login-container').classList.add('hidden');
       document.getElementById('welcome-message').innerText = `¡Bienvenido, ${nombre}!`;
       document.getElementById('welcome-container').classList.remove('hidden');
     }
 
-    // Mantener sesión activa si ya está logueado
+    // Mantener sesión
     firebase.auth().onAuthStateChanged(user => {
       if (user) mostrarBienvenida(user.displayName);
     });
