@@ -81,7 +81,7 @@
   <!-- Main -->
   <main class="flex-1 p-6">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-semibold">Welcome, Medicina</h1>
+<h1 class="text-2xl font-semibold">Welcome, <span id="user-name">Medicina</span></h1>
       <button id="logout" class="text-sm bg-red-100 text-red-600 px-3 py-1 rounded">Cerrar sesión</button>
     </div>
 
@@ -149,14 +149,18 @@
   });
 
   firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-      loginSection.classList.add("hidden");
-      userSection.classList.remove("hidden");
-    } else {
-      loginSection.classList.remove("hidden");
-      userSection.classList.add("hidden");
-    }
-  });
+  if (user) {
+    loginSection.classList.add("hidden");
+    userSection.classList.remove("hidden");
+
+    // Mostrar primer nombre o email antes del @
+    document.getElementById("user-name").innerText =
+      user.displayName?.split(" ")[0] || user.email.split("@")[0];
+  } else {
+    loginSection.classList.remove("hidden");
+    userSection.classList.add("hidden");
+  }
+});
 
   document.getElementById("logout").addEventListener("click", () => {
     firebase.auth().signOut();
