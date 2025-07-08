@@ -6,14 +6,14 @@
   <title>Bancomicina - Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <style>
     body { font-family: 'Inter', sans-serif; }
   </style>
 
-  <!-- Firebase compat SDK -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
@@ -25,55 +25,32 @@
       measurementId: "G-VJ006XMN9G"
     };
     firebase.initializeApp(firebaseConfig);
-
-    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-      .catch((error) => {
-        console.error("Error al establecer persistencia:", error);
-      });
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
   </script>
 </head>
 <body class="bg-gray-50">
 
-<!-- LOGIN FORM -->
+<!-- LOGIN -->
 <div id="login-section" class="flex flex-col items-center justify-center min-h-screen px-4 space-y-8">
   <div class="flex items-center">
     <img src="./assets/logo.png" alt="Bancomicina Logo" class="w-12 h-12" />
     <span class="ml-4 text-4xl font-bold text-gray-900">bancomicina</span>
   </div>
-
   <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-8">
     <h2 class="text-2xl font-bold text-gray-900 text-center mb-1">Bienvenido</h2>
     <p class="text-gray-500 text-center mb-6">Inicia sesión o crea una cuenta</p>
-
     <form id="login-form" class="space-y-4">
-      <input type="email" id="email" placeholder="Email" required
-             class="w-full px-4 py-2 bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" />
+      <input type="email" id="email" placeholder="Email" required class="w-full px-4 py-2 bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" />
       <div class="relative">
-        <input id="password" type="password" placeholder="Contraseña" required
-               class="w-full px-4 py-2 bg-gray-100 rounded-md pr-10 focus:outline-none focus:ring-2 focus:ring-teal-500" />
+        <input id="password" type="password" placeholder="Contraseña" required class="w-full px-4 py-2 bg-gray-100 rounded-md pr-10 focus:outline-none focus:ring-2 focus:ring-teal-500" />
         <button type="button" id="togglePassword" class="absolute inset-y-0 right-3 flex items-center text-gray-400">
-          <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
-               viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7
-                    -1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
+          <i class="fas fa-eye"></i>
         </button>
       </div>
-
       <div class="space-y-2 pt-4">
-        <button type="submit"
-                class="w-full bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 rounded-md transition">
-          Iniciar sesión
-        </button>
-        <button type="button" id="register-btn"
-                class="w-full border border-teal-500 text-teal-600 font-semibold py-2 rounded-md hover:bg-teal-50 transition">
-          Registrarse
-        </button>
-        <button type="button" id="google-signin"
-                class="w-full flex items-center justify-center border border-gray-300 bg-white text-gray-700 font-semibold py-2 rounded-md hover:bg-gray-50 transition">
+        <button type="submit" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 rounded-md transition">Iniciar sesión</button>
+        <button type="button" id="register-btn" class="w-full border border-teal-500 text-teal-600 font-semibold py-2 rounded-md hover:bg-teal-50 transition">Registrarse</button>
+        <button type="button" id="google-signin" class="w-full flex items-center justify-center border border-gray-300 bg-white text-gray-700 font-semibold py-2 rounded-md hover:bg-gray-50 transition">
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-5 h-5 mr-2">
           Continuar con Google
         </button>
@@ -82,16 +59,60 @@
   </div>
 </div>
 
-<!-- PANEL USUARIO -->
-<div id="user-section" class="hidden bg-gray-100 flex items-center justify-center min-h-screen p-4">
-  <div class="bg-white shadow-lg rounded-lg p-8 max-w-md w-full text-center">
-    <h1 class="text-2xl font-bold text-gray-800 mb-4">Bienvenido a Bancomicina</h1>
-    <p id="user-email" class="text-gray-600 mb-6">Cargando...</p>
-    <button id="logout"
-            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md font-semibold transition">
-      Cerrar sesión
-    </button>
-  </div>
+<!-- DASHBOARD estilo AMBOSS -->
+<div id="user-section" class="hidden bg-gray-100 min-h-screen flex">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white border-r p-4 space-y-4">
+    <div class="text-xl font-bold flex items-center justify-between">
+      <span class="text-blue-600">△</span> AMBOSS
+      <span class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded">CLINICIAN</span>
+    </div>
+    <nav class="text-sm text-gray-700 space-y-2">
+      <a href="#" class="block hover:bg-blue-50 rounded px-3 py-2"><i class="fas fa-home mr-2"></i>Home</a>
+      <a href="#" class="block hover:bg-blue-50 rounded px-3 py-2"><i class="fas fa-pills mr-2"></i>Drugs</a>
+      <a href="#" class="block hover:bg-blue-50 rounded px-3 py-2"><i class="fas fa-stethoscope mr-2"></i>Clinical resources</a>
+      <a href="#" class="block hover:bg-blue-50 rounded px-3 py-2"><i class="fas fa-graduation-cap mr-2"></i>Exams & CME</a>
+      <a href="#" class="block hover:bg-blue-50 rounded px-3 py-2"><i class="fas fa-book mr-2"></i>Library</a>
+      <a href="#" class="block hover:bg-blue-50 rounded px-3 py-2"><i class="fas fa-user-cog mr-2"></i>Account & settings</a>
+      <a href="#" class="block hover:bg-blue-50 rounded px-3 py-2"><i class="fas fa-question-circle mr-2"></i>Help & privacy</a>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-semibold">Welcome, Medicina</h1>
+      <button id="logout" class="text-sm bg-red-100 text-red-600 px-3 py-1 rounded">Cerrar sesión</button>
+    </div>
+
+    <!-- Search -->
+    <div class="flex mb-8">
+      <select class="bg-white border rounded-l px-4 py-2 text-sm">
+        <option>EN</option>
+      </select>
+      <input type="text" placeholder="Ask a clinical question" class="flex-1 border-t border-b px-4 py-2 text-sm" />
+      <span class="border rounded-r px-4 py-2 text-sm text-gray-400">⌘+K</span>
+    </div>
+
+    <!-- Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white p-4 rounded shadow">
+        <h2 class="text-lg font-semibold mb-4">Recently viewed articles</h2>
+        <ul class="space-y-2 text-sm">
+          <li><i class="fas fa-file-alt mr-2 text-gray-500"></i>Acute pancreatitis</li>
+          <li><i class="fas fa-file-alt mr-2 text-gray-500"></i>Meningitis</li>
+          <li><i class="fas fa-file-alt mr-2 text-gray-500"></i>Spleen</li>
+          <li><i class="fas fa-file-alt mr-2 text-gray-500"></i>Fever</li>
+        </ul>
+      </div>
+      <div class="bg-white p-4 rounded shadow text-center border">
+        <div class="text-xl font-bold mb-2">NEJM Knowledge<span class="text-red-600">+</span></div>
+        <p class="text-sm text-gray-600 mb-4">Board Exams and CME</p>
+        <p class="text-sm text-gray-500 mb-4">Study for ABIM, ABFM, and ABP boards and earn CME credits.</p>
+        <button class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded">Go to Qbank</button>
+      </div>
+    </div>
+  </main>
 </div>
 
 <script>
@@ -100,64 +121,47 @@
   const loginForm = document.getElementById("login-form");
   const registerBtn = document.getElementById("register-btn");
   const togglePassword = document.getElementById("togglePassword");
-  const eyeIcon = document.getElementById("eyeIcon");
   const loginSection = document.getElementById("login-section");
   const userSection = document.getElementById("user-section");
-  const userEmailDisplay = document.getElementById("user-email");
 
   togglePassword.addEventListener("click", () => {
-    const isPassword = passwordInput.type === "password";
-    passwordInput.type = isPassword ? "text" : "password";
+    passwordInput.type = passwordInput.type === "password" ? "text" : "password";
   });
 
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    const email = emailInput.value;
-    const password = passwordInput.value;
-    localStorage.setItem("lastEmail", email);
-    firebase.auth().signInWithEmailAndPassword(email, password)
+    firebase.auth().signInWithEmailAndPassword(emailInput.value, passwordInput.value)
       .catch(error => alert("Error al iniciar sesión: " + error.message));
   });
 
   registerBtn.addEventListener("click", () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
-    if (!email || !password) {
+    if (!emailInput.value || !passwordInput.value) {
       alert("Completa el email y la contraseña.");
       return;
     }
-    localStorage.setItem("lastEmail", email);
-    firebase.auth().createUserWithEmailAndPassword(email, password)
+    firebase.auth().createUserWithEmailAndPassword(emailInput.value, passwordInput.value)
       .catch(error => alert("Error al registrarse: " + error.message));
   });
 
   document.getElementById("google-signin").addEventListener("click", () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth().signInWithPopup(provider)
-      .then(result => mostrarPanelUsuario(result.user))
-      .catch(error => alert("Error de autenticación: " + error.message));
+    firebase.auth().signInWithPopup(provider).catch(error => alert("Error con Google: " + error.message));
   });
 
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-      mostrarPanelUsuario(user);
+      loginSection.classList.add("hidden");
+      userSection.classList.remove("hidden");
     } else {
       loginSection.classList.remove("hidden");
       userSection.classList.add("hidden");
-      const lastEmail = localStorage.getItem("lastEmail");
-      if (lastEmail) emailInput.value = lastEmail;
     }
   });
-
-  function mostrarPanelUsuario(user) {
-    loginSection.classList.add("hidden");
-    userSection.classList.remove("hidden");
-    userEmailDisplay.innerText = `Estás logueado como: ${user.displayName || user.email}`;
-  }
 
   document.getElementById("logout").addEventListener("click", () => {
     firebase.auth().signOut();
   });
 </script>
+
 </body>
 </html>
