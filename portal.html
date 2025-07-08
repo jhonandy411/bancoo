@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bancomicina - Login</title>
+  <title>Bancomicina</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     body { font-family: 'Inter', sans-serif; }
   </style>
@@ -19,23 +19,22 @@
       projectId: "bancomicina-62bfe",
       storageBucket: "bancomicina-62bfe.appspot.com",
       messagingSenderId: "737254665977",
-      appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28",
-      measurementId: "G-VJ006XMN9G"
+      appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
     };
     firebase.initializeApp(firebaseConfig);
-    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
   </script>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-100">
 
-<!-- LOGIN -->
+<!-- Login -->
 <div id="login-section" class="flex flex-col items-center justify-center min-h-screen px-4 space-y-8">
   <div class="flex items-center">
-    <img src="./assets/logo.png" alt="Bancomicina Logo" class="w-12 h-12" />
+    <img src="./assets/logo.png" alt="Logo" class="w-12 h-12" />
     <span class="ml-4 text-4xl font-bold text-gray-900">bancomicina</span>
   </div>
   <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-8">
-    <h2 class="text-2xl font-bold text-gray-900 text-center mb-1">Bienvenido</h2>
+    <h2 class="text-2xl font-bold text-center mb-1">Bienvenido</h2>
     <p class="text-gray-500 text-center mb-6">Inicia sesión o crea una cuenta</p>
     <form id="login-form" class="space-y-4">
       <input type="email" id="email" placeholder="Email" required class="w-full px-4 py-2 bg-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" />
@@ -46,9 +45,9 @@
         </button>
       </div>
       <div class="space-y-2 pt-4">
-        <button type="submit" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 rounded-md transition">Iniciar sesión</button>
-        <button type="button" id="register-btn" class="w-full border border-teal-500 text-teal-600 font-semibold py-2 rounded-md hover:bg-teal-50 transition">Registrarse</button>
-        <button type="button" id="google-signin" class="w-full flex items-center justify-center border border-gray-300 bg-white text-gray-700 font-semibold py-2 rounded-md hover:bg-gray-50 transition">
+        <button type="submit" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 rounded-md">Iniciar sesión</button>
+        <button type="button" id="register-btn" class="w-full border border-teal-500 text-teal-600 font-semibold py-2 rounded-md hover:bg-teal-50">Registrarse</button>
+        <button type="button" id="google-signin" class="w-full flex items-center justify-center border border-gray-300 bg-white text-gray-700 font-semibold py-2 rounded-md hover:bg-gray-50">
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-5 h-5 mr-2">
           Continuar con Google
         </button>
@@ -57,67 +56,103 @@
   </div>
 </div>
 
-<!-- DASHBOARD estilo AMBOSS -->
-<div id="user-section" class="hidden bg-gray-100 min-h-screen flex w-full relative">
-  
+<!-- Dashboard -->
+<div id="user-section" class="hidden min-h-screen w-full">
+  <!-- Header fijo -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-white border-b flex items-center justify-between px-4 h-16 shadow">
+  <!-- Menú hamburguesa -->
+  <div class="flex items-center space-x-4">
+    <button id="menu-toggle" class="text-gray-700 hover:text-black focus:outline-none">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
 
-  <aside id="sidebar" style="z-index: 60;" class="fixed inset-y-0 left-0 w-64 bg-white border-r p-4 space-y-6 transform -translate-x-full transition-transform duration-300 z-40 md:relative md:translate-x-0 md:flex-shrink-0">
-  <div class="flex flex-col space-y-1">
-    <button id="menu-toggle" class="text-blue-600 text-2xl font-bold focus:outline-none" title="Mostrar/ocultar menú">△</button>
-    <span class="text-gray-900 text-xl font-semibold tracking-tight">BANCOM</span>
-    <span class="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded w-fit">CLINICIAN</span>
+    <!-- Logo + texto -->
+    <div class="flex items-center space-x-2">
+      <img src="./assets/logo.png" alt="Logo" class="w-6 h-6" />
+      <span class="text-xl font-semibold text-gray-800">BANCOMICINA</span>
+    </div>
+
+    <!-- Badge tipo "CLINICIAN" -->
+    <div class="ml-2">
+      <button class="text-sm font-medium bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex items-center space-x-1">
+        <span>CLINICIAN</span>
+        <i class="fas fa-chevron-down text-xs"></i>
+      </button>
+    </div>
   </div>
-  <nav class="text-sm text-gray-700 space-y-2">
-    <a href="#" class="block hover:bg-blue-50 rounded px-3 py-2 font-medium"><i class="fas fa-home mr-2"></i>Home</a>
-    <a href="#" class="block hover:bg-blue-50 rounded px-3 py-2 font-medium"><i class="fas fa-pills mr-2"></i>Drugs</a>
-    <a href="#" class="block hover:bg-blue-50 rounded px-3 py-2 font-medium"><i class="fas fa-stethoscope mr-2"></i>Clinical resources</a>
-    <a href="#" class="block hover:bg-blue-50 rounded px-3 py-2 font-medium"><i class="fas fa-graduation-cap mr-2"></i>Exams & CME</a>
-    <a href="#" class="block hover:bg-blue-50 rounded px-3 py-2 font-medium"><i class="fas fa-book mr-2"></i>Library</a>
-    <a href="#" class="block hover:bg-blue-50 rounded px-3 py-2 font-medium"><i class="fas fa-user-cog mr-2"></i>Account & settings</a>
-    <a href="#" class="block hover:bg-blue-50 rounded px-3 py-2 font-medium"><i class="fas fa-question-circle mr-2"></i>Help & privacy</a>
-  </nav>
-  </aside>
 
-  <div id="overlay" class="fixed inset-0 bg-black bg-opacity-30 z-30 hidden md:hidden"></div>
+  <!-- Acciones derecha -->
+  <div class="flex items-center space-x-4">
+    <button class="text-gray-600 hover:text-black">
+      <i class="far fa-bookmark text-xl"></i>
+    </button>
+    <div class="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center font-semibold">
+      M
+    </div>
+  </div>
+</header>
 
-  <main class="flex-1 p-6 overflow-x-hidden">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-semibold">Welcome, <span id="user-name">Medicina</span></h1>
-      <button id="logout" class="text-sm bg-red-100 text-red-600 px-3 py-1 rounded">Cerrar sesión</button>
-    </div>
-    <div class="flex mb-8">
-      <select class="bg-white border rounded-l px-4 py-2 text-sm">
-        <option>EN</option>
-      </select>
-      <input type="text" placeholder="Ask a clinical question" class="flex-1 border-t border-b px-4 py-2 text-sm" />
-      <span class="border rounded-r px-4 py-2 text-sm text-gray-400">⌘+K</span>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="bg-white p-4 rounded shadow">
-        <h2 class="text-lg font-semibold mb-4">Recently viewed articles</h2>
-        <ul class="space-y-2 text-sm">
-          <li><i class="fas fa-file-alt mr-2 text-gray-500"></i>Acute pancreatitis</li>
-          <li><i class="fas fa-file-alt mr-2 text-gray-500"></i>Meningitis</li>
-          <li><i class="fas fa-file-alt mr-2 text-gray-500"></i>Spleen</li>
-          <li><i class="fas fa-file-alt mr-2 text-gray-500"></i>Fever</li>
-        </ul>
+  <div class="flex pt-16 h-[calc(100vh-4rem)] overflow-hidden transition-all duration-300">
+    <!-- Sidebar cerrado inicialmente -->
+    <aside id="sidebar" class="w-0 overflow-hidden bg-white border-r transition-all duration-300 px-0">
+  <div id="sidebar-content" class="hidden w-full space-y-6">
+        
+        <nav class="mt-8 text-sm text-gray-700 space-y-2">
+          <a href="#" class="flex items-center space-x-2 px-3 py-2 rounded hover:bg-blue-50"><i class="fas fa-home w-4"></i><span>Home</span></a>
+          <a href="#" class="flex items-center space-x-2 px-3 py-2 rounded hover:bg-blue-50"><i class="fas fa-pills w-4"></i><span>Drugs</span></a>
+          <a href="#" class="flex items-center space-x-2 px-3 py-2 rounded hover:bg-blue-50"><i class="fas fa-stethoscope w-4"></i><span>Clinical resources</span></a>
+          <a href="#" class="flex items-center space-x-2 px-3 py-2 rounded hover:bg-blue-50"><i class="fas fa-graduation-cap w-4"></i><span>Exams & CME</span></a>
+          <a href="#" class="flex items-center space-x-2 px-3 py-2 rounded hover:bg-blue-50"><i class="fas fa-book w-4"></i><span>Library</span></a>
+          <a href="#" class="flex items-center space-x-2 px-3 py-2 rounded hover:bg-blue-50"><i class="fas fa-user-cog w-4"></i><span>Account & settings</span></a>
+          <a href="#" class="flex items-center space-x-2 px-3 py-2 rounded hover:bg-blue-50"><i class="fas fa-question-circle w-4"></i><span>Help & privacy</span></a>
+        </nav>
       </div>
-      <div class="bg-white p-4 rounded shadow text-center border">
-        <div class="text-xl font-bold mb-2">NEJM Knowledge<span class="text-red-600">+</span></div>
-        <p class="text-sm text-gray-600 mb-4">Board Exams and CME</p>
-        <p class="text-sm text-gray-500 mb-4">Study for ABIM, ABFM, and ABP boards and earn CME credits.</p>
-        <button class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded">Go to Qbank</button>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main id="main-content" class="flex-1 p-10 bg-gray-100 overflow-y-auto ml-0 transition-all duration-300">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold">Welcome, <span id="user-name">Usuario</span></h1>
+        <button id="logout" class="text-sm bg-red-100 text-red-600 px-3 py-1 rounded">Cerrar sesión</button>
       </div>
-    </div>
-  </main>
+
+      <div class="flex mb-8 space-x-2 items-center">
+        <select class="bg-white border rounded px-3 py-1 text-sm">
+          <option>EN</option>
+        </select>
+        <input type="text" placeholder="Ask a clinical question" class="flex-1 border rounded px-4 py-2 text-sm" />
+        <span class="px-3 py-2 text-sm text-gray-400">⌘+K</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="col-span-2 bg-white p-4 rounded shadow">
+          <h2 class="text-lg font-semibold mb-4">Recently viewed articles</h2>
+          <ul class="divide-y text-sm">
+            <li class="py-2 flex items-center"><i class="fas fa-file-alt mr-2 text-gray-500"></i>Acute pancreatitis</li>
+            <li class="py-2 flex items-center"><i class="fas fa-file-alt mr-2 text-gray-500"></i>Meningitis</li>
+            <li class="py-2 flex items-center"><i class="fas fa-file-alt mr-2 text-gray-500"></i>Spleen</li>
+            <li class="py-2 flex items-center"><i class="fas fa-file-alt mr-2 text-gray-500"></i>Fever</li>
+          </ul>
+        </div>
+        <div class="bg-white p-4 rounded shadow border text-center">
+          <div class="text-xl font-bold mb-2">NEJM Knowledge<span class="text-red-600">+</span></div>
+          <p class="text-sm text-gray-600 mb-2">Board Exams and CME</p>
+          <p class="text-sm text-gray-500 mb-4">Study for ABIM, ABFM, and ABP boards and earn CME credits.</p>
+          <button class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded">Go to Qbank</button>
+        </div>
+      </div>
+    </main>
+  </div>
 </div>
 
 <script>
+  const loginForm = document.getElementById("login-form");
   const emailInput = document.getElementById("email");
   const passwordInput = document.getElementById("password");
-  const loginForm = document.getElementById("login-form");
-  const registerBtn = document.getElementById("register-btn");
   const togglePassword = document.getElementById("togglePassword");
+  const registerBtn = document.getElementById("register-btn");
   const loginSection = document.getElementById("login-section");
   const userSection = document.getElementById("user-section");
   const userName = document.getElementById("user-name");
@@ -129,12 +164,12 @@
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
     firebase.auth().signInWithEmailAndPassword(emailInput.value, passwordInput.value)
-      .catch(error => alert("Error al iniciar sesión: " + error.message));
+      .catch(error => alert("Error: " + error.message));
   });
 
   registerBtn.addEventListener("click", () => {
     if (!emailInput.value || !passwordInput.value) {
-      alert("Completa el email y la contraseña.");
+      alert("Completa email y contraseña.");
       return;
     }
     firebase.auth().createUserWithEmailAndPassword(emailInput.value, passwordInput.value)
@@ -150,7 +185,7 @@
     if (user) {
       loginSection.classList.add("hidden");
       userSection.classList.remove("hidden");
-      userName.innerText = user.displayName?.split(" ")[0] || user.email.split("@")[0];
+      userName.textContent = user.displayName?.split(" ")[0] || user.email.split("@")[0];
     } else {
       loginSection.classList.remove("hidden");
       userSection.classList.add("hidden");
@@ -161,30 +196,23 @@
     firebase.auth().signOut();
   });
 
-  const toggleBtn = document.getElementById("menu-toggle");
+  document.getElementById("menu-toggle").addEventListener("click", () => {
   const sidebar = document.getElementById("sidebar");
-  const overlay = document.getElementById("overlay");
+  const sidebarContent = document.getElementById("sidebar-content");
 
-  toggleBtn?.addEventListener("click", () => {
-  const isVisible = !sidebar.classList.contains("-translate-x-full");
-  if (isVisible) {
-    sidebar.classList.add("-translate-x-full");
-    overlay.classList.add("hidden");
+  const isOpen = sidebar.classList.contains("w-64");
+
+  if (isOpen) {
+    sidebar.classList.remove("w-64", "px-6");
+    sidebar.classList.add("w-0", "px-0");
+    sidebarContent.classList.add("hidden");
   } else {
-    sidebar.classList.remove("-translate-x-full");
-    overlay.classList.remove("hidden");
+    sidebar.classList.remove("w-0", "px-0");
+    sidebar.classList.add("w-64", "px-6");
+    sidebarContent.classList.remove("hidden");
   }
 });
-
-  document.getElementById("menu-close")?.addEventListener("click", () => {
-    sidebar.classList.add("-translate-x-full");
-    overlay.classList.add("hidden");
-  });
-
-  overlay?.addEventListener("click", () => {
-    sidebar.classList.add("-translate-x-full");
-    overlay.classList.add("hidden");
-  });
 </script>
+
 </body>
 </html>
