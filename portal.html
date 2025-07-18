@@ -103,7 +103,7 @@
         font-weight: 500 !important; /* medium */
     }
     .active-link i {
- 	 	 color: #1d4ed8 !important; /* blue-700 */
+         color: #1d4ed8 !important; /* blue-700 */
     }
     /* Estilo para los botones de grupo cuando su acordeón está abierto */
     .sidebar-group button.accordion-open {
@@ -153,7 +153,7 @@
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script> <script>
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
       authDomain: "bancomicina-62bfe.firebaseapp.com",
@@ -164,7 +164,6 @@
     };
     firebase.initializeApp(firebaseConfig);
     firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    const db = firebase.firestore(); // Inicializa Firestore
   </script>
 </head>
 <body class="bg-gray-100">
@@ -285,7 +284,7 @@
               <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
           </button>
           <div id="accordion-library" class="ml-8 mt-1 space-y-1 hidden text-sm text-gray-600">
-              <a id="link-articles" href="#" class="block px-2 py-1 hover:bg-gray-100 rounded" onclick="setActiveLink(this); showArticlesPanel()">Articles</a>
+              <a href="#" class="block px-2 py-1 hover:bg-gray-100 rounded" onclick="setActiveLink(this)">Articles</a>
               <a href="#" class="block px-2 py-1 hover:bg-gray-100 rounded" onclick="setActiveLink(this)">Videos</a>
               <a href="#" class="block px-2 py-1 hover:bg-gray-100 rounded" onclick="setActiveLink(this)">Media Library</a>
           </div>
@@ -329,20 +328,48 @@
       <div id="articles-panel" class="hidden flex-nowrap gap-x-4 transition-all">
         <div class="bg-white rounded-lg shadow-sm articles-panel-column py-3 px-4">
           <h2 class="text-sm font-semibold mb-2 text-gray-800">Library</h2>
-          <ul id="panel-1-list" class="text-sm space-y-1 divide-y divide-gray-200">
-            </ul>
+          <ul class="text-sm space-y-1 divide-y divide-gray-200"> <li><a href="#" onclick="showSecondPanel(this, 'Basic sciences')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Basic sciences</span></a></li>
+            <li><a href="#" onclick="showSecondPanel(this, 'Clinical knowledge')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Clinical knowledge</span></a></li>
+            <li><a href="#" onclick="showSecondPanel(this, 'Clinical skills')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Clinical skills</span></a></li>
+            <li><a href="#" onclick="showSecondPanel(this, 'Clerkship survival guide')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Clerkship survival guide</span></a></li>
+            <li><a href="#" onclick="showSecondPanel(this, 'Transition to residency')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Transition to residency</span></a></li>
+            <li><a href="#" onclick="showSecondPanel(this, 'On-call survival guide')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>On-call survival guide</span></a></li>
+            <li><a href="#" onclick="showSecondPanel(this, 'Osteopathic medicine')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Osteopathic medicine</span></a></li>
+            <li><a href="#" onclick="showSecondPanel(this, 'CME-eligible articles')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>CME-eligible articles</span></a></li>
+          </ul>
         </div>
 
         <div id="panel-2" class="bg-white rounded-lg shadow-sm articles-panel-column py-3 px-4 hidden">
           <h2 class="text-sm font-semibold mb-2 text-gray-800" id="second-panel-title"></h2>
-          <ul id="panel-2-list" class="text-sm space-y-1 divide-y divide-gray-200">
-            </ul>
+          <ul class="text-sm space-y-1 divide-y divide-gray-200"> <li><a href="#" onclick="showThirdPanel(this, 'By discipline')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>By discipline</span></a></li>
+            <li><a href="#" onclick="showThirdPanel(this, 'By system')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>By system</span></a></li>
+            <li><a href="#" onclick="showThirdPanel(this, 'AMBOSS animations')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>AMBOSS animations</span></a></li>
+            <li><a href="#" onclick="showThirdPanel(this, 'AMBOSS content updates')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>AMBOSS content updates</span></a></li>
+            <li><a href="#" onclick="showThirdPanel(this, 'AMBOSS fact sheets')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>AMBOSS fact sheets</span></a></li>
+            <li><a href="#" onclick="showThirdPanel(this, 'Chalk Talk library')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Chalk Talk library</span></a></li>
+            <li><a href="#" onclick="showThirdPanel(this, 'Overview of most important anatomy')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Overview of most important anatomy</span></a></li>
+            <li><a href="#" onclick="showThirdPanel(this, 'About the USMLE®')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>About the USMLE®</span></a></li>
+            <li><a href="#" onclick="showThirdPanel(this, 'USMLE® content outline')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>USMLE® content outline</span></a></li>
+          </ul>
         </div>
 
         <div id="panel-3" class="bg-white rounded-lg shadow-sm articles-panel-column py-3 px-4 hidden">
           <h2 class="text-sm font-semibold mb-2 text-gray-800" id="third-panel-title"></h2>
-          <ul id="panel-3-list" class="text-sm space-y-1 divide-y divide-gray-200">
-            </ul>
+          <ul class="text-sm space-y-1 divide-y divide-gray-200"> <li><a href="#" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>General principles of foundational science</span></a></li>
+            <li><a href="#" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Biostatistics and epidemiology</span></a></li>
+            <li><a href="#" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Endocrine system</span></a></li>
+            <li><a href="#" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Gastrointestinal system</span></a></li>
+            <li><a href="#" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Cardiovascular system</span></a></li>
+            <li><a href="#" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Respiratory system</span></a></li>
+            <li><a href="#" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Blood and lymphoreticular system</span></a></li>
+            <li><a href="#" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Immune system</span></a></li>
+            <li><a href="#" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Musculoskeletal system</span></a></li>
+            <li><a href="#" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Skin and subcutaneous tissue</span></a></li>
+            <li><a href="#" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Nervous system and special senses</span></a></li>
+            <li><a href="#" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Renal and urinary system</span></a></li>
+            <li><a href="#" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Male reproductive system</span></a></li>
+            <li><a href="#" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Female reproductive system and breast</span></a></li>
+          </ul>
         </div>
       </div>
 
@@ -378,6 +405,23 @@
           </div>
         </div>
       </div>
+
+
+
+      <div id="subcategoria-content" class="hidden bg-white rounded shadow p-6 mt-6">
+  <h2 id="subcategoria-title" class="text-2xl font-bold mb-4"></h2>
+  <div id="subcategoria-body" class="space-y-6"></div>
+</div>
+
+
+
+
+
+
+
+
+
+
     </main>
   </div>
 
@@ -391,266 +435,465 @@
   const registerBtn = document.getElementById("register-btn");
   const loginSection = document.getElementById("login-section");
   const userSection = document.getElementById("user-section");
-  const userNameSpan = document.getElementById("user-name");
-  const userInitialDiv = document.getElementById("user-initial");
-  const logoutBtn = document.getElementById("logout");
-  const googleSignInBtn = document.getElementById("google-signin");
+  const userName = document.getElementById("user-name");
 
-  const menuToggle = document.getElementById("menu-toggle");
-  const sidebar = document.getElementById("sidebar");
-  const mainContent = document.getElementById("main-content");
+  togglePassword.addEventListener("click", () => {
+    passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+  });
 
-  // Paneles de artículos
-  const articlesPanel = document.getElementById('articles-panel');
-  const panel1List = document.getElementById('panel-1-list');
-  const panel2 = document.getElementById('panel-2');
-  const panel2List = document.getElementById('panel-2-list');
-  const secondPanelTitle = document.getElementById('second-panel-title');
-  const panel3 = document.getElementById('panel-3');
-  const panel3List = document.getElementById('panel-3-list');
-  const thirdPanelTitle = document.getElementById('third-panel-title');
-  const homeContent = document.getElementById('home-content');
+  loginForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    firebase.auth().signInWithEmailAndPassword(emailInput.value, passwordInput.value)
+      .catch(error => alert("Error: " + error.message));
+  });
 
-  let currentPanel1Selection = null;
-  let currentPanel2Selection = null;
-
-  // Objeto para almacenar los datos de Firebase una vez cargados
-  let panelData = {};
-
-  // Función para cargar los nombres desde Firebase
-  async function loadPanelContent() {
-    try {
-      const querySnapshot = await db.collection("panelContent").get();
-      panelData = {}; // Resetear datos
-      querySnapshot.forEach((doc) => {
-        panelData[doc.id] = doc.data();
-      });
-      console.log("Datos de panelContent cargados:", panelData);
-      populatePanel1(); // Cargar el primer panel una vez que los datos estén disponibles
-    } catch (error) {
-      console.error("Error al cargar los datos de Firestore:", error);
-      alert("Error al cargar el contenido de la biblioteca. Inténtalo de nuevo más tarde.");
+  registerBtn.addEventListener("click", () => {
+    if (!emailInput.value || !passwordInput.value) {
+      alert("Completa email y contraseña.");
+      return;
     }
-  }
+    firebase.auth().createUserWithEmailAndPassword(emailInput.value, passwordInput.value)
+      .catch(error => alert("Error al registrarse: " + error.message));
+  });
 
-  // Función para poblar el primer panel
-  function populatePanel1() {
-    panel1List.innerHTML = ''; // Limpiar lista actual
-    for (const key in panelData) {
-      if (panelData.hasOwnProperty(key) && panelData[key].title) {
-        const listItem = document.createElement('li');
-        const anchor = document.createElement('a');
-        anchor.href = "#";
-        anchor.className = "articles-panel-list-item";
-        anchor.onclick = function() { showSecondPanel(this, key); return false; }; // Pasa el key del documento
-        anchor.innerHTML = `<i class="far fa-file-alt"></i><span>${panelData[key].title}</span>`;
-        listItem.appendChild(anchor);
-        panel1List.appendChild(listItem);
-      }
-    }
-  }
+  document.getElementById("google-signin").addEventListener("click", () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider).catch(error => alert("Error con Google: " + error.message));
+  });
 
-  // Función para mostrar el segundo panel
-  async function showSecondPanel(selectedLink, panelId) {
-    // Eliminar la clase 'selected' de todos los elementos del primer panel
-    document.querySelectorAll('#panel-1-list .articles-panel-list-item').forEach(link => {
-      link.classList.remove('selected');
-    });
-    // Añadir la clase 'selected' al elemento clickeado
-    selectedLink.classList.add('selected');
-    currentPanel1Selection = selectedLink;
-
-    secondPanelTitle.textContent = panelData[panelId].title; // Usar el título del documento
-
-    panel2List.innerHTML = ''; // Limpiar lista actual
-    panel3List.innerHTML = ''; // Limpiar tercer panel también
-    panel3.classList.add('hidden'); // Ocultar el tercer panel
-
-    // Comprobar si hay subcategorías y cargarlas
-    if (panelData[panelId].subcategories) {
-        // Asumiendo que 'subcategories' es una subcolección
-        const subcategoriesSnapshot = await db.collection('panelContent').doc(panelId).collection('subcategories').get();
-        if (!subcategoriesSnapshot.empty) {
-            subcategoriesSnapshot.forEach(subDoc => {
-                const subCategory = subDoc.data();
-                const listItem = document.createElement('li');
-                const anchor = document.createElement('a');
-                anchor.href = "#";
-                anchor.className = "articles-panel-list-item";
-                anchor.onclick = function() { showThirdPanel(this, panelId, subDoc.id); return false; }; // Pasa el ID del subdocumento
-                anchor.innerHTML = `<i class="far fa-file-alt"></i><span>${subCategory.name}</span>`;
-                listItem.appendChild(anchor);
-                panel2List.appendChild(listItem);
-            });
-            panel2.classList.remove('hidden');
-        } else {
-            panel2.classList.add('hidden'); // Ocultar si no hay subcategorías
-        }
-    } else {
-        panel2.classList.add('hidden'); // Ocultar si no hay propiedad 'subcategories'
-    }
-
-    // Limpiar selección del panel 2
-    currentPanel2Selection = null;
-  }
-
-  // Función para mostrar el tercer panel
-  async function showThirdPanel(selectedLink, panel1DocId, panel2SubDocId) {
-    // Eliminar la clase 'selected' de todos los elementos del segundo panel
-    document.querySelectorAll('#panel-2-list .articles-panel-list-item').forEach(link => {
-      link.classList.remove('selected');
-    });
-    // Añadir la clase 'selected' al elemento clickeado
-    selectedLink.classList.add('selected');
-    currentPanel2Selection = selectedLink;
-
-    const subcategoriesRef = db.collection('panelContent').doc(panel1DocId).collection('subcategories').doc(panel2SubDocId);
-    const subcategoryDoc = await subcategoriesRef.get();
-
-    if (subcategoryDoc.exists) {
-        const subCategoryData = subcategoryDoc.data();
-        thirdPanelTitle.textContent = subCategoryData.name; // Usar el nombre de la subcategoría
-
-        panel3List.innerHTML = ''; // Limpiar lista actual
-
-        // Comprobar si hay ítems y cargarlos
-        const itemsSnapshot = await subcategoriesRef.collection('items').get();
-        if (!itemsSnapshot.empty) {
-            itemsSnapshot.forEach(itemDoc => {
-                const itemData = itemDoc.data();
-                const listItem = document.createElement('li');
-                const anchor = document.createElement('a');
-                anchor.href = "#";
-                anchor.className = "articles-panel-list-item";
-                anchor.innerHTML = `<i class="far fa-file-alt"></i><span>${itemData.name}</span>`;
-                listItem.appendChild(anchor);
-                panel3List.appendChild(listItem);
-            });
-            panel3.classList.remove('hidden');
-        } else {
-            panel3.classList.add('hidden'); // Ocultar si no hay ítems
-        }
-    } else {
-        panel3.classList.add('hidden'); // Ocultar si el subdocumento no existe
-    }
-  }
-
-  // Función para mostrar el panel de artículos y ocultar el contenido de inicio
-  function showArticlesPanel() {
-    homeContent.classList.add('hidden');
-    articlesPanel.classList.remove('hidden');
-    articlesPanel.classList.add('flex'); // Asegurarse de que esté visible
-    panel2.classList.add('hidden'); // Ocultar panel 2 y 3 al inicio
-    panel3.classList.add('hidden');
-    // Deseleccionar cualquier elemento previamente seleccionado
-    if (currentPanel1Selection) {
-        currentPanel1Selection.classList.remove('selected');
-        currentPanel1Selection = null;
-    }
-    if (currentPanel2Selection) {
-        currentPanel2Selection.classList.remove('selected');
-        currentPanel2Selection = null;
-    }
-  }
-
-  // Función para mostrar el contenido de inicio y ocultar los paneles de artículos
-  function showHomeContent() {
-    articlesPanel.classList.add('hidden');
-    articlesPanel.classList.remove('flex');
-    homeContent.classList.remove('hidden');
-  }
-
-  // Lógica de autenticación
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
       loginSection.classList.add("hidden");
       userSection.classList.remove("hidden");
-      const userDisplayName = user.displayName || user.email;
-      userNameSpan.textContent = userDisplayName.split('@')[0];
-      userInitialDiv.textContent = userDisplayName.charAt(0).toUpperCase();
-      loadPanelContent(); // Cargar contenido del panel al iniciar sesión
+      userName.textContent = user.displayName?.split(" ")[0] || user.email.split("@")[0];
+      const userInitial = (user.displayName?.charAt(0) || user.email.charAt(0)).toUpperCase();
+
+      const userInitialElement = document.getElementById("user-initial");
+      userInitialElement.textContent = userInitial;
+
+      // Función para generar color en base al texto (hash)
+      function stringToColor(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+          hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const hue = hash % 360;
+        return `hsl(${hue}, 70%, 45%)`; // color agradable
+      }
+
+      // Aplica color al fondo
+      const bgColor = stringToColor(user.displayName || user.email);
+      userInitialElement.style.backgroundColor = bgColor;
     } else {
       loginSection.classList.remove("hidden");
       userSection.classList.add("hidden");
-      showHomeContent(); // Volver al contenido de inicio si no hay usuario
     }
   });
 
-  loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    try {
-      await firebase.auth().signInWithEmailAndPassword(emailInput.value, passwordInput.value);
-    } catch (error) {
-      alert(`Error al iniciar sesión: ${error.message}`);
-    }
+  document.getElementById("logout").addEventListener("click", () => {
+    firebase.auth().signOut();
   });
 
-  registerBtn.addEventListener("click", async () => {
-    try {
-      await firebase.auth().createUserWithEmailAndPassword(emailInput.value, passwordInput.value);
-    } catch (error) {
-      alert(`Error al registrar: ${error.message}`);
-    }
-  });
+  // Toggle de la sidebar
+  document.getElementById("menu-toggle").addEventListener("click", () => {
+    const sidebar = document.getElementById("sidebar");
+    const mainContent = document.getElementById("main-content");
 
-  googleSignInBtn.addEventListener("click", async () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    try {
-      await firebase.auth().signInWithPopup(provider);
-    } catch (error) {
-      alert(`Error con Google Sign-In: ${error.message}`);
-    }
-  });
-
-  logoutBtn.addEventListener("click", async () => {
-    try {
-      await firebase.auth().signOut();
-    } catch (error) {
-      alert(`Error al cerrar sesión: ${error.message}`);
-    }
-  });
-
-  togglePassword.addEventListener('click', () => {
-    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-    passwordInput.setAttribute('type', type);
-    togglePassword.querySelector('i').classList.toggle('fa-eye');
-    togglePassword.querySelector('i').classList.toggle('fa-eye-slash');
-  });
-
-  // Funcionalidad del menú lateral
-  menuToggle.addEventListener("click", () => {
     sidebar.classList.toggle("open");
     mainContent.classList.toggle("sidebar-open");
   });
+</script>
 
-  // Funcionalidad de los acordeones en la sidebar
-  function toggleAccordion(group) {
-    const accordion = document.getElementById(`accordion-${group}`);
-    const button = document.querySelector(`#group-${group} button`);
-    accordion.classList.toggle('hidden');
-    button.classList.toggle('accordion-open');
-  }
+<script>
+  let currentActivePanel2Item = null; // Para mantener el elemento seleccionado en el panel 2
+  let currentActivePanel3Item = null; // Para mantener el elemento seleccionado en el panel 3
 
-  // Funcionalidad para resaltar el enlace activo en la sidebar
-  function setActiveLink(clickedLink) {
-    // Primero, remover la clase 'active-link' de todos los enlaces
-    document.querySelectorAll('#sidebar a').forEach(link => {
-      link.classList.remove('active-link');
-    });
-    // Luego, añadir la clase 'active-link' al enlace clickeado
-    clickedLink.classList.add('active-link');
+  async function showSecondPanel(clickedElement, supracategoriaId) {
+  const panel2 = document.getElementById("panel-2");
+  const panel3 = document.getElementById("panel-3");
+  const secondPanelTitle = document.getElementById("second-panel-title");
 
-    // Si se hace clic en "Home", ocultar el panel de artículos
-    if (clickedLink.closest('#group-home')) {
-        showHomeContent();
-    }
-  }
+  // Reiniciar selección visual en panel 1
+  document.querySelectorAll('#articles-panel > div:first-child .articles-panel-list-item').forEach(item => {
+    item.classList.remove('selected');
+  });
+  clickedElement.classList.add('selected');
 
-  // Listener para el enlace "Articles" en la sidebar para mostrar el panel de artículos
-  document.getElementById('link-articles').addEventListener('click', () => {
-    showArticlesPanel();
+  // Mostrar el panel 2
+  panel2.classList.remove("hidden");
+  secondPanelTitle.textContent = supracategoriaId;
+
+  // Ocultar panel 3
+  panel3.classList.add("hidden");
+
+  // Limpiar contenido anterior del panel 2
+  const panel2List = panel2.querySelector("ul");
+  panel2List.innerHTML = "";
+
+  // Obtener categorías desde Firestore
+  const snapshot = await db.collection("supracategorias")
+                           .doc(supracategoriaId)
+                           .collection("categorias")
+                           .get();
+
+  snapshot.forEach(doc => {
+const nombreCategoria = doc.id; // usa el ID del documento como nombre visible
+
+    const li = document.createElement("li");
+    li.innerHTML = `<a href="#" onclick="showThirdPanel(this, '${doc.id}')" class="articles-panel-list-item">
+                      <i class="far fa-file-alt"></i><span>${nombreCategoria}</span>
+                    </a>`;
+    panel2List.appendChild(li);
   });
 
+  // Resetear selección visual
+  document.querySelectorAll('#panel-2 .articles-panel-list-item').forEach(item => {
+    item.classList.remove('selected');
+  });
+  currentActivePanel2Item = null;
+  currentActivePanel3Item = null;
+}
+
+  async function showThirdPanel(clickedElement, categoriaId) {
+  const panel3 = document.getElementById("panel-3");
+  const thirdPanelTitle = document.getElementById("third-panel-title");
+
+  // Reiniciar y marcar el elemento clickeado en el panel 2
+  document.querySelectorAll('#panel-2 .articles-panel-list-item').forEach(item => {
+    item.classList.remove('selected');
+  });
+  clickedElement.classList.add('selected');
+  currentActivePanel2Item = clickedElement;
+
+  // Mostrar el panel 3
+  panel3.classList.remove("hidden");
+  thirdPanelTitle.textContent = categoriaId;
+
+  // Limpiar contenido anterior
+  const panel3List = panel3.querySelector("ul");
+  panel3List.innerHTML = "";
+
+  // 🔥 Obtener ID de supracategoría seleccionada (de panel 1)
+  const supracategoriaId = document.querySelector('#articles-panel > div:first-child .articles-panel-list-item.selected span')?.textContent;
+
+  if (!supracategoriaId) {
+    console.error("No se encontró la supracategoría seleccionada");
+    return;
+  }
+
+  // 🔥 Obtener subcategorías desde Firestore
+  const snapshot = await db.collection("supracategorias")
+    .doc(supracategoriaId)
+    .collection("categorias")
+    .doc(categoriaId)
+    .collection("subcategorias")
+    .orderBy("orden") // si querés orden específico
+    .get();
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    const nombre = data.denomincacion || doc.id;
+    const li = document.createElement("li");
+li.innerHTML = `<a href="#" class="articles-panel-list-item" onclick="showSubcategoriaContent('${doc.id}', '${categoriaId}', '${supracategoriaId}')">
+  <i class="far fa-file-alt"></i><span>${nombre}</span>
+</a>`;
+    panel3List.appendChild(li);
+  });
+
+  // Reset visual
+  document.querySelectorAll('#panel-3 .articles-panel-list-item').forEach(item => {
+    item.classList.remove('selected');
+  });
+  currentActivePanel3Item = null;
+}
+
+  async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategoriaId) {
+    const contentSection = document.getElementById("subcategoria-content");
+    const titleEl = document.getElementById("subcategoria-title");
+    const bodyEl = document.getElementById("subcategoria-body");
+
+    // Ocultar todo lo demás
+    document.getElementById("home-content").classList.add("hidden");
+    document.getElementById("articles-panel").classList.add("hidden");
+
+    // Traer el documento
+    const docRef = db.collection("supracategorias")
+                     .doc(supracategoriaId)
+                     .collection("categorias")
+                     .doc(categoriaId)
+                     .collection("subcategorias")
+                     .doc(subcategoriaId);
+
+    const doc = await docRef.get();
+    if (!doc.exists) return;
+
+    const data = doc.data();
+    titleEl.textContent = data.nombre || subcategoriaId;
+    bodyEl.innerHTML = "";
+
+    const detalle = data.definiciondetallada || {};
+
+    for (const key in detalle) {
+      const bloque = detalle[key];
+      if (!bloque || typeof bloque !== "object") continue;
+
+      const section = document.createElement("section");
+      section.className = "border-b pb-4";
+
+      // Título de sección (key como 'causas', 'tratamiento', etc.)
+      const h3 = document.createElement("h3");
+      h3.className = "text-lg font-semibold text-gray-800 mb-2 capitalize";
+      h3.textContent = key.replace(/_/g, " ");
+      section.appendChild(h3);
+
+      // Texto
+      if (bloque.texto) {
+        const p = document.createElement("p");
+        p.className = "text-sm text-gray-700 mb-2";
+        p.textContent = bloque.texto;
+        section.appendChild(p);
+      }
+
+      // Imágenes
+      if (Array.isArray(bloque.imagenes) && bloque.imagenes.length > 0) {
+        const imgGrid = document.createElement("div");
+        imgGrid.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-2";
+        bloque.imagenes.forEach(img => {
+          const imgEl = document.createElement("img");
+          imgEl.src = img.url;
+          imgEl.alt = img.descripcion || "";
+          imgEl.className = "rounded shadow";
+          imgGrid.appendChild(imgEl);
+        });
+        section.appendChild(imgGrid);
+      }
+
+      // Videos
+      if (Array.isArray(bloque.videos) && bloque.videos.length > 0) {
+        bloque.videos.forEach(video => {
+          const iframe = document.createElement("iframe");
+          iframe.src = `https://www.youtube.com/embed/${video.videoId}`;
+          iframe.title = video.titulo || "";
+          iframe.allowFullscreen = true;
+          iframe.className = "w-full aspect-video mt-2";
+          section.appendChild(iframe);
+        });
+      }
+
+      bodyEl.appendChild(section);
+    }
+
+    // Mostrar
+    contentSection.classList.remove("hidden");
+  }
+</script>  
+
 </script>
+
+
+<script>
+  // Función para manejar la apertura y cierre de acordeones
+  function toggleAccordion(id) {
+      const accordion = document.getElementById(`accordion-${id}`);
+      const button = accordion.previousElementSibling;
+      const icon = button.querySelector('.fa-chevron-down');
+
+      // Cerrar todos los acordeones y quitar sus estilos de "abierto"
+      document.querySelectorAll('div[id^="accordion-"]').forEach(acc => {
+          if (acc.id !== `accordion-${id}`) { // No cerrar el que se va a abrir/cerrar
+              acc.classList.add('hidden');
+              const btn = acc.previousElementSibling;
+              btn.classList.remove('accordion-open');
+              const icn = btn.querySelector('.fa-chevron-down');
+              if (icn) icn.classList.remove('rotate-180');
+          }
+      });
+
+      // Si el acordeón clickeado está oculto (cerrado), ábrelo
+      if (accordion.classList.contains('hidden')) {
+          accordion.classList.remove('hidden');
+          button.classList.add('accordion-open');
+          if (icon) icon.classList.add('rotate-180');
+      } else { // Si está visible (abierto), ciérralo
+          accordion.classList.add('hidden');
+          button.classList.remove('accordion-open');
+          if (icon) icon.classList.remove('rotate-180');
+      }
+
+      // Ya no llamamos setActiveLink aquí, ya que toggleAccordion solo abre/cierra acordeones.
+      // La selección activa y el cambio de contenido ocurren solo al hacer clic en un enlace.
+  }
+
+  // Función para establecer el enlace o botón activo (marcado con active-link)
+  function setActiveLink(element) {
+      // Determinar si el elemento clickeado es un enlace (sub-item)
+      // Un sub-item es un <a> que está dentro de un div con id="accordion-"
+      const isSubItem = element.tagName === 'A' && element.closest('div[id^="accordion-"]');
+      // El enlace de Home es un caso especial porque no está dentro de un acordeón pero también controla contenido
+      const isHomeLink = element.textContent.trim() === 'Home' && element.closest('#group-home');
+
+      // Si el elemento clickeado es un BOTÓN de acordeón (no un sub-item ni el enlace de Home)
+      if (element.tagName === 'BUTTON' && element.closest('.sidebar-group') && !isSubItem && !isHomeLink) {
+          // Solo marcamos el botón como activo y salimos de la función
+          document.querySelectorAll('#sidebar a, #sidebar button').forEach(item => {
+              item.classList.remove('active-link');
+              if (item.tagName === 'BUTTON' && item.closest('.sidebar-group')) {
+                  item.classList.remove('accordion-open');
+              }
+              const icon = item.querySelector('.fa-chevron-down');
+              if (icon) icon.classList.remove('rotate-180');
+              const itemIcon = item.querySelector('i:not(.fa-chevron-down)');
+              if (itemIcon) itemIcon.style.color = '';
+          });
+          element.classList.add('active-link'); // Marcar el botón del acordeón como activo
+          return; // Salir de la función si es un botón de grupo
+      }
+
+      // A partir de aquí, la lógica es solo para enlaces (sub-items o Home)
+      // OCULTAR SIEMPRE LOS PANELES DE ARTÍCULOS Y EL CONTENIDO DE HOME AL INICIO DE CADA SELECCIÓN DE UN ENLACE
+      const articlesPanel = document.getElementById("articles-panel");
+      articlesPanel.classList.add("hidden");
+      articlesPanel.classList.remove("flex"); // Asegura que no tenga flex si estaba visible
+      document.getElementById("panel-2").classList.add("hidden");
+      document.getElementById("panel-3").classList.add("hidden");
+
+      const homeContent = document.getElementById("home-content"); // Obtener el div de contenido de Home
+      homeContent.classList.add("hidden"); // Ocultar por defecto
+
+
+      // 1. Remover 'active-link' y estilos de "abierto" de TODOS los enlaces y botones de grupo
+      document.querySelectorAll('#sidebar a, #sidebar button').forEach(item => {
+          item.classList.remove('active-link'); // Elimina el resaltado de selección
+          // Solo si es un botón de acordeón, remover accordion-open
+          if (item.tagName === 'BUTTON' && item.closest('.sidebar-group')) {
+            item.classList.remove('accordion-open');
+          }
+
+          const icon = item.querySelector('.fa-chevron-down');
+          if (icon) {
+            icon.classList.remove('rotate-180');
+          }
+          const itemIcon = item.querySelector('i:not(.fa-chevron-down)'); // Icono principal
+          if (itemIcon) {
+            itemIcon.style.color = ''; // Resetear el color del icono principal a lo por defecto del CSS (gray-700)
+          }
+      });
+
+      // 2. Aplicar 'active-link' al elemento clickeado
+      element.classList.add('active-link');
+
+      // 3. Si el elemento clickeado es un enlace dentro de un acordeón (sub-item)
+      let parentAccordionDiv = element.closest('div[id^="accordion-"]');
+      if (parentAccordionDiv) {
+          const parentButton = parentAccordionDiv.previousElementSibling;
+          const parentIcon = parentButton.querySelector('.fa-chevron-down');
+
+          // Asegurarse de que el botón de grupo padre tenga los estilos de "abierto"
+          parentButton.classList.add('accordion-open');
+          if (parentIcon) {
+              parentIcon.classList.add('rotate-180');
+          }
+          // Asegurarse de que el acordeón padre esté abierto
+          parentAccordionDiv.classList.remove('hidden');
+      }
+
+      // Lógica para mostrar los paneles de artículos SOLO si se selecciona "Articles" de "Library"
+      if (element.textContent.trim() === 'Articles' && element.closest('#group-library')) {
+          articlesPanel.classList.remove("hidden");
+          articlesPanel.classList.add("flex"); // Mostrar como flex
+          // Los paneles 2 y 3 se mantienen ocultos por defecto hasta que se haga clic en ellos
+          document.getElementById("panel-2").classList.add("hidden");
+          document.getElementById("panel-3").classList.add("hidden");
+
+          // Resetear cualquier selección previa en los paneles de artículos
+          document.querySelectorAll('#articles-panel .articles-panel-list-item').forEach(item => {
+              item.classList.remove('selected');
+          });
+          currentActivePanel2Item = null;
+          currentActivePanel3Item = null;
+
+      }
+      // Lógica para mostrar el contenido de Home SOLO si se selecciona "Home"
+      else if (isHomeLink) {
+          homeContent.classList.remove("hidden");
+      }
+      // Si se selecciona cualquier otro sub-item (no Articles ni Home), ambos paneles (articles-panel y home-content)
+      // ya están ocultos por la lógica al principio de la función, lo cual es el comportamiento deseado.
+  }
+
+  // Inicializar la sidebar al cargar el DOM
+  document.addEventListener('DOMContentLoaded', () => {
+      // 1. Asegurarse de que todos los acordeones estén cerrados inicialmente y sin estilos de "abierto"
+      document.querySelectorAll('div[id^="accordion-"]').forEach(accordion => {
+          accordion.classList.add('hidden');
+          const button = accordion.previousElementSibling;
+          button.classList.remove('accordion-open'); // Asegurarse de que no tenga esta clase
+          const icon = button.querySelector('.fa-chevron-down');
+          if (icon) {
+              icon.classList.remove('rotate-180');
+          }
+      });
+
+      // 2. Deseleccionar todos los enlaces y botones de grupo (asegurando limpieza total)
+      document.querySelectorAll('#sidebar a, #sidebar button').forEach(item => {
+          item.classList.remove('active-link');
+          const itemIcon = item.querySelector('i');
+          if (itemIcon) {
+            itemIcon.classList.remove('text-blue-700'); // Quita el color azul de todos los iconos
+            itemIcon.style.color = ''; // Restablece el color por defecto (gray-700 en este caso)
+          }
+      });
+
+      // 3. Ocultar los paneles de artículos y subpaneles al inicio
+      const articlesPanel = document.getElementById("articles-panel");
+      articlesPanel.classList.add("hidden");
+      articlesPanel.classList.remove("flex"); // Asegurarse de que no tenga flex
+      document.getElementById("panel-2").classList.add("hidden");
+      document.getElementById("panel-3").classList.add("hidden");
+
+      // También, asegurarse de que no haya elementos seleccionados en los paneles de artículos
+      document.querySelectorAll('#articles-panel .articles-panel-list-item').forEach(item => {
+          item.classList.remove('selected');
+      });
+      currentActivePanel2Item = null;
+      currentActivePanel3Item = null;
+
+
+      // 4. Ocultar el contenido de Home al inicio (será mostrado por setActiveLink)
+      document.getElementById("home-content").classList.add("hidden");
+
+      // 5. Activar "Home" por defecto
+      const homeLink = document.querySelector('#group-home a');
+      if (homeLink) {
+          setActiveLink(homeLink); // Esto aplicará la clase 'active-link' a "Home" y mostrará su contenido
+      }
+  });
+</script>
+
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+  const db = firebase.firestore();
+
+  async function cargarSupracategorias() {
+    const panel1 = document.querySelector('#articles-panel > div:first-child ul');
+    panel1.innerHTML = ""; // Limpiar contenido anterior
+
+    const snapshot = await db.collection("supracategorias").get();
+    snapshot.forEach(doc => {
+      const nombre = doc.data().nombre;
+      const li = document.createElement("li");
+      li.innerHTML = `<a href="#" onclick="showSecondPanel(this, '${doc.id}')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>${nombre}</span></a>`;
+      panel1.appendChild(li);
+    });
+  }
+
+  // Llamar cuando el usuario hace clic en "Articles"
+  document.querySelector('#group-library a').addEventListener('click', () => {
+    cargarSupracategorias();
+  });
+</script>
+
+
 </body>
 </html>
