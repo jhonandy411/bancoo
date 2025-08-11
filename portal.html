@@ -4,21 +4,36 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bancomicina</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    body {
-        font-family: 'Inter', sans-serif;
-        padding-top: 4rem; /* Asegura que el contenido no quede debajo del header */
-    }
+
+
+
+
+
+
+
+    html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* evita que el body/html haga scroll */
+}
 
     /* Estilos específicos para la sidebar y el contenido principal */
     .dashboard-container {
         display: flex;
+        top: 3rem;    /* deja espacio para el header fijo */
+  bottom: 0; 
         height: calc(100vh - 4rem); /* Altura restante de la ventana después del header */
         position: relative; /* Para que la sidebar fixed se posicione correctamente dentro */
     }
+
+
+    
 
     #sidebar {
         width: 0; /* Inicialmente cerrada */
@@ -37,7 +52,7 @@
 
     /* Overlay del sidebar principal sobre cualquier otro */
 #sidebar.open {
-  width: 280px;
+  width: 240px;
   /* … */
 }
 #sidebar.collapsed:hover {
@@ -54,14 +69,15 @@
 
     
 
-    #main-content {
-        flex-grow: 1; /* Permite que ocupe todo el espacio disponible */
-        margin-left: 0; /* Inicialmente sin margen */
-        width: 100%; /* Ocupa el 100% del ancho del contenedor padre inicialmente */
-        padding: 1rem 2.5rem; /* Ajusta el padding para que no se vea tan pegado al borde */
-transition: none !important;
-        overflow-y: auto; /* Permite scroll vertical si el contenido es muy largo */
-    }
+   #main-content {
+    flex-grow: 1;
+    margin-left: 0;
+    width: 100%;
+    padding: 1rem 2.5rem;
+    transition: none !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;  /* ← esta línea */
+}
 
    
 
@@ -164,11 +180,7 @@ transition: none !important;
     }
 
 
-    #sidebar.collapsed {
-    width: 60px;
-    padding-left: 0;
-    padding-right: 0;
-}
+
 
 #sidebar.collapsed .sidebar-group span {
     display: none;
@@ -192,10 +204,90 @@ transition: none !important;
 
 
 
+/* —— TOC (subcategoria-sidebar) —— */
+#subcategoria-sidebar .toc{ padding: .25rem 0; }
+#subcategoria-sidebar .toc-section{ margin: .125rem 0; }
+
+/* Título/sección (negro, seminegrita) */
+#subcategoria-sidebar .toc-h2{
+  width:100%;
+  padding: .35rem .65rem; 
+  display:block;
+  text-align:left;
+  background:transparent;
+  border:none;
+  border-left:2px solid transparent;
+  padding:.5rem .75rem;
+  font-weight:400;
+  font-size:1rem;                 /* ~16px */
+  color:#111827;                  /* gray-900 */
+  border-radius:.5rem;
+  cursor:pointer;
+}
+
+#subcategoria-sidebar .toc-topic{
+  padding:.5rem .75rem;
+  font-size:1rem;
+  font-weight:600;
+  color:#111827;           /* gray-900 */
+  background:#fff;
+  position:sticky;         /* queda fijo arriba si la lista es larga */
+  top:0;
+  z-index:5;
+}
+/* Seleccionado (banda izquierda + fondo suave) */
+#subcategoria-sidebar .toc-h2.is-active{
+  background:#f1f5f9;             /* slate-100 */
+  border-left-color:rgb(168, 164, 178);      /* blue-400 */
+  border-top: 0.5px solid #e5e7eb;    /* gris claro */
+  border-bottom: 0.5px solid #e5e7eb; 
+  font-weight: 400; 
+}
+
+
+/* Subenlaces (azulados, tamaño menor) */
+#subcategoria-sidebar .toc-a{
+  display:block;
+  padding: .15rem .65rem .15rem 1.25rem;
+  font-size:.9rem;
+  color:#77797b;                  /* slate-500 */
+  border-radius:.375rem;
+}
+#subcategoria-sidebar .toc-a:hover{ background:#f8fafc; }
+#subcategoria-sidebar .toc-a.is-active{
+  background:#e0f2fe;             /* blue-100 */
+  color:#1d4ed8;                   /* blue-700 */
+  font-weight:500;
+}
+/* Quita el padding lateral del contenedor de la TOC */
+#subcategoria-sidebar-content{
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+/* (opcional) que el item activo no tenga esquinas redondeadas */
+#subcategoria-sidebar .toc-h2.is-active{ border-radius: 0; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* Segunda barra lateral de subcategoría */
 #subcategoria-sidebar {
-  width: 240px;           /* mismo ancho que la principal */
+  width: 180px;           /* mismo ancho que la principal */
   flex-shrink: 0;         /* no se encoja */
   transition: transform 0.3s ease;
 }
@@ -211,7 +303,7 @@ transition: none !important;
 
   /* 1) Mantener el ancho colapsado por defecto */
 #sidebar.collapsed {
-  width: 60px;
+  width: 40px;
   padding-left: 0;
   padding-right: 0;
   position: relative;
@@ -267,14 +359,864 @@ transition: none !important;
 
 /* Si hay un segundo sidebar, lo desplazamos también para que no empuje el main */
 #sidebar.collapsed:hover ~ #subcategoria-sidebar {
-  left: 60px;
+  left: 40px;
 }
 
 /* El main siempre a 60px de la izquierda y ancho = 100% − 60px */
 #sidebar.collapsed:hover ~ #main-content {
-  margin-left: 60px !important;
-  width: calc(100% - 60px) !important;
+  margin-left: 40px !important;
+  width: calc(100% - 40px) !important;
 }
+
+/* La barra ya no es sticky sola */
+#main-content .highlighting-bar { position: static; }
+
+/* El bloque entero (barra + breadcrumb) es sticky */
+#subcat-header { position: sticky; top: 0; z-index: 50; background: #fff; }
+
+/* Breadcrumb: oculto por defecto (lo refuerza por si quitas la clase hidden) */
+#breadcrumbs { display: none; }
+
+/* Cuando #subcat-header esté “stuck” le pondremos .is-stuck desde JS */
+#subcat-header.is-stuck #breadcrumbs { display: block; }
+
+/* Ajuste de scroll para que no tape summaries al anclar */
+#main-content { scroll-padding-top: 88px; }           /* ≈ alto barra + breadcrumb */
+#subcategoria-body details summary { scroll-margin-top: 88px; }
+
+
+
+
+/* Primero quita ese margin-top en split-view */
+#video-modal.split-view #toggle-thumbnails {
+  position: absolute;
+  top: auto;
+  bottom: 0;   /* que quede justo encima del carrusel */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5.5rem;
+  height: 1.5rem;
+  background-color: rgb(225, 230, 234);      /* gray-100 */
+  border-radius: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+#video-modal.split-view #toggle-thumbnails i {
+  color: #475569; /* gray-600 */
+  font-size: 0.75rem;
+}
+
+
+
+
+
+
+
+
+/* 1) Estilo para el details/summary */
+#subcategoria-body details {
+  border-bottom: 1px solid #e5e7eb;
+}
+#subcategoria-body summary {
+  list-style: none; /* quita marcador por defecto */
+  background-color: #f8f9fa;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#subcategoria-body summary::-webkit-details-marker {
+  display: none;
+}
+/* 2) Listas con viñetas */
+#subcategoria-body .texto-lista ul {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+#subcategoria-body .texto-lista > ul {
+  list-style: disc inside;
+}
+#subcategoria-body .texto-lista > ul ul {
+  list-style: circle inside;
+}
+/* 3) Galería de imágenes con captions */
+#subcategoria-body .galeria {
+  display: grid;
+  /* En lugar de 1rem, usa algo más pequeño */
+  gap: 0.5rem;
+  /* Que las columnas sean sólo tan anchas como la imagen */
+  grid-template-columns: repeat(auto-fit, minmax(120px, auto));
+  /* Alinea todo al borde izquierdo */
+  justify-content: start;
+  /* ó bien si quieres controlar cada item: */
+  /* justify-items: start; */
+  margin-top: 1rem;
+}
+#subcategoria-body .galeria figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+#subcategoria-body .galeria img {
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  max-width: 100%;
+  width: 115px;
+  height: 115px;
+  object-fit: cover;
+
+}
+#subcategoria-body .galeria figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Contenedor de cada thumbnail de vídeo */
+.video-thumb {
+  position: relative;
+  width: 8rem;    /* 128px, igual que las img de la galería */
+  height: 8rem;
+  flex-shrink: 0;
+  border-radius: 0.375rem; /* same rounded corners */
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+/*  Garantizar tamaño mínimo de todas las miniaturas  */
+.media-thumb {
+  min-width: 8rem;   /* ancho mínimo 128px */
+  min-height: 8rem;  /* alto mínimo 128px */
+}
+.video-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+#video-modal .media-thumb {
+  width: 80px !important;
+  height: 80px !important;
+  min-width: 80px !important;
+  min-height: 80px !important;
+}
+#video-modal .media-thumb img {
+  width: 80px !important;
+  height: 80px !important;
+  object-fit: cover;
+}
+/* Icono de play superpuesto */
+.video-thumb .play-icon {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.5rem;
+  background: rgba(0,0,0,0.6);
+  padding: 0.25rem;
+  border-radius: 9999px;
+}
+.video-thumb .play-icon i {
+  font-size: 0.75rem;
+  color: white;
+}
+
+
+/* Ya tenías .video-thumb y .play-icon */
+
+/* Para que el modal aparezca centrado y cubra todo */
+#video-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.9);
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
+}
+
+#video-modal > div {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  overflow: visible !important;
+  margin: 0; /* Asegura que no haya margen por el padding anterior */
+  border-radius: 0; /* Elimina bordes redondeados */
+}
+
+/* Ajustes internos del modal */
+#video-modal aside {
+  /* width: 25% bg-gray-900 text-white p-6 flex flex-col */
+}
+#video-modal iframe {
+  /* absolute inset-0 w-full h-full */
+}
+#modal-close {
+  /* botón de cerrar en esquina */
+}
+
+/* Estilo para el modal en modo expandido */
+#video-modal.expanded {
+  display: flex;
+  flex-direction: row;
+}
+
+#video-modal.expanded > div {
+  width: 50%;
+  height: 100%;
+  position: relative;
+}
+
+#video-modal.expanded #main-content {
+  width: 50%;
+  height: 100%;
+  overflow-y: auto;
+  background: white;
+}
+
+#video-modal.expanded .dashboard-container {
+  height: 100vh;
+}
+
+#video-modal.expanded iframe {
+  height: 100% !important;
+}
+
+
+
+
+
+#video-modal.split-view {
+  /* Anula inset:0 */
+  position: fixed;
+  top: 4rem !important; 
+  right: 0 !important;
+  bottom: 20 !important;
+  left: 60% !important;
+  width: 40% !important;
+  height: calc(100% - 2rem) !important; /* 100% de la pantalla menos esos 4rem */
+
+ background-color: transparent !important; 
+}
+
+/* Ajusta su contenedor interno para que ocupe todo */
+#video-modal.split-view > div {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: row; /* si necesitas */
+}
+
+
+
+
+
+
+
+/* ————————————————————————
+   Evita que el carrusel desborde en split-view 
+   ———————————————————————— */
+#video-modal.split-view .absolute.inset-x-0.top-10.bottom-0.flex {
+  overflow-x: hidden !important;
+  padding-bottom: 2rem;
+}
+
+/* Asegura que el carrusel ocupe sólo el 100% de su contenedor */
+#video-modal.split-view #thumbnail-carousel {
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  
+  background-color: rgb(255, 255, 255) !important;
+  border-top: 1px solid #e5e7eb !important; /* border-gray-200 */
+  padding: 2rem 1.5rem 0.5rem;      
+             /* espacio arriba/abajo y a los lados */
+  box-shadow: 0 -1px 4px rgba(0,0,0,0.05); /* ligera sombra si la quieres */
+}
+
+/* Oculta la scrollbar nativa para que no se vea el riel gris */
+#video-modal.split-view #video-thumbnails {
+  overflow-x: auto;
+  scrollbar-width: none;    /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+#video-modal.split-view #video-thumbnails::-webkit-scrollbar {
+  display: none;            /* Chrome, Safari */
+}
+
+/* Espaciado uniforme entre miniaturas */
+#video-modal.split-view .media-thumb {
+  margin: 0 0.5rem;
+}
+
+/* Opcional: quita el backdrop sobre la mitad izquierda,
+   para que el usuario pueda seguir interactuando con el contenido */
+#video-modal.split-view {
+  pointer-events: none;
+}
+/* pero que el modal y sus hijos sigan recibiendo clicks */
+#video-modal.split-view > * {
+  pointer-events: auto;
+}
+
+/* ——————————————— */
+/* Ajuste del contenido al 50% izquierdo */
+/* ——————————————— */
+body.split-view-active .dashboard-container {
+  position: fixed;      /* para que no se mueva */
+  top: 4rem;            /* justo debajo del header */
+  bottom: 0;
+  left: 0;
+  width: 60vw;          /* ocupa la mitad izquierda */
+  overflow-y: auto;     /* scroll interno si hace falta */
+}
+
+body.split-view-active .dashboard-container aside#sidebar {
+  height: 100%;         /* sidebar siempre al 100% de este contenedor */
+}
+
+body.split-view-active .dashboard-container #main-content {
+  flex-grow: 1;         /* ya rellena el espacio restante del 50% */
+}
+
+
+
+
+/* Cuando esté en split-view, oculta la columna de descripción y haz que el vídeo ocupe todo el ancho */
+#video-modal.split-view .absolute.inset-x-0.top-10.bottom-0.flex > aside {
+  display: none !important;
+}
+#video-modal.split-view .absolute.inset-x-0.top-10.bottom-0.flex > div {
+  display: flex;
+    width: 100% !important;
+
+  align-items: center;
+  justify-content: center;
+}
+
+/* En split-view, baja el contenedor del vídeo hasta 4rem y ajusta su altura */
+#video-modal.split-view > div.absolute.inset-x-0.top-10.bottom-0 {
+  top: 0 !important;
+  height: 100% !important;
+}
+
+#video-modal.split-view button span {
+  display: none !important;
+}
+
+
+/* Panel de descripción en split-view */
+#video-modal.split-view .video-desc-panel {
+  position: absolute;
+  top: 3rem;    /* coincide con h-12 (3rem) de tu header */
+  bottom: 0; left: 0;
+  width: 240px;
+  background: rgba(0,0,0,0.9);
+  color: #fff;
+  z-index: 10;               /* por encima del iframe */
+  overflow-y: auto;
+  transition: transform .3s ease;
+}
+/* Cuando no esté activo, lo desplazamos fuera de pantalla */
+#video-modal.split-view .video-desc-panel.hidden {
+  transform: translateX(-100%);
+}
+/* Ajustar el vídeo para dejar espacio */
+/* ✅ solo desplaza el vídeo cuando el panel de descripción está abierto */
+#video-modal.split-view .video-desc-panel:not(.hidden) + .absolute.inset-x-0.top-10.bottom-0.flex {
+  margin-left: 240px !important;
+}
+
+#modal-image {
+  max-height: calc(100% - 6rem);
+  width: 100%;
+  object-contain: contain;
+  transition: max-height 0.3s ease;
+}
+
+/* permite a las miniaturas “salirse” un poco */
+#video-modal > div.absolute.inset-x-0.top-10.bottom-0.flex {
+  overflow: visible !important;
+}
+
+/* Miniaturas de imagen: altura fija y ancho auto para mantener proporciones */
+#video-thumbnails .image-thumb img {
+  height: 8rem;   /* mismo alto que antes (h-32) */
+  width: auto;    /* ancho automático según proporción */
+  object-fit: cover;
+}
+#video-thumbnails {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch; /* para scroll suave en iOS */
+  scroll-behavior: smooth;
+}
+
+
+/* En split-view, que el fondo detrás de la imagen/vídeo sea blanco */
+#video-modal.split-view .w-3\/4.relative {
+  background-color: rgb(245, 246, 248) !important;
+}
+
+/* Header del modal en split-view */
+#video-modal.split-view .absolute.top-0.left-0.w-full.h-12 {
+  background-color: #fff !important;
+  border-color: #e5e7eb !important;
+  color: #000 !important;
+}
+
+/* Fondo del carrusel en split-view */
+
+
+
+
+
+
+
+.media-thumb.selected {
+  border-radius: 0.5rem;
+  border: 0.3rem solid #525354;             /* gris interior */
+  outline: 0.2rem solid rgba(255,255,255,0.8); /* blanco exterior */
+  outline-offset: -0.2rem;                   /* sin espacio entre border y outline */
+}
+
+
+/* En split-view, botones transparentes y flechas grises */
+#video-modal.split-view #scroll-left,
+#video-modal.split-view #scroll-right {
+  background-color: transparent !important;
+}
+
+#video-modal.split-view #scroll-left i,
+#video-modal.split-view #scroll-right i {
+  color: #6b7280 !important; /* gray-600 de Tailwind */
+}
+
+
+/* En modo completo (no split-view), fondo gris semitransparente en el carrusel */
+#video-modal:not(.split-view) #thumbnail-carousel {
+  background-color: rgba(55, 65, 81, 0.3) !important; /* gray-700 al 30% de opacidad */
+}
+
+
+.zoom-menu {
+  position: absolute;
+  top: 100%;
+  right: 2rem;
+  background: #1f2937;
+  /* Aumentamos el padding para más espacio interior */
+  padding: .75rem 1rem;     /* antes .25rem .5rem */
+  /* Garantizamos un tamaño mínimo */
+  min-width: 8rem;          /* 128px */
+  min-height: 2.5rem;       /* 40px */
+  border-radius: .375rem;
+  display: flex;
+  align-items: center;
+  gap: .75rem;              /* antes .5rem */
+  z-index: 30;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* Opcional: agrandar un poco los botones y el texto */
+.zoom-menu button {
+  font-size: 1rem;          /* antes .875rem */
+  padding: .25rem .5rem;    /* un poquito más grande */
+}
+.zoom-menu span {
+  font-size: 1.2rem;
+}
+.zoom-menu.hidden { display: none; }
+.zoom-menu button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.zoom-menu span {
+  color: white;
+  font-size: 1rem;
+  min-width: 2ch;
+  text-align: center;
+}
+
+
+/* 1) Clippear el zoom dentro de la zona de vídeo */
+#video-modal .w-3\/4.relative {
+  overflow: hidden;
+}
+
+/* 2) Centrar el origen del zoom */
+#modal-image {
+  transform-origin: center center;
+}
+
+/* 3) Mantener la descripción siempre por encima */
+#video-desc-panel {
+  z-index: 30;
+}
+
+
+/* Split-view: descripción con fondo blanco y texto negro */
+#video-modal.split-view .video-desc-panel {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+/* Asegúrate de que todos los elementos hijos (títulos, párrafos, etc.) hereden el color */
+#video-modal.split-view .video-desc-panel h3,
+#video-modal.split-view .video-desc-panel p {
+  color: inherit !important;
+}
+
+/* Título en split-view: más grande y en negrita */
+#video-modal.split-view .video-desc-panel h3#video-desc-title {
+  font-size: 1.25rem !important;   /* aprox. 20px */
+  font-weight: 700     !important; /* negrita */
+  margin-bottom: 0.5rem !important; /* separa un poquito del copyright */
+  display: block        !important; /* aseguramos que ocupe línea propia */
+  order: -1             !important; /* si hiciera falta reposicionarlo */
+}
+
+
+/* estilos del footer de cada details */
+.collapse-controls {
+  display: none;
+  padding: 0.75rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  font-size: 0.875rem;
+  color: #475569;
+}
+details[open] > .collapse-controls {
+  display: flex;
+}
+/* iconos un poco más grandes y espaciados */
+.collapse-controls i {
+  font-size: 0.875rem;
+}
+.collapse-controls span {
+  font-weight: 500;
+}
+
+/* Hago sticky la barra de MY HIGHLIGHTING dentro del scroll de subcategoría */
+
+/* Hace sticky la barra MY HIGHLIGHTING en todo el scroll de main-content */
+
+
+/* 1) Asegúrate de que #main-content sea el contenedor de scroll */
+#main-content {
+  
+  position: relative;
+}
+
+
+
+
+
+
+/* quita el padding-top del scroll container */
+#main-content {
+  /* preserve el padding horizontal si lo necesitas */
+  padding: 0 2.5rem !important;
+}
+
+/* quita el margin y padding superior solo de esta sección */
+#subcategoria-content {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  /* si quieres seguir teniendo padding a los lados y abajo: */
+  padding-right: 1.5rem;
+  padding-bottom: 1.5rem;
+  padding-left: 1.5rem;
+    background-color: #ffffff !important;
+
+}
+
+/* Resetea el fondo de los summary cuando el details está cerrado */
+#subcategoria-body details:not([open]) > summary {
+  background-color: transparent;
+  min-height: 30px;
+  padding: .2rem .4rem;   /* antes 1rem 1.5rem */
+  line-height: .5; 
+  padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+
+  
+}
+
+#subcategoria-body details[open] > summary {
+  padding: .75rem 1.25rem;
+  padding-left: 1.5rem !important;
+      padding-right: 1.5rem !important;
+
+}
+
+/* Evita que el chevron ensanche la fila */
+#subcategoria-body summary svg { flex-shrink: 0; }
+.collapse-controls {
+  background-color: transparent !important;
+  border-top: none !important;
+}
+
+details[open] > summary {
+  background-color: rgb(247, 248, 249);
+}
+
+#main-content:has(#subcategoria-content:not(.hidden)) {
+  background-color: #ffffff !important;
+}
+
+/* —— Estilos finos para que se vea EXACTO —— */
+.highlighting-bar {
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial;
+}
+.hl-title{
+  font-size: 13.5px;           /* muy parecido al screenshot */
+  font-weight: 600;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: #475569;              /* slate-600 */
+}
+.hl-btn{
+  padding: 2px 4px;
+  color: #475569;
+}
+.hl-btn:hover{ color:#111827; } /* hover sutil */
+.hl-sep{
+  width:1px;
+  height:18px;
+  background:#e5e7eb;          /* gray-200 */
+  margin: 0 .75rem;
+  display:inline-block;
+}
+
+/* Menú de fuentes “AA” */
+#lang-menu { scrollbar-width: thin; scrollbar-color: #e5e7eb transparent; }
+#lang-menu::-webkit-scrollbar{ width: 8px; }
+#lang-menu::-webkit-scrollbar-thumb{ background-color:#e5e7eb; border-radius:9999px; }
+#lang-menu::-webkit-scrollbar-track{ background:transparent; }
+
+
+
+/* —— Escala solo del CONTENIDO —— */
+/* Variable con el porcentaje de fuente del contenido */
+#subcategoria-content { --content-font-scale: 100%; }
+
+/* Aplico la escala SOLO a texto típico del contenido */
+#subcategoria-content p,
+#subcategoria-content li,
+#subcategoria-content figcaption,
+#subcategoria-content summary span,
+#subcategoria-content .texto-lista,
+#subcategoria-content .collapse-controls span {
+  font-size: var(--content-font-scale);
+}
+
+/* Mantengo la jerarquía de headings sin tocar el layout */
+#subcategoria-content h1, 
+#subcategoria-content h2, 
+#subcategoria-content h3 { 
+  /* opcional: si querés que también escalen, descomentá: */
+  /* font-size: var(--content-font-scale); */
+}
+
+
+/* Líneas separadoras (hairline) más finas bajo cada título */
+@supports (border-width: .5px) {
+  #subcategoria-body details { border-bottom-width: .5px; }
+}
+@supports not (border-width: .5px) {
+  /* Fallback para navegadores que no aceptan .5px */
+  #subcategoria-body details {
+    border-bottom: none;
+    box-shadow: inset 0 -0.5px 0 0 #e5e7eb;
+  }
+}
+
+
+/* Afinar la línea superior e inferior de la barra MY HIGHLIGHTING */
+#subcat-header .highlighting-bar {
+  border-top-width: .5px !important;
+  border-bottom-width: .5px !important;
+}
+
+
+/* Base para items (enlaces y botones) */
+#sidebar .sidebar-item{
+  display:flex; align-items:center; height:40px;
+  width:100%; text-align:left; padding:0 .75rem;
+  color:#374151; /* gray-700 */
+  border-radius:.375rem;
+  transition:background-color .2s, color .2s, font-weight .2s;
+}
+
+/* Hover consistente */
+#sidebar .sidebar-item:hover{ background:#eff6ff; } /* blue-50 */
+
+/* — Estado activo unificado — */
+#sidebar .sidebar-item.is-active{
+  background:#e0f2fe;        /* blue-100 */
+  color:#1d4ed8 !important;  /* blue-700 */
+  font-weight:500 !important;
+}
+#sidebar .sidebar-item.is-active i:not(.fa-chevron-down){
+  color:#1d4ed8 !important;  /* icono principal azul */
+}
+
+/* Chevrón: solo rota cuando el grupo está “abierto” */
+#sidebar .sidebar-item.is-active .fa-chevron-down{
+  color:#1d4ed8;
+}
+#sidebar .sidebar-item.chev-open .fa-chevron-down{
+  transform:rotate(180deg);
+}
+
+/* Sub-items (los <a> dentro de acordeones) siguen con su tamaño menor */
+#sidebar div[id^="accordion-"] a.sidebar-item{
+  height:32px; font-size:.875rem; color:#6b7280;
+}
+
+
+/* ==== Sidebar: estado seleccionado EXACTO ==== */
+/* Aplica tanto a enlaces como a botones del grupo */
+#sidebar .sidebar-item.active-link,
+#sidebar .sidebar-item.is-active,
+#sidebar .sidebar-group > button.active-link {
+  /* fondo gris */
+  background-color: #f3f4f6;              /* gray-100 */
+  /* texto un poco más oscuro y fuerte */
+  color: #111827 !important;              /* gray-900 */
+  font-weight: 600 !important;
+
+  /* hairlines arriba/abajo (sin “engordar” el layout) */
+  border-radius: 0 !important;
+  border-top: .5px solid #e5e7eb;         /* gray-200 */
+  border-bottom: .5px solid #e5e7eb;      /* gray-200 */
+
+  /* banda lateral “un poco gruesa” SIN mover el contenido */
+  /* usamos inset box-shadow para no alterar el ancho */
+  box-shadow: inset 3px 0 0 0 #9ca3af;    /* gray-400 ~ 4px */
+}
+
+/* Icono del ítem seleccionado: que herede el color del texto */
+#sidebar .sidebar-item.active-link i:not(.fa-chevron-down),
+#sidebar .sidebar-item.is-active i:not(.fa-chevron-down) {
+  color: inherit !important;
+}
+
+/* Hover consistente cuando ya está seleccionado (no “salta” a azul) */
+#sidebar .sidebar-item.active-link:hover,
+#sidebar .sidebar-item.is-active:hover {
+  background-color: #f3f4f6;              /* mantiene el mismo gris */
+}
+
+/* Subitems dentro de acordeones: mantienen tipografía más pequeña
+   pero heredan el look seleccionado cuando corresponda */
+#sidebar div[id^="accordion-"] a.sidebar-item.active-link,
+#sidebar div[id^="accordion-"] a.sidebar-item.is-active {
+  font-size: .875rem;                     /* text-sm */
+  color: #111827 !important;
+  box-shadow: inset 4px 0 0 0 #9ca3af;
+  border-top: .5px solid #e5e7eb;
+  border-bottom: .5px solid #e5e7eb;
+}
+
+/* Colapsado: evitamos que la banda lateral “ensucie” el pill de iconos */
+#sidebar.collapsed .sidebar-item.active-link,
+#sidebar.collapsed .sidebar-item.is-active {
+  box-shadow: none;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  background-color: transparent;
+}
+
+/* —— Botones de grupo abiertos: mismo look que ítem activo —— */
+/* Botón de grupo abierto: solo rota chevron, sin look de "seleccionado" */
+#sidebar .sidebar-group > button.accordion-open{
+  background: transparent !important;
+  color: #374151 !important;          /* gray-700 */
+  font-weight: 400 !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* El chevron puede rotar igual */
+#sidebar .sidebar-group > button.accordion-open .fa-chevron-down{
+  transform: rotate(180deg);
+  color: #6b7280;                      /* gray-600 */
+}
+
+/* El bloque completo solo se pinta cuando hay subitem activo */
+#sidebar .sidebar-group.segment-active{
+  background:#f3f4f6;
+  box-shadow: inset 4px 0 0 #9ca3af;
+  border-top:.5px solid #e5e7eb;
+  border-bottom:.5px solid #e5e7eb;
+  border-radius:0;
+}
+#sidebar.collapsed .sidebar-group.segment-active{
+  background:transparent; box-shadow:none; border-color:transparent;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Asegura que al hacer scroll el título quede justo debajo del header de 4rem */
+
   
   
   
@@ -334,7 +1276,7 @@ transition: none !important;
 </div>
 
 <div id="user-section" class="hidden min-h-screen w-full">
-  <header class="fixed top-0 left-0 right-0 z-50 bg-white border-b flex items-center justify-between px-4 h-16 shadow">
+  <header class="fixed top-0 left-0 right-0 z-50 bg-white border-b flex items-center justify-between px-4 h-[3rem] shadow">
   <div class="flex items-center space-x-4">
     <button id="menu-toggle" class="text-gray-700 hover:text-black focus:outline-none">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -344,15 +1286,45 @@ transition: none !important;
 
     <div class="flex items-center space-x-2">
       <img src="./assets/logo.png" alt="Logo" class="w-6 h-6" />
-      <span class="text-xl font-semibold text-gray-800">BANCOMICINA</span>
+      <span class="text-xl  text-gray-800 font-[Inter]">BANCOMICINA</span>
     </div>
 
-    <div class="ml-2">
-      <button class="text-sm font-medium bg-blue-100 text-blue-700 px-2 py-1 rounded-full flex items-center space-x-1">
-        <span>CLINICIAN</span>
-        <i class="fas fa-chevron-down text-xs"></i>
-      </button>
-    </div>
+    <!-- Contenedor del dropdown -->
+<div class="relative" id="mode-dropdown">
+  <button id="mode-btn"
+    class="text-xs font-medium bg-[rgb(234,245,248)] text-[rgb(29,125,138)] px-2 py-1 rounded-full flex items-center space-x-1">
+    <span id="mode-label">CLÍNICO</span>
+    <i class="fas fa-chevron-down text-xs"></i>
+  </button>
+
+  <!-- Menú reducido -->
+  <div id="mode-menu"
+       class="hidden absolute left-0 mt-2 w-[200px] bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50">
+    <!-- Opción 1 -->
+    <button type="button" data-mode="ESTUDIANTE"
+            class="w-full text-left px-4 py-3 hover:bg-gray-50">
+      <div class="text-sm font-semibold text-gray-800 leading-4">Modo Estudiante</div>
+      <div class="text-xs text-gray-500 mt-0.5">Ideal para preparación de exámenes</div>
+    </button>
+
+    <!-- Opción 2 (seleccionada) -->
+    <button type="button" data-mode="CLÍNICO"
+            class="w-full text-left px-4 py-3 bg-gray-50 flex items-start justify-between">
+      <div>
+        <div class="text-sm font-semibold text-gray-800 leading-4">Modo Clínico</div>
+        <div class="text-xs text-gray-500 mt-0.5">Recomendado para la práctica</div>
+      </div>
+      <i class="fas fa-check mt-0.5 text-[rgb(29,125,138)] text-xs"></i>
+    </button>
+
+    <div class="h-[1px] bg-gray-200"></div>
+
+    <a href="#" class="flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-800">
+      <i class="fas fa-info-circle text-sm"></i>
+      Más información
+    </a>
+  </div>
+</div>
   </div>
 
   <div class="flex items-center space-x-4">
@@ -372,33 +1344,50 @@ transition: none !important;
 
 <aside id="sidebar" class="open">
   
-  <div class="sidebar-group" id="group-home">
-          <a href="#" class="flex items-center space-x-2 px-3 py-2 rounded hover:bg-blue-50" onclick="setActiveLink(this)">
-              <i class="fas fa-home w-4"></i><span>Home</span>
-          </a>
-      </div>
+<!-- Home -->
+<div class="sidebar-group" id="group-home">
+  <a href="#" class="sidebar-item flex items-center space-x-2 px-3 py-2 rounded"
+     onclick="setActiveLink(this)">
+    <i class="fas fa-home w-4"></i>
+    <span>Home</span>
+  </a>
+</div>
 
-      <div class="sidebar-group" id="group-drugs">
-          <a href="#" class="flex items-center space-x-2 px-3 py-2 rounded hover:bg-blue-50" onclick="setActiveLink(this)">
-              <i class="fas fa-pills w-4"></i><span>Drugs</span>
-          </a>
-      </div>
+<!-- Drugs -->
+<div class="sidebar-group" id="group-drugs">
+  <a href="#" class="sidebar-item flex items-center space-x-2 px-3 py-2 rounded"
+     onclick="setActiveLink(this)">
+    <i class="fas fa-pills w-4"></i>
+    <span>Drugs</span>
+  </a>
+</div>
 
+<!-- Clinical resources (botón + acordeón) -->
 <div class="sidebar-group" id="group-clinical">
-  <button onclick="toggleAccordion('clinical')" class="w-full flex items-center justify-between px-3 py-2 rounded hover:bg-blue-50">
-    <i class="fas fa-stethoscope w-4"></i>
-    <span class="ml-2 flex-1 text-left">Clinical resources</span>
+  <button onclick="toggleAccordion('clinical')"
+          class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded">
+    <div class="flex items-center">
+      <i class="fas fa-stethoscope w-4"></i>
+      <span class="ml-2">Clinical resources</span>
+    </div>
     <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
   </button>
-  <div id="accordion-clinical" class="ml-8 mt-1 space-y-1 hidden text-sm text-gray-600">
-              <a id="link-quick" href="#" class="block px-2 py-1 hover:bg-gray-100 rounded" onclick="setActiveLink(this)">Quick Guides</a>
-              <a id="link-acute" href="#" class="block px-2 py-1 hover:bg-gray-100 rounded" onclick="setActiveLink(this)">Acute management checklists</a>
-              <a id="link-flowcharts" href="#" class="block px-2 py-1 hover:bg-gray-100 rounded" onclick="setActiveLink(this)">Flowcharts</a>
-              <a id="link-calculators" href="#" class="block px-2 py-1 hover:bg-gray-100 rounded" onclick="setActiveLink(this)">Calculators</a>
-              <a href="#" class="block px-2 py-1 hover:bg-gray-100 rounded" onclick="setActiveLink(this)">Clinical guidelines</a>
-              <a href="#" class="block px-2 py-1 hover:bg-gray-100 rounded" onclick="setActiveLink(this)">Dot Phrases</a>
-          </div>
-      </div>
+
+  <div id="accordion-clinical" class="ml-8 mt-1 space-y-1 hidden">
+    <a id="link-quick" href="#" class="sidebar-item block px-2 py-1 rounded"
+       onclick="setActiveLink(this)">Quick Guides</a>
+    <a id="link-acute" href="#" class="sidebar-item block px-2 py-1 rounded"
+       onclick="setActiveLink(this)">Acute management checklists</a>
+    <a id="link-flowcharts" href="#" class="sidebar-item block px-2 py-1 rounded"
+       onclick="setActiveLink(this)">Flowcharts</a>
+    <a id="link-calculators" href="#" class="sidebar-item block px-2 py-1 rounded"
+       onclick="setActiveLink(this)">Calculators</a>
+    <a href="#" class="sidebar-item block px-2 py-1 rounded"
+       onclick="setActiveLink(this)">Clinical guidelines</a>
+    <a href="#" class="sidebar-item block px-2 py-1 rounded"
+       onclick="setActiveLink(this)">Dot Phrases</a>
+  </div>
+</div>
 
       <div class="sidebar-group" id="group-exams">
   <button onclick="toggleAccordion('exams')" class="w-full flex items-center justify-between px-3 py-2 rounded hover:bg-blue-50">
@@ -475,7 +1464,7 @@ transition: none !important;
 
 
 <main id="main-content" class="bg-gray-100 sidebar-open">
-        <div id="articles-panel" class="hidden flex-nowrap gap-x-4 transition-all">
+        <div id="articles-panel" class="hidden flex-nowrap gap-x-4 transition-all mt-4">
         <div class="bg-white rounded-lg shadow-sm articles-panel-column py-3 px-4">
           <h2 class="text-sm font-semibold mb-2 text-gray-800">Library</h2>
           <ul class="text-sm space-y-1 divide-y divide-gray-200"> <li><a href="#" onclick="showSecondPanel(this, 'Basic sciences')" class="articles-panel-list-item"><i class="far fa-file-alt"></i><span>Basic sciences</span></a></li>
@@ -558,7 +1547,7 @@ transition: none !important;
 
 
 
-      <div id="subcategoria-content" class="hidden bg-white rounded shadow p-6 mt-6">
+<div id="subcategoria-content" class="hidden p-6 pt-10 mt-6">
   <h2 id="subcategoria-title" class="text-2xl font-bold mb-4"></h2>
   <div id="subcategoria-body" class="space-y-6"></div>
 </div>
@@ -659,6 +1648,31 @@ transition: none !important;
 </script>
 
 <script>
+function measureStickySubHeaderHeight() {
+  const hdr = document.querySelector('#subcat-header');
+  if (!hdr) return 0;
+
+  const wasStuck = hdr.classList.contains('is-stuck');
+  const bc = hdr.querySelector('#breadcrumbs');
+  const wasHidden = bc ? bc.classList.contains('hidden') : false;
+
+  // Fuerza estado "final" (stuck + breadcrumbs visibles) para medir
+  hdr.classList.add('is-stuck');
+  if (bc) bc.classList.remove('hidden');
+
+  const h = hdr.getBoundingClientRect().height;
+
+  // Restaurar estado anterior
+  if (!wasStuck) hdr.classList.remove('is-stuck');
+  if (bc && wasHidden) bc.classList.add('hidden');
+
+  return h;
+}
+</script>
+
+
+
+<script>
   let currentActivePanel2Item = null; // Para mantener el elemento seleccionado en el panel 2
   let currentActivePanel3Item = null; // Para mantener el elemento seleccionado en el panel 3
 
@@ -685,10 +1699,12 @@ transition: none !important;
   panel2List.innerHTML = "";
 
   // Obtener categorías desde Firestore
-  const snapshot = await db.collection("supracategorias")
-                           .doc(supracategoriaId)
-                           .collection("categorias")
-                           .get();
+  const snapshot = await db
+  .collection("supracategorias")
+  .doc(supracategoriaId)
+  .collection("categorias")
+  .orderBy("orden", "asc")
+  .get();
 
   snapshot.forEach(doc => {
 const nombreCategoria = doc.id; // usa el ID del documento como nombre visible
@@ -736,21 +1752,27 @@ const nombreCategoria = doc.id; // usa el ID del documento como nombre visible
   }
 
   // 🔥 Obtener subcategorías desde Firestore
+    // 🔥 Obtener subcategorías desde Firestore, ya ordenadas por su campo "orden"
   const snapshot = await db.collection("supracategorias")
     .doc(supracategoriaId)
     .collection("categorias")
     .doc(categoriaId)
     .collection("subcategorias")
-    .orderBy("orden") // si querés orden específico
+    .orderBy("orden", "asc")  // ascendente, usa "desc" si lo prefieres al revés
     .get();
 
   snapshot.forEach(doc => {
-    const data = doc.data();
-    const nombre = data.denomincacion || doc.id;
-    const li = document.createElement("li");
-li.innerHTML = `<a href="#" class="articles-panel-list-item" onclick="showSubcategoriaContent('${doc.id}', '${categoriaId}', '${supracategoriaId}')">
-  <i class="far fa-file-alt"></i><span>${nombre}</span>
-</a>`;
+    const data     = doc.data();
+    const nombre   = data.denominacion || doc.id;   // ojo con la e de denominación
+    const li       = document.createElement("li");
+    li.innerHTML   = `
+      <a href="#"
+         class="articles-panel-list-item"
+         onclick="showSubcategoriaContent('${doc.id}', '${categoriaId}', '${supracategoriaId}')">
+        <i class="far fa-file-alt"></i>
+        <span>${nombre}</span>
+      </a>
+    `;
     panel3List.appendChild(li);
   });
 
@@ -784,72 +1806,530 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   const data = doc.data();
 
   // — Poner título —
-  titleEl.textContent = data.nombre || subcategoriaId;
 
   // — Construir contenido en el main —
   bodyEl.innerHTML = "";
   const wrapper = document.createElement("div");
-  wrapper.className = "divide-y divide-gray-200";
+  wrapper.className = "";
 
-  for (const key in (data.definiciondetallada || {})) {
-    const bloque = data.definiciondetallada[key];
-    if (!bloque || typeof bloque !== "object") continue;
 
-    const section = document.createElement("details");
-    section.className = "group";
+  const headerHtml = `
+  <!-- fila principal: dos columnas, sin padding lateral ni superior, solo padding-bottom -->
+  <div class="px-6 flex justify-between items-start pb-4">
+  <!-- Columna izquierda: título y botón -->
+  <div class="flex flex-col space-y-3">
+  <h1 class="text-3xl font-bold">
+    ${data.nombre || subcategoriaId}
+  </h1>
+  <button class="w-fit flex items-center space-x-2 bg-gray-100 text-[#546E7A] text-sm font-semibold uppercase px-3 py-1.5 rounded-md">
+    <!-- Ícono triangular -->
+    <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
+      <path d="M6 4l8 6-8 6V4z" />
+    </svg>
+    <span>Qbank Session</span>
+  </button>
+</div>
+  <!-- Columna derecha: metadata -->
+  <div class="flex flex-col items-end space-y-2 text-sm">
+    <span class="text-gray-500">Last edited: ${data.lastEdited || '—'}</span>
+    <a href="#" class="text-blue-600 hover:underline">Content policy</a>
+    <label class="inline-flex items-center space-x-1">
+      <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600"/>
+      <span>Learned</span>
+    </label>
+  </div>
+</div>
 
-    // resumen + icono
-    const title = key
-      .replace(/_/g, " ")
-      .replace(/\b\w/g, l => l.toUpperCase());
-    section.innerHTML = `
-      <summary class="cursor-pointer list-none py-4 px-6 text-lg font-semibold text-gray-900 flex justify-between items-center group-open:bg-gray-50">
-        ${title}
-        <svg class="ml-2 h-4 w-4 text-gray-500 group-open:rotate-180 transform transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-        </svg>
-      </summary>
-      <div class="px-6 pt-2 pb-4 text-sm text-gray-700">
-        ${bloque.texto ? `<p>${bloque.texto}</p>` : ""}
-        ${Array.isArray(bloque.imagenes)
-          ? `<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-2">
-              ${bloque.imagenes.map(img=>`<img src="${img.url}" alt="${img.descripcion||""}" class="rounded shadow"/>`).join("")}
-            </div>`
-          : ""}
-        ${Array.isArray(bloque.videos)
-          ? bloque.videos.map(v=>
-              `<iframe src="https://www.youtube.com/embed/${v.videoId}" class="w-full aspect-video mt-4" allowfullscreen></iframe>`
-            ).join("")
-          : ""}
+<!-- solo este bloque irá dentro de #subcat-header -->
+<div id="subcat-header">
+  <div class="highlighting-bar -mx-20 border-y border-gray-200 bg-white z-30 relative overflow-visible">
+    <!-- contenido centrado al grid del card -->
+    <div class="mx-20 px-6 py-1 flex items-center justify-between overflow-visible">
+      <!-- Izquierda -->
+      <div class="flex items-center">
+        <i class="fas fa-highlighter text-slate-600 text-sm mr-1.5"></i>
+        <span class="hl-title text-sm">MY HIGHLIGHTING</span>
       </div>
-    `;
-    wrapper.appendChild(section);
+
+      <!-- Derecha -->
+      <div class="flex items-center text-slate-600 space-x-1.5 relative overflow-visible">
+        <button class="hl-btn" aria-label="Bookmark">
+          <i class="far fa-bookmark text-sm"></i>
+        </button>
+
+        <span class="hl-sep" aria-hidden="true"></span>
+
+        <button id="expand-all-btn" class="hl-btn" aria-label="Expand/Collapse all" type="button">
+          <i class="fas fa-sort-amount-up-alt text-sm"></i>
+        </button>
+
+        <span class="hl-sep" aria-hidden="true"></span>
+
+        <!-- “AA” más pequeño -->
+        <button id="font-btn" class="hl-btn font-semibold tracking-wide text-xs">AA</button>
+
+       <!-- Menú de zoom sobrepuestos -->
+<div id="font-menu"
+     class="font-menu hidden absolute right-0 top-full mt-1 z-50 inline-block rounded-l bg-white shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+  <div class="grid grid-cols-[auto_auto_auto] items-center gap-2 px-3 py-2 whitespace-nowrap">
+    <!-- − -->
+    <button id="font-dec" aria-label="Disminuir"
+            class="h-6 w-6 inline-flex items-center justify-center text-slate-600 text-l leading-none select-none">−</button>
+
+    <!-- AA (centro / reset) -->
+   <span id="font-reset" role="button" tabindex="0"
+      class="justify-self-center text-slate-400 font-semibold cursor-pointer select-none leading-none transition-colors">
+  AA
+</span>
+
+    <!-- + -->
+    <button id="font-inc" aria-label="Aumentar"
+            class="h-6 w-6 inline-flex items-center justify-center text-slate-600 text-l leading-none select-none">+</button>
+  </div>
+</div>
+
+        <span class="hl-sep" aria-hidden="true"></span>
+        <!-- Language dropdown -->
+        <div id="lang-wrap" class="relative">
+          <button id="lang-btn" class="hl-btn flex items-center" aria-haspopup="listbox" aria-expanded="false">
+            <span id="lang-current" class="text-xs font-medium mr-1">EN</span>
+            <i class="fas fa-chevron-down text-[9px]"></i>
+          </button>
+          <div id="lang-menu"
+     class="hidden absolute right-0 top-full mt-2 w-56 max-h-96 overflow-y-auto
+            rounded-xl border border-gray-200 bg-white
+            shadow-[0_8px_30px_rgba(0,0,0,0.12)] z-50">
+</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Breadcrumbs debajo en la pila -->
+  <nav id="breadcrumbs" class="hidden -mx-20 bg-white border-b z-20 relative">
+    <div class="mx-20 px-6 py-2 flex items-center gap-1.5 text-slate-600 text-xs leading-tight">
+      <a id="bc-topic" href="#" class="hover:text-slate-800">—</a>
+      <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>
+      <span id="bc-section" class="text-slate-800 font-medium">—</span>
+    </div>
+  </nav>
+</div>
+`;
+  // Convertir el string a nodos y añadir al wrapper
+  const headerNode = document.createRange().createContextualFragment(headerHtml);
+  wrapper.appendChild(headerNode);
+
+// —— Fuente “AA” (solo contenido) ——
+const fontBtn   = wrapper.querySelector('#font-btn');
+const fontMenu  = wrapper.querySelector('#font-menu');
+const fontInc   = wrapper.querySelector('#font-inc');
+const fontDec   = wrapper.querySelector('#font-dec');
+const fontReset = wrapper.querySelector('#font-reset');
+
+
+const contentRoot = document.getElementById('subcategoria-content');
+
+let fontPct = 100;
+const MIN = 80, MAX = 160, STEP = 5;
+
+
+function updateResetVisual() {
+  const isDefault = fontPct === 100;
+  fontReset.classList.toggle('text-slate-400', isDefault); // gris si 100%
+  fontReset.classList.toggle('text-black', !isDefault);    // negro si ≠100%
+}
+
+function applyContentFont() {
+  contentRoot.style.setProperty('--content-font-scale', fontPct + '%');
+  updateResetVisual();
+}
+
+// botones +/− ya llaman a applyContentFont(); si no, asegurate:
+fontInc.addEventListener('click', () => { fontPct = Math.min(MAX, fontPct + STEP); applyContentFont(); });
+fontDec.addEventListener('click', () => { fontPct = Math.max(MIN, fontPct - STEP); applyContentFont(); });
+
+// reset sin cerrar menú
+fontReset.addEventListener('click', () => { fontPct = 100; applyContentFont(); });
+fontReset.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fontPct = 100; applyContentFont(); }
+});
+
+fontBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  fontMenu.classList.toggle('hidden');
+});
+
+// Cerrar al clickear fuera
+document.addEventListener('click', (e) => {
+  if (!fontMenu.contains(e.target) && e.target !== fontBtn) {
+    fontMenu.classList.add('hidden');
   }
+});
+
+fontInc.addEventListener('click', () => {
+  fontPct = Math.min(MAX, fontPct + STEP);
+  applyContentFont();
+});
+
+fontDec.addEventListener('click', () => {
+  fontPct = Math.max(MIN, fontPct - STEP);
+  applyContentFont();
+});
+
+function resetFont() {
+  fontPct = 100;
+  applyContentFont();
+  fontMenu.classList.add('hidden'); // opcional: cerrar el menú
+}
+
+fontReset.addEventListener('click', (e) => {
+  e.stopPropagation();       // evita que burbujee
+  fontPct = 100;
+  applyContentFont();
+  // NO cerramos el menú
+});
+
+fontReset.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    fontPct = 100;
+    applyContentFont();
+  }
+});
+
+applyContentFont();
+// ——— Dropdown de idioma (igual a la captura) ———
+const langBtn     = wrapper.querySelector('#lang-btn');
+const langMenu    = wrapper.querySelector('#lang-menu');
+const langCurrent = wrapper.querySelector('#lang-current');
+
+const LANGS = [
+  { code:'ES', name:'Español' },
+  { code:'AR', name:'العربية' },
+  { code:'BG', name:'български' },
+  { code:'CZ', name:'čeština' },
+  { code:'EN', name:'English' },
+  { code:'ET', name:'Eesti' },
+  { code:'FA', name:'فارسی' },
+  { code:'FI', name:'Suomi' },
+  { code:'FR', name:'Français' },
+  { code:'HR', name:'Hrvatski' },
+  { code:'HU', name:'magyar' },
+];
+
+function renderLangMenu(selected) {
+  langMenu.innerHTML = LANGS.map(l => `
+    <button type="button" data-code="${l.code}"
+      class="w-full grid grid-cols-[auto_1fr_auto] items-center gap-2 px-4 py-2.5
+             hover:bg-gray-50 text-[10px] text-left">
+      <span class="font-semibold text-slate-700">${l.code}</span>
+      <span class="text-slate-600">(${l.name})</span>
+      <i class="fas fa-check text-slate-500 ${selected===l.code ? '' : 'invisible'}"></i>
+    </button>
+  `).join('');
+}
+renderLangMenu(langCurrent.textContent.trim() || 'EN');
+
+langBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  langMenu.classList.toggle('hidden');
+  langBtn.setAttribute('aria-expanded', String(!langMenu.classList.contains('hidden')));
+});
+
+document.addEventListener('click', (e) => {
+  if (!langMenu.contains(e.target) && !langBtn.contains(e.target)) {
+    langMenu.classList.add('hidden');
+    langBtn.setAttribute('aria-expanded', 'false');
+  }
+});
+
+langMenu.addEventListener('click', (e) => {
+  const item = e.target.closest('button[data-code]');
+  if (!item) return;
+  const code = item.dataset.code;
+  // actualizar etiqueta
+  langCurrent.textContent = code;
+  // mover check
+  langMenu.querySelectorAll('button[data-code] i').forEach(i => i.classList.add('invisible'));
+  item.querySelector('i').classList.remove('invisible');
+  // Hook opcional de traducción
+  if (typeof setLanguage === 'function') setLanguage(code); // no cierra el menú
+});
+
+
+
+  const expandAllBtn = wrapper.querySelector('#expand-all-btn');
+
+if (expandAllBtn) {
+  expandAllBtn.addEventListener('click', () => {
+    const allDetails = Array.from(wrapper.querySelectorAll('details'));
+    const anyClosed = allDetails.some(d => !d.open);
+    allDetails.forEach(d => d.open = anyClosed);
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+  // dentro de showSubcategoriaContent, al construir cada bloque:
+// 1) Extraemos las entradas y las ordenamos por bloque.orden
+
+
+
+
+
+const sortedDefs = Object
+  .entries(data.definiciondetallada || {})
+  .sort(([, a], [, b]) => (a.orden ?? 0) - (b.orden ?? 0));
+
+// 2) Iteramos en el orden correcto
+sortedDefs.forEach(([key, bloque]) => {
+  const title = key
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, l => l.toUpperCase());
+  const imgs = Array.isArray(bloque.imagenes) ? bloque.imagenes : [];
+  const vids = Array.isArray(bloque.videos) ? bloque.videos : [];
+
+  const section = document.createElement("details");
+  section.className = "group";
+   section.innerHTML = `
+<summary class="py-2 group-open:py-3 flex items-center justify-between">
+  <span class="text-xs md:text-sm leading-5
+               transition-[font-size] duration-150
+               group-open:!text-[16px] group-open:leading-[22px]">
+    ${title}
+  </span>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    class="h-4 w-4 text-gray-500 transition-transform group-open:rotate-180"
+    aria-hidden="true"
+  >
+    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+  </svg>
+</summary>
+
+
+
+    <div class="px-6 py-4 text-gray-700 space-y-4">
+      ${bloque.texto
+
+        ? `<div class="texto-lista">${bloque.texto}</div>`
+        : ``
+      }
+      ${imgs.length
+        ? `<div class="galeria">
+             ${imgs.map(img => `
+  <figure class="media-thumb image-thumb inline-flex flex-col ..." 
+          data-img-url="${img.url}"
+          data-img-desc="${img.descripcion||''}">
+    <img src="${img.url}"
+         alt="${img.descripcion||''}"
+         class="w-32 h-32 object-cover rounded shadow"/>
+    <figcaption class="max-w-32 text-center mt-2 break-words">
+      ${img.descripcion||''}
+    </figcaption>
+  </figure>
+`).join("")}
+           </div>`
+        : ``
+      }
+      ${vids.length
+        ? `<div class="flex flex-wrap gap-2">
+             ${vids.map(v => `
+   <figure class="media-thumb video-thumb" data-video-id="${v.videoId}"
+                       data-video-title="${v.titulo}">
+                 <img src="https://img.youtube.com/vi/${v.videoId}/hqdefault.jpg"
+                      alt="Video thumbnail"/>
+                 <div class="play-icon">
+                   <i class="fas fa-play"></i>
+                 </div>
+               </figure>
+             `).join("")}
+           </div>`
+        : ``
+      }
+    </div>
+
+    <div class="collapse-controls">
+  <button class="flex items-center space-x-1">
+    <i class="fas fa-grip-lines-vertical"></i>
+    <span>COLLAPSE</span>
+  </button>
+  <div class="flex items-center space-x-6">
+    <button class="flex items-center space-x-1">
+      <i class="fas fa-pen"></i>
+      <span>NOTES</span>
+    </button>
+    <button class="flex items-center space-x-1">
+      <i class="fas fa-comment-dots"></i>
+      <span>FEEDBACK</span>
+    </button>
+  </div>
+</div>
+
+
+
+  `;
+  wrapper.appendChild(section);
+
+  
+
+
+
+
+
+
+});
 
   bodyEl.appendChild(wrapper);
 
-  // — Generar sólo los títulos en la segunda sidebar —
-  const defs = data.definiciondetallada || {};
-  const sidebarHtml = Object.keys(defs)
-    .map((key, idx) => {
-      const title = key
-        .replace(/_/g, " ")
-        .replace(/\b\w/g, l => l.toUpperCase());
-      // idx+1 para nth-of-type en details
-      return `
-        <div
-          class="py-2 px-4 hover:bg-gray-100 cursor-pointer"
-          onclick="document.querySelector('#subcategoria-body details:nth-of-type(${idx+1}) summary').click()"
-        >
-          ${title}
-        </div>
-      `;
-    })
-    .join("");
+    // selecciona el contenedor de scroll y tu nuevo header
+  // Sentinel para detectar cuando el header se pega arriba
+const content = document.getElementById('main-content');
+const subcatHeader = wrapper.querySelector('#subcat-header');
 
-  const subSidebar = document.getElementById("subcategoria-sidebar");
-  document.getElementById("subcategoria-sidebar-content").innerHTML = sidebarHtml;
-  subSidebar.classList.remove("hidden");
+// crea un sentinel justo ANTES del subcat-header
+const sentinel = document.createElement('div');
+sentinel.id = 'subcat-header-sentinel';
+sentinel.style.height = '1px';
+wrapper.insertBefore(sentinel, subcatHeader);
+
+// observa el sentinel dentro del scroll-container (#main-content)
+const io = new IntersectionObserver(
+  ([entry]) => {
+    // Cuando el sentinel sale por el borde superior, el header está "stuck"
+    const stuck = !entry.isIntersecting;
+    subcatHeader.classList.toggle('is-stuck', stuck);
+    // muestra/oculta el breadcrumb sin tocar tus tamaños de summary
+    const bc = subcatHeader.querySelector('#breadcrumbs');
+    if (bc) bc.classList.toggle('hidden', !stuck);
+  },
+  { root: content, threshold: 0 }
+);
+io.observe(sentinel);
+
+
+// ——— Breadcrumb dinámico (tema > sección visible) ———
+const bcTopic   = subcatHeader.querySelector('#bc-topic');
+const bcSection = subcatHeader.querySelector('#bc-section');
+// Tema = título de la subcategoría
+bcTopic.textContent = (data.nombre || subcategoriaId);
+bcTopic.addEventListener('click', (e) => {
+  e.preventDefault();
+  content.scrollTo({ top: 0, behavior: 'smooth' });
+});
+// Sección actual según el summary más alto visible
+const summaries = Array.from(wrapper.querySelectorAll('#subcategoria-body details > summary'));
+function updateBreadcrumbSection() {
+  if (!summaries.length) return;
+  const offset = subcatHeader.classList.contains('is-stuck') ? subcatHeader.offsetHeight : 0;
+  const containerTop = content.getBoundingClientRect().top + offset + 1;
+  let current = summaries[0];
+  for (const s of summaries) {
+    if (s.getBoundingClientRect().top <= containerTop) current = s; else break;
+  }
+  const txt = (current.querySelector('span')?.textContent || current.textContent).trim();
+  bcSection.textContent = txt;
+}
+content.addEventListener('scroll', updateBreadcrumbSection);
+// también al abrir/cerrar secciones
+summaries.forEach(s => s.addEventListener('click', () => setTimeout(updateBreadcrumbSection, 0)));
+// estado inicial
+updateBreadcrumbSection();
+
+// —— Vincular también el estado activo de la TOC ——
+const tocButtons = Array.from(document.querySelectorAll('#subcategoria-sidebar .toc-h2'));
+function updateTOCActive(){
+  // índice del summary "actual"
+  const names = summaries.map(s => (s.querySelector('span')?.textContent || s.textContent).trim());
+  const currentTxt = bcSection.textContent.trim();
+  const idx = names.findIndex(n => n === currentTxt);
+  tocButtons.forEach(b => b.classList.remove('is-active'));
+  if (idx >= 0 && tocButtons[idx]) tocButtons[idx].classList.add('is-active');
+}
+content.addEventListener('scroll', updateTOCActive);
+summaries.forEach(s => s.addEventListener('click', () => setTimeout(updateTOCActive, 0)));
+updateTOCActive();
+
+
+
+// vuelve a enlazar eventos a cada .video-thumb recién creado
+wrapper.querySelectorAll('.media-thumb').forEach(thumb => {
+ thumb.addEventListener('click', abrirModalMedio);
+});
+
+
+
+
+
+// — TOC: títulos de cada <details> con estilo de la captura —
+  const makeTitle = (k)=>k.replace(/_/g,' ').replace(/\b\w/g, l=>l.toUpperCase());
+const topicTitle = (data.nombre || subcategoriaId);   // ej. "Tejido conectivo"
+const tocHTML = `
+  <div class="toc-topic" id="toc-topic">${topicTitle}</div>
+  <nav class="toc">
+    ${sortedDefs.map(([k],i)=>`
+      <div class="toc-section">
+        <button class="toc-h2" data-toc-index="${i}">${makeTitle(k)}</button>
+      </div>
+    `).join('')}
+  </nav>`;
+
+  const subSidebar = document.getElementById('subcategoria-sidebar');
+  const subWrap    = document.getElementById('subcategoria-sidebar-content');
+  subWrap.innerHTML = tocHTML;
+  subSidebar.classList.remove('hidden');
+
+  const detailsList = Array.from(document.querySelectorAll('#subcategoria-body details'));
+  const tocBtns     = Array.from(subWrap.querySelectorAll('.toc-h2'));
+
+  function setActiveTOC(idx){
+    tocBtns.forEach(b=>b.classList.remove('is-active'));
+    if (idx>=0 && tocBtns[idx]) tocBtns[idx].classList.add('is-active');
+  }
+
+  // Click en TOC: abre sección y hace scroll compensando el header sticky
+  tocBtns.forEach((btn,idx)=>{
+    btn.addEventListener('click', ()=>{
+      const detail  = detailsList[idx];
+      if (!detail.open) detail.open = true;
+      const container = document.getElementById('main-content');
+      const summary   = detail.querySelector('summary');
+      requestAnimationFrame(()=>{
+        const cR = container.getBoundingClientRect();
+        const sR = summary.getBoundingClientRect();
+        const offset = measureStickySubHeaderHeight() + 1;
+        const target = container.scrollTop + (sR.top - cR.top) - offset;
+        container.scrollTo({ top: target, behavior:'smooth' });
+      });
+      setActiveTOC(idx);
+    });
+  });
+
+
+
+
+  
+
+
+
+
+
+
+
+
 
   // — Mostrar la sección dentro del main —
   contentSection.classList.remove("hidden");
@@ -858,7 +2338,6 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   toggleSidebarCollapse(true);
 }
 
-</script>  
 
 </script>
 
@@ -866,145 +2345,162 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
 <script>
    let lastOpenedAccordionId = null;
 
-  function toggleAccordion(id) {
-    const acc = document.getElementById(`accordion-${id}`);
-    const btn = acc.previousElementSibling;
-    const icon = btn.querySelector('.fa-chevron-down');
-    const willOpen = acc.classList.contains('hidden');
+function toggleAccordion(id) {
+  const acc  = document.getElementById(`accordion-${id}`);
+  const btn  = acc.previousElementSibling;
+  const icon = btn.querySelector('.fa-chevron-down');
+  const willOpen = acc.classList.contains('hidden');
 
-    // Cerrar todos
+  // Cierra otros acordeones y limpia rotaciones (no toques active-link aquí)
+  document.querySelectorAll('div[id^="accordion-"]').forEach(el => {
+    el.classList.add('hidden');
+    const ic = el.previousElementSibling.querySelector('.fa-chevron-down');
+    if (ic) ic.classList.remove('rotate-180');
+    el.previousElementSibling.classList.remove('accordion-open');
+  });
+
+  // Abrir/cerrar este
+  if (willOpen) {
+    acc.classList.remove('hidden');
+    btn.classList.add('accordion-open');
+    icon?.classList.add('rotate-180');
+    lastOpenedAccordionId = id;
+  } else {
+    btn.classList.remove('accordion-open');
+    icon?.classList.remove('rotate-180');
+    lastOpenedAccordionId = null;
+  }
+}
+
+
+// Función para establecer el enlace o botón activo (marcado con active-link)
+function setActiveLink(element) {
+  // Oculta sub-sidebar cada vez que cambias de sección
+  document.getElementById("subcategoria-sidebar").classList.add("hidden");
+
+  // Limpia bloques grises del grupo
+  document.querySelectorAll('#sidebar .sidebar-group')
+    .forEach(g => g.classList.remove('segment-active'));
+
+  // Quita activos visuales de TODO
+  document.querySelectorAll('#sidebar a, #sidebar button').forEach(item => {
+    item.classList.remove('active-link', 'accordion-open');
+    item.querySelector('.fa-chevron-down')?.classList.remove('rotate-180');
+  });
+
+  // 1) Si es BOTÓN de grupo: NO marcar activo; solo abrir acordeón y salir
+  if (element.tagName === 'BUTTON' && element.closest('.sidebar-group')) {
+    const acc  = element.nextElementSibling;
+    const open = acc && acc.classList.contains('hidden');
+    // cerrar todos los acordeones
     document.querySelectorAll('div[id^="accordion-"]').forEach(el => {
       el.classList.add('hidden');
       el.previousElementSibling.classList.remove('accordion-open');
-      const ic = el.previousElementSibling.querySelector('.fa-chevron-down');
-      if (ic) ic.classList.remove('rotate-180');
+      el.previousElementSibling.querySelector('.fa-chevron-down')?.classList.remove('rotate-180');
     });
-
-    // Si tocaste uno que estaba cerrado, lo abrimos
-    if (willOpen) {
+    // abrir el propio si tocaba
+    if (open) {
       acc.classList.remove('hidden');
-      btn.classList.add('accordion-open');
-      if (icon) icon.classList.add('rotate-180');
-      lastOpenedAccordionId = id;
-    } else {
-      lastOpenedAccordionId = null;
+      element.classList.add('accordion-open');
+      element.querySelector('.fa-chevron-down')?.classList.add('rotate-180');
     }
+    return; // <- nada de active-link aquí
   }
 
-  // Función para establecer el enlace o botón activo (marcado con active-link)
-  function setActiveLink(element) {
-
-// Cada vez que cambias de sección, ocultar sub-sidebar:
-document.getElementById("subcategoria-sidebar").classList.add("hidden");
-
-      // Determinar si el elemento clickeado es un enlace (sub-item)
-      // Un sub-item es un <a> que está dentro de un div con id="accordion-"
-      const isSubItem = element.tagName === 'A' && element.closest('div[id^="accordion-"]');
-      // El enlace de Home es un caso especial porque no está dentro de un acordeón pero también controla contenido
-      const isHomeLink = element.textContent.trim() === 'Home' && element.closest('#group-home');
-
-      // Si el elemento clickeado es un BOTÓN de acordeón (no un sub-item ni el enlace de Home)
-      if (element.tagName === 'BUTTON' && element.closest('.sidebar-group') && !isSubItem && !isHomeLink) {
-          // Solo marcamos el botón como activo y salimos de la función
-          document.querySelectorAll('#sidebar a, #sidebar button').forEach(item => {
-              item.classList.remove('active-link');
-              if (item.tagName === 'BUTTON' && item.closest('.sidebar-group')) {
-                  item.classList.remove('accordion-open');
-              }
-              const icon = item.querySelector('.fa-chevron-down');
-              if (icon) icon.classList.remove('rotate-180');
-              const itemIcon = item.querySelector('i:not(.fa-chevron-down)');
-              if (itemIcon) itemIcon.style.color = '';
-          });
-          element.classList.add('active-link'); // Marcar el botón del acordeón como activo
-          return; // Salir de la función si es un botón de grupo
-      }
-
-      // A partir de aquí, la lógica es solo para enlaces (sub-items o Home)
-      // OCULTAR SIEMPRE LOS PANELES DE ARTÍCULOS Y EL CONTENIDO DE HOME AL INICIO DE CADA SELECCIÓN DE UN ENLACE
-      const articlesPanel = document.getElementById("articles-panel");
-      articlesPanel.classList.add("hidden");
-      articlesPanel.classList.remove("flex"); // Asegura que no tenga flex si estaba visible
+  // 2) Si es un ENLACE de nivel 1 (Home/Drugs), márcalo normal
+  const isTopLevelLink =
+    element.tagName === 'A' &&
+    element.closest('.sidebar-group') &&
+    !element.closest('div[id^="accordion-"]');
+  if (isTopLevelLink) {
+    element.classList.add('active-link');
+    // cierra acordeones
+    document.querySelectorAll('div[id^="accordion-"]').forEach(el => el.classList.add('hidden'));
+    // Home: muestra y limpia lo demás (como ya lo tenías)
+    if (element.textContent.trim() === 'Home' && element.closest('#group-home')) {
+      toggleSidebarCollapse(false);
+      document.getElementById("home-content").classList.remove("hidden");
+      document.getElementById("articles-panel").classList.add("hidden");
       document.getElementById("panel-2").classList.add("hidden");
       document.getElementById("panel-3").classList.add("hidden");
-
-      const homeContent = document.getElementById("home-content"); // Obtener el div de contenido de Home
-      homeContent.classList.add("hidden"); // Ocultar por defecto
-
-
-      // 1. Remover 'active-link' y estilos de "abierto" de TODOS los enlaces y botones de grupo
-      document.querySelectorAll('#sidebar a, #sidebar button').forEach(item => {
-          item.classList.remove('active-link'); // Elimina el resaltado de selección
-          // Solo si es un botón de acordeón, remover accordion-open
-          if (item.tagName === 'BUTTON' && item.closest('.sidebar-group')) {
-            item.classList.remove('accordion-open');
-          }
-
-          const icon = item.querySelector('.fa-chevron-down');
-          if (icon) {
-            icon.classList.remove('rotate-180');
-          }
-          const itemIcon = item.querySelector('i:not(.fa-chevron-down)'); // Icono principal
-          if (itemIcon) {
-            itemIcon.style.color = ''; // Resetear el color del icono principal a lo por defecto del CSS (gray-700)
-          }
-      });
-
-      // 2. Aplicar 'active-link' al elemento clickeado
-      element.classList.add('active-link');
-
-      // 3. Si el elemento clickeado es un enlace dentro de un acordeón (sub-item)
-      let parentAccordionDiv = element.closest('div[id^="accordion-"]');
-      if (parentAccordionDiv) {
-          const parentButton = parentAccordionDiv.previousElementSibling;
-          const parentIcon = parentButton.querySelector('.fa-chevron-down');
-
-          // Asegurarse de que el botón de grupo padre tenga los estilos de "abierto"
-          parentButton.classList.add('accordion-open');
-          if (parentIcon) {
-              parentIcon.classList.add('rotate-180');
-          }
-          // Asegurarse de que el acordeón padre esté abierto
-          parentAccordionDiv.classList.remove('hidden');
-      }
-
-      // Lógica para mostrar los paneles de artículos SOLO si se selecciona "Articles" de "Library"
-      if (element.textContent.trim() === 'Articles' && element.closest('#group-library')) {
-          articlesPanel.classList.remove("hidden");
-          articlesPanel.classList.add("flex"); // Mostrar como flex
-          // Los paneles 2 y 3 se mantienen ocultos por defecto hasta que se haga clic en ellos
-          document.getElementById("panel-2").classList.add("hidden");
-          document.getElementById("panel-3").classList.add("hidden");
-
-          // Resetear cualquier selección previa en los paneles de artículos
-          document.querySelectorAll('#articles-panel .articles-panel-list-item').forEach(item => {
-              item.classList.remove('selected');
-          });
-          currentActivePanel2Item = null;
-          currentActivePanel3Item = null;
-
-      }
-      // Lógica para mostrar el contenido de Home SOLO si se selecciona "Home"
-      else if (isHomeLink) {
-  toggleSidebarCollapse(false);               // ya tenías esto
-  homeContent.classList.remove("hidden");     // mostrar Home
-
-  // ——— AÑADIR ESTO ———
-  document.getElementById("articles-panel").classList.add("hidden");
-  document.getElementById("panel-2").classList.add("hidden");
-  document.getElementById("panel-3").classList.add("hidden");
-  document.getElementById("subcategoria-content").classList.add("hidden");
-  // —————————————————
-
-}
-      // Si se selecciona cualquier otro sub-item (no Articles ni Home), ambos paneles (articles-panel y home-content)
-      // ya están ocultos por la lógica al principio de la función, lo cual es el comportamiento deseado.
+      document.getElementById("subcategoria-content").classList.add("hidden");
+    }
+    return;
   }
 
+  // 3) Si es SUBITEM dentro de acordeón: marca el subitem y pinta el bloque
+  const parentAccordionDiv = element.closest('div[id^="accordion-"]');
+  if (parentAccordionDiv) {
+    element.classList.add('active-link');                // subitem
+    const parentButton = parentAccordionDiv.previousElementSibling;
+    parentAccordionDiv.classList.remove('hidden');
+    parentButton.classList.add('accordion-open');        // solo para chevron
+    parentButton.querySelector('.fa-chevron-down')?.classList.add('rotate-180');
+    parentButton.closest('.sidebar-group')?.classList.add('segment-active'); // bloque gris
+  }
+
+  // (tu lógica de Articles/subcategoría sigue funcionando igual)
+  if (element.textContent.trim() === 'Articles' && element.closest('#group-library')) {
+    document.getElementById("subcategoria-content").classList.add("hidden");
+    document.getElementById("subcategoria-sidebar").classList.add("hidden");
+    const articlesPanel = document.getElementById("articles-panel");
+    articlesPanel.classList.remove("hidden");
+    articlesPanel.classList.add("flex");
+    document.getElementById("panel-2").classList.add("hidden");
+    document.getElementById("panel-3").classList.add("hidden");
+    document.querySelectorAll('#articles-panel .articles-panel-list-item').forEach(i => i.classList.remove('selected'));
+    currentActivePanel2Item = null;
+    currentActivePanel3Item = null;
+  }
+}
+
+
+
+
+
+
+
+
+
+
   // Inicializar la sidebar al cargar el DOM
-  document.addEventListener('DOMContentLoaded', () => {
-      // 1. Asegurarse de que todos los acordeones estén cerrados inicialmente y sin estilos de "abierto"
-       toggleSidebarCollapse(false);
+    document.addEventListener('DOMContentLoaded', () => {
+    const thumbsContainer = document.getElementById('video-thumbnails');
+    const toggleBtn       = document.getElementById('toggle-thumbnails');
+      const toggleIcon      = toggleBtn.querySelector('i');
+
+
+
+    toggleBtn.addEventListener('click', () => {
+  const thumbsHidden = document.getElementById('thumbnail-carousel')
+                            .classList.toggle('hidden');
+
+        const img    = document.getElementById('modal-image');
+    const iframe = document.getElementById('modal-iframe');
+    [img, iframe].forEach(el => el.style.transition = 'max-height 0.1s ease');
+
+
+
+
+    // 2) Cambiar la flecha
+    if (thumbsHidden) {
+          img.style.maxHeight    = 'calc(100% - 6rem)';
+      iframe.style.maxHeight = 'calc(100% - 6rem)';
+          toggleBtn.style.bottom = '0';
+
+
+    toggleIcon.classList.remove('fa-chevron-down');
+    toggleIcon.classList.add('fa-chevron-up');
+  } else {
+      img.style.maxHeight    = 'calc(100% - 14rem)';
+      iframe.style.maxHeight = 'calc(100% - rem)';
+          toggleBtn.style.bottom = 'calc(80px + 1rem)';
+
+
+    toggleIcon.classList.remove('fa-chevron-up');
+    toggleIcon.classList.add('fa-chevron-down');
+  }
+});
 
      
      
@@ -1147,6 +2643,11 @@ if (lastOpenedAccordionId) {
 </script>
 
 
+
+
+
+
+
 <script>
 document.getElementById("sidebar").addEventListener("mouseleave", () => {
   // Solo ejecutar si está colapsado
@@ -1169,10 +2670,596 @@ document.getElementById("sidebar").addEventListener("mouseleave", () => {
 
 
 
+
+
+
+
+<div id="video-modal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-80">
+
+  <!-- Contenedor con posición relativa -->
+  <div class="relative w-full h-full">
+
+    <!-- Barra superior en posición absoluta -->
+    <div class="absolute top-0 left-0 w-full h-12 bg-gray-800 text-white border-b border-gray-700 z-20 flex items-center justify-between px-4">
+      <!-- Botón izquierdo -->
+<button class="flex items-center space-x-1.5 border border-cyan-500 text-cyan-400 px-2.5 py-0.5 rounded hover:bg-cyan-900/30">
+  <i class="fas fa-file-alt text-sm"></i>
+  <span class="text-xs font-medium">Description</span>
+</button>
+
+
+
+<!-- Íconos derechos -->
+<div class="flex items-center space-x-3 relative">
+  <button class="hover:text-gray-300">
+    <i class="far fa-bookmark text-sm"></i>
+  </button>
+
+  <button id="zoom-btn" class="hover:text-gray-300">
+    <i class="fas fa-search-plus text-sm"></i>
+  </button>
+
+  <div id="zoom-menu" class="zoom-menu hidden">
+    <button id="zoom-out">−</button>
+    <span id="zoom-level">100%</span>
+    <button id="zoom-in">+</button>
+    <button id="zoom-reset"><i class="fas fa-redo"></i></button>
+  </div>
+
+  <button id="expand-video" class="hover:text-gray-300">
+    <i class="fas fa-expand text-sm"></i>
+  </button>
+  <button id="modal-close" class="hover:text-gray-300" onclick="cerrarModal()">
+    <i class="fas fa-times text-sm"></i>
+  </button>
+</div>
+
+
+    </div>
+
+      <!-- Panel de descripción oculto -->
+  <!-- Panel de descripción en split-view -->
+<aside id="video-desc-panel" class="video-desc-panel hidden">
+  <div class="p-4 overflow-y-auto h-full">
+    <!-- 1) Aquí irá el título del vídeo -->
+    <h3 id="video-desc-title" class="text-lg font-semibold mb-2"></h3>
+    <!-- 2) Siempre © BANCOMICINA -->
+    <p id="video-desc-copyright" class="text-sm text-gray-400 mb-4">© BANCOMICINA</p>
+    <!-- 3) Aquí insertaremos dinámicamente la descripción desde YouTube -->
+    <p id="video-desc-text" class="text-sm text-white whitespace-pre-wrap"></p>
+  </div>
+</aside>
+
+
+
+
+
+
+      
+
+
+    </div>
+
+    <!-- Contenido principal desplazado sólo 2rem (h-8) hacia abajo -->
+    <div class="absolute inset-x-0 top-10 bottom-0 flex overflow-visible">
+
+      <!-- Sidebar izquierdo -->
+      <aside id="video-main-panel" class="w-1/4 bg-gray-900 text-white p-6 flex flex-col">
+        <h2 id="modal-title" class="text-xl font-semibold mb-2">Título del vídeo</h2>
+        <span class="text-sm text-gray-400">© BANCOMICINA</span>
+        <p id="video-main-text" class="text-sm text-gray-200 mt-4"></p>
+        
+      </aside>
+
+      <!-- Área de vídeo -->
+      <div class="w-3/4 relative bg-black flex flex-col">
+       <iframe
+  id="modal-iframe"
+  class="w-full"
+  style="height: calc(100% - 70px);"
+  src=""
+  frameborder="0"
+  allow="autoplay; encrypted-media"
+  allowfullscreen
+></iframe>
+
+<!-- ▼ Imagen en modal: añadido para soportar imágenes -->
+ <img id="modal-image" class="hidden w-full h-auto object-contain" alt="Media preview"/>
+
+        <button
+  id="toggle-thumbnails"
+  class="self-center z-50 w-20 h-6 flex items-center justify-center bg-gray-800 bg-opacity-75 hover:bg-opacity-100 rounded-full text-white mt-2"
+>
+  <i class="fas fa-chevron-up text-xs"></i>
+</button>
+
+        <!-- Carrusel con botones laterales -->
+<div id="thumbnail-carousel" class="relative hidden bg-black py-4">
+  <!-- Botón izquierdo -->
+  <button id="scroll-left" class="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-black bg-opacity-30 hover:bg-opacity-60 text-white px-2 py-1 rounded-l">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+
+  <!-- Contenedor scrollable -->
+  <div id="video-thumbnails" class="flex gap-4 overflow-x-auto scroll-smooth px-10">
+    <!-- aquí se inyectan miniaturas dinámicamente -->
+  </div>
+
+  <!-- Botón derecho -->
+  <button id="scroll-right" class="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-black bg-opacity-30 hover:bg-opacity-60 text-white px-2 py-1 rounded-r">
+    <i class="fas fa-chevron-right"></i>
+  </button>
+</div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+<script>
+// 1) Selecciona todas las miniaturas y el modal
+const thumbs     = document.querySelectorAll('.media-thumb');
+const modal      = document.getElementById('video-modal');
+const imgEl      = document.getElementById('modal-image');
+
+const iframe     = document.getElementById('modal-iframe');
+const titleEl    = document.getElementById('modal-title');
+const closeBtn   = document.getElementById('modal-close');
+
+// justo después de definir `modal` y `closeBtn`
+const expandBtn = document.getElementById('expand-video');
+const splitDesc = document.getElementById('video-desc-panel');  // panel flotante de split
+const mainDesc  = document.getElementById('video-main-panel');  // panel izquierdo de modo completo
+
+expandBtn.addEventListener('click', e => {
+  // 1) Alternamos split-view en el modal y en body
+  modal.classList.toggle('split-view');
+  document.body.classList.toggle('split-view-active');
+
+  // 2) Si acabamos de entrar en split-view, ocultamos el panel de modo completo:
+  if (modal.classList.contains('split-view')) {
+    mainDesc.classList.add('hidden');
+  } 
+  // 3) Si acabamos de salir (modo completo), ocultamos el panel flotante de split:
+  else {
+    splitDesc.classList.add('hidden');
+    // (opcional) y nos aseguramos de que el panel completo esté visible
+    mainDesc.classList.remove('hidden');
+  }
+});
+
+
+// Referencias
+const descBtn   = document
+  .querySelector('#video-modal button i.fa-file-alt')
+  .closest('button');
+
+// Panel flotante para split-view
+
+
+descBtn.addEventListener('click', () => {
+  const isSplit = modal.classList.contains('split-view');
+
+  if (isSplit) {
+    // En split-view: mostramos/ocultamos el panel flotante
+    splitDesc.classList.toggle('hidden');
+    return;
+  }
+
+  // En modo completo: mostramos/ocultamos el panel izquierdo
+  const container = modal.querySelector('.absolute.inset-x-0.top-10.bottom-0.flex');
+  const videoArea = container.querySelector('div');
+
+  if (mainDesc.classList.contains('hidden')) {
+    // Mostrar descripción → restablecemos ancho
+    mainDesc.classList.remove('hidden');
+    videoArea.style.width = '75%';
+  } else {
+    // Ocultar descripción → vídeo a ancho completo
+    mainDesc.classList.add('hidden');
+    videoArea.style.width = '100%';
+  }
+});
+
+
+
+
+function abrirModalMedio(e) {
+
+  scale = 1;
+  pos = { x: 0, y: 0 };
+  zoomLevel.textContent = '100%';
+  applyTransform();
+  const thumb = e.currentTarget;
+  const videoId = thumb.dataset.videoId;
+  const imgUrl  = thumb.dataset.imgUrl;
+  const vid   = thumb.dataset.videoId;
+  const title = thumb.dataset.videoTitle || '';
+  const imgDesc = thumb.dataset.imgDesc || '';
+
+
+
+
+  // ① Cargamos el vídeo
+if (imgUrl) {
+   // ► Mostrar imagen
+   iframe.src = '';                     // + detiene el vídeo
+     iframe.classList.add('hidden');
+      imgEl.src = imgUrl;
+      imgEl.classList.remove('hidden');
+      titleEl.textContent = imgDesc;
+
+      document.getElementById('video-desc-title').textContent = imgDesc;
+ } else {
+   // ► Mostrar vídeo
+   imgEl.classList.add('hidden');
+   iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`;
+   iframe.classList.remove('hidden');
+    titleEl.textContent = title;
+    document.getElementById('video-desc-title').textContent = title;
+    // — aquí podrías reubicar tu fetch() de descripción, si lo necesitas solo para vídeo —
+  }
+  modal.classList.remove('hidden');
+
+
+
+    // ———————————————
+  //  A) Ponemos el título en el panel de descripción
+
+  // B) La línea de copyright ya viene estática en el HTML
+  //    (si quisieras cambiarla dinámicamente también podrías hacerlo aquí)
+
+  // C) Recuperamos la descripción vía YouTube Data API v3
+  fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${vid}&key=AIzaSyD8KPi7phPuDjEVjjsv_GyYeF3gHJO2Ygg`)
+    .then(resp => resp.json())
+    .then(data => {
+      const desc = data.items?.[0]?.snippet?.description || 'Descripción no disponible';
+      document.getElementById('video-desc-text').textContent = desc;
+      const mainText = document.getElementById('video-main-text');
+  mainText.textContent = desc;
+    })
+    .catch(err => {
+      console.error('Error al cargar descripción:', err);
+      document.getElementById('video-desc-text').textContent = 'No se pudo cargar la descripción.';
+    });
+  // ———————————————
+
+
+
+   const thumbsContainer = document.getElementById('video-thumbnails');
+  if (imgUrl) {
+    // — Relaciones entre imágenes —
+    const imgNodes = document.querySelectorAll('#subcategoria-body .image-thumb');
+    const relatedImgs = Array.from(imgNodes)
+      .map(n => ({
+        url:  n.dataset.imgUrl,
+        desc: n.dataset.imgDesc
+      }));
+    thumbsContainer.innerHTML = relatedImgs.map(img => `
+      <figure class="media-thumb image-thumb" data-img-url="${img.url}" data-img-desc="${img.desc}">
+        <img src="${img.url}" alt="${img.desc}" class="w-32 h-32 object-cover rounded shadow"/>
+      </figure>
+    `).join('');
+  } else {
+    // — Relaciones entre vídeos —
+    const vidNodes = document.querySelectorAll('#subcategoria-body .video-thumb');
+    const relatedVids = Array.from(vidNodes)
+      .map(n => ({
+        id:        n.dataset.videoId,
+        thumbnail: n.querySelector('img').src,
+        title:     n.dataset.videoTitle
+      }));
+    thumbsContainer.innerHTML = relatedVids.map(v => `
+      <figure class="media-thumb video-thumb" data-video-id="${v.id}" data-video-title="${v.title}">
+        <img src="${v.thumbnail}" alt="${v.title}" class="w-32 h-32 object-cover rounded shadow"/>
+        <div class="play-icon"><i class="fas fa-play"></i></div>
+      </figure>
+    `).join('');
+
+
+    // —> Si ninguna miniatura está marcada, marcar la primera:
+if (!thumbsContainer.querySelector('.media-thumb.selected')) {
+  const first = thumbsContainer.querySelector('.media-thumb');
+  if (first) first.classList.add('selected');
+}
+
+    
+  }
+  // Re-asignar el manejador de clicks a todas las miniaturas recién inyectadas
+  // Eliminar selección previa
+thumbsContainer.querySelectorAll('.media-thumb').forEach(t => {
+  t.classList.remove('selected');
+  t.addEventListener('click', abrirModalMedio);
+});
+
+// Marcar la actual como seleccionada
+setTimeout(() => {
+  const allThumbs = thumbsContainer.querySelectorAll('.media-thumb');
+  const selected = imgUrl
+    ? Array.from(allThumbs).find(t => t.dataset.imgUrl === imgUrl)
+    : Array.from(allThumbs).find(t => t.dataset.videoId === videoId);
+  if (selected) selected.classList.add('selected');
+}, 0);
+
+  // ③ Volvemos a enlazar el click sobre esas miniaturas
+  thumbsContainer.querySelectorAll('.media-thumb')
+    .forEach(t =>{ t.addEventListener('click', abrirModalMedio);});
+}
+
+
+
+
+
+  function cerrarModal() {
+  // ocultamos el modal y paramos el vídeo
+  modal.classList.add('hidden');
+  iframe.src = '';
+
+  // si estábamos en split-view, lo desactivamos
+  modal.classList.remove('split-view');
+  document.body.classList.remove('split-view-active');
+
+  // — opcional: si aplicaste inline styles al main, los borras —
+  const main = document.getElementById('main-content');
+  main.style.width = '';
+  main.style.marginLeft = '';
+}
+
+
+
+
+
+
+  document.addEventListener('click', function(e) {
+    const thumb = e.target.closest('.media-thumb');
+    if (thumb) return abrirModalMedio({ currentTarget: thumb });
+  });
+
+  closeBtn.addEventListener('click', cerrarModal);
+  modal.addEventListener('click', e => {
+    if (e.target === modal) cerrarModal();
+  });
+
+
+
+// 2) Al hacer click en una miniatura, rellenar y mostrar modal
+thumbs.forEach(thumb => {
+  thumb.addEventListener('click', () => {
+    const vid   = thumb.dataset.videoId;
+    const title = thumb.dataset.videoTitle || '';
+    iframe.src  = `https://www.youtube.com/embed/${vid}?autoplay=1`;
+    titleEl.textContent = title;
+    modal.classList.remove('hidden');
+  });
+});
+
+// 3) Cerrar modal con la “X”
+closeBtn.addEventListener('click', () => {
+  modal.classList.add('hidden');
+  iframe.src = '';
+});
+
+// 4) También cerrar clicando fuera del contenedor
+modal.addEventListener('click', e => {
+  if (e.target === modal) {
+    closeBtn.click();
+  }
+});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const thumbsContainer = document.getElementById('video-thumbnails');
+  const leftBtn         = document.getElementById('scroll-left');
+  const rightBtn        = document.getElementById('scroll-right');
+
+  function selectThumb(thumb) {
+scale = 1;
+    pos = { x: 0, y: 0 };
+    zoomLevel.textContent = '100%';
+    applyTransform();
+
+
+
+    const prev = thumbsContainer.querySelector('.media-thumb.selected');
+    if (prev) prev.classList.remove('selected');
+    thumb.classList.add('selected');
+    abrirModalMedio({ currentTarget: thumb });
+  }
+
+  leftBtn.addEventListener('click', () => {
+    const thumbs = Array.from(thumbsContainer.children);
+    const idx    = thumbs.findIndex(t => t.classList.contains('selected'));
+    if (idx > 0) {
+      const prevThumb = thumbs[idx - 1];
+      selectThumb(prevThumb);
+      prevThumb.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+    }
+  });
+
+  rightBtn.addEventListener('click', () => {
+    const thumbs = Array.from(thumbsContainer.children);
+    const idx    = thumbs.findIndex(t => t.classList.contains('selected'));
+    if (idx < thumbs.length - 1) {
+      const nextThumb = thumbs[idx + 1];
+      selectThumb(nextThumb);
+      nextThumb.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+    }
+  });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+
+<script>
+  const zoomBtn   = document.getElementById('zoom-btn');
+  const zoomMenu  = document.getElementById('zoom-menu');
+  const zoomOut   = document.getElementById('zoom-out');
+  const zoomIn    = document.getElementById('zoom-in');
+  const zoomReset = document.getElementById('zoom-reset');
+  const zoomLevel = document.getElementById('zoom-level');
+  const img       = document.getElementById('modal-image');
+
+  // Estado compartido
+  let scale = 1;
+  let pos = { x: 0, y: 0 };
+  let isPanning = false;
+  let start = { x: 0, y: 0 };
+
+  // Siempre centrar el origen del zoom
+  img.style.transformOrigin = 'center center';
+  img.style.cursor = 'grab';
+
+  // Aplica ambos, translate y scale, en un único transform
+  function applyTransform() {
+    img.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(${scale})`;
+  }
+
+  // Mostrar/ocultar menú
+  zoomBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    zoomMenu.classList.toggle('hidden');
+  });
+  document.addEventListener('click', e => {
+    if (!zoomMenu.contains(e.target) && e.target !== zoomBtn) {
+      zoomMenu.classList.add('hidden');
+    }
+  });
+
+  // Zoom out
+  zoomOut.addEventListener('click', () => {
+    scale = Math.max(0.1, scale - 0.1);
+    zoomLevel.textContent = Math.round(scale * 100) + '%';
+    applyTransform();  // Solo scale, pos no cambia
+  });
+
+  // Zoom in
+  zoomIn.addEventListener('click', () => {
+    scale = Math.min(3, scale + 0.1);
+    zoomLevel.textContent = Math.round(scale * 100) + '%';
+    applyTransform();
+  });
+
+  // Reset
+  zoomReset.addEventListener('click', () => {
+    scale = 1;
+    pos = { x: 0, y: 0 };
+    zoomLevel.textContent = '100%';
+    applyTransform();
+  });
+
+  // ————— Panning —————
+  img.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    isPanning = true;
+    img.style.cursor = 'grabbing';
+    start.x = e.clientX - pos.x;
+    start.y = e.clientY - pos.y;
+  });
+
+  window.addEventListener('pointermove', e => {
+    if (!isPanning) return;
+    pos.x = e.clientX - start.x;
+    pos.y = e.clientY - start.y;
+    applyTransform();  // Solo translate + mantiene scale
+  });
+
+  window.addEventListener('pointerup', () => {
+    if (!isPanning) return;
+    isPanning = false;
+    img.style.cursor = 'grab';
+  });
+
+  // Inicializamos
+  applyTransform();
+</script>
+
+<script>
+// Delegación de evento: si haces click en cualquier botón dentro de .collapse-controls…
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('.collapse-controls > button');
+  if (!btn) return;
+
+  // Busca el <details> más cercano y ciérralo
+  const detail = btn.closest('details');
+  if (detail) detail.removeAttribute('open');
+});
+</script>
+
+
+<script>
+  // --- Dropdown comportamiento ---
+  (() => {
+    const wrap = document.getElementById('mode-dropdown');
+    const btn  = document.getElementById('mode-btn');
+    const lab  = document.getElementById('mode-label');
+    const menu = document.getElementById('mode-menu');
+
+    // abrir/cerrar
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.classList.toggle('hidden');
+    });
+
+    // cerrar al clic fuera
+    document.addEventListener('click', (e) => {
+      if (!wrap.contains(e.target)) menu.classList.add('hidden');
+    });
+
+    // seleccionar opción
+    menu.addEventListener('click', (e) => {
+      const opt = e.target.closest('button[data-mode]');
+      if (!opt) return;
+
+      const mode = opt.getAttribute('data-mode');
+      lab.textContent = mode;
+
+      menu.querySelectorAll('button[data-mode]').forEach(b => {
+        b.classList.remove('bg-gray-50');
+        const check = b.querySelector('.fa-check');
+        if (check) check.remove();
+      });
+      opt.classList.add('bg-gray-50');
+      if (!opt.querySelector('.fa-check')) {
+        opt.insertAdjacentHTML('beforeend', '<i class="fas fa-check mt-1 text-[rgb(29,125,138)]"></i>');
+      }
+
+      menu.classList.add('hidden');
+    });
+  })();
+</script>
+
+
+
+
 </body>
 </html>
 
 
 
 
-////////////////////////////////////
+
+/////////////
+////////////
+// —> 6:10
+// —> 6:58
+// —> 7:47
+// 9: 59
+//10 55
+//10 agosto
+//10 agosto tarde
