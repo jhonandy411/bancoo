@@ -10,6 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
   <style>
 
+    
+
 
 
 @font-face {
@@ -332,7 +334,7 @@ html, body {
   border-left:0 solid transparent;
   padding:.5rem .75rem;
   font-weight:400;
-  font-size:1rem;                 /* ~16px */
+  font-size:0.85rem;                 /* ~16px */
   color:#111827;                  /* gray-900 */
   border-radius:.5rem;
   cursor:pointer;
@@ -353,7 +355,7 @@ html, body {
   /* fondo gris */
   background: #f3f4f6;                 /* gray-100 */
   color: #111827;                       /* gray-900 */
-  font-weight: normal;
+  font-weight: 400;
 
   /* sin radios para que “toque” los bordes */
   border-radius: 0 !important;
@@ -394,10 +396,34 @@ html, body {
 
 /* Variables de anchos para sincronizar el overlay con el TOC */
 :root{
-  --sb-collapsed: 40px;   /* ancho de la barra principal colapsada */
-  --subcat-width: 180px;  /* ancho de la barra de títulos (#subcategoria-sidebar) */
+  --sb-collapsed: 40px;      /* ya la tienes */
+  --subcat-width: 180px;     /* ya la tienes */
+  --split-left: 0px;         /* OFFSET desde la izquierda (calculado en JS) */
+  --split-w: 50vw;           /* ANCHO del panel derecho (calculado en JS) */
 }
 
+/* Split real, pegado al header de 3rem */
+#video-modal.split-view{
+  position: fixed;
+  z-index: 40 !important;
+  top: 3rem !important;
+  bottom: 0 !important;
+  left: var(--split-left) !important;
+  width: var(--split-w) !important;
+  height: auto !important;
+  background-color: transparent !important;
+  border-left: 1px solid rgba(229,231,235,.9);
+}
+
+/* Quita el viejo “60vw” para el área de lectura o sobrescríbelo */
+body.split-view-active .dashboard-container{
+  position: fixed;
+  top: 3rem;
+  bottom: 0;
+  left: 0;
+  width: calc(var(--split-left)); /* lo que NO ocupa el panel derecho */
+  overflow-y: auto;
+}
 
 
 
@@ -2235,11 +2261,135 @@ details[open] > summary {
 
 
 
+/* —— FIX: split a base de variables, anulando el 60/40 ——————————— */
+#video-modal.split-view{
+  left: var(--split-left) !important;
+  width: var(--split-w) !important;
+  right: auto !important;     /* anula cualquier right:0 previo */
+  height: auto !important;
+}
+
+body.split-view-active .dashboard-container{
+  width: calc(var(--split-left)) !important; /* mitad izquierda real */
+}
+
+/* Sugerencia: si aún tienes algo así en tu CSS, bórralo o déjalo comentado:
+#video-modal.split-view { right:0 !important; left:60% !important; width:40% !important; }
+body.split-view-active .dashboard-container{ width:60vw; }
+*/
 
 
+#subcategoria-body .texto-lista p{margin:.5rem 0;}
+#subcategoria-body .texto-lista ul{list-style:disc; margin:.5rem 0 .5rem 1.25rem;}
+#subcategoria-body .texto-lista ol{list-style:decimal; margin:.5rem 0 .5rem 1.25rem;}
+#subcategoria-body .texto-lista li{margin:.25rem 0;}
+#subcategoria-body .texto-lista li > ul{list-style:circle; margin-top:.25rem;}
+#subcategoria-body .texto-lista strong{font-weight:700;}
 
 
+/* === TOC: subtítulos (h3) === */
+#subcategoria-sidebar .toc-sub{ margin:.125rem 0 .25rem 0; }
+#subcategoria-sidebar .toc-h3{
+  width:100%;
+  display:block;
+  text-align:left;
+  background:transparent;
+  border:none;
+  padding:.25rem .75rem .25rem 1.5rem; /* sangría bajo el h2 */
+  font-size:.7rem;                   /* ~14px */
+  color:#374151;                       /* gray-700 */
+  border-radius:.375rem;
+  cursor:pointer;
+}
+#subcategoria-sidebar .toc-h3:hover{ background:#f8fafc; }
+#subcategoria-sidebar .toc-h3.is-active{
+  background:transparent !important;
+  color:#111827 !important;
+  font-weight:500 !important;
+  box-shadow: inset 3px 0 0 #9ca3af;  /* mini banda izquierda */
+}
 
+
+/* === TOC: resaltar CONTENEDOR cuando el activo es un h2 con subtítulos === */
+#subcategoria-sidebar .toc-section{
+  transition: background-color .2s ease, box-shadow .2s ease;
+  border-radius:.5rem; /* redondeo normal cuando no está activo */
+}
+#subcategoria-sidebar .toc-section.is-active{
+  background:#f3f4f6;                 /* gris suave a todo el bloque */
+  border-radius:0 !important;
+  box-shadow:
+    inset 3px 0 0 #9ca3af,            /* banda izquierda */
+    inset 0 .5px 0 #e5e7eb,           /* hairline superior */
+    inset 0 -.5px 0 #e5e7eb,          /* hairline inferior */
+    inset -.5px 0 0 #e5e7eb;          /* borde derecho fino */
+}
+#subcategoria-sidebar .toc-section.is-active .toc-h2{
+  background:transparent !important;  /* evita doble fondo en el h2 */
+  color:#111827;
+  font-weight:500;
+}
+
+/* Subtítulo activo: solo él lleva la banda (no todo el bloque) */
+#subcategoria-sidebar .toc-h3.is-active{
+    border-radius: 0 !important;     /* ← quita la curva */
+  background:transparent !important;
+  color:#111827 !important;
+  font-weight:500 !important;
+  box-shadow: inset 3px 0 0 #9ca3af;
+}
+
+/* Opcional: enderezar también el contenedor cuando el activo es un h3 */
+#subcategoria-sidebar .toc-section:has(.toc-h3.is-active){
+  border-radius: 0 !important;
+}
+
+/* TOC: subtítulo activo con borde gris completo, igual a los títulos */
+#subcategoria-sidebar .toc-h3.is-active {
+  /* mismo fondo gris que los títulos activos */
+  background: #f3f4f6 !important;    /* ← pisa el "transparent !important" anterior */
+  color: #111827;                     /* gray-900 */
+  font-weight: normal;
+
+  /* sin radios para que “toque” los bordes */
+  border-radius: 0 !important;
+
+  /* hairlines arriba/abajo y borde derecho sutil SIN alterar layout */
+  box-shadow:
+    inset 2px 0 0 #9ca3af,            /* banda izquierda */
+    inset 0 .5px 0 #e5e7eb,           /* borde superior */
+    inset 0 -.5px 0 #e5e7eb,          /* borde inferior */
+    inset -.5px 0 0 #e5e7eb;          /* borde derecho */
+}
+
+
+/* === Sweep celeste por DETRÁS del texto, un poco más lento === */
+.flash-mark{
+  position: relative;
+  display: inline-block;
+  z-index: 0;                 /* crea stacking context para apilar detrás */
+}
+.flash-mark::after{
+  content: "";
+  position: absolute;
+  inset: 0 .06em;             /* mini margen lateral */
+  background: rgba(186,230,253,.9); /* sky-200 */
+  border-radius: .18em;
+  pointer-events: none;
+
+  /* detrás del texto */
+  z-index: -1;                /* ← clave: queda por debajo del contenido */
+  transform-origin: left center;
+  transform: scaleX(0);
+
+  /* más lento: barrido 0.8s + desvanecido 0.5s */
+  animation:
+    flash-sweep .9s cubic-bezier(.22,.61,.36,1) forwards,
+    flash-fade  .6s ease-out .8s forwards;
+}
+
+@keyframes flash-sweep { to { transform: scaleX(1); } }
+@keyframes flash-fade  { to { opacity: 0; } }
 
 
 
@@ -2303,6 +2453,29 @@ details[open] > summary {
   
   
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
+<script>
+  // Renderer: links abren en nueva pestaña
+  const mdRenderer = new marked.Renderer();
+  mdRenderer.link = (href, title, text) => {
+    const t = title ? ` title="${title}"` : "";
+    const h = href || "#";
+    return `<a href="${h}"${t} target="_blank" rel="noopener noreferrer">${text}</a>`;
+  };
+
+  function renderMD(source) {
+    const src = (source ?? "").trim();
+    marked.setOptions({
+      gfm: true,
+      breaks: true,       // respeta saltos de línea simples
+      smartLists: true,
+      renderer: mdRenderer
+    });
+    const raw = marked.parse(src);
+    return DOMPurify.sanitize(raw);
+  }
+</script>
 
 
 
@@ -2741,25 +2914,11 @@ details[open] > summary {
 </script>
 
 <script>
-function measureStickySubHeaderHeight() {
+let STICKY_H = 0; // altura actual del header sticky
+
+function updateStickyHeight() {
   const hdr = document.querySelector('#subcat-header');
-  if (!hdr) return 0;
-
-  const wasStuck = hdr.classList.contains('is-stuck');
-  const bc = hdr.querySelector('#breadcrumbs');
-  const wasHidden = bc ? bc.classList.contains('hidden') : false;
-
-  // Fuerza estado "final" (stuck + breadcrumbs visibles) para medir
-  hdr.classList.add('is-stuck');
-  if (bc) bc.classList.remove('hidden');
-
-  const h = hdr.getBoundingClientRect().height;
-
-  // Restaurar estado anterior
-  if (!wasStuck) hdr.classList.remove('is-stuck');
-  if (bc && wasHidden) bc.classList.add('hidden');
-
-  return h;
+  STICKY_H = hdr ? (hdr.getBoundingClientRect().height || 0) : 0;
 }
 </script>
 
@@ -2924,13 +3083,14 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   <h1 class="text-3xl font-bold">
     ${data.nombre || subcategoriaId}
   </h1>
-  <button class="w-fit flex items-center space-x-2 bg-gray-100 text-[#546E7A] text-sm font-semibold uppercase px-3 py-1.5 rounded-md">
-    <!-- Ícono triangular -->
-    <svg class="w-3 h-3 fill-current" viewBox="0 0 20 20">
-      <path d="M6 4l8 6-8 6V4z" />
-    </svg>
-    <span>Qbank Session</span>
-  </button>
+  <button class="flex items-center justify-center bg-gray-100 text-[#546E7A] text-[8px] font-semibold uppercase rounded-sm space-x-1"
+        style="width:95px; height:18px;">
+  <!-- Ícono triangular -->
+  <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
+    <path d="M6 4l8 6-8 6V4z" />
+  </svg>
+  <span>Qbank Session</span>
+</button>
 </div>
   <!-- Columna derecha: metadata -->
   <div class="flex flex-col items-end space-y-2 text-sm">
@@ -2951,7 +3111,7 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
       <!-- Izquierda -->
       <div class="flex items-center">
         <i class="fas fa-highlighter text-slate-600 text-sm mr-1.5"></i>
-        <span class="hl-title text-sm">MY HIGHLIGHTING</span>
+<span class="hl-title text-sm" style="font-weight:400; font-size:0.8rem;">MY HIGHLIGHTING</span>
       </div>
 
       <!-- Derecha -->
@@ -3189,9 +3349,113 @@ if (expandAllBtn) {
 
 
 
+
+
+
+
 const sortedDefs = Object
   .entries(data.definiciondetallada || {})
   .sort(([, a], [, b]) => (a.orden ?? 0) - (b.orden ?? 0));
+
+
+
+// ——— Helpers para renderizar la "clave" (tip con foquito) ———
+const esc = (s) =>
+  String(s ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+
+// Si quieres permitir resaltar frases, escribe [[así]] en Firestore y saldrá con subrayado punteado
+function formatClaveText(t){
+  return esc(t).replace(/\[\[(.+?)\]\]/g,'<span class="key-dotted">$1</span>');
+}
+
+// Un “callout” azul con el ícono de foco
+function renderClave(t){
+  return `
+  <div class="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-900">
+    <div class="mt-[2px] flex h-5 w-5 items-center justify-center rounded-full bg-blue-100">
+      <i class="fas fa-lightbulb text-[11px] text-blue-600"></i>
+    </div>
+    <p class="m-0 text-sm leading-5">${formatClaveText(t)}</p>
+  </div>`;
+}
+
+// Acepta bloque.clave (string) o bloque.claves (array de strings)
+function renderClaveBlock(bloque){
+  if (Array.isArray(bloque?.claves)) return bloque.claves.map(renderClave).join("");
+  if (bloque?.clave) return renderClave(bloque.clave);
+  return "";
+}
+
+// Convierte claves como "special_surface_epithelia" -> "Special Surface Epithelia"
+const makeTitle = (k) => k.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase());
+
+// Renderiza hijos (subsubtítulos) ordenados por "orden"
+// Renderiza hijos (subsubtítulos) con look de "título" + prefijo ⤷
+function renderChildren(children) {
+  if (!children || typeof children !== 'object') return '';
+
+  const childEntries = Object.entries(children)
+    .sort(([,a],[,b]) => (a?.orden ?? 0) - (b?.orden ?? 0));
+
+  return `
+    <div class="divide-y divide-gray-200 -mx-6">
+      ${childEntries.map(([ck, ch]) => `
+        <details class="group subhead">
+          <summary class="px-6 py-2 group-open:py-3 flex items-center justify-between hover:bg-slate-50 transition-colors">
+            <span class="text-xs md:text-sm leading-5">
+              <span aria-hidden="true" class="mr-2 text-slate-400">⤷</span>${makeTitle(ck)}
+            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2"
+                 class="h-4 w-4 text-gray-500 transition-transform group-open:rotate-180" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </summary>
+
+          <div class="px-6 py-4 text-gray-700 space-y-3">
+            ${ch?.clave ? renderClave(ch.clave) : ''}
+
+            ${ch?.texto ? `<div class="texto-lista">${renderMD(ch.texto)}</div>` : ''}
+
+            ${Array.isArray(ch?.imagenes) && ch.imagenes.length ? `
+              <div class="galeria">
+                ${ch.imagenes.map(img => `
+                  <figure class="media-thumb image-thumb" data-img-url="${img.url}" data-img-desc="${img.descripcion || ''}">
+                    <div class="thumb-box"><img src="${img.url}" alt="${img.descripcion || ''}"></div>
+                    <figcaption class="thumb-caption">${img.descripcion || ''}</figcaption>
+                  </figure>
+                `).join('')}
+              </div>
+            ` : ''}
+
+            ${Array.isArray(ch?.videos) && ch.videos.length ? `
+              <div class="galeria videos">
+                ${ch.videos.map(v => `
+                  <figure class="media-thumb video-thumb" data-video-id="${v.videoId}" data-video-title="${v.titulo || ''}">
+                    <div class="thumb-box">
+                      <img src="https://img.youtube.com/vi/${v.videoId}/hqdefault.jpg" alt="${(v.descripcion || v.titulo || 'Video').replace(/"/g,'&quot;')}" />
+                      <span class="play-badge" aria-hidden="true"><i class="fas fa-play"></i></span>
+                    </div>
+                    <figcaption class="thumb-caption">${v.descripcion || v.titulo || ''}</figcaption>
+                  </figure>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        </details>
+      `).join('')}
+    </div>
+  `;
+}
+
+
+
+
+
+
+
 
 // 2) Iteramos en el orden correcto
 sortedDefs.forEach(([key, bloque]) => {
@@ -3204,71 +3468,49 @@ sortedDefs.forEach(([key, bloque]) => {
   const section = document.createElement("details");
   section.className = "group";
    section.innerHTML = `
-<summary class="py-2 group-open:py-3 flex items-center justify-between">
-  <span class="text-xs md:text-sm leading-5
-               transition-[font-size] duration-150
-               group-open:!text-[16px] group-open:leading-[22px]">
-    ${title}
-  </span>
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    class="h-4 w-4 text-gray-500 transition-transform group-open:rotate-180"
-    aria-hidden="true"
-  >
-    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-  </svg>
-</summary>
+  <summary class="py-2 group-open:py-3 flex items-center justify-between">
+    <span class="text-xs md:text-sm leading-5 transition-[font-size] duration-150 group-open:!text-[16px] group-open:leading-[22px]">
+      ${title}
+    </span>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         class="h-4 w-4 text-gray-500 transition-transform group-open:rotate-180" aria-hidden="true">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+    </svg>
+  </summary>
 
+  <div class="px-6 py-4 text-gray-700 space-y-4">
+    
 
+    ${renderClaveBlock(bloque)}      <!-- 👈 NUEVO: tip con foquito si existe “clave” -->
 
-    <div class="px-6 py-4 text-gray-700 space-y-4">
-      ${bloque.texto
+${bloque.texto ? `<div class="texto-lista">${renderMD(bloque.texto)}</div>` : ``}
 
-        ? `<div class="texto-lista">${bloque.texto}</div>`
-        : ``
-      }
-      ${imgs.length
-        ? `<div class="galeria">
-             ${imgs.map(img => `
-  <figure class="media-thumb image-thumb" 
-        data-img-url="${img.url}" 
-        data-img-desc="${img.descripcion || ''}">
-  <div class="thumb-box">
-    <img src="${img.url}" alt="${img.descripcion || ''}">
-  </div>
-  <figcaption class="thumb-caption">${img.descripcion || ''}</figcaption>
-</figure>
-`).join("")}
-           </div>`
-        : ``
-      }
-      ${vids.length
-  ? `<div class="galeria videos">
-       ${vids.map(v => `
-  <figure class="media-thumb video-thumb" 
-          data-video-id="${v.videoId}"
-          data-video-title="${v.titulo || ''}">
-    <div class="thumb-box">
-      <img src="https://img.youtube.com/vi/${v.videoId}/hqdefault.jpg"
-           alt="${(v.descripcion || v.titulo || 'Video').replace(/"/g,'&quot;')}" />
-      <span class="play-badge" aria-hidden="true">
-        <i class="fas fa-play"></i>
-      </span>
-    </div>
-    <figcaption class="thumb-caption">
-      ${v.descripcion || v.titulo || ''}
-    </figcaption>
-  </figure>
-`).join("")}
-     </div>`
-  : ``}
-    </div>
+    ${imgs.length ? `
+      <div class="galeria">
+        ${imgs.map(img => `
+          <figure class="media-thumb image-thumb" data-img-url="${img.url}" data-img-desc="${img.descripcion || ''}">
+            <div class="thumb-box"><img src="${img.url}" alt="${img.descripcion || ''}"></div>
+            <figcaption class="thumb-caption">${img.descripcion || ''}</figcaption>
+          </figure>`).join("")}
+      </div>` : ``}
 
-    <div class="collapse-controls">
+    ${vids.length ? `
+      <div class="galeria videos">
+        ${vids.map(v => `
+          <figure class="media-thumb video-thumb" data-video-id="${v.videoId}" data-video-title="${v.titulo || ''}">
+            <div class="thumb-box">
+              <img src="https://img.youtube.com/vi/${v.videoId}/hqdefault.jpg" alt="${(v.descripcion || v.titulo || 'Video').replace(/"/g,'&quot;')}" />
+              <span class="play-badge" aria-hidden="true"><i class="fas fa-play"></i></span>
+            </div>
+            <figcaption class="thumb-caption">${v.descripcion || v.titulo || ''}</figcaption>
+          </figure>`).join("")}
+      </div>` : ``}
+
+  
+  
+      </div>
+
+  <div class="collapse-controls">
   <button class="flex items-center space-x-1">
     <i class="fas fa-grip-lines-vertical"></i>
     <span>COLLAPSE</span>
@@ -3283,12 +3525,92 @@ sortedDefs.forEach(([key, bloque]) => {
       <span>FEEDBACK</span>
     </button>
   </div>
+
+
+
+
+
+
 </div>
 
 
 
   `;
+
+
+
+
+
+
+
+
+
+
+
+
   wrapper.appendChild(section);
+
+  // —— Subsubtítulos como títulos hermanos (con prefijo ⤷) ——
+if (bloque.children && typeof bloque.children === 'object') {
+  const childEntries = Object.entries(bloque.children)
+    .sort(([,a],[,b]) => (a?.orden ?? 0) - (b?.orden ?? 0));
+
+  childEntries.forEach(([ck, ch]) => {
+    const cImgs = Array.isArray(ch.imagenes) ? ch.imagenes : [];
+    const cVids = Array.isArray(ch.videos)  ? ch.videos  : [];
+
+    const child = document.createElement('details');
+    child.className = 'group';
+    child.innerHTML = `
+      <summary class="py-2 group-open:py-3 flex items-center justify-between">
+        <span class="text-xs md:text-sm leading-5">
+          <span class="mr-2 text-slate-400">⤷</span>${makeTitle(ck)}
+        </span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             class="h-4 w-4 text-gray-500 transition-transform group-open:rotate-180" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </summary>
+
+      <div class="px-6 py-4 text-gray-700 space-y-4">
+        ${renderClaveBlock(ch)}
+        ${ch?.texto ? `<div class="texto-lista">${renderMD(ch.texto)}</div>` : ``}
+
+        ${cImgs.length ? `
+          <div class="galeria">
+            ${cImgs.map(img => `
+              <figure class="media-thumb image-thumb" data-img-url="${img.url}" data-img-desc="${img.descripcion || ''}">
+                <div class="thumb-box"><img src="${img.url}" alt="${img.descripcion || ''}"></div>
+                <figcaption class="thumb-caption">${img.descripcion || ''}</figcaption>
+              </figure>`).join("")}
+          </div>` : ``}
+
+        ${cVids.length ? `
+          <div class="galeria videos">
+            ${cVids.map(v => `
+              <figure class="media-thumb video-thumb" data-video-id="${v.videoId}" data-video-title="${v.titulo || ''}">
+                <div class="thumb-box">
+                  <img src="https://img.youtube.com/vi/${v.videoId}/hqdefault.jpg" alt="${(v.descripcion || v.titulo || 'Video').replace(/"/g,'&quot;')}" />
+                  <span class="play-badge" aria-hidden="true"><i class="fas fa-play"></i></span>
+                </div>
+                <figcaption class="thumb-caption">${v.descripcion || v.titulo || ''}</figcaption>
+              </figure>`).join("")}
+          </div>` : ``}
+      </div>
+
+      <div class="collapse-controls">
+        <button class="flex items-center space-x-1">
+          <i class="fas fa-grip-lines-vertical"></i><span>COLLAPSE</span>
+        </button>
+        <div class="flex items-center space-x-6">
+          <button class="flex items-center space-x-1"><i class="fas fa-pen"></i><span>NOTES</span></button>
+          <button class="flex items-center space-x-1"><i class="fas fa-comment-dots"></i><span>FEEDBACK</span></button>
+        </div>
+      </div>
+    `;
+    wrapper.appendChild(child);
+  });
+}
 
   
 
@@ -3321,6 +3643,8 @@ const io = new IntersectionObserver(
     // muestra/oculta el breadcrumb sin tocar tus tamaños de summary
     const bc = subcatHeader.querySelector('#breadcrumbs');
     if (bc) bc.classList.toggle('hidden', !stuck);
+
+    updateStickyHeight();
   },
   { root: content, threshold: 0 }
 );
@@ -3349,7 +3673,6 @@ function updateBreadcrumbSection() {
   const txt = (current.querySelector('span')?.textContent || current.textContent).trim();
   bcSection.textContent = txt;
 }
-content.addEventListener('scroll', updateBreadcrumbSection);
 // también al abrir/cerrar secciones
 summaries.forEach(s => s.addEventListener('click', () => setTimeout(updateBreadcrumbSection, 0)));
 // estado inicial
@@ -3373,17 +3696,11 @@ function getActiveTOCIndex() {
 // No-op para que no rompa (luego lo mejoras si quieres animación)
 function animateTOCTraversal() {/* noop */}
 
-// —— Vincular también el estado activo de la TOC ——
-const tocButtons = Array.from(document.querySelectorAll('#subcategoria-sidebar .toc-h2'));
+// —— Vincular activo de la TOC usando el contenedor cuando toca ——
 function updateTOCActive(){
-  // índice del summary "actual"
-  const names = summaries.map(s => (s.querySelector('span')?.textContent || s.textContent).trim());
-  const currentTxt = bcSection.textContent.trim();
-  const idx = names.findIndex(n => n === currentTxt);
-  tocButtons.forEach(b => b.classList.remove('is-active'));
-  if (idx >= 0 && tocButtons[idx]) tocButtons[idx].classList.add('is-active');
+  const idx = getActiveTOCIndex();
+  setTOCActiveByIndex(idx);
 }
-content.addEventListener('scroll', updateTOCActive);
 summaries.forEach(s => s.addEventListener('click', () => setTimeout(updateTOCActive, 0)));
 updateTOCActive();
 
@@ -3398,26 +3715,234 @@ wrapper.querySelectorAll('.media-thumb').forEach(thumb => {
 
 
 
-// — TOC: títulos de cada <details> con estilo de la captura —
-  const makeTitle = (k)=>k.replace(/_/g,' ').replace(/\b\w/g, l=>l.toUpperCase());
-const topicTitle = (data.nombre || subcategoriaId);   // ej. "Tejido conectivo"
-const tocHTML = `
+// — TOC: títulos (h2) + subtítulos (h3) como en la captura —
+const topicTitle = (data.nombre || subcategoriaId);
+
+// 1) Lista real de <details> en el orden en que se pintaron
+const detailsList = Array.from(document.querySelectorAll('#subcategoria-body details'));
+
+// 2) Calculamos los índices que tendrá cada botón del TOC
+let cursor = 0;
+const tocSections = sortedDefs.map(([k, bloque]) => {
+  const h2Title = makeTitle(k);
+  const h2Index = cursor++;
+  const children = Object.entries(bloque.children || {})
+    .sort(([,a],[,b]) => (a?.orden ?? 0) - (b?.orden ?? 0))
+    .map(([ck]) => ({ title: makeTitle(ck), index: cursor++ }));
+  return { title:h2Title, index:h2Index, children };
+});
+
+
+
+
+function flashSummaryAtIndex(idx){
+  const det = detailsList[idx];
+  if (!det) return;
+  const summary = det.querySelector('summary');
+  const target  = summary?.querySelector('span') || summary; // solo el texto, si existe
+  if (!target) return;
+
+  // reinicia la animación si ya estaba corriendo
+  target.classList.remove('flash-mark');
+  void target.offsetWidth;            // reflow para reiniciar
+  target.classList.add('flash-mark');
+
+  // limpia la clase al terminar
+  target.addEventListener('animationend', () => {
+    target.classList.remove('flash-mark');
+  }, { once:true });
+}
+
+// 3) Pintamos el TOC con h2 + h3
+const subSidebar = document.getElementById('subcategoria-sidebar');
+const subWrap    = document.getElementById('subcategoria-sidebar-content');
+
+let tocHTML = `
   <div class="toc-topic" id="toc-topic">${topicTitle}</div>
   <nav class="toc">
-    ${sortedDefs.map(([k],i)=>`
-      <div class="toc-section">
-        <button class="toc-h2" data-toc-index="${i}">${makeTitle(k)}</button>
-      </div>
-    `).join('')}
-  </nav>`;
+`;
+tocSections.forEach(sec => {
+  tocHTML += `
+    <div class="toc-section">
+      <button class="toc-h2" data-index="${sec.index}">${sec.title}</button>
+      ${sec.children.length ? `
+        <div class="toc-sub">
+          ${sec.children.map(ch => `
+            <button class="toc-h3" data-index="${ch.index}">${ch.title}</button>
+          `).join('')}
+        </div>
+      ` : ``}
+    </div>
+  `;
+});
+tocHTML += `</nav>`;
+subWrap.innerHTML = tocHTML;
+subSidebar.classList.remove('hidden');
 
-  const subSidebar = document.getElementById('subcategoria-sidebar');
-  const subWrap    = document.getElementById('subcategoria-sidebar-content');
-  subWrap.innerHTML = tocHTML;
-  subSidebar.classList.remove('hidden');
+// —— FIX: lock de selección TOC durante scroll programático ——
+let tocLockIdx = -1;
+let tocLockTimer = null;
+const LOCK_MS = 500; // duración aproximada del scroll suave
 
-  const detailsList = Array.from(document.querySelectorAll('#subcategoria-body details'));
-  const tocBtns     = Array.from(subWrap.querySelectorAll('.toc-h2'));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// === TOC: marcar contenedor (h2+subtítulos) o solo el subtítulo ===
+function setTOCActiveByIndex(activeIdx){
+  const tocRoot  = document.getElementById('subcategoria-sidebar-content');
+  if (!tocRoot) return;
+  const h2Btns   = tocRoot.querySelectorAll('.toc-h2');
+  const h3Btns   = tocRoot.querySelectorAll('.toc-h3');
+  const sections = tocRoot.querySelectorAll('.toc-section');
+
+  // limpia todo
+  h2Btns.forEach(b => b.classList.remove('is-active'));
+  h3Btns.forEach(b => b.classList.remove('is-active'));
+  sections.forEach(s => s.classList.remove('is-active'));
+
+  if (activeIdx == null || activeIdx < 0) return;
+
+  const btn = tocRoot.querySelector(`[data-index="${activeIdx}"]`);
+  if (!btn) return;
+
+  if (btn.classList.contains('toc-h2')) {
+    const sec = btn.closest('.toc-section');
+    // si el h2 tiene subtítulos => marcar TODO el bloque; si no, marcar solo el h2 (fallback)
+    if (sec && sec.querySelector('.toc-sub')) {
+      sec.classList.add('is-active');
+    } else {
+      btn.classList.add('is-active');
+    }
+  } else if (btn.classList.contains('toc-h3')) {
+    btn.classList.add('is-active');
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 4) Click: abrir la sección objetivo y hacer scroll con offset correcto
+function scrollToDetailIndex(targetIdx){
+  const container = document.getElementById('main-content');
+  const det = detailsList[targetIdx];
+  if (!det) return;
+  if (!det.open) det.open = true;
+  const summary = det.querySelector('summary');
+  requestAnimationFrame(() => {
+    const cR = container.getBoundingClientRect();
+    const sR = summary.getBoundingClientRect();
+    const offset = STICKY_H + 1;
+    const top = container.scrollTop + (sR.top - cR.top) - offset;
+    container.scrollTo({ top, behavior:'smooth' });
+  });
+}
+
+// Espera hasta que el contenedor deje de desplazarse (con fallback)
+function waitForScrollEnd(container, idleMs = 140, hardTimeout = 2000){
+  return new Promise(resolve => {
+    let idleTimer = null;
+    let finished = false;
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      container.removeEventListener('scroll', onScroll, { passive:true });
+      container.removeEventListener('scrollend', finish); // si existe
+      clearTimeout(hardTimer);
+      resolve();
+    };
+
+    const onScroll = () => {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(finish, idleMs); // “no se mueve” por idleMs
+    };
+
+    // Soporte nativo si el navegador emite 'scrollend'
+    container.addEventListener('scrollend', finish, { once:true });
+
+    // Fallback por inactividad del evento scroll
+    container.addEventListener('scroll', onScroll, { passive:true });
+    onScroll(); // arranca el contador
+
+    // Cortafuegos por si algo queda colgado
+    const hardTimer = setTimeout(finish, hardTimeout);
+  });
+}
+
+
+// ✅ ÚNICO handler de click
+// ✅ ÚNICO handler de click (con lock anti-parpadeo)
+const tocBtns = Array.from(subWrap.querySelectorAll('.toc-h2, .toc-h3'));
+tocBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const idx = Number(btn.dataset.index || -1);
+    if (idx < 0) return;
+
+    // Activa lock para evitar que el sync por scroll “robe” la selección
+    if (tocLockTimer) clearTimeout(tocLockTimer);
+    tocLockIdx = idx;
+    setTOCActiveByIndex(idx); // pinta activo inmediatamente
+
+    const container = document.getElementById('main-content');
+    const det = detailsList[idx];
+    if (!det.open) det.open = true;
+
+    const summary = det.querySelector('summary');
+    requestAnimationFrame(() => {
+      const cR = container.getBoundingClientRect();
+      const sR = summary.getBoundingClientRect();
+      const target = container.scrollTop + (sR.top - cR.top) - STICKY_H - 1;
+      container.scrollTo({ top: target, behavior: 'smooth' });
+    });
+
+
+        // … después de hacer container.scrollTo({ top, behavior:'smooth' });
+waitForScrollEnd(container).then(() => {
+  flashSummaryAtIndex(idx);   // ahora el resaltado corre cuando el scroll terminó
+});
+
+
+    // libera el lock cuando termina el scroll suave
+    tocLockTimer = setTimeout(() => { tocLockIdx = -1; }, LOCK_MS);
+  }, { passive: true });
+});
+
+
+
+
+
+
+// 5) Sincronizar estado activo al cargar
+updateTOCActive();
 
   // === Sincronía TOC priorizando "abierto + contenido visible" ===
 (function syncTOCByVisibility(){
@@ -3425,7 +3950,7 @@ const tocHTML = `
 
   function getContainerBounds(){
     const r = content.getBoundingClientRect();
-    const off = measureStickySubHeaderHeight() || 0; // respeta header/crumbs pegados
+    const off = STICKY_H || 0; // respeta header/crumbs pegados (tomado del observer)
     return { top: r.top + off + 1, bottom: r.bottom };
   }
 
@@ -3473,21 +3998,27 @@ const tocHTML = `
   return bestIdx; // puede ser -1 si no hay ninguno visible
 }
 
+
+
+
+
 function applyActive(idx){
-  // limpiar siempre
-  tocBtns.forEach(b => b.classList.remove('is-active'));
-  // si idx inválido (p.ej. todo colapsado), dejamos todo sin selección
-  if (idx == null || idx < 0) return;
-  // marcar activo
-  if (tocBtns[idx]) {
-    tocBtns[idx].classList.add('is-active');
-    tocBtns[idx].scrollIntoView({ block: 'nearest' });
-  }
+  setTOCActiveByIndex(idx);
+  // mantener auto-scroll del ítem activo en la TOC
+  const activeBtn = document.querySelector(`#subcategoria-sidebar-content [data-index="${idx}"]`);
+  activeBtn?.scrollIntoView({ block: 'nearest' });
 }
 
   // Ejecuta en scroll, al abrir/cerrar <details> y al inicializar
-  const onScrollSync = () => applyActive(pickActiveIndex());
-  content.addEventListener('scroll', onScrollSync, { passive: true });
+  const onScrollSync = () => {
+  if (tocLockIdx !== -1) {
+    applyActive(tocLockIdx);   // mientras haya lock, mantené el activo clickeado
+  } else {
+    applyActive(pickActiveIndex());
+  }
+  updateBreadcrumbSection();
+};
+content.addEventListener('scroll', onScrollSync, { passive: true });
   detailsList.forEach(d => d.addEventListener('toggle', () => {
     // Espera al reflow del toggle para medir correctamente
     requestAnimationFrame(onScrollSync);
@@ -3506,31 +4037,7 @@ function applyActive(idx){
 
 
 
-  // Click en TOC: abre sección y hace scroll compensando el header sticky
-  tocBtns.forEach((btn, idx) => {
-  btn.addEventListener('click', () => {
-    const detail  = detailsList[idx];
-    if (!detail.open) detail.open = true;
 
-    // 🔹 NUEVO: animar el paso por intermedios
-    const current = getActiveTOCIndex();
-    animateTOCTraversal(current, idx);
-
-    const container = document.getElementById('main-content');
-    const summary   = detail.querySelector('summary');
-
-    requestAnimationFrame(() => {
-      const cR = container.getBoundingClientRect();
-      const sR = summary.getBoundingClientRect();
-      const offset = measureStickySubHeaderHeight() + 1;
-      const target = container.scrollTop + (sR.top - cR.top) - offset;
-      container.scrollTo({ top: target, behavior: 'smooth' });
-    });
-
-    // marcamos destino al final por si no hay scroll/observer
-    setActiveTOC(idx);
-  });
-});
 
 
 
@@ -4764,6 +5271,94 @@ document.addEventListener('click', function(e) {
 
 
 
+<script>
+(function(){
+  function val(rootVar, fallback){
+    const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(rootVar));
+    return Number.isFinite(v) ? v : fallback;
+  }
+
+  function computeSplit(){
+    const modal = document.getElementById('video-modal');
+    if (!modal || !modal.classList.contains('split-view')) return;
+
+    const sb  = document.getElementById('sidebar');
+    const toc = document.getElementById('subcategoria-sidebar');
+
+    // ancho sidebar principal según estado
+    let sbW = 0;
+    if (sb) {
+      if (sb.classList.contains('force-hidden')) {
+        sbW = 0;
+      } else if (sb.classList.contains('collapsed')) {
+        sbW = val('--sb-collapsed', 40);
+      } else {
+        sbW = sb.offsetWidth || 0;
+      }
+    }
+
+    // ancho TOC si visible
+    const tocW = (toc && !toc.classList.contains('hidden'))
+                  ? (toc.offsetWidth || val('--subcat-width', 180))
+                  : 0;
+
+    const vw = document.documentElement.clientWidth || window.innerWidth;
+    const usable = Math.max(0, vw - (sbW + tocW));
+
+    // —— mitad derecha del área útil ——
+    const rightW = Math.max(360, Math.floor(usable / 2));
+    const leftOffset = Math.floor(sbW + tocW + (usable - rightW));
+
+    document.documentElement.style.setProperty('--split-left', leftOffset + 'px');
+    document.documentElement.style.setProperty('--split-w', rightW + 'px');
+  }
+
+  // Recalcular en resize
+  window.addEventListener('resize', () => requestAnimationFrame(computeSplit));
+
+  // Observar cambios de clase que afecten layout (sidebar, toc, body, modal)
+  const watch = (el) => {
+    if (!el) return;
+    new MutationObserver(() => requestAnimationFrame(computeSplit))
+      .observe(el, { attributes: true, attributeFilter: ['class', 'style'] });
+  };
+  document.addEventListener('DOMContentLoaded', () => {
+    watch(document.getElementById('sidebar'));
+    watch(document.getElementById('subcategoria-sidebar'));
+    watch(document.body);
+    watch(document.getElementById('video-modal'));
+
+    // primer cálculo por si ya entras en split
+    computeSplit();
+  });
+
+  // Si en algún punto tu código añade/quita .split-view, vuelve a calcular
+  document.addEventListener('click', (e) => {
+    // ejemplo: botón que activa el split
+    if (e.target.closest('#expand-video')) {
+      setTimeout(computeSplit, 0);
+    }
+    // ejemplo: botón que colapsa/oculta sidebar
+    if (e.target.closest('#menu-toggle')) {
+      setTimeout(computeSplit, 0);
+    }
+  });
+
+  // Por si llamas a toggleSidebarCollapse() programáticamente
+  const orig = window.toggleSidebarCollapse;
+  if (typeof orig === 'function') {
+    window.toggleSidebarCollapse = function(...args){
+      const r = orig.apply(this, args);
+      requestAnimationFrame(computeSplit);
+      return r;
+    };
+  }
+})();
+</script>
+
+
+
+
 </body>
 </html>
 
@@ -4783,3 +5378,6 @@ document.addEventListener('click', function(e) {
 //14 agosto
 //14 agosto 2
 //15 agosto
+//16 agosto
+//17 agosto noche noche noche amanecida
+//18 agosto amanecida amanecida
