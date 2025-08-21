@@ -10,9 +10,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
   <style>
 
-    
-
-
 
 @font-face {
   font-family:Lato-Light;
@@ -133,7 +130,7 @@ html, body {
 
     /* Overlay del sidebar principal sobre cualquier otro */
 #sidebar.open {
-  width: 240px;
+  width: calc(var(--sb-collapsed) + var(--subcat-width));
   /* … */
 }
 #sidebar.collapsed:hover {
@@ -763,16 +760,7 @@ body.split-view-active .dashboard-container{
   border-radius: 0; /* Elimina bordes redondeados */
 }
 
-/* Ajustes internos del modal */
-#video-modal aside {
-  /* width: 25% bg-gray-900 text-white p-6 flex flex-col */
-}
-#video-modal iframe {
-  /* absolute inset-0 w-full h-full */
-}
-#modal-close {
-  /* botón de cerrar en esquina */
-}
+
 
 /* Estilo para el modal en modo expandido */
 #video-modal.expanded {
@@ -1227,13 +1215,7 @@ details[open] > summary {
   font-size: var(--content-font-scale);
 }
 
-/* Mantengo la jerarquía de headings sin tocar el layout */
-#subcategoria-content h1, 
-#subcategoria-content h2, 
-#subcategoria-content h3 { 
-  /* opcional: si querés que también escalen, descomentá: */
-  /* font-size: var(--content-font-scale); */
-}
+
 
 
 /* Líneas separadoras (hairline) más finas bajo cada título */
@@ -2393,6 +2375,61 @@ body.split-view-active .dashboard-container{ width:60vw; }
 
 
 
+/* Botón activo del selector Light/Dark/System */
+/* Botón activo del selector Light/Dark/System */
+#um-theme button.is-active {
+  background:#E6F3F5;
+  color:rgb(53,120,134);
+  border: 1.5px solid rgb(53,120,134);  /* borde teal */
+  box-shadow: none;              /* quitamos el inset */
+}
+
+/* Segmento activo estilo Amboss */
+.seg-active {
+  background: rgb(222,241,243) !important;
+  color: rgb(53,120,134) !important;
+  border: 1.5px solid rgb(53,120,134);  /* borde teal */
+  box-shadow: none !important;           /* sin doble borde */
+  font-weight: 700 !important;
+}
+
+/* Botón flotante tipo AMBOSS para contraer/expandir sidebars */
+#sb-switch{
+    transform: scale(0.7);   /* Reduce todo el bloque al 80% */
+  padding: 4px 6px;        /* Ajusta el relleno interno */
+  font-size: 0.85rem;      /* Texto más chico, si lo tuviera */
+  position: fixed;
+  top: calc(3rem + 8px);                 /* justo debajo del header */
+  left: var(--btn-left, 280px);          /* la calcula JS según ancho real */
+  width: 28px; height: 28px;
+  display:grid; place-items:center;
+  background:rgb(245, 247, 249);
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 9999px;
+  box-shadow: 0 6px 6px rgba(164, 163, 163, 0.12);
+  color:#546E7A;
+  z-index: 120;                          /* por encima de las barras */
+  cursor: pointer;
+}
+#sb-switch i{ font-size: 10px; }
+
+/* Cuando las barras están ocultas, el botón se pega al borde izquierdo */
+body.bars-hidden #sb-switch{
+  left: 8px;
+}
+body.bars-hidden #sb-switch i{
+  transform: rotate(180deg);             /* chevron hacia la derecha */
+}
+
+/* Pequeña protección para que no tape el hover de tu sidebar colapsada */
+#sidebar.collapsed:hover + #subcategoria-sidebar ~ #sb-switch{
+  pointer-events: none;
+}
+
+/* Oculta el botón flotante cuando las barras están ocultas */
+body.bars-hidden #sb-switch { display: none !important; }
+
+
 
 
 
@@ -2529,68 +2566,177 @@ body.split-view-active .dashboard-container{ width:60vw; }
 </div>
 
 <div id="user-section" class="hidden min-h-screen w-full">
-  <header class="fixed top-0 left-0 right-0 z-50 bg-white border-b flex items-center justify-between px-4 h-[3rem] shadow">
+
+
+
+  
+<header class="fixed top-0 left-0 right-0 z-50 bg-white border-b flex items-center justify-between px-4 h-[3rem] shadow">
+  <!-- Sección izquierda -->
   <div class="flex items-center space-x-4">
+    <!-- Botón menú -->
     <button id="menu-toggle" class="text-gray-700 hover:text-black focus:outline-none">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
       </svg>
     </button>
 
+    <!-- Logo + texto -->
     <div class="flex items-center space-x-2">
       <img src="./assets/logo.png" alt="Logo" class="w-6 h-6" />
-      <span class="text-xl  text-gray-800 font-[Inter]">BANCOMICINA</span>
+      <span class="text-xl font-semibold text-gray-800 font-[Inter]">BANCOMICINA</span>
     </div>
 
-    <!-- Contenedor del dropdown -->
-<div class="relative" id="mode-dropdown">
-  <button id="mode-btn"
-    class="text-xs font-medium bg-[rgb(234,245,248)] text-[rgb(29,125,138)] px-2 py-1 rounded-full flex items-center space-x-1">
-    <span id="mode-label">CLÍNICO</span>
-    <i class="fas fa-chevron-down text-xs"></i>
-  </button>
+    <!-- Dropdown modo -->
+    <div class="relative" id="mode-dropdown">
+      <button id="mode-btn"
+        class="text-xs font-medium bg-[rgb(234,245,248)] text-[rgb(29,125,138)] px-2 py-1 rounded-full flex items-center space-x-1">
+        <span id="mode-label">CLÍNICO</span>
+        <i class="fas fa-chevron-down text-xs"></i>
+      </button>
+      <!-- ... menú desplegable ... -->
+    </div>
+  </div>
 
-  <!-- Menú reducido -->
-  <div id="mode-menu"
-       class="hidden absolute left-0 mt-2 w-[200px] bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50">
-    <!-- Opción 1 -->
-    <button type="button" data-mode="ESTUDIANTE"
-            class="w-full text-left px-4 py-3 hover:bg-gray-50">
-      <div class="text-sm font-semibold text-gray-800 leading-4">Modo Estudiante</div>
-      <div class="text-xs text-gray-500 mt-0.5">Ideal para preparación de exámenes</div>
-    </button>
+  <!-- Buscador centrado -->
+  <div class="flex-1 flex justify-center">
+    <div class="flex items-center gap-1">
+      <!-- Selector idioma -->
+      <button class="flex items-center gap-1 bg-[#EEF3F7] text-slate-700 rounded-md px-2.5 h-7 text-xs shadow-sm">
+        <span class="font-medium">EN</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z"/>
+        </svg>
+      </button>
 
-    <!-- Opción 2 (seleccionada) -->
-    <button type="button" data-mode="CLÍNICO"
-            class="w-full text-left px-4 py-3 bg-gray-50 flex items-start justify-between">
-      <div>
-        <div class="text-sm font-semibold text-gray-800 leading-4">Modo Clínico</div>
-        <div class="text-xs text-gray-500 mt-0.5">Recomendado para la práctica</div>
-      </div>
-      <i class="fas fa-check mt-0.5 text-[rgb(29,125,138)] text-xs"></i>
-    </button>
+      <!-- Barra de búsqueda -->
+      <!-- Barra de búsqueda -->
+<div id="searchbox" class="relative flex items-center gap-2 bg-[#EEF3F7] rounded-md px-2 h-7 w-[640px]">
+  <!-- Icono lupa -->
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 110-15 7.5 7.5 0 010 15z"/>
+  </svg>
 
-    <div class="h-[1px] bg-gray-200"></div>
+  <!-- Input -->
+  <input
+    id="global-search"
+    type="text"
+    placeholder="Ask a medical question"
+    autocomplete="off"
+    class="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 placeholder-slate-400 text-[12px] leading-6"
+  />
 
-    <a href="#" class="flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-slate-600 hover:text-slate-800">
-      <i class="fas fa-info-circle text-sm"></i>
-      Más información
-    </a>
+  <!-- Hint ⌘+K -->
+  <span class="pr-1 text-slate-500 text-sm font-medium">⌘+K</span>
+
+  <!-- Resultados -->
+  <div id="search-results"
+       class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg hidden
+              max-h-80 overflow-auto text-[12px]">
+    <!-- items dinámicos -->
   </div>
 </div>
+    </div>
   </div>
 
+  <!-- Sección derecha -->
   <div class="flex items-center space-x-4">
     <button class="text-gray-600 hover:text-black">
-      <i class="far fa-bookmark text-xl"></i>
+      <i class="far fa-bookmark text-lg"></i>
     </button>
-    <div id="user-initial" class="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center font-semibold">
-  M
-</div>
+    <div id="user-initial" class="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center font-semibold cursor-pointer">M</div>
   </div>
 </header>
 
+<!-- Menú flotante de usuario -->
+<!-- Menú flotante de usuario (compacto) -->
+<div id="user-menu"
+     class="hidden fixed z-[100] w-[240px] rounded-[4px] border border-[rgba(15,23,42,.06)]
+            bg-white shadow-[0_6px_16px_rgba(0,0,0,.12)]">
+  <!-- caret (punta) -->
+  <div id="user-menu-caret"
+       class="absolute -top-[5px] right-[10px] w-2.5 h-2.5 rotate-45
+              bg-white border-t border-l border-[rgba(15,23,42,.06)]"></div>
+
+  <div class="p-3">
+    <!-- Nombre + institución -->
+    <div class="mb-2">
+      <div id="um-name" class="text-[13px] font-[700] leading-[1.3] text-slate-900">
+        jhon ramos
+      </div>
+      <div id="um-sub" class="text-[11px] leading-[1.4] text-slate-400">
+        Instituto Universitario CEMIC Escuela de Medicina
+      </div>
+    </div>
+
+    <!-- Appearance en línea -->
+    <div class="mt-3 flex items-center justify-between gap-2">
+      <div class="text-[12px] leading-[1.4] text-slate-800 whitespace-nowrap">Appearance</div>
+
+      <!-- Contenedor con borde gris -->
+      <div id="appearance-group" class="inline-flex rounded-[4px]">
+  <button type="button" data-theme="light"
+          class="seg px-2 py-1.5 text-[11px] font-[700]
+                 border border-[rgba(15,23,42,.14)]
+                 first:rounded-l-[4px] rounded-none
+                 text-slate-600">
+    Light
+  </button>
+
+  <button type="button" data-theme="dark"
+          class="seg px-2 py-1.5 text-[11px] font-[600]
+                 border border-[rgba(15,23,42,.14)] -ml-px
+                 rounded-none text-slate-600">
+    Dark
+  </button>
+
+  <button type="button" data-theme="system"
+          class="seg px-2 py-1.5 text-[11px] font-[600]
+                 border border-[rgba(15,23,42,.14)] -ml-px
+                 last:rounded-r-[4px] rounded-none text-slate-600">
+    System
+  </button>
+</div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="mt-3 space-y-1.5">
+      <button id="um-edit"
+              class="w-full flex items-center justify-between text-left
+                     text-[11px] leading-[1.4] text-slate-800 py-1">
+        <span>Edit profile</span>
+        <i class="fas fa-angle-right text-slate-400 text-[11px]"></i>
+      </button>
+
+      <button id="um-logout"
+              class="w-full flex items-center justify-between text-left
+                     text-[11px] leading-[1.4] text-slate-800 py-1">
+        <span>Log out</span>
+        <i class="fas fa-angle-right text-slate-400 text-[11px]"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
   <div class="dashboard-container">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2601,7 +2747,7 @@ body.split-view-active .dashboard-container{ width:60vw; }
   <div class="sidebar-group" id="group-home">
     <a href="#" class="sidebar-item px-3 py-2 rounded" onclick="setActiveLink(this)">
       <div class="flex items-center">
-        <i class="fas fa-home w-4 shrink-0"></i>
+       <img src="./assets/aaa2.png" data-icon="aaa" class="w-4.3 h-5 shrink-0 sidebar-icon" />
         <span class="ml-2">Home</span>
       </div>
     </a>
@@ -2611,7 +2757,7 @@ body.split-view-active .dashboard-container{ width:60vw; }
   <div class="sidebar-group" id="group-drugs">
     <a href="#" class="sidebar-item px-3 py-2 rounded" onclick="setActiveLink(this)">
       <div class="flex items-center">
-        <i class="fas fa-pills w-4 shrink-0"></i>
+        <img src="./assets/bbb2.png" data-icon="bbb" class="w-4.3 h-5 shrink-0 sidebar-icon" />
         <span class="ml-2">Drugs</span>
       </div>
     </a>
@@ -2622,7 +2768,7 @@ body.split-view-active .dashboard-container{ width:60vw; }
   <button onclick="toggleAccordion('clinical')"
           class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded">
     <div class="flex items-center">
-      <i class="fas fa-stethoscope w-4"></i>
+      <img src="./assets/ccc2.png" data-icon="ccc" class="w-4.3 h-5 shrink-0 sidebar-icon" />
       <span class="ml-2">Clinical resources</span>
     </div>
     <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
@@ -2648,7 +2794,7 @@ body.split-view-active .dashboard-container{ width:60vw; }
   <button onclick="toggleAccordion('exams')"
           class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded">
     <div class="flex items-center">
-      <i class="fas fa-graduation-cap w-4"></i>
+      <img src="./assets/ddd2.png" data-icon="ddd" class="w-4.3 h-5  shrink-0 sidebar-icon" />
       <span class="ml-2">Exams & CME</span>
     </div>
     <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
@@ -2668,14 +2814,14 @@ body.split-view-active .dashboard-container{ width:60vw; }
   <button onclick="toggleAccordion('library')"
           class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded">
     <div class="flex items-center">
-      <i class="fas fa-book w-4"></i>
+     <img src="./assets/eee2.png" data-icon="eee" class="w-4.3 h-5  shrink-0 sidebar-icon" />
       <span class="ml-2">Library</span>
     </div>
     <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
   </button>
 
   <div id="accordion-library" class="ml-8 mt-1 space-y-1 hidden">
-    <a href="#" class="sidebar-item block px-2 py-1 rounded" onclick="setActiveLink(this)">Articles</a>
+<a id="lib-articles" href="#" class="sidebar-item block px-2 py-1 rounded" onclick="setActiveLink(this)">Articles</a>
     <a href="#" class="sidebar-item block px-2 py-1 rounded" onclick="setActiveLink(this)">Videos</a>
     <a href="#" class="sidebar-item block px-2 py-1 rounded" onclick="setActiveLink(this)">Media Library</a>
   </div>
@@ -2685,7 +2831,7 @@ body.split-view-active .dashboard-container{ width:60vw; }
   <button onclick="toggleAccordion('account')"
           class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded">
     <div class="flex items-center">
-      <i class="fas fa-user-cog w-4"></i>
+      <img src="./assets/fff2.png" data-icon="fff" class="w-4.3 h-5  shrink-0 sidebar-icon" />
       <span class="ml-2">Account & settings</span>
     </div>
     <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
@@ -2707,7 +2853,7 @@ body.split-view-active .dashboard-container{ width:60vw; }
   <button onclick="toggleAccordion('help')"
           class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded">
     <div class="flex items-center">
-      <i class="fas fa-question-circle w-4"></i>
+      <img src="./assets/ggg2.png" data-icon="ggg" class="w-4.3 h-5  shrink-0 sidebar-icon" />
       <span class="ml-2">Help & privacy</span>
     </div>
     <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
@@ -2737,7 +2883,7 @@ body.split-view-active .dashboard-container{ width:60vw; }
 <main id="main-content" class="bg-gray-100 sidebar-open">
        <div id="articles-panel" class="hidden flex-nowrap gap-x-4 transition-all mt-4">
   <!-- Columna 1: título fuera y card con la lista -->
-  <div class="flex flex-col">
+<div class="flex flex-col pb-6">
     <h2 class="text-lg font-bold mb-2 text-gray-800">Library</h2>
     <div class="bg-white rounded-lg shadow-sm articles-panel-column px-4 py-0">
       <ul class="text-sm divide-y divide-gray-200">
@@ -2780,38 +2926,64 @@ body.split-view-active .dashboard-container{ width:60vw; }
   </div>
 </div>
 
-      <div id="home-content">
-        <div class="flex justify-between items-center mb-6">
-          <h1 class="text-2xl font-semibold">Welcome, <span id="user-name">Usuario</span></h1>
-          <button id="logout" class="text-sm bg-red-100 text-red-600 px-3 py-1 rounded">Cerrar sesión</button>
-        </div>
+  <!-- === Página de resultados de búsqueda (tipo AMBOSS) === -->
+  <div id="search-page" class="hidden mx-auto max-w-3xl px-6 py-6"></div>
 
-        <div class="flex mb-8 space-x-2 items-center">
-          <select class="bg-white border rounded px-3 py-1 text-sm">
-            <option>EN</option>
-          </select>
-          <input type="text" placeholder="Ask a clinical question" class="flex-1 border rounded px-4 py-2 text-sm" />
-          <span class="px-3 py-2 text-sm text-gray-400">⌘+K</span>
-        </div>
+<div id="home-content" class="pt-6">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-semibold">Welcome, <span id="user-name">Usuario</span></h1>
+    <button id="logout" class="text-sm bg-red-100 text-red-600 px-3 py-1 rounded">Cerrar sesión</button>
+  </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="col-span-2 bg-white p-4 rounded shadow">
-            <h2 class="text-lg font-semibold mb-4">Recently viewed articles</h2>
-            <ul class="divide-y text-sm">
-              <li class="py-2 flex items-center"><i class="fas fa-file-alt mr-2 text-gray-500"></i>Acute pancreatitis</li>
-              <li class="py-2 flex items-center"><i class="fas fa-file-alt mr-2 text-gray-500"></i>Meningitis</li>
-              <li class="py-2 flex items-center"><i class="fas fa-file-alt mr-2 text-gray-500"></i>Spleen</li>
-              <li class="py-2 flex items-center"><i class="fas fa-file-alt mr-2 text-gray-500"></i>Fever</li>
-            </ul>
-          </div>
-          <div class="bg-white p-4 rounded shadow border text-center">
-            <div class="text-xl font-bold mb-2">NEJM Knowledge<span class="text-red-600">+</span></div>
-            <p class="text-sm text-gray-600 mb-2">Board Exams and CME</p>
-            <p class="text-sm text-gray-500 mb-4">Study for ABIM, ABFM, and ABP boards and earn CME credits.</p>
-            <button class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded">Go to Qbank</button>
-          </div>
-        </div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+  
+  <!-- Izquierda: 2/3 -->
+  <div class="col-span-2 bg-white rounded-lg shadow overflow-hidden">
+  <!-- Encabezado -->
+  <div class="px-4 py-2 border-b border-gray-200">
+    <h2 class="text-sm font-semibold text-slate-800">Recently viewed articles</h2>
+  </div>
+
+  <!-- Si la lista está vacía -->
+  <div class="flex items-center justify-between px-4 py-6 text-sm text-slate-500">
+    <span>Your recently viewed articles will appear here.</span>
+    <!-- Reemplaza tu botón por este (solo añade el onclick) -->
+<button class="border border-gray-300 text-slate-700 rounded px-3 py-1 text-sm hover:bg-gray-50"
+        onclick="goToLibraryArticles()">
+  Go to library
+</button>
+  </div>
+
+  <!-- Si la lista tiene items -->
+  <!--
+  <ul class="divide-y divide-gray-200 text-sm text-slate-700">
+    <li class="flex items-center">
+      <div class="w-12 flex items-center justify-center border-r border-gray-200 py-2">
+        <img src="./assets/iconopanel3b.png" alt="icon" class="w-3 h-5 opacity-80">
       </div>
+      <div class="flex-1 pl-4 py-2">Practical skills and procedures</div>
+    </li>
+    <!-- más <li> -->
+  </ul>
+  
+</div>
+
+  <!-- Derecha: 1/3 -->
+  <div class="bg-white rounded-lg shadow border text-center p-4">
+    <div>
+      <div class="text-xl font-bold mb-2">NEJM Knowledge<span class="text-red-600">+</span></div>
+      <p class="text-sm text-gray-600 mb-2">Board Exams and CME</p>
+      <p class="text-sm text-gray-500">Study for ABIM, ABFM, and ABP boards and earn CME credits.</p>
+    </div>
+    <div class="pt-4">
+      <button class="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded">
+        Go to Qbank
+      </button>
+    </div>
+  </div>
+
+</div>
+</div>
 
 
 
@@ -2819,13 +2991,6 @@ body.split-view-active .dashboard-container{ width:60vw; }
   <h2 id="subcategoria-title" class="text-2xl font-bold mb-4"></h2>
   <div id="subcategoria-body" class="space-y-6"></div>
 </div>
-
-
-
-
-
-
-
 
 
 
@@ -2905,11 +3070,172 @@ body.split-view-active .dashboard-container{ width:60vw; }
     }
   });
 
+  
+  
+  (function(){
+  const trigger = document.getElementById('user-initial');
+  const menu    = document.getElementById('user-menu');
+  const caret   = document.getElementById('user-menu-caret');
+
+  // Rellena nombre/institución si los tienes en Firebase
+  firebase.auth().onAuthStateChanged((user) => {
+    if (!user) return;
+    // nombre tal cual (minúsculas si quieres el look exacto):
+    const name = (user.displayName || user.email.split('@')[0] || 'Usuario');
+    document.getElementById('um-name').textContent = name.toLowerCase();
+    // institución (si tienes un customClaim o perfil guardado en Firestore, tráelo aquí):
+    // document.getElementById('um-sub').textContent = perfil.institucion || '—';
+  });
+
+  function ensureWidth(){
+    const wasHidden = menu.classList.contains('hidden');
+    if (wasHidden) {
+      menu.classList.remove('hidden');
+      menu.style.visibility = 'hidden';
+    }
+    const w = menu.getBoundingClientRect().width || 360;
+    if (wasHidden) { menu.classList.add('hidden'); menu.style.visibility=''; }
+    return w;
+  }
+
+  function positionMenu(){
+    const r  = trigger.getBoundingClientRect();
+    const mw = ensureWidth();
+    const gap = 10;
+    const margin = 12;
+    const idealLeft = r.left + r.width/2 - mw/2;
+    const left = Math.max(margin, Math.min(window.innerWidth - mw - margin, idealLeft));
+    const top  = r.bottom + gap;
+
+    menu.style.left = `${left}px`;
+    menu.style.top  = `${top}px`;
+
+    // caret apuntando exactamente al centro del avatar (clamp en bordes)
+    const caretHalf = 10; // w-5 => 20px, /2
+    const caretX = (r.left + r.width/2) - left;
+    const minX = 14 + caretHalf;
+    const maxX = mw - 14 - caretHalf;
+    const x = Math.max(minX, Math.min(maxX, caretX));
+    caret.style.left = `${x - caretHalf}px`;
+  }
+
+  function openMenu(){
+    positionMenu();
+    menu.classList.remove('hidden');
+    // fuerza un frame para transición
+    requestAnimationFrame(()=>menu.classList.add('open'));
+    setTimeout(()=>document.addEventListener('click', onOutside, { once:true }),0);
+    window.addEventListener('resize', onResize, { once:true });
+    document.addEventListener('keydown', onEsc,   { once:true });
+  }
+  function closeMenu(){
+    menu.classList.remove('open');
+    setTimeout(()=>menu.classList.add('hidden'), 120);
+  }
+  function onOutside(e){ if(!menu.contains(e.target) && e.target!==trigger) closeMenu(); }
+  function onEsc(e){ if(e.key==='Escape') closeMenu(); }
+  function onResize(){ positionMenu(); window.addEventListener('resize', onResize, { once:true }); }
+
+  trigger.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    menu.classList.contains('hidden') ? openMenu() : closeMenu();
+  });
+
+  // Segmented control (Light/Dark/System)
+  document.querySelectorAll('#user-menu .seg').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#user-menu .seg').forEach(b=>b.classList.remove('seg-active'));
+      btn.classList.add('seg-active');
+      const theme = btn.dataset.theme;
+      // aquí aplica tu tema si ya lo tienes implementado:
+      // setTheme(theme);
+    });
+  });
+
+  // Acciones (completa con tus handlers)
+  document.getElementById('um-edit').addEventListener('click', ()=>{/* abrir perfil */});
+  document.getElementById('um-logout').addEventListener('click', ()=>firebase.auth().signOut());
+})();
+  
+  
+  
+  
+  
+  
   document.getElementById("logout").addEventListener("click", () => {
     firebase.auth().signOut();
   });
 
   // Toggle de la sidebar
+
+const ICON_PATH = './assets/';
+const iconSrc = (base, active) => `${ICON_PATH}${base}${active ? '1' : '2'}.png`;
+
+// Hijos directos que cumplan un selector (sin :scope ni '>').
+function directChildren(el, selector) {
+  return Array.from(el.children).filter(ch => ch.matches(selector));
+}
+
+function updateSidebarIcons() {
+  document.querySelectorAll('#sidebar .sidebar-group').forEach(group => {
+    const img = group.querySelector('img.sidebar-icon');
+    if (!img) return;
+
+    const base = img.dataset.icon; // ej: 'aaa', 'bbb', 'ccc'
+
+    // a) link directo activo (Home/Drugs…)
+    const directActive =
+      directChildren(group, 'a.sidebar-item.is-active').length > 0 ||
+      directChildren(group, 'a.sidebar-item.active-link').length > 0;
+
+    // b) botón de acordeón y si está abierto
+    const btn = directChildren(group, 'button.sidebar-item')[0] || null;
+    const accordionOpen = !!(btn && btn.classList.contains('accordion-open'));
+
+    // c) subitem activo dentro del acordeón
+    const acc = group.querySelector('div[id^="accordion-"]');
+    const childActive = !!(acc && acc.querySelector('.sidebar-item.is-active, .sidebar-item.active-link'));
+
+    const active = directActive || accordionOpen || childActive;
+    const newSrc = iconSrc(base, active);
+    if (img.src.endsWith(`${base}${active ? '2' : '1'}.png`) || img.getAttribute('src') !== newSrc) {
+      img.setAttribute('src', newSrc);
+    }
+  });
+}
+
+// Marca activo un item
+window.setActiveLink = function (el) {
+  document.querySelectorAll('#sidebar .sidebar-item.is-active')
+    .forEach(a => a.classList.remove('is-active'));
+  el.classList.add('is-active');
+  updateSidebarIcons();
+};
+
+// Abre/cierra acordeón
+window.toggleAccordion = function (key) {
+  const acc = document.getElementById(`accordion-${key}`);
+  const btn = document.querySelector(`#group-${key} > button.sidebar-item`);
+  if (!acc || !btn) return;
+
+  acc.classList.toggle('hidden');
+  btn.classList.toggle('accordion-open');
+
+  if (acc.classList.contains('hidden')) {
+    acc.querySelectorAll('.sidebar-item.is-active').forEach(a => a.classList.remove('is-active'));
+  }
+  updateSidebarIcons();
+};
+
+// Observa cambios de clase dentro del sidebar para refrescar automáticamente
+const mo = new MutationObserver(muts => {
+  for (const m of muts) {
+    if (m.type === 'attributes' && m.attributeName === 'class') { updateSidebarIcons(); break; }
+  }
+});
+mo.observe(sidebar, { subtree: true, attributes: true, attributeFilter: ['class'] });
+
+document.addEventListener('DOMContentLoaded', updateSidebarIcons);
   
 </script>
 
@@ -4037,21 +4363,6 @@ content.addEventListener('scroll', onScrollSync, { passive: true });
 
 
 
-
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
   // — Mostrar la sección dentro del main —
   contentSection.classList.remove("hidden");
 
@@ -4075,6 +4386,11 @@ function switchView(target) {
   const subc  = document.getElementById("subcategoria-content");
   const subSB = document.getElementById("subcategoria-sidebar");
 
+   if (target !== "content" && !subc.classList.contains("hidden")) {
+    exitSplitIfAny();
+  }
+
+
   // Ocultar todo primero (sin parpadeos)
   home.classList.add("hidden");
   art.classList.add("hidden"); 
@@ -4097,38 +4413,49 @@ function switchView(target) {
 }
 
 function toggleAccordion(id) {
-  const acc  = document.getElementById(`accordion-${id}`);
-  const btn  = acc.previousElementSibling;
-  const icon = btn.querySelector('.fa-chevron-down');
-  const group = btn.closest('.sidebar-group');
+  const sidebar = document.getElementById('sidebar');
+  const acc     = document.getElementById(`accordion-${id}`);
+  const btn     = acc?.previousElementSibling;                 // <button> del grupo
+  const group   = btn?.closest('.sidebar-group');
+  const icon    = btn?.querySelector('.fa-chevron-down');
+
+  // Si la barra está colapsada: NO abrir acordeón. Solo dejar el ícono activo.
+  if (sidebar.classList.contains('collapsed')) {
+    closeAllAccordions();
+    acc?.classList.add('hidden');
+    btn?.classList.remove('accordion-open');
+    icon?.classList.remove('rotate-180');
+    group?.classList.remove('hover-open');
+
+    // Marcá solo el ícono como activo (tu CSS ya lo deja “limpio” en colapsado)
+    document.querySelectorAll('#sidebar .sidebar-item')
+      .forEach(el => el.classList.remove('is-active','active-link'));
+    btn?.classList.add('is-active');
+    return; // ⛔️ corta acá en colapsado
+  }
+
+  // —— Comportamiento normal cuando NO está colapsada ——
   const willOpen = acc.classList.contains('hidden');
 
-  // Cierra otros acordeones y limpia clases
+  // Cerrar todos
   document.querySelectorAll('div[id^="accordion-"]').forEach(el => {
     el.classList.add('hidden');
-    const ic = el.previousElementSibling.querySelector('.fa-chevron-down');
-    if (ic) ic.classList.remove('rotate-180');
-    el.previousElementSibling.classList.remove('accordion-open');
-
-    // quitar hover gris de todos los grupos
-    const g = el.closest('.sidebar-group');
-    g?.classList.remove('hover-open');
+    el.previousElementSibling?.classList.remove('accordion-open');
+    el.previousElementSibling?.querySelector('.fa-chevron-down')?.classList.remove('rotate-180');
+    el.closest('.sidebar-group')?.classList.remove('hover-open');
   });
 
-  // Abrir/cerrar este
+  // Abrir/cerrar el pedido
   if (willOpen) {
     acc.classList.remove('hidden');
-    btn.classList.add('accordion-open');
+    btn?.classList.add('accordion-open');
     icon?.classList.add('rotate-180');
-    group?.classList.add('hover-open'); // ← activa hover gris
-    lastOpenedAccordionId = id;
-
-   
-   } else {
-    btn.classList.remove('accordion-open');
+    group?.classList.add('hover-open');
+  } else {
+    acc.classList.add('hidden');
+    btn?.classList.remove('accordion-open');
     icon?.classList.remove('rotate-180');
-    group?.classList.remove('hover-open'); // ← lo quita al cerrar
-    lastOpenedAccordionId = null;
+    group?.classList.remove('hover-open');
   }
 }
 
@@ -4310,93 +4637,100 @@ toggleBtn.style.bottom = '0';
 
 
 
+<!-- Asegúrate de tener Firestore compat -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+  // si no existe 'db' en tu código, créalo:
+  window.db = window.db || firebase.firestore();
+</script>
 
 <script>
 function toggleSidebarCollapse(force = null) {
-  const sidebar = document.getElementById("sidebar");
+  const sidebar     = document.getElementById("sidebar");
   const mainContent = document.getElementById("main-content");
 
-  const shouldCollapse = force !== null ? force : !sidebar.classList.contains("collapsed");
+  const shouldCollapse = (force !== null) ? force : !sidebar.classList.contains("collapsed");
 
+  // — Helper: limpia selección/estados visuales en la sidebar —
   function clearSidebarSelection() {
-  // Quita cualquier estado “activo/seleccionado”
-  document.querySelectorAll('#sidebar a, #sidebar button').forEach(el => {
-    el.classList.remove('active-link', 'is-active', 'accordion-open');
-    el.querySelector('.fa-chevron-down')?.classList.remove('rotate-180');
-  });
+    // Quita estados activos/abiertos
+    document.querySelectorAll('#sidebar a, #sidebar button').forEach(el => {
+      el.classList.remove('active-link', 'is-active', 'accordion-open');
+      el.querySelector('.fa-chevron-down')?.classList.remove('rotate-180');
+    });
+    // Quita “bloques” o resaltados de grupo
+    document.querySelectorAll('#sidebar .sidebar-group').forEach(g => {
+      g.classList.remove('segment-active', 'hover-open');
+    });
+  }
 
-  // Quita el bloque gris del grupo activo, si lo hubiera
-  document.querySelectorAll('#sidebar .sidebar-group').forEach(g => {
-    g.classList.remove('segment-active', 'hover-open');
-  });
-}
-
-  if (shouldCollapse) {
-    sidebar.classList.add("collapsed");
-    mainContent.style.marginLeft = "0px";
-    mainContent.style.width = "calc(100% - 64px)";
-
-    // 🔽 Cierra todos los acordeones al colapsar
+  // — Cierra TODOS los acordeones (utilidad local) —
+  function closeAllAccordions() {
     document.querySelectorAll('div[id^="accordion-"]').forEach(acc => {
       acc.classList.add('hidden');
       const btn = acc.previousElementSibling;
-      btn.classList.remove('accordion-open');
-      const icn = btn.querySelector('.fa-chevron-down');
-      if (icn) icn.classList.remove('rotate-180');
+      btn?.classList.remove('accordion-open');
+      btn?.querySelector('.fa-chevron-down')?.classList.remove('rotate-180');
+      btn?.closest('.sidebar-group')?.classList.remove('hover-open');
     });
+  }
 
+  // — Vincula una sola vez el handler de mouseleave para el estado colapsado —
+  if (!sidebar._mouseleaveBound) {
+    sidebar.addEventListener("mouseleave", () => {
+      if (!sidebar.classList.contains("collapsed")) return; // solo actúa si está colapsada
+      closeAllAccordions();
+      clearSidebarSelection();
+      // si querés “olvidar” el último abierto cuando el usuario salga, dejá esta línea:
+      // lastOpenedAccordionId = null;
+    });
+    sidebar._mouseleaveBound = true;
+  }
+
+  if (shouldCollapse) {
+    // —— COLAPSAR ——
+    sidebar.classList.add("collapsed");
+
+    // Ajustes de layout (si los usás)
+    mainContent.style.marginLeft = "0px";
+    mainContent.style.width      = "calc(100% - 64px)";
+    mainContent.style.paddingLeft = ""; // limpia el padding del expand
+
+    // Cierra acordeones y limpia selección
+    closeAllAccordions();
     clearSidebarSelection();
 
   } else {
+    // —— EXPANDIR ——
     sidebar.classList.remove("collapsed");
 
-    document.getElementById("sidebar").addEventListener("mouseleave", () => {
-  const sidebar = document.getElementById("sidebar");
-  if (!sidebar.classList.contains("collapsed")) return;
-
-  // Cierra acordeones
-  document.querySelectorAll('div[id^="accordion-"]').forEach(acc => {
-    acc.classList.add('hidden');
-    const btn = acc.previousElementSibling;
-    btn.classList.remove('accordion-open');
-    btn.querySelector('.fa-chevron-down')?.classList.remove('rotate-180');
-  });
-
-  // ⬇️ Limpia cualquier selección visible/guardada
-  clearSidebarSelection();
-  lastOpenedAccordionId = null;
-});
-
-    // Asegura que las flechas se vuelvan a mostrar
-    // ✅ Mostrar nuevamente las flechas al expandir el sidebar
-document.querySelectorAll('.sidebar-group button .fa-chevron-down').forEach(icon => {
-  icon.style.display = 'inline';
-});
-
-if (lastOpenedAccordionId) {
-  const acc = document.getElementById(`accordion-${lastOpenedAccordionId}`);
-  const btn = acc.previousElementSibling;
-  acc.classList.remove('hidden');
-  btn.classList.add('accordion-open');
-  const icn = btn.querySelector('.fa-chevron-down');
-  if (icn) icn.classList.add('rotate-180');
-}
-
+    // (Opcional) restablecer margenes/paddings que tocaste al colapsar
+    mainContent.style.marginLeft  = "";
+    mainContent.style.width       = "100%";
     mainContent.style.paddingLeft = "64px";
-    mainContent.style.width = "100%";
 
-    // 🔽 Cierra todos los acordeones al expandir también (opcional, ya lo tenías)
-    document.querySelectorAll('div[id^="accordion-"]').forEach(acc => {
-      acc.classList.add('hidden');
-      const btn = acc.previousElementSibling;
-      btn.classList.remove('accordion-open');
-      const icn = btn.querySelector('.fa-chevron-down');
-      if (icn) icn.classList.remove('rotate-180');
+    // Primero cerramos todo…
+    closeAllAccordions();
+    clearSidebarSelection();
+
+    // …y luego reabrimos el último acordeón si había uno recordado
+    if (window.lastOpenedAccordionId) {
+      const acc = document.getElementById(`accordion-${lastOpenedAccordionId}`);
+      if (acc) {
+        acc.classList.remove('hidden');
+        const btn = acc.previousElementSibling;
+        btn?.classList.add('accordion-open', 'is-active');
+        btn?.querySelector('.fa-chevron-down')?.classList.add('rotate-180');
+        btn?.closest('.sidebar-group')?.classList.add('hover-open');
+      }
+    }
+
+    // Asegura que las flechas se muestren (por si quedaron con style inline)
+    document.querySelectorAll('.sidebar-group button .fa-chevron-down').forEach(icon => {
+      icon.style.display = ''; // deja que el CSS normal gobierne
     });
   }
 }
-
 
 function toggleReadingSidebars() {
   const sidebar   = document.getElementById('sidebar');
@@ -5356,28 +5690,787 @@ document.addEventListener('click', function(e) {
 })();
 </script>
 
+<script>
+  function goToLibraryArticles() {
+    // Mostrá el panel central de Library (tu función ya lo hace)
+    switchView('library');
+
+    const sidebar = document.getElementById('sidebar');
+    const group   = document.getElementById('group-library');
+    const btn     = group?.querySelector('button.sidebar-item');
+    const acc     = document.getElementById('accordion-library');
+
+    // Limpieza de estados previos
+    document.querySelectorAll('#sidebar .sidebar-item')
+      .forEach(el => el.classList.remove('is-active','active-link'));
+
+    if (sidebar.classList.contains('collapsed')) {
+      // En colapsado: NUNCA abrir el acordeón
+      closeAllAccordions();
+      acc?.classList.add('hidden');
+      btn?.classList.remove('accordion-open');
+      btn?.querySelector('.fa-chevron-down')?.classList.remove('rotate-180');
+      group?.classList.remove('hover-open');
+
+      // Solo dejar el ícono marcado
+      btn?.classList.add('is-active');
+    } else {
+      // En ancho normal, si querés abrir automáticamente el acordeón de Library:
+      toggleAccordion('library');
+    }
+
+    // <<< ESTA LÍNEA NUEVA >>>
+    document.getElementById('lib-articles')?.click();
+  }
+</script>
+
+
+<script>
+(() => {
+  const GROUP = document.getElementById('appearance-group');
+  const ACTIVE_BG   = 'bg-[rgb(222,241,243)]';
+  const ACTIVE_TXT  = 'text-[rgb(53,120,134)]';
+  const ACTIVE_BDR  = 'border-[rgb(53,120,134)]';
+  const INACTIVE_TXT= 'text-slate-600';
+  const INACTIVE_BDR= 'border-[rgba(15,23,42,.14)]';
+
+  function setActive(btn) {
+    GROUP.querySelectorAll('button.seg').forEach((b, i) => {
+      // base (inactivo)
+      b.classList.remove(ACTIVE_BG, ACTIVE_TXT, ACTIVE_BDR);
+      b.classList.add(INACTIVE_TXT, INACTIVE_BDR, 'rounded-none');
+      // mantener unión sin doble borde salvo el primero
+      if (i > 0) b.classList.add('-ml-px'); else b.classList.remove('-ml-px');
+      // esquinas exteriores
+      if (i === 0) { b.classList.add('first:rounded-l-[4px]'); }
+      if (i === GROUP.children.length - 1) { b.classList.add('last:rounded-r-[4px]'); }
+    });
+
+    // activo
+    btn.classList.remove(INACTIVE_BDR, INACTIVE_TXT);
+    btn.classList.add(ACTIVE_BG, ACTIVE_TXT, ACTIVE_BDR, 'relative', 'z-10');
+  }
+
+  // inicia con "Light" activo
+  setActive(GROUP.querySelector('button[data-theme="light"]'));
+
+  GROUP.addEventListener('click', (e) => {
+    const b = e.target.closest('button.seg');
+    if (!b) return;
+    setActive(b);
+    // aquí puedes guardar el modo elegido si quieres
+    // const theme = b.dataset.theme;
+  });
+})();
+</script>
+<script>
+async function exitSplitIfAny() {
+  const body  = document.body;
+  const modal = document.getElementById('video-modal');
+
+  // 0) Si hay Picture-in-Picture, cerrarlo
+  try {
+    if (document.pictureInPictureElement) await document.exitPictureInPicture();
+  } catch {}
+
+  // 1) Detener cualquier <video> HTML5 y <audio>
+  document.querySelectorAll('video, audio').forEach(m => {
+    try { m.pause(); } catch {}
+    try { m.currentTime = 0; } catch {}
+    try { m.removeAttribute('src'); m.load(); } catch {}
+  });
+
+  // 2) Neutralizar embeds (YouTube/Vimeo/lo que sea)
+  const allFrames = Array.from(document.querySelectorAll('iframe'));
+  allFrames.forEach(f => {
+    // intenta pausar por API si es YT/Vimeo
+    try {
+      const src = (f.getAttribute('src') || '').toLowerCase();
+      if (src.includes('youtube') || src.includes('youtu.be')) {
+        f.contentWindow?.postMessage('{"event":"command","func":"stopVideo","args":""}', '*');
+      } else if (src.includes('vimeo.com')) {
+        f.contentWindow?.postMessage({ method: 'pause' }, '*');
+      }
+    } catch {}
+
+    // ⚠️ clave: vaciar y remover para que NO se reactive en background
+    try { f.removeAttribute('src'); } catch {}
+    try { f.parentElement?.removeChild(f); } catch {}
+  });
+
+  // 3) Cerrar split + modal + UI
+  body.classList.remove('split-view-active');
+  if (modal) {
+    modal.classList.remove('split-view', 'video-mode');
+    modal.classList.add('hidden');
+    modal.querySelector('#thumbnail-carousel')?.classList.add('hidden');
+  }
+
+  // 4) Limpiar variables CSS del split
+  const root = document.documentElement;
+  root.style.removeProperty('--split-left');
+  root.style.removeProperty('--split-w');
+}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const homeLink = document.querySelector('#group-home a.sidebar-item');
+  if (!homeLink) return;
+
+  // al iniciar la página, marcar Home
+  homeLink.classList.add('active-link');
+
+  // al clickear Home, volver a marcarlo
+  homeLink.addEventListener('click', () => {
+    setTimeout(() => {
+      document.querySelectorAll('#sidebar .sidebar-item')
+        .forEach(el => el.classList.remove('active-link','is-active'));
+      homeLink.classList.add('active-link');
+    }, 0);
+  });
+});
+</script>
+<!-- Botón flotante para ocultar/mostrar barras -->
+<button id="sb-switch" aria-label="Ocultar barras" title="Ocultar barras">
+  <i class="fas fa-chevron-left" aria-hidden="true"></i>
+</button>
+
+<script>
+(function(){
+  const btn = document.getElementById('sb-switch');
+  const sb  = document.getElementById('sidebar');
+  const toc = document.getElementById('subcategoria-sidebar');
+
+  // Estado previo para restaurar exactamente como estaba
+  const saved = { sidebarClass: null, tocHidden: null };
+
+  // Calcula el ancho realmente visible de las barras (principal + TOC si aplica)
+  function currentSidebarsWidth(){
+    let w = 0;
+    if (sb && !sb.classList.contains('force-hidden')) {
+      // ancho real actual (colapsada, abierta o “hover-expand”)
+      w += sb.getBoundingClientRect().width || 0;
+    }
+    if (toc && !toc.classList.contains('hidden')) {
+      w += toc.getBoundingClientRect().width || 0;
+    }
+    return w;
+  }
+
+  // Coloca el botón exactamente en el borde derecho de lo visible
+  function cssVarPx(name, fallback = 0){
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const n = parseFloat(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function currentSidebarsWidthStable(){
+  let w = 0;
+
+  // 1) Sidebar principal: si está colapsada, usar --sb-collapsed fijo
+  if (sb && !sb.classList.contains('force-hidden')) {
+    if (sb.classList.contains('collapsed')) {
+      w += cssVarPx('--sb-collapsed', 40);  // ← estable, no varía con el hover
+    } else {
+      w += sb.getBoundingClientRect().width || 0; // abierta: ancho real
+    }
+  }
+
+  // 2) TOC: ancho real (no cambia con hover de la principal)
+  if (toc && !toc.classList.contains('hidden')) {
+    w += toc.getBoundingClientRect().width || 0;
+  }
+
+  return w;
+}
+
+function placeSwitch(){
+  if (document.body.classList.contains('bars-hidden')) return; // en oculto queda a 8px
+  const w = Math.max(0, currentSidebarsWidthStable());
+  const overlap = 14; // “muerde” un poco el borde como en la captura
+  const left = Math.max(8, w - overlap);
+  document.documentElement.style.setProperty('--btn-left', left + 'px');
+}
+
+
+  // Observa cambios de tamaño/clases que afecten la posición
+  const mo = new MutationObserver(placeSwitch);
+  if (sb)  mo.observe(sb,  { attributes: true, attributeFilter:['class','style'] });
+  if (toc) mo.observe(toc, { attributes: true, attributeFilter:['class','style'] });
+  window.addEventListener('resize', placeSwitch, { passive:true });
+  // Recalcula también cuando el user pasa el mouse sobre la barra colapsada (hover-expand)
+  
+  // Llamada inicial
+  requestAnimationFrame(placeSwitch);
+
+  // Toggle principal
+  btn.addEventListener('click', () => {
+    const hiding = !document.body.classList.contains('bars-hidden');
+
+    if (hiding){
+      // Guardar estado EXACTO
+      saved.sidebarClass = sb ? sb.className : null;
+      saved.tocHidden    = toc ? toc.classList.contains('hidden') : null;
+
+      // Ocultar ambas barras
+      if (sb)  sb.classList.add('force-hidden');
+      if (toc) toc.classList.add('hidden');
+
+      document.body.classList.add('bars-hidden');
+      btn.setAttribute('aria-label','Mostrar barras');
+      btn.title = 'Mostrar barras';
+    } else {
+      // Restaurar estado EXACTO
+      if (sb && saved.sidebarClass !== null) sb.className = saved.sidebarClass;
+      if (toc && saved.tocHidden === false) toc.classList.remove('hidden');
+      if (toc && saved.tocHidden === true)  toc.classList.add('hidden');
+
+      document.body.classList.remove('bars-hidden');
+      btn.setAttribute('aria-label','Ocultar barras');
+      btn.title = 'Ocultar barras';
+      // Reposicionar al volver a aparecer
+      requestAnimationFrame(placeSwitch);
+    }
+  });
+
+  // Si cambias el modo "split-view" o similares, vuelve a posicionar
+  const ro = new ResizeObserver(placeSwitch);
+  if (sb)  ro.observe(sb);
+  if (toc) ro.observe(toc);
+})();
+</script>
+
+
+<script>
+  const sidebar   = document.getElementById('sidebar');
+  const home      = document.getElementById('home-content');
+  const menuBtn   = document.getElementById('menu-toggle');
+  const floatBtn  = document.getElementById('sb-switch'); // si lo usás para colapsar/expandir
+
+  // Helpers de estado
+  const isOnHome = () => home && !home.classList.contains('hidden');
+
+  function showSidebarFull() {
+    // Mostrar SIEMPRE completa (ni oculta ni colapsada)
+    sidebar.classList.remove('force-hidden', 'collapsed');
+    sidebar.classList.add('open');
+    document.body.classList.remove('bars-hidden'); // si lo usás como marca global
+  }
+
+  function hideSidebar() {
+    // Ocultar por completo (sin hover-expand)
+    sidebar.classList.add('force-hidden');
+    sidebar.classList.remove('open', 'collapsed');
+    document.body.classList.add('bars-hidden');
+  }
+
+  function toggleHiddenOnly() {
+    // Si está oculta => mostrar completa
+    if (sidebar.classList.contains('force-hidden')) {
+      showSidebarFull();
+    } else {
+      // Si está visible (abierta o colapsada) => ocultar
+      hideSidebar();
+    }
+  }
+
+  // 🔘 BOTÓN MENÚ (header)
+  // En Home: solo ocultar/mostrar (nunca colapsar).
+  // Fuera de Home: mantené tu comportamiento original (si usás el botón flotante).
+  menuBtn?.addEventListener('click', () => {
+    if (isOnHome()) {
+      toggleHiddenOnly();          // ← NO deja "collapsed" al mostrar
+    } else {
+      // Comportamiento previo fuera de Home (si existía)
+      // Por ejemplo, disparar el flotante para colapsar/expandir:
+      floatBtn?.click();
+    }
+  });
+
+  // 🔘 BOTÓN FLOTANTE (si querés mantener su función de colapsar/expandir)
+  // Ejemplo de wiring típico (opcional — si ya lo tenés, dejalo tal cual):
+  // floatBtn?.addEventListener('click', () => {
+  //   // alternar entre abierto y colapsado (no oculto)
+  //   if (sidebar.classList.contains('collapsed')) {
+  //     sidebar.classList.remove('collapsed');
+  //     sidebar.classList.add('open');
+  //   } else {
+  //     sidebar.classList.remove('open', 'force-hidden');
+  //     sidebar.classList.add('collapsed');
+  //     document.body.classList.remove('bars-hidden');
+  //   }
+  // });
+
+  // 🛡️ Salvaguarda: si por cualquier acción termina "mostrada pero colapsada"
+  // y estás en Home, al primer hover se “descolapsa” definitivamente:
+  sidebar?.addEventListener('mouseenter', () => {
+    if (isOnHome() && !sidebar.classList.contains('force-hidden')) {
+      // forzar que quede abierta al interactuar en Home
+      sidebar.classList.remove('collapsed');
+      sidebar.classList.add('open');
+    }
+  });
+</script>
+
+
+<script>
+(function () {
+  const input   = document.getElementById('global-search');
+  const popover = document.getElementById('search-results');
+  const box     = document.getElementById('searchbox');
+
+  if (!input || !popover || !window.db) return;
+
+  // Util: quitar acentos y bajar a minúsculas (búsqueda insensible a tildes)
+  const norm = s => (s || '')
+    .toString()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().trim();
+
+  // Pequeño índice en memoria con todas las subcategorías
+  // Estructura: { label, subcategoriaId, categoriaId, supracategoriaId }
+  let INDEX = [];
+  let ready = false;
+
+  // Construye índice la primera vez que el usuario está logueado
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (!user || ready) return;
+    try {
+      // Busca en TODAS las colecciones 'subcategorias' (collection group)
+      const snap = await db.collectionGroup('subcategorias').get();
+INDEX = snap.docs.map(d => {
+  const data = d.data() || {};
+  const subId = d.id;
+
+  // Ruta: supracategorias/{S}/categorias/{C}/subcategorias/{subId}
+  const catDoc = d.ref.parent.parent;
+  const supDoc = catDoc && catDoc.parent && catDoc.parent.parent;
+  const catId  = catDoc ? catDoc.id : '';
+  const supId  = supDoc ? supDoc.id : '';
+
+  const label = data.denominacion || data.nombre || subId;
+
+  // ←— NUEVO: normaliza keywords (array de strings)
+  const kws = Array.isArray(data.keywords) ? data.keywords.filter(Boolean) : [];
+  const kwNorm = kws.map(k => norm(k));
+
+  // Puedes agregar otros campos al “haystack” si quieres (p. ej. descripcion)
+  const haystack = norm(
+    [label, ...(kws || []), data.descripcion || ''].join(' ')
+  );
+
+  return {
+    label,
+    labelNorm: norm(label),
+    keywords: kws,
+    kwNorm,               // keywords normalizados
+    haystack,             // todo junto para búsquedas
+    subcategoriaId: subId,
+    categoriaId: catId,
+    supracategoriaId: supId
+  };
+});
+ready = true;
+    } catch (e) {
+      console.error('No se pudo construir el índice de búsqueda:', e);
+    }
+  });
+
+  // Render de resultados
+  function render(items) {
+  if (!items.length) {
+    popover.innerHTML = '<div class="px-3 py-2 text-slate-500">Sin resultados</div>';
+    popover.classList.remove('hidden');
+    return;
+  }
+
+  const qTokens = norm(input.value).split(/\s+/).filter(Boolean);
+
+  popover.innerHTML = items.slice(0, 12).map(it => {
+    // keyword destacado (el primero que coincida)
+    const hit = (it.keywords || []).find((kw, i) => {
+      const n = it.kwNorm?.[i] || norm(kw);
+      return qTokens.some(t => n.includes(t));
+    });
+    const badge = hit
+      ? `<span class="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">${hit}</span>`
+      : '';
+
+    return `
+      <button type="button"
+              class="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2"
+              data-sup="${it.supracategoriaId}"
+              data-cat="${it.categoriaId}"
+              data-sub="${it.subcategoriaId}">
+        <i class="fas fa-search text-slate-400"></i>
+        <span class="text-slate-800">${it.label}</span>
+        ${badge}
+      </button>
+    `;
+  }).join('');
+
+  popover.classList.remove('hidden');
+}
+
+  // Filtrar en memoria
+  let last = '';
+  
+
+
+  function matchItem(item, qn) {
+  // AND por tokens: "endo aureus" debe estar todo
+  const tokens = qn.split(/\s+/).filter(Boolean);
+  if (!tokens.length) return false;
+
+  // buscamos en el “haystack” (label + keywords + descripcion)
+  return tokens.every(t => item.haystack.includes(t));
+}
+  
+  function searchNow(q) {
+  const qn = norm(q);
+  if (!ready || !qn) { popover.classList.add('hidden'); return; }
+  if (qn === last) return;
+  last = qn;
+
+  const res = INDEX.filter(it => matchItem(it, qn));
+  render(res);
+}
+
+  // Debounce suave
+  let t;
+  input.addEventListener('input', () => {
+    clearTimeout(t);
+    t = setTimeout(() => searchNow(input.value), 120);
+  });
+
+  // Enter = ir al primer resultado
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const first = popover.querySelector('button[data-sub]');
+      if (first) first.click();
+    } else if (e.key === 'Escape') {
+      popover.classList.add('hidden');
+    }
+  });
+
+  // Click en resultado -> abre la subcategoría con tu función existente
+  popover.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-sub]');
+    if (!btn) return;
+    const sup = btn.getAttribute('data-sup');
+    const cat = btn.getAttribute('data-cat');
+    const sub = btn.getAttribute('data-sub');
+
+    // Cierra dropdown
+    popover.classList.add('hidden');
+    input.blur();
+
+    // Usa tu función ya definida
+    if (typeof showSubcategoriaContent === 'function') {
+      showSubcategoriaContent(sub, cat, sup);
+    } else {
+      console.warn('showSubcategoriaContent no está disponible');
+    }
+  });
+
+  // Cerrar si clic fuera
+  document.addEventListener('click', (e) => {
+    if (!box.contains(e.target)) popover.classList.add('hidden');
+  });
+
+  // Atajo ⌘+K / Ctrl+K para enfocar
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      input.focus();
+      input.select();
+    }
+  });
+})();
+</script>
+
+
+
+
+
+
+<!-- === Resultados + preguntas reales por keywords (con fallback texto) === -->
+<script>
+  /* ------------ Firestore ready ------------- */
+  try { if (!window.db && firebase?.firestore) window.db = firebase.firestore(); }
+  catch(e){ console.warn('Firestore no disponible:', e); }
+
+  /* ------------ Utils ------------- */
+  function normalize(str){
+    return (str||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  }
+  function termsFromQuery(q){
+    return Array.from(new Set(
+      normalize(q||'').split(/[\s,.;:]+/).filter(Boolean)
+    )).slice(0,10); // <= 10 para array-contains-any
+  }
+  function fmtDate(d){
+    try{ if(!d) return ''; const x = d.toDate? d.toDate(): (d instanceof Date? d: new Date(d));
+      return `${String(x.getDate()).padStart(2,'0')}.${String(x.getMonth()+1).padStart(2,'0')}.${x.getFullYear()}`;
+    }catch{return String(d)}
+  }
+
+  /* ------------ Colecciones “planas” (articles/guidelines/…) ------------- */
+  const COLLECTIONS = { articles:'articles', guidelines:'guidelines', drugs:'drugs', media:'media' };
+  function pickFields(d={}){
+    return {
+      title: d.title || d.nombre || d.titulo || d.name || '(sin título)',
+      meta:  d.meta  || d.subtitle || d.resumen || d.descripcion || '',
+      url:   d.url   || d.link || d.href || d.permalink || '#',
+      date:  fmtDate(d.date || d.fecha || d.publishedAt || d.updatedAt || '')
+    };
+  }
+  function buildTextMatcher(query){
+    const ts = termsFromQuery(query);
+    if(!ts.length) return ()=>true;
+    return (txt)=>{ const t = normalize(txt||''); return ts.every(k=>t.includes(k)); };
+  }
+  async function searchCollection(coll, query, limit=40){
+    if(!window.db) return [];
+    const snap = await db.collection(coll).limit(limit).get();
+    const out=[]; const match = buildTextMatcher(query);
+    snap.forEach(doc=>{
+      const r = doc.data()||{};
+      const hay = [
+        r.title,r.titulo,r.nombre,r.name,
+        r.meta,r.descripcion,r.resumen,r.body,r.content,r.texto,
+        Array.isArray(r.keywords)? r.keywords.join(' '):'', Array.isArray(r.tags)? r.tags.join(' '):''
+      ].filter(Boolean).join(' ');
+      if(match(hay)) out.push(pickFields(r));
+    });
+    return out;
+  }
+
+  /* ------------ PREGUNTAS (collection group) ------------- */
+  function pickQuestionText(d={}){
+    return d.pregunta || d.titulo || d.enunciado || d.texto || d.explicacion || '';
+  }
+
+  // 1) por KEYWORDS exactos (normalizados)
+  async function cgQuestionsByKeywords(query, limit=12){
+    if(!window.db) return [];
+    const terms = termsFromQuery(query);
+    if(!terms.length) return [];
+        let snap;
+    try {
+      snap = await db.collectionGroup('preguntas')
+        .where('keywords','array-contains-any', terms)
+        .limit(limit)
+        .get();
+    } catch (err) {
+      // Si falta el índice (failed-precondition / create_exemption), no rompas la UI
+      const msg = String(err && (err.code || err.message || err));
+      if (msg.includes('failed-precondition') || msg.includes('create_exemption')) {
+        console.warn('[cgQuestionsByKeywords] Falta índice; usando fallback por texto.', err);
+        return [];
+      }
+      throw err; // otros errores sí se propagan
+    }
+
+
+
+    const out=[];
+    snap.forEach(doc=>{
+      const d = doc.data()||{};
+      const text = String(pickQuestionText(d)).trim();
+      if(text) out.push({ text, path: doc.ref.path, score: 2 }); // score alto por keyword
+    });
+    console.log('[cgQuestionsByKeywords] terms:', terms, 'hits:', out.length);
+    return out;
+  }
+
+  // 2) fallback: *texto* cliente sobre campos de la pregunta
+  async function cgQuestionsByText(query, limit=12){
+    if(!window.db) return [];
+    const match = buildTextMatcher(query);
+    const snap  = await db.collectionGroup('preguntas').limit(50).get(); // lee un batch
+    const out=[];
+    snap.forEach(doc=>{
+      const d = doc.data()||{};
+      const blob = [
+        pickQuestionText(d),
+        Array.isArray(d.opciones)? d.opciones.join(' '):'',
+        Array.isArray(d.keywords)? d.keywords.join(' '):''
+      ].join(' ');
+      if(match(blob)){
+        const text = String(pickQuestionText(d)).trim();
+        if(text) out.push({ text, path: doc.ref.path, score: 1 });
+      }
+    });
+    console.log('[cgQuestionsByText] hits:', out.length);
+    return out.slice(0, limit);
+  }
+
+  async function getRelatedQuestions(query){
+    // primero keywords…
+    let qs = await cgQuestionsByKeywords(query, 12);
+    // …si no alcanza, mezclamos fallback por texto
+    if(qs.length < 3){
+      const fb = await cgQuestionsByText(query, 12);
+      // evita duplicados por texto
+      const seen = new Set(qs.map(q=>q.path));
+      fb.forEach(q=>{ if(!seen.has(q.path)) qs.push(q); });
+    }
+    // ordena por score (keywords primero)
+    qs.sort((a,b)=>b.score-a.score);
+    return qs.map(q=>q.text).slice(0,3);
+  }
+
+  /* ------------ UI de resultados ------------- */
+  const resultsView = (data) => `
+    <div>
+      <div class="flex gap-6 border-b pb-2 text-sm">
+        ${['Overview','Articles','Drugs','Media','Guidelines'].map(tab=>{
+          const c = data.counts[tab.toLowerCase()] ?? 0;
+          const active = tab==='Overview'
+            ? 'border-b-2 pb-2 -mb-[2px] border-sky-500 text-sky-600'
+            : 'text-gray-600 hover:text-gray-800';
+          return `<button class="tab ${active}" data-tab="${tab.toLowerCase()}">${tab}${tab!=='Overview'?` (${c})`:''}</button>`;
+        }).join('')}
+      </div>
+
+      <section class="mt-6">
+        <h3 class="font-semibold">Articles (${data.counts.articles})</h3>
+        ${data.articles.length
+          ? data.articles.map(a=>`
+              <article class="mt-3">
+                <a href="${a.url||'#'}" class="text-sky-600 hover:underline">${a.title}</a>
+                ${a.meta?`<ul class="mt-1 text-sm text-gray-600 list-disc pl-5"><li>${a.meta}</li></ul>`:''}
+              </article>`).join('')
+          : `<p class="mt-2 text-sm text-gray-600">No results.</p>`}
+
+
+
+
+
+       <div class="mt-5 group">
+  <!-- header -->
+  <div class="border-t border-b border-slate-200">
+    <div class="flex items-center justify-between py-2">
+      <h4 class="font-semibold text-slate-600 text-sm">
+        Questions related to your search
+      </h4>
+
+      <!-- switch intacto -->
+      <label class="inline-flex items-center cursor-pointer">
+        <input type="checkbox" id="toggle-qs" class="sr-only peer" checked>
+        <span class="w-9 h-5 bg-gray-200 rounded-full peer-checked:bg-sky-500 relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-4"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- bloque que se oculta todo junto -->
+  <div class="mt-2 hidden group-has-[input:checked]:block">
+    <div class="divide-y divide-slate-200">
+      ${data.suggestions.length
+        ? data.suggestions.map(q=>`
+            <details class="group">
+              <summary class="flex items-center justify-between cursor-pointer list-none py-2 pl-0">
+                <span class="text-slate-700 text-sm">${q}</span>
+                <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+              </summary>
+            </details>`).join('')
+        : `<div class="p-2 text-xs text-gray-600">No matching questions.</div>`}
+    </div>
+
+    <!-- línea divisoria + botón MORE -->
+    <div class="border-t border-slate-200 pt-2">
+      <button class="ml-2 font-semibold text-[7px] uppercase tracking-wide text-slate-600 hover:text-slate-800 flex items-center gap-1">
+        More <i class="fa-solid fa-chevron-down text-[9px]"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+      </section>
+
+      <section class="mt-8">
+        <h3 class="font-semibold">Guidelines (${data.counts.guidelines})</h3>
+        ${data.guidelines.length
+          ? data.guidelines.map(g=>`
+              <article class="mt-3">
+                <a href="${g.url||'#'}" class="text-sky-600 hover:underline">${g.title}</a>
+                ${g.date?`<div class="text-sm text-gray-500 mt-1">Published: ${g.date}</div>`:''}
+              </article>`).join('')
+          : `<p class="mt-2 text-sm text-gray-600">No results.</p>`}
+      </section>
+    </div>`;
+
+  /* ------------ Orquestador ------------- */
+  async function fetchSearchData(query){
+    const [articles, guidelines, drugs, media] = await Promise.all([
+      searchCollection(COLLECTIONS.articles, query),
+      searchCollection(COLLECTIONS.guidelines, query),
+      searchCollection(COLLECTIONS.drugs, query),
+      searchCollection(COLLECTIONS.media, query),
+    ]);
+    const suggestions = await getRelatedQuestions(query); // << AQUÍ van las preguntas reales
+    return {
+      counts: { overview:1, articles:articles.length, drugs:drugs.length, media:media.length, guidelines:guidelines.length },
+      articles, guidelines, suggestions
+    };
+  }
+
+  async function showSearchPage(query){
+    const mount = document.getElementById('search-page');
+    if(!window.db){
+      mount.innerHTML = `<p class="text-sm text-gray-600">Firestore no está disponible.</p>`;
+      return;
+    }
+    try{
+      const data = await fetchSearchData(query?.trim());
+      console.log('[search] query:', query, data);
+      mount.innerHTML = resultsView(data);
+    }catch(err){
+      console.error('[search] error:', err);
+      mount.innerHTML = `<p class="text-sm text-red-600">Error buscando resultados: ${err?.message||err}</p>`;
+    }
+    document.getElementById('home-content')?.classList.add('hidden');
+    document.getElementById('articles-panel')?.classList.add('hidden');
+    document.getElementById('subcategoria-content')?.classList.add('hidden');
+    mount.classList.remove('hidden');
+  }
+
+  // Hook Enter
+  const globalSearch = document.getElementById('global-search');
+  if(globalSearch){
+    globalSearch.addEventListener('keydown',(e)=>{
+      if(e.key==='Enter'){ e.preventDefault(); showSearchPage(globalSearch.value); }
+    });
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 </body>
+
 </html>
 
 
-
-
-
-/////////////
-////////////
-// —> 6:10
-// —> 6:58
-// —> 7:47
-// 9: 59
-//10 55
-//10 agosto
-//10 agosto tarde
-//14 agosto
-//14 agosto 2
-//15 agosto
-//16 agosto
-//17 agosto noche noche noche amanecida
-//18 agosto amanecida amanecida
+//19 agosto tarde noche noche noche
+//20 agosto noche noche
