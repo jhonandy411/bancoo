@@ -2429,6 +2429,61 @@ body.bars-hidden #sb-switch i{
 /* Oculta el botón flotante cuando las barras están ocultas */
 body.bars-hidden #sb-switch { display: none !important; }
 
+/* —— Opciones tipo AMBOSS (línea fina, círculo y botón X) —— */
+/* Lista de opciones con líneas finas */
+.opt-list { margin: 0; padding: 0; list-style: none; }
+.opt-list > li { padding: .2rem .25rem .2rem 0; }
+.opt-list > li + li {
+  border-top: 0.5px solid #e5e7eb;   /* gris muy fino */
+}
+
+/* Fila */
+.option-row { display:flex; align-items:center; gap:.35rem; }
+.option-row:hover { background: #f9fafb; }
+
+/* Círculo con la letra (A, B, …) */
+.opt-bullet{
+  width: 18px; height: 18px; flex: 0 0 18px;
+  display:grid; place-items:center;
+  border: 1px solid #cbd5e1;          /* gris */
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 10px;                    /* mucho más pequeño */
+  line-height: 1;
+  color:#334155;                      /* slate-700 */
+  background: transparent;            /* ✅ fondo transparente */
+}
+
+/* Texto de la opción */
+.opt-text{ 
+  color:#334155; 
+  font-size: 11px;                    /* más pequeño */
+  line-height: 1.2;
+}
+
+/* Texto tachado */
+.opt-text.striked {
+  text-decoration: line-through;
+  color: #94a3b8;                     /* gris apagado */
+}
+
+/* Botón X */
+.opt-x{
+  margin-left:auto;
+  width: 18px; height: 18px;
+  display:grid; place-items:center;
+  border-radius:9999px;
+  color:#64748b;
+  background:transparent;
+  border: 1px solid transparent;
+}
+.opt-x:hover{
+  background:#f1f5f9;
+  border-color:#e2e8f0;
+  color:#0f172a;
+}
+.opt-x i{ font-size: 10px; }
+
 
 
 
@@ -6020,6 +6075,8 @@ function placeSwitch(){
   const popover = document.getElementById('search-results');
   const box     = document.getElementById('searchbox');
 
+  
+
   if (!input || !popover || !window.db) return;
 
   // Util: quitar acentos y bajar a minúsculas (búsqueda insensible a tildes)
@@ -6155,24 +6212,35 @@ ready = true;
   });
 
   // Click en resultado -> abre la subcategoría con tu función existente
-  popover.addEventListener('click', (e) => {
-    const btn = e.target.closest('button[data-sub]');
-    if (!btn) return;
-    const sup = btn.getAttribute('data-sup');
-    const cat = btn.getAttribute('data-cat');
-    const sub = btn.getAttribute('data-sub');
+  // 1) Abrir contenido SOLO con clic real en un resultado
+popover.addEventListener('mousedown', (e) => {
+  const btn = e.target.closest('button[data-sub]');
+  if (!btn) return;                   // no es un item
+  // (mousedown no se dispara con Enter)
 
-    // Cierra dropdown
-    popover.classList.add('hidden');
-    input.blur();
+  const { sup, cat, sub } = btn.dataset;
 
-    // Usa tu función ya definida
-    if (typeof showSubcategoriaContent === 'function') {
-      showSubcategoriaContent(sub, cat, sup);
-    } else {
-      console.warn('showSubcategoriaContent no está disponible');
-    }
-  });
+  popover.classList.add('hidden');    // cierra lista
+  input.blur();                       // opcional: quitar foco del input
+  showSubcategoriaContent(sub, cat, sup);
+});
+
+// 2) Con Enter: ocultar lista, NO abrir contenido
+function hideOnEnter(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();               // evita click sintético del teclado
+    e.stopPropagation();
+    popover.classList.add('hidden');  // solo ocultar
+    // input.blur();                  // si quieres mantener foco, no hagas blur
+  }
+}
+
+// Enter desde el input de búsqueda:
+input.addEventListener('keydown', hideOnEnter);
+
+// (opcional) Enter cuando el foco está dentro del popover:
+popover.addEventListener('keydown', hideOnEnter);
+
 
   // Cerrar si clic fuera
   document.addEventListener('click', (e) => {
@@ -6319,7 +6387,7 @@ ready = true;
     }
     // ordena por score (keywords primero)
     qs.sort((a,b)=>b.score-a.score);
-    return qs.map(q=>q.text).slice(0,3);
+    return qs.map(q=>q.text);
   }
 
   /* ------------ UI de resultados ------------- */
@@ -6351,41 +6419,44 @@ ready = true;
 
        <div class="mt-5 group">
   <!-- header -->
-  <div class="border-t border-b border-slate-200">
-    <div class="flex items-center justify-between py-2">
-      <h4 class="font-semibold text-slate-600 text-sm">
-        Questions related to your search
-      </h4>
+<div class="border-t border-b border-slate-200">
+  <div class="flex items-center justify-between py-2">
+    <h4 class="font-semibold text-slate-600 text-sm">
+      Questions related to your search
+    </h4>
+    <label class="inline-flex items-center cursor-pointer">
+      <input type="checkbox" id="toggle-qs" class="sr-only peer" checked>
+      <span class="w-9 h-5 bg-gray-200 rounded-full peer-checked:bg-sky-500 relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-4"></span>
+    </label>
+  </div>
+</div>
 
-      <!-- switch intacto -->
-      <label class="inline-flex items-center cursor-pointer">
-        <input type="checkbox" id="toggle-qs" class="sr-only peer" checked>
-        <span class="w-9 h-5 bg-gray-200 rounded-full peer-checked:bg-sky-500 relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-4"></span>
-      </label>
-    </div>
+<!-- bloque que se oculta todo junto -->
+<div class="mt-2 hidden group-has-[input:checked]:block">
+  <div id="qs-list" class="divide-y divide-slate-200">
+    ${data.suggestions.length
+      ? data.suggestions.slice(0,3).map(q=>`
+          <details class="group">
+            <summary class="flex items-center justify-between cursor-pointer list-none py-2 pl-0">
+              <span class="text-slate-700 text-sm">${q}</span>
+              <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+            </summary>
+          </details>`).join('')
+      : `<div class="p-2 text-xs text-gray-600">No matching questions.</div>`}
   </div>
 
-  <!-- bloque que se oculta todo junto -->
-  <div class="mt-2 hidden group-has-[input:checked]:block">
-    <div class="divide-y divide-slate-200">
-      ${data.suggestions.length
-        ? data.suggestions.map(q=>`
-            <details class="group">
-              <summary class="flex items-center justify-between cursor-pointer list-none py-2 pl-0">
-                <span class="text-slate-700 text-sm">${q}</span>
-                <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
-              </summary>
-            </details>`).join('')
-        : `<div class="p-2 text-xs text-gray-600">No matching questions.</div>`}
-    </div>
-
-    <!-- línea divisoria + botón MORE -->
-    <div class="border-t border-slate-200 pt-2">
-      <button class="ml-2 font-semibold text-[7px] uppercase tracking-wide text-slate-600 hover:text-slate-800 flex items-center gap-1">
-        More <i class="fa-solid fa-chevron-down text-[9px]"></i>
-      </button>
-    </div>
+  ${data.suggestions.length > 3 ? `
+<div class="border-t border-slate-200 pt-2">
+  <div class="flex items-center gap-3">
+    <button id="qs-more" class="ml-2 font-semibold text-[7px] uppercase tracking-wide text-slate-600 hover:text-slate-800 flex items-center gap-1">
+      More <i class="fa-solid fa-chevron-down text-[9px]"></i>
+    </button>
+    <button id="qs-less" class="font-semibold text-[7px] uppercase tracking-wide text-slate-600 hover:text-slate-800 flex items-center gap-1 hidden">
+      Less <i class="fa-solid fa-chevron-up text-[9px]"></i>
+    </button>
   </div>
+</div>`:''}
+</div>
 </div>
 
 
@@ -6433,6 +6504,66 @@ ready = true;
       const data = await fetchSearchData(query?.trim());
       console.log('[search] query:', query, data);
       mount.innerHTML = resultsView(data);
+
+
+// Paginación con "deshacer" del último agregado
+let shown   = Math.min(3, data.suggestions.length); // visibles iniciales
+const batches = []; // tamaños agregados secuencialmente (p.ej. [3,3,3,2])
+
+async function renderQs() {
+  const list   = document.getElementById('qs-list');
+  const btnMore= document.getElementById('qs-more');
+  const btnLess= document.getElementById('qs-less');
+  if (!list) return;
+
+  // 🧠 guardar cuáles estaban abiertas (por su texto del summary)
+  const abiertos = new Set(
+    Array.from(list.querySelectorAll('details[open] summary span'))
+         .map(el => el.textContent.trim())
+  );
+
+  // re-render normal
+  await renderSuggestionsConOpciones(list, data, shown);
+
+  // 🔁 restaurar las que ya estaban abiertas
+  // 🔁 restaurar las que ya estaban abiertas
+Array.from(list.querySelectorAll('details')).forEach(det => {
+  const txt = det.querySelector('summary span')?.textContent.trim();
+  if (abiertos.has(txt)) det.setAttribute('open', 'true');
+});
+
+// 🪄 asegurar animaciones asociadas al estado final
+wireExpandoAnimations(list);
+
+  if (btnMore) btnMore.classList.toggle('hidden', shown >= data.suggestions.length);
+  if (btnLess) btnLess.classList.toggle('hidden', batches.length === 0);
+}
+
+
+
+
+
+
+document.getElementById('qs-more')?.addEventListener('click', async () => {
+  const remaining = data.suggestions.length - shown;
+  if (remaining <= 0) return;
+  const add = Math.min(3, remaining);
+  shown += add;
+  batches.push(add);
+  await renderQs();
+});
+
+document.getElementById('qs-less')?.addEventListener('click', async () => {
+  if (batches.length === 0) return;
+  const last = batches.pop();
+  shown = Math.max(3, shown - last);
+  await renderQs();
+});
+
+// render inicial
+await renderQs();
+
+
     }catch(err){
       console.error('[search] error:', err);
       mount.innerHTML = `<p class="text-sm text-red-600">Error buscando resultados: ${err?.message||err}</p>`;
@@ -6450,6 +6581,238 @@ ready = true;
       if(e.key==='Enter'){ e.preventDefault(); showSearchPage(globalSearch.value); }
     });
   }
+</script>
+
+
+
+
+
+<script>
+// Renderiza preguntas mostrando opciones por ID
+// Utilidad: parte un array en chunks de N (Firestore "in" soporta hasta 10)
+// util
+
+
+
+const chunk = (arr, size = 10) => {
+  const out = []; for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+};
+
+
+// ↳ estado persistente de opciones tachadas (pregunta||opción)
+const markedOpts = new Set();
+
+// busca opciones por id de DOC y, si no hay id, por texto exacto de "pregunta"
+
+
+
+async function getOpcionesParaItems(items){
+  const byKey = new Map();
+
+  const ids = [];
+  const texts = [];
+  for (const it of items){
+    if (typeof it === 'object' && (it.id || it.qid)) {
+      ids.push(String(it.id || it.qid));
+    } else {
+      const t = typeof it === 'string' ? it : (it?.text || it?.q || '');
+      texts.push(String(t).trim());
+    }
+  }
+
+  // 1) por ID
+  if (ids.length){
+    const fpId = firebase.firestore.FieldPath.documentId();
+    for (const g of chunk([...new Set(ids)], 10)){
+      const snap = await db.collectionGroup('preguntas').where(fpId, 'in', g).get();
+      snap.forEach(d => {
+        const data = d.data() || {};
+        byKey.set(d.id, {
+          opciones: Array.isArray(data.opciones) ? data.opciones : [],
+          corr: Number(data.corr ?? -1),
+          explicacion: data.explicacion || ''
+        });
+      });
+    }
+  }
+
+  // 2) por TEXTO exacto
+  const uniqueTexts = [...new Set(texts.filter(Boolean))];
+  await Promise.all(uniqueTexts.map(async (t) => {
+    const qs = await db.collectionGroup('preguntas').where('pregunta', '==', t).limit(1).get();
+    if (!qs.empty){
+      const data = qs.docs[0].data() || {};
+      byKey.set(`__TXT__${t}`, {
+        opciones: Array.isArray(data.opciones) ? data.opciones : [],
+        corr: Number(data.corr ?? -1),
+        explicacion: data.explicacion || ''
+      });
+    }
+  }));
+
+  return byKey;
+}
+
+
+// NUEVO render con soporte id/texto
+async function renderSuggestionsConOpciones(list, data, shown) {
+  const letters = i => String.fromCharCode(65 + i);
+  const esc = s => String(s ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+
+  const items = data.suggestions.slice(0, shown);
+  const infoMap = await getOpcionesParaItems(items);
+
+  list.innerHTML = items.map(item => {
+    const texto = typeof item === 'string' ? item : (item.text || item.q || '');
+    const sid   = typeof item === 'object' ? (item.id || item.qid || null) : null;
+
+    const keyTxt = `__TXT__${String(texto).trim()}`;
+    const meta   = sid ? (infoMap.get(String(sid)) || {}) : (infoMap.get(keyTxt) || {});
+    const opciones = Array.isArray(meta.opciones) ? meta.opciones : [];
+    const corr = Number(meta.corr ?? -1);
+
+    const opcionesHtml = opciones.length
+      ? opciones.map((op, i) => `
+          <li>
+            <div class="option-row flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer hover:bg-slate-50"
+                 data-idx="${i}">
+              <span class="opt-bullet w-5 text-sm font-semibold text-slate-600">${letters(i)}</span>
+              <span class="opt-text grow text-[13px] text-slate-800">${esc(op)}</span>
+              <button type="button" class="opt-x ml-2 text-slate-400 hover:text-slate-600" aria-label="Tachar opción">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </li>`).join('')
+      : `<li class="text-xs text-slate-400 px-3 py-2">Sin opciones registradas</li>`;
+
+    return `
+  <details class="group">
+    <summary class="flex items-center justify-between cursor-pointer list-none py-2 pl-0">
+      <span class="text-slate-700 text-sm">${esc(texto)}</span>
+      <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+    </summary>
+
+    <div class="pl-4 pr-2 pb-2 overflow-hidden">
+      <div class="expando" style="max-height:0; opacity:0; transition:max-height 250ms ease, opacity 200ms ease;">
+        <ul class="opt-list space-y-1" data-qkey="${esc(texto)}" data-corr="${corr}">
+          ${opcionesHtml}
+        </ul>
+      </div>
+    </div>
+  </details>`;
+  }).join('');
+}
+
+
+function _openPanel(panel) {
+  // desde colapsado → expandido
+  panel.style.willChange = 'max-height, opacity';
+  panel.style.opacity = '1';
+  panel.style.maxHeight = panel.scrollHeight + 'px';
+
+  const onEnd = () => {
+    panel.style.maxHeight = 'none'; // permite altura auto tras expandir
+    panel.style.willChange = '';
+    panel.removeEventListener('transitionend', onEnd);
+  };
+  panel.addEventListener('transitionend', onEnd);
+}
+
+function _closePanel(panel) {
+  // desde expandido → colapsado
+  panel.style.willChange = 'max-height, opacity';
+  // fijar altura actual para poder animar hacia 0
+  panel.style.maxHeight = panel.scrollHeight + 'px';
+  // forzar reflow para que el cambio a 0 anime
+  void panel.offsetHeight;
+  panel.style.opacity = '0';
+  panel.style.maxHeight = '0px';
+
+  const onEnd = () => {
+    panel.style.willChange = '';
+    panel.removeEventListener('transitionend', onEnd);
+  };
+  panel.addEventListener('transitionend', onEnd);
+}
+
+function wireExpandoAnimations(root) {
+  root.querySelectorAll('details').forEach(det => {
+    const panel = det.querySelector('.expando');
+    if (!panel) return;
+
+    // Estado inicial (si se restaura abierto)
+    if (det.open) {
+      panel.style.maxHeight = 'none';
+      panel.style.opacity = '1';
+    } else {
+      panel.style.maxHeight = '0px';
+      panel.style.opacity = '0';
+    }
+
+    det.addEventListener('toggle', () => {
+      if (det.open) _openPanel(panel);
+      else _closePanel(panel);
+    });
+  });
+}
+
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.opt-x');
+  if (!btn) return;
+
+  const row   = btn.closest('.option-row');
+  const optEl = row?.querySelector('.opt-text');
+  const qText = btn.closest('details')?.querySelector('summary span')?.textContent?.trim() || '';
+  const key   = `${qText}||${optEl?.textContent?.trim() || ''}`;
+
+  if (!optEl) return;
+
+  if (markedOpts.has(key)) {
+    markedOpts.delete(key);
+    optEl.classList.remove('striked');
+  } else {
+    markedOpts.add(key);
+    optEl.classList.add('striked');
+  }
+});
+
+
+document.addEventListener('click', (e) => {
+  const row = e.target.closest('.option-row');
+  if (!row) return;
+
+  // si el click vino del botón "X" de tachar, se ignora aquí
+  if (e.target.closest('.opt-x')) return;
+
+  const list = row.closest('.opt-list');
+  if (!list) return;
+
+  const corr = Number(list.dataset.corr ?? -1);
+  const idx  = Number(row.dataset.idx ?? -1);
+
+  // reset de estilos previos
+  list.querySelectorAll('.option-row').forEach(r => {
+    r.classList.remove('bg-green-100','ring-1','ring-green-500','bg-red-100','ring-red-500');
+  });
+
+  // marca selección
+  const corrRow = list.querySelector(`.option-row[data-idx="${corr}"]`);
+  if (idx === corr) {
+    row.classList.add('bg-green-100','ring-1','ring-green-500');
+  } else {
+    row.classList.add('bg-red-100','ring-1','ring-red-500');
+    corrRow?.classList.add('bg-green-100','ring-1','ring-green-500');
+  }
+});
+
+
+
+
+
 </script>
 
 
@@ -6474,3 +6837,6 @@ ready = true;
 
 //19 agosto tarde noche noche noche
 //20 agosto noche noche
+//21 agosto noche
+//22 agosto noche
+//23 agosto amane
