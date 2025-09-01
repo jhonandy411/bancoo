@@ -475,6 +475,7 @@ body.split-view-active .dashboard-container{
 /* 3) En hover, “desplegar” provisionalmente la sidebar completa */
  #sidebar.collapsed:hover {
    width: calc(var(--sb-collapsed) + var(--subcat-width));           /* ancho del overlay */
+   background: #fff !important;   
    padding-left: 0;          /* ← sin gutter izquierdo */
    padding-right: 0;         /* ← sin gutter derecho */
    box-shadow: 2px 0 8px rgba(0,0,0,0.1);
@@ -2431,33 +2432,47 @@ body.bars-hidden #sb-switch { display: none !important; }
 
 /* —— Opciones tipo AMBOSS (línea fina, círculo y botón X) —— */
 /* Lista de opciones con líneas finas */
+/* —— Opciones tipo AMBOSS (compactas) —— */
+/* Lista de opciones con líneas finas */
 .opt-list { margin: 0; padding: 0; list-style: none; }
-.opt-list > li { padding: .2rem .25rem .2rem 0; }
+.opt-list > li { padding: .15rem .2rem .15rem 0; }   /* 🔽 menos padding vertical */
 .opt-list > li + li {
-  border-top: 0.5px solid #e5e7eb;   /* gris muy fino */
+  border-top: none;                 /* quita la línea gris */
+  box-shadow: inset 0 1px 0 #e5e7eb; /* simula línea interna */
 }
 
 /* Fila */
-.option-row { display:flex; align-items:center; gap:.35rem; }
+/* —— Opciones compactas y homogéneas —— */
+/* —— Opciones compactas y homogéneas —— */
+.option-row { 
+  display: flex; 
+  align-items: center; 
+  gap: .05rem; 
+  padding-top: .05rem; 
+  padding-bottom: .05rem;   /* compacto */
+}
 .option-row:hover { background: #f9fafb; }
 
 /* Círculo con la letra (A, B, …) */
-.opt-bullet{
-  width: 18px; height: 18px; flex: 0 0 18px;
-  display:grid; place-items:center;
+.opt-bullet {
+  width: 14px; height: 14px;          /* círculo se mantiene */
+  flex: 0 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid #cbd5e1;          /* gris */
   border-radius: 9999px;
   font-weight: 600;
-  font-size: 10px;                    /* mucho más pequeño */
+  font-size: 7px;                     /* 🔽 más pequeño dentro del mismo círculo */
   line-height: 1;
-  color:#334155;                      /* slate-700 */
-  background: transparent;            /* ✅ fondo transparente */
+  color: #334155;                     /* slate-700 */
+  background: transparent;
 }
 
 /* Texto de la opción */
-.opt-text{ 
-  color:#334155; 
-  font-size: 11px;                    /* más pequeño */
+.opt-text { 
+  color: #334155; 
+  font-size: 10px;                    /* tamaño legible pero discreto */
   line-height: 1.2;
 }
 
@@ -2470,7 +2485,7 @@ body.bars-hidden #sb-switch { display: none !important; }
 /* Botón X */
 .opt-x{
   margin-left:auto;
-  width: 18px; height: 18px;
+  width: 16px; height: 16px;          /* 🔽 más chico */
   display:grid; place-items:center;
   border-radius:9999px;
   color:#64748b;
@@ -2482,35 +2497,201 @@ body.bars-hidden #sb-switch { display: none !important; }
   border-color:#e2e8f0;
   color:#0f172a;
 }
-.opt-x i{ font-size: 10px; }
+.opt-x i{ font-size: 9px; }           /* 🔽 más chico */
+
+/* Base (tal como la tienes) */
+.opt-bullet{
+  width: 14px; height: 14px;
+  flex: 0 0 14px;
+  display:flex; align-items:center; justify-content:center;
+  border: 1px solid #cbd5e1;      /* gris por defecto */
+  border-radius:9999px;
+  font-weight:600;
+  font-size:7px;
+  line-height:1;
+  color:#334155;                   /* gris por defecto */
+  background:transparent;
+}
+
+/* Estados para corrección */
+.opt-bullet.ok      { border-color:#16a34a; color:#16a34a; background:transparent; } 
+.opt-bullet.ok-solid{ border-color:#15803d; background:#15803d; color:#fff; } /* ✅ más oscuro */
+
+.opt-bullet.err     { border-color:#dc2626; color:#dc2626; background:transparent; } /* rojo contorno/letra */
+.opt-bullet.err-solid{border-color:#dc2626; background:#dc2626; color:#fff; }        /* rojo sólido (letra blanca) */
+
+
+/* Verde más oscuro (para la opción correcta) */
+/* Verde más oscuro SOLO de fondo para la opción correcta */
+.option-row.correct {
+  background-color:#dcfce7 !important; /* green-100 */
+  border-color:#22c55e !important;     /* igual que la explicación */
+}
+
+/* Verde más claro (para la explicación) */
+.explicacion-box > div {
+  border-color:#22c55e !important;   /* green-500 */
+  background-color:#f0fdf4 !important; /* green-50 */
+}
+
+/* Texto de la opción: siempre negro (o casi) */
+.opt-text{ color:#111827 !important; font-size:10px; line-height:1.2; }
 
 
 
 
+/* deshabilita click en botones de tachar cuando están "disable" */
+.opt-x[aria-disabled="true"] { pointer-events: none; cursor: default; }
+
+
+/* Sin hover cuando la pregunta está respondida (locked) */
+.opt-list.locked .option-row {
+  pointer-events: none;   /* desactiva :hover y clicks */
+  cursor: default;
+}
+
+/* Footer bajo las opciones */
+.opt-footer{ margin-top:.25rem; padding-top:.25rem; }
+
+/* Línea igual a las internas (hairline) */
+.opt-divider{
+  height:1px;
+  background:#e5e7eb;     /* slate-200 */
+  width:100%;
+  margin:.25rem 0 .35rem 0;
+}
+
+/* Botón Reset */
+.opt-reset{
+  font-size:10px;
+  line-height:1;
+  padding:.35rem .55rem;
+  border:1px solid #cbd5e1;           /* slate-300 */
+  border-radius:.375rem;
+  background:#f8fafc;                 /* slate-50 */
+  color:#64748b;                      /* slate-500 */
+  opacity:.6;
+  cursor:default;
+}
+.opt-reset.enabled{
+  opacity:1;
+  cursor:pointer;
+  background:#ffffff;
+  color:#0f172a;                       /* slate-900 */
+}
+.opt-reset:disabled{ pointer-events:none; }
+
+#subcategoria-sidebar-content { scroll-behavior: smooth; }
+
+
+blockquote {
+  white-space: normal;   /* asegura saltos de línea normales */
+  overflow-wrap: break-word; /* permite cortar solo si no hay espacios */
+}
 
 
 
 
+/* ===== Tabs estilo normal ===== */
+.tabsbar {
+  position: relative;
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  border-bottom: 1px solid #e6edf3;   /* línea gris clarita */
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+
+.tab-btn {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.2;
+  color: #2e4454;
+  opacity: .92;
+  cursor: pointer;
+}
+
+.tab-btn .count {
+  font-weight: 600;
+  opacity: .9;
+}
+
+.tab-btn i {
+  font-size: 18px;
+  color: #2e4454;
+  opacity: .9;
+}
+
+.tab-btn.is-active {
+  color: #0ea5e9;           /* celeste activo */
+}
+
+.tab-btn.is-active i {
+  color: #0ea5e9;
+}
+
+.tabs-ink {
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 4px;
+  width: 0;
+  background: #0ea5e9;
+  border-radius: 2px;
+  transition: left .22s ease, width .22s ease;
+}
 
 
+/* ===== Tabs ultracompactas (versión pequeña) ===== */
+.tabsbar.tabsbar--xs {
+  gap: 12px;
+  padding-bottom: 4px;
+  border-bottom-width: 1px;
+}
+
+.tabsbar.tabsbar--xs .tab-btn {
+  font-size: 10px;       /* texto mucho más pequeño */
+  line-height: 1.05;
+  gap: 4px;
+}
+
+.tabsbar.tabsbar--xs .tab-btn i {
+  font-size: 9px;        /* icono más pequeño */
+}
+
+.tabsbar.tabsbar--xs .tab-btn .count {
+  font-weight: 600;
+  opacity: .75;
+  font-size: 10px;
+}
+
+.tabsbar.tabsbar--xs .tabs-ink {
+  height: 2px;           /* subrayado muy fino */
+  bottom: -2px;
+}
 
 
+/* === Fondo blanco para la página de resultados (Overview/Articles/Drugs/…) === */
+#main-content:has(#search-page:not(.hidden)),
+#search-page {
+  background-color: #ffffff !important;
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* Mostrar el contenido del grupo que esté abierto (o el grupo bajo el puntero)
+   incluso si el panel tiene la clase .hidden */
+#sidebar.collapsed:hover .sidebar-group button.accordion-open + div[id^="accordion-"],
+#sidebar.collapsed:hover .sidebar-group:hover > div[id^="accordion-"],
+#sidebar.collapsed:hover .sidebar-group button.accordion-open + div[id^="accordion-"].hidden {
+  display: block !important;
+}
 
 
 
@@ -2800,7 +2981,7 @@ body.bars-hidden #sb-switch { display: none !important; }
   
 <!-- Home -->
   <div class="sidebar-group" id="group-home">
-    <a href="#" class="sidebar-item px-3 py-2 rounded" onclick="setActiveLink(this)">
+    <a href="#" class="sidebar-item px-3 py-2 rounded" onclick="setActiveLink(this); showHome()">
       <div class="flex items-center">
        <img src="./assets/aaa2.png" data-icon="aaa" class="w-4.3 h-5 shrink-0 sidebar-icon" />
         <span class="ml-2">Home</span>
@@ -2876,7 +3057,7 @@ body.bars-hidden #sb-switch { display: none !important; }
   </button>
 
   <div id="accordion-library" class="ml-8 mt-1 space-y-1 hidden">
-<a id="lib-articles" href="#" class="sidebar-item block px-2 py-1 rounded" onclick="setActiveLink(this)">Articles</a>
+<a id="lib-articles" href="#" class="sidebar-item block px-2 py-1 rounded" onclick="setActiveLink(this); showArticles()">Articles</a>
     <a href="#" class="sidebar-item block px-2 py-1 rounded" onclick="setActiveLink(this)">Videos</a>
     <a href="#" class="sidebar-item block px-2 py-1 rounded" onclick="setActiveLink(this)">Media Library</a>
   </div>
@@ -3304,12 +3485,46 @@ function updateStickyHeight() {
 </script>
 
 
+<!-- === Simple View Manager (oculta todo y muestra sólo la vista pedida) === -->
+<script>
+  // Vistas principales de tu app
+  const VIEW_IDS = ['home-content','articles-panel','search-page','subcategoria-content'];
+
+  function hideAllViews(){
+    VIEW_IDS.forEach(id => document.getElementById(id)?.classList.add('hidden'));
+    // columas internas del panel de artículos
+    document.getElementById('panel-2')?.classList.add('hidden');
+    document.getElementById('panel-3')?.classList.add('hidden');
+    // sidebar de subcategoría y dropdown de búsqueda
+    document.getElementById('subcategoria-sidebar')?.classList.add('hidden');
+    document.getElementById('search-results')?.classList.add('hidden');
+  }
+
+  function showView(id){
+    hideAllViews();
+    document.getElementById(id)?.classList.remove('hidden');
+    // confort: sube al top del contenedor scrolleable
+    document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Helpers públicos para usar en tus onClick
+  window.showHome     = () => showView('home-content');
+  window.showArticles = () => showView('articles-panel');
+  window.showSearch   = () => showView('search-page');
+  window.showSubcat   = () => showView('subcategoria-content');
+
+  // Botón "Go to library" ya existente en Home
+  window.goToLibraryArticles = () => showArticles();
+</script>
+
+
 
 <script>
   let currentActivePanel2Item = null; // Para mantener el elemento seleccionado en el panel 2
   let currentActivePanel3Item = null; // Para mantener el elemento seleccionado en el panel 3
 
   async function showSecondPanel(clickedElement, supracategoriaId) {
+    showArticles(); // ← oculta previos y muestra #articles-panel
   const panel2 = document.getElementById("panel-2");
   const panel3 = document.getElementById("panel-3");
   const secondPanelTitle = document.getElementById("second-panel-title");
@@ -3427,12 +3642,11 @@ function markSelected(el) {
 }
 
 async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategoriaId) {
-  // — Ocultar todo lo anterior —
-  document.getElementById("home-content").classList.add("hidden");
-  document.getElementById("articles-panel").classList.add("hidden");
-  document.getElementById("panel-2").classList.add("hidden");
-  document.getElementById("panel-3").classList.add("hidden");
-  document.getElementById("subcategoria-content").classList.add("hidden");
+  // — Cambiar de vista de forma centralizada —
+  // Oculta la TOC desde el inicio para evitar el "flash"
+  const tocEl = document.getElementById('subcategoria-sidebar');
+  tocEl?.classList.add('hidden');
+  showSubcat();
 
   // — Referencias al DOM —
   const contentSection = document.getElementById("subcategoria-content");
@@ -4029,7 +4243,7 @@ const io = new IntersectionObserver(
   },
   { root: content, threshold: 0 }
 );
-io.observe(sentinel);
+updateStickyHeight();
 
 
 // ——— Breadcrumb dinámico (tema > sección visible) ———
@@ -4158,12 +4372,16 @@ tocSections.forEach(sec => {
 });
 tocHTML += `</nav>`;
 subWrap.innerHTML = tocHTML;
-subSidebar.classList.remove('hidden');
+  // Muestra la TOC SOLO cuando el contenido ya está pintado
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    subSidebar.classList.remove('hidden');
+  }));
 
 // —— FIX: lock de selección TOC durante scroll programático ——
 let tocLockIdx = -1;
 let tocLockTimer = null;
-const LOCK_MS = 500; // duración aproximada del scroll suave
+// El lock ahora se libera al terminar el scroll; este es solo un fallback
+const LOCK_FALLBACK_MS = 2000;
 
 
 
@@ -4289,7 +4507,6 @@ tocBtns.forEach(btn => {
     if (idx < 0) return;
 
     // Activa lock para evitar que el sync por scroll “robe” la selección
-    if (tocLockTimer) clearTimeout(tocLockTimer);
     tocLockIdx = idx;
     setTOCActiveByIndex(idx); // pinta activo inmediatamente
 
@@ -4306,14 +4523,19 @@ tocBtns.forEach(btn => {
     });
 
 
-        // … después de hacer container.scrollTo({ top, behavior:'smooth' });
-waitForScrollEnd(container).then(() => {
-  flashSummaryAtIndex(idx);   // ahora el resaltado corre cuando el scroll terminó
-});
+    // … después de hacer container.scrollTo({ top, behavior:'smooth' });
+    waitForScrollEnd(container).then(() => {
+      // asegurar selección final del item pulsado
+      setTOCActiveByIndex(idx);
+      const btnEl = document.querySelector(`#subcategoria-sidebar-content [data-index="${idx}"]`);
+      btnEl?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+      flashSummaryAtIndex(idx);
+      tocLockIdx = -1; // liberar lock al terminar de verdad
+    });
 
-
-    // libera el lock cuando termina el scroll suave
-    tocLockTimer = setTimeout(() => { tocLockIdx = -1; }, LOCK_MS);
+    // Fallback por si 'scrollend' no dispara (navegador viejo)
+    if (tocLockTimer) clearTimeout(tocLockTimer);
+    tocLockTimer = setTimeout(() => { tocLockIdx = -1; }, LOCK_FALLBACK_MS);
   }, { passive: true });
 });
 
@@ -4384,10 +4606,11 @@ updateTOCActive();
 
 
 function applyActive(idx){
+  if (idx == null || idx < 0) return;
   setTOCActiveByIndex(idx);
-  // mantener auto-scroll del ítem activo en la TOC
+  // mantener auto-scroll del ítem activo en la TOC (suave)
   const activeBtn = document.querySelector(`#subcategoria-sidebar-content [data-index="${idx}"]`);
-  activeBtn?.scrollIntoView({ block: 'nearest' });
+  activeBtn?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
 }
 
   // Ejecuta en scroll, al abrir/cerrar <details> y al inicializar
@@ -4420,6 +4643,17 @@ content.addEventListener('scroll', onScrollSync, { passive: true });
 
   // — Mostrar la sección dentro del main —
   contentSection.classList.remove("hidden");
+
+
+
+  // Al final de showSubcategoriaContent(...)
+window.dispatchEvent(new CustomEvent('subcat:rendered', {
+  detail: {
+    sup: supracategoriaId,
+    cat: categoriaId,
+    sub: subcategoriaId
+  }
+}));
 
   // — Opcional: colapsar la sidebar principal si lo necesitas —
   toggleSidebarCollapse(true);
@@ -4833,25 +5067,64 @@ function toggleReadingSidebars() {
 /* Hook al botón del header:
    - Si hay contenido de subcategoría abierto, usa el toggle de lectura.
    - Si NO hay contenido (home, library, etc.), conserva el comportamiento actual (colapsar/expandir). */
-(() => {
-  const btn = document.getElementById('menu-toggle');
-  const subcatContent = document.getElementById('subcategoria-content');
+document.addEventListener('DOMContentLoaded', () => {
+  const btn  = document.getElementById('menu-toggle');
+  const subc = document.getElementById('subcategoria-content');
+  const sb   = document.getElementById('sidebar');
+  const toc  = document.getElementById('subcategoria-sidebar');
+  const body = document.body;
 
-  const handleClick = (e) => {
-    const showingSubcat = !subcatContent.classList.contains('hidden');
-    if (showingSubcat) {
-      toggleReadingSidebars();
+  const handleClick = () => {
+    const inSubcat = subc && !subc.classList.contains('hidden');
+
+    if (inSubcat) {
+      // Subcategoría: principal colapsada + TOC visible, o ambas ocultas
+      const isHidden = body.classList.contains('bars-hidden')
+                    || sb.classList.contains('force-hidden')
+                    || (toc && toc.classList.contains('hidden'));
+
+      if (isHidden) {
+        body.classList.remove('bars-hidden');
+        sb.classList.remove('force-hidden','open');
+        sb.classList.add('collapsed');     // aquí sí, colapsada
+        if (toc) toc.classList.remove('hidden');
+      } else {
+        body.classList.add('bars-hidden');
+        sb.classList.add('force-hidden');
+        if (toc) toc.classList.add('hidden');
+      }
+      return;
+    }
+
+    // HOME: solo expandida u oculta (sin 'collapsed')
+    const hiddenNow = body.classList.contains('bars-hidden') || sb.classList.contains('force-hidden');
+
+    if (hiddenNow) {
+      body.classList.remove('bars-hidden');
+      sb.classList.remove('force-hidden','collapsed');
+      sb.classList.add('open');            // expandida
     } else {
-      // fallback clásico
-      toggleSidebarCollapse();
+      body.classList.add('bars-hidden');
+      sb.classList.add('force-hidden');    // oculta
+      sb.classList.remove('open','collapsed');
     }
   };
 
-  // Quita el listener anterior si existía y pon el nuevo
-  btn.replaceWith(btn.cloneNode(true));
-  const freshBtn = document.getElementById('menu-toggle');
-  freshBtn.addEventListener('click', handleClick);
-})();
+  const fresh = btn.cloneNode(true);
+  btn.replaceWith(fresh);
+  fresh.addEventListener('click', handleClick);
+
+  
+
+  const _showView = window.showView;
+  window.showHome = () => {
+    body.classList.remove('bars-hidden');
+    sb.classList.remove('force-hidden','collapsed');
+    sb.classList.add('open');           
+    toc && toc.classList.add('hidden'); 
+    _showView('home-content');
+  };
+});
 
 
 
@@ -4994,25 +5267,28 @@ document.getElementById("sidebar").addEventListener("mouseleave", () => {
     <!-- Contenido principal desplazado sólo 2rem (h-8) hacia abajo -->
     <div class="absolute inset-x-0 top-10 bottom-0 flex overflow-visible">
 
-      <!-- Sidebar izquierdo -->
-      <aside id="video-main-panel" class="w-1/4 bg-gray-900 text-white p-6 flex flex-col">
-        <h2 id="modal-title" class="text-xl font-semibold mb-2">Título del vídeo</h2>
-        <span class="text-sm text-gray-400">© BANCOMICINA</span>
-        <p id="video-main-text" class="text-sm text-gray-200 mt-4"></p>
-        
-      </aside>
+<!-- Sidebar izquierdo -->
+<aside 
+  id="video-main-panel" 
+  class="w-1/4 bg-gray-900 text-white p-6 flex flex-col overflow-y-auto"
+  style="height: 100%;"
+>
+  <h2 id="modal-title" class="text-xl font-semibold mb-2">Título del vídeo</h2>
+  <span class="text-sm text-gray-400">© BANCOMICINA</span>
+  <p id="video-main-text" class="text-sm text-gray-200 mt-4"></p>
+</aside>
 
-      <!-- Área de vídeo -->
-      <div id="video-area" class="w-3/4 relative bg-black flex flex-col">
-       <iframe
-  id="modal-iframe"
-  class="w-full"
-  style="height: calc(100% - 70px);"
-  src=""
-  frameborder="0"
-  allow="autoplay; encrypted-media"
-  allowfullscreen
-></iframe>
+<!-- Área de vídeo -->
+<div id="video-area" class="w-3/4 relative bg-black flex flex-col">
+  <iframe
+    id="modal-iframe"
+    class="w-full"
+    style="height: calc(100% - 70px);"
+    src=""
+    frameborder="0"
+    allow="autoplay; encrypted-media"
+    allowfullscreen
+  ></iframe>
 
 <!-- ▼ Imagen en modal: añadido para soportar imágenes -->
  <img id="modal-image" class="hidden w-full h-auto object-contain" alt="" aria-hidden="true" role="presentation"/>
@@ -5750,6 +6026,9 @@ document.addEventListener('click', function(e) {
     // Mostrá el panel central de Library (tu función ya lo hace)
     switchView('library');
 
+
+    
+
     const sidebar = document.getElementById('sidebar');
     const group   = document.getElementById('group-library');
     const btn     = group?.querySelector('button.sidebar-item');
@@ -5886,6 +6165,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+
+
 <!-- Botón flotante para ocultar/mostrar barras -->
 <button id="sb-switch" aria-label="Ocultar barras" title="Ocultar barras">
   <i class="fas fa-chevron-left" aria-hidden="true"></i>
@@ -6068,6 +6349,9 @@ function placeSwitch(){
   });
 </script>
 
+
+
+<!-- === Otro === -->
 
 <script>
 (function () {
@@ -6258,12 +6542,157 @@ popover.addEventListener('keydown', hideOnEnter);
 })();
 </script>
 
-
-
-
-
-
 <!-- === Resultados + preguntas reales por keywords (con fallback texto) === -->
+
+<script>
+function prettifyAmbossBlob(src = '', UNESC_FN = null, opts = {}) {
+  let t = (UNESC_FN ? UNESC_FN(src) : String(src || '')).trim();
+
+  // 1) Títulos → bullets
+  t = t.replace(/\*\*([A-Z][A-Za-z0-9 ]{1,60}?)\*\*\s*-\s*/g, (_m, h) => `\n\n### ${h}\n\n- `);
+  // 2) " - " → bullets
+  t = t.replace(/\s-\s/g, '\n- ');
+  // 3) Limpieza de saltos
+  t = t.replace(/\n{3,}/g, '\n\n');
+
+  // 4) (Opcional) quita *cualquier* palabra suelta al final (no solo “vancomicina”)
+  if (opts.stripTailSingleWord) {
+    const lines = t.split('\n');
+    const last  = (lines[lines.length - 1] || '').trim();
+    // solo si la última línea es una palabra sin espacios, de 3–20 chars
+    if (/^-?\s*[^\s]{3,20}$/u.test(last)) lines.pop();
+    t = lines.join('\n');
+  }
+  return t;
+}
+</script>
+
+
+
+<script>
+// --- Markdown renderer exclusivo para "Articles" (sin dependencias) ---
+
+
+
+function renderMD_ART(md = '') {
+  if (!md) return '';
+
+  // 0) mini "unescape" para normalizar comillas y símbolos comunes
+  const UNESC = (s) => String(s ?? '')
+    .replace(/&quot;|&#34;/g, '"')
+    .replace(/&apos;|&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
+
+  // 1) escape seguro (SIN convertir comillas)
+  const ESC = (typeof window.__escHTML === 'function')
+    ? window.__escHTML
+    : (s) => String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+        md = prettifyAmbossBlob(md, UNESC);
+
+  const inline = (s) => {
+    // a) des-escapa lo que venga como entidad y b) vuelve a escapar <,>,&
+    s = ESC(UNESC(s));
+
+    // <mark>…</mark> → resaltado celeste (acepta tanto &lt;mark&gt; como <mark>)
+    s = s
+      .replace(/&lt;mark&gt;|<mark>/g,
+        '<mark style="background:#dbeafe;color:#0c4a6e;padding:0 .2em;border-radius:.2em;">')
+      .replace(/&lt;\/mark&gt;|<\/mark>/g, '</mark>');
+
+    // links [texto](url)
+    s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g,
+      (_m, txt, href) => `<a href="${ESC(UNESC(href))}" target="_blank" rel="noopener noreferrer">${ESC(UNESC(txt))}</a>`
+    );
+
+    // **negrita**
+    s = s.replace(/(\*\*|__)(.+?)\1/g, '<strong>$2</strong>');
+    // *cursiva*
+    s = s.replace(/(\*|_)([^*_][\s\S]*?)\1/g, '<em>$2</em>');
+
+    return s;
+  };
+
+  const lines = String(md).replace(/\r\n?/g, '\n').split('\n');
+  let html = '', inP = false, inUL = false, inOL = false;
+
+  const flushP     = () => { if (inP) { html += '</p>'; inP = false; } };
+  const closeLists = () => { if (inUL) { html += '</ul>'; inUL = false; } if (inOL) { html += '</ol>'; inOL = false; } };
+
+  for (let raw of lines) {
+    const line = raw, t = line.trim();
+    if (!t) { flushP(); closeLists(); continue; }
+
+    const mH = t.match(/^(#{1,6})\s+(.*)$/);
+if (mH) {
+  flushP(); 
+  closeLists();
+  const lvl = mH[1].length;
+  // heading legible aun si el contenedor tiene text-xs
+html += `<h${lvl} class="mt-1 mb-0.5 font-semibold text-[9px] md:text-[9px] leading-tight text-slate-700">${inline(mH[2])}</h${lvl}>`;
+  continue;
+}
+
+if (/^[-*]\s+/.test(t)) {
+  flushP();
+  if (!inUL) {
+    closeLists();
+    html += '<ul class="list-disc list-outside pl-5 space-y-1">';
+    inUL = true;
+  }
+  html += `<li class="ml-1">${inline(t.replace(/^[-*]\s+/, ''))}</li>`;
+  continue;
+}
+if (/^\d+\.\s+/.test(t)) {
+  flushP();
+  if (!inOL) {
+    closeLists();
+    html += '<ol class="list-decimal list-outside pl-5 space-y-1">';
+    inOL = true;
+  }
+  html += `<li class="ml-1">${inline(t.replace(/^\d+\.\s+/, ''))}</li>`;
+  continue;
+}
+    if (!inP) { html += `<p>${inline(line)}`; inP = true; } else { html += `<br>${inline(line)}`; }
+  }
+
+  flushP(); closeLists();
+  return html;
+}
+
+
+// --- Empty state (imagen + textos) ---
+const EMPTY_IMG = './assets/noresultfound.png';
+function renderEmptyState(kind = 'results') {
+  const label =
+    kind === 'articles'   ? 'article'
+  : kind === 'drugs'      ? 'drug'
+  : kind === 'media'      ? 'media'
+  : kind === 'guidelines' ? 'guideline'
+  : 'result';
+
+  return `
+    <div class="mt-10 grid place-items-center text-center select-none">
+      <img src="${EMPTY_IMG}" alt="No ${label} results"
+           class="w-40 h-40 object-contain opacity-80 pointer-events-none" />
+      <div class="mt-3 text-slate-800 font-medium">No ${label} results found.</div>
+      <div class="text-slate-500 text-sm">Please try with another search query.</div>
+    </div>
+  `;
+}
+
+
+</script>
+
+
+
+
+
 <script>
   /* ------------ Firestore ready ------------- */
   try { if (!window.db && firebase?.firestore) window.db = firebase.firestore(); }
@@ -6390,109 +6819,828 @@ popover.addEventListener('keydown', hideOnEnter);
     return qs.map(q=>q.text);
   }
 
+
+  
+
+
+
+
+
+
   /* ------------ UI de resultados ------------- */
-  const resultsView = (data) => `
-    <div>
-      <div class="flex gap-6 border-b pb-2 text-sm">
-        ${['Overview','Articles','Drugs','Media','Guidelines'].map(tab=>{
-          const c = data.counts[tab.toLowerCase()] ?? 0;
-          const active = tab==='Overview'
-            ? 'border-b-2 pb-2 -mb-[2px] border-sky-500 text-sky-600'
-            : 'text-gray-600 hover:text-gray-800';
-          return `<button class="tab ${active}" data-tab="${tab.toLowerCase()}">${tab}${tab!=='Overview'?` (${c})`:''}</button>`;
+// 1) Vista principal con contenedor dinámico
+const resultsView = (data) => `
+
+  <div>
+    <div class="tabsbar tabsbar--xs" id="tabsbar">
+      <button class="tab-btn is-active" data-tab="overview"><span>Overview</span></button>
+      <button class="tab-btn" data-tab="articles"><i class="fa-regular fa-file-lines"></i><span>Articles <span class="count">(${data.counts.articles})</span></span></button>
+      <button class="tab-btn" data-tab="drugs"><i class="fa-solid fa-capsules"></i><span>Drugs <span class="count">(${data.counts.drugs})</span></span></button>
+      <button class="tab-btn" data-tab="media"><i class="fa-regular fa-image"></i><span>Media <span class="count">(${data.counts.media})</span></span></button>
+      <button class="tab-btn" data-tab="guidelines"><i class="fa-solid fa-layer-group"></i><span>Guidelines <span class="count">(${data.counts.guidelines})</span></span></button>
+      <span class="tabs-ink"></span>
+    </div>
+
+    <!-- Contenido dinámico -->
+    <div id="tab-content">
+      ${renderOverview(data)}
+    </div>
+  </div>
+`;
+
+
+    // --- renderizadores por bloque (reusables) ---
+function renderArticlesBlock(data){
+  if (!data.articles?.length) return `<p class="mt-2 text-sm text-gray-600">No results.</p>`;
+  return `
+    ${
+      data.articles.map(a=>{
+        const isSub = a.__kind === 'subtema';
+        const pill = isSub
+          ? `<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">
+               ${__escHTML(a.__cat || a.__sup || 'Subtopic')}
+             </span>`
+          : '';
+
+        const titleEl = isSub
+          ? `<a href="#"
+               class="text-sky-600 no-underline hover:underline hover:decoration-solid underline-offset-2 focus-visible:underline"
+               data-result="subcat"
+               data-sup="${__escHTML(a.__sup||'')}"
+               data-cat="${__escHTML(a.__cat||'')}"
+               data-sub="${__escHTML(a.__sub||'')}">${__escHTML(a.title)}</a>`
+          : `<a href="${a.url||'#'}" class="text-sky-600 no-underline hover:underline hover:decoration-solid underline-offset-2 focus-visible:underline">${__escHTML(a.title)}</a>`;
+
+        const body = isSub
+          ? (a.__hits?.length
+              ? `<ul class="mt-2 space-y-2 list-disc pl-5">
+                  ${a.__hits.map(h => `
+                    <li>
+                      <button type="button"
+                        class="text-xs text-gray-500 hover:text-sky-700 no-underline hover:underline hover:decoration-solid"
+                        data-result="subcat-hit"
+                        data-sup="${__escHTML(a.__sup||'')}"
+                        data-cat="${__escHTML(a.__cat||'')}"
+                        data-sub="${__escHTML(a.__sub||'')}"
+                        data-subheading="${__escHTML(h.subheading||'')}"
+                        title="Ver en subtema">
+                        <span class="font-medium">${__escHTML(h.subheading)}</span>
+                      </button>
+                      <blockquote class="mt-1 text-xs text-gray-700 border-l-2 border-gray-200 pl-3">
+                        ${renderMD_ART(h.snippetHTML)}
+                      </blockquote>
+                    </li>`).join('')}
+                </ul>`
+              : (a.meta ? `<div class="mt-2 text-sm text-gray-700 max-w-none">${renderMD_ART(a.meta)}</div>` : '')
+            )
+          : (a.meta ? `<div class="mt-1 text-sm text-gray-700 max-w-none">${renderMD_ART(a.meta)}</div>` : '');
+
+        return `<article class="mt-3">${titleEl}${pill}${body}</article>`;
+      }).join('')
+    }`;
+}
+
+/* === Questions (igual que tenías) === */
+function renderQuestionsBlock(data){
+  return `
+  <div class="mt-5 group">
+    <div class="border-t border-b border-slate-200">
+      <div class="flex items-center justify-between py-2">
+        <h4 class="font-semibold text-slate-600 text-sm">Questions related to your search</h4>
+        <label class="inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="toggle-qs" class="sr-only peer" checked>
+          <span class="w-9 h-5 bg-gray-200 rounded-full peer-checked:bg-sky-500 relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-4"></span>
+        </label>
+      </div>
+    </div>
+    <div class="mt-2 hidden group-has-[input:checked]:block">
+      <div id="qs-list" class="divide-y divide-slate-200">
+        ${data.suggestions.length
+          ? data.suggestions.slice(0,3).map(q=>`
+              <details class="group">
+                <summary class="flex items-center justify-between cursor-pointer list-none py-2 pl-0">
+                  <span class="text-slate-700 text-sm">${q}</span>
+                  <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                </summary>
+              </details>`).join('')
+          : `<div class="p-2 text-xs text-gray-600">No matching questions.</div>`}
+      </div>
+      ${data.suggestions.length>3?`
+        <div class="border-t border-slate-200 pt-2">
+          <div class="flex items-center gap-3">
+            <button id="qs-more" class="ml-2 font-semibold text-[7px] uppercase tracking-wide text-slate-600 hover:text-slate-800 flex items-center gap-1">
+              More <i class="fa-solid fa-chevron-down text-[9px]"></i>
+            </button>
+            <button id="qs-less" class="font-semibold text-[7px] uppercase tracking-wide text-slate-600 hover:text-slate-800 flex items-center gap-1 hidden">
+              Less <i class="fa-solid fa-chevron-up text-[9px]"></i>
+            </button>
+          </div>
+        </div>`:''}
+    </div>
+  </div>`;
+}
+
+/* === Media === */
+/* === Media === */
+function renderMediaBlock(data, showSeeAll = true){
+  if (!data.media?.length) return renderEmptyState('media');
+  return `
+  <h3 class="font-semibold flex items-center gap-2">
+    <i class="fa-regular fa-image text-slate-400"></i> Media (${data.counts.media})
+  </h3>
+  <div class="flex gap-2 mb-3 flex-wrap">
+    ${['Photos','Illustrations','Functional diag.'].map(lbl=>{
+      const key = lbl==='Photos' ? 'photo' : lbl==='Illustrations' ? 'illustration' : 'functional';
+      const n = data.media.filter(m => String(m.kind||m.type||'').toLowerCase().includes(key)).length;
+      return `<button class="px-3 py-1 rounded-full text-[11px] bg-gray-100 text-gray-700">${lbl} (${n})</button>`;
+    }).join('')}
+  </div>
+  <div class="overflow-x-auto">
+    <div class="flex gap-3 pb-2">
+      ${data.media.slice(0,8).map(m=>`
+        <article class="w-[85px]">
+          <a href="${m.url||'#'}" class="block rounded-lg border border-slate-200 overflow-hidden hover:shadow w-[85px] h-[85px]">
+            ${m.thumb
+              ? `<img src="${m.thumb}" alt="${__escHTML(m.title)}" class="w-[85px] h-[85px] object-cover">`
+              : `<div class="w-[85px] h-[85px] bg-slate-100 grid place-items-center text-[8px] text-slate-500">${__escHTML((m.kind||m.type||'MEDIA'))}</div>`}
+          </a>
+          <div class="mt-1 flex items-center gap-1 uppercase text-[8px] tracking-wide text-slate-600 truncate">
+            <i class="fa-regular fa-image text-slate-400 text-[10px]"></i>
+            ${__escHTML(String(m.kind||m.type||'').toUpperCase())}
+          </div>
+          <div class="text-slate-800 line-clamp-2 text-[9px] leading-tight">
+            ${__escHTML(m.title||'(untitled)')}
+          </div>
+        </article>`).join('')}
+    </div>
+  </div>
+  ${showSeeAll ? `
+    <a class="inline-flex items-center gap-1 text-sky-600 text-sm mt-2 hover:underline" href="#" data-see-all="media">
+      See all Media results (${data.counts.media})
+      <i class="fa-solid fa-chevron-right text-xs"></i>
+    </a>` : ``}
+  `;
+}
+
+/* === Guidelines === */
+function renderGuidelinesBlock(data){
+  if (!data.guidelines?.length) return renderEmptyState('guidelines');
+  return `
+    <h3 class="font-semibold">Guidelines (${data.counts.guidelines})</h3>
+    ${
+      data.guidelines.map(g=>`
+        <article class="mt-3">
+          <a href="${g.url||'#'}" class="text-sky-600 hover:underline">${g.title}</a>
+          ${g.date?`<div class="text-sm text-gray-500 mt-1">Published: ${g.date}</div>`:''}
+        </article>`
+      ).join('')
+    }
+  `;
+}
+
+/* === Drugs === */
+function renderDrugsBlock(data){
+  if (!data.drugs?.length) return renderEmptyState('drugs');
+  return `
+    <h3 class="font-semibold">Drugs (${data.counts.drugs})</h3>
+    ${data.drugs.map(d=>`
+      <article class="mt-3">
+        <a href="${d.url||'#'}" class="text-sky-600 hover:underline">${__escHTML(d.title)}</a>
+        ${d.meta?`<div class="mt-1 text-sm text-gray-700">${renderMD_ART(d.meta)}</div>`:''}
+      </article>
+    `).join('')}
+  `;
+}
+
+// --- Overview = combinación tal cual tienes
+// 2) OVERVIEW con TODO lo que tenías (Articles + Questions + Media + Guidelines)
+function renderOverview(data){
+  return `
+   <section class="mt-6">
+   <h3 class="font-semibold flex items-center gap-2">
+  <i class="fa-regular fa-file-lines text-slate-400"></i>
+  Articles (${data.counts.articles})
+</h3>
+    ${data.articles.length
+      ? data.articles.map(a=>{
+          const isSub = a.__kind === 'subtema';
+          const pill = isSub
+            ? `<span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">
+                 ${__escHTML(a.__cat || a.__sup || 'Subtopic')}
+               </span>`
+            : '';
+
+          const titleEl = isSub
+            ? `<a href="#"
+                 class="text-sky-600 no-underline hover:underline hover:decoration-solid underline-offset-2 focus-visible:underline"
+                 data-result="subcat"
+                 data-sup="${__escHTML(a.__sup||'')}"
+                 data-cat="${__escHTML(a.__cat||'')}"
+                 data-sub="${__escHTML(a.__sub||'')}">${__escHTML(a.title)}</a>`
+            : `<a href="${a.url||'#'}" class="text-sky-600 no-underline hover:underline hover:decoration-solid underline-offset-2 focus-visible:underline">${__escHTML(a.title)}</a>`;
+
+          const body  = isSub
+            ? (a.__hits && a.__hits.length
+                ? `
+                  <ul class="mt-2 space-y-2 list-disc pl-5">
+                    ${a.__hits.map(h => `
+                      <li>
+                        <button
+                          type="button"
+                          class="text-xs text-gray-500 hover:text-sky-700 no-underline hover:underline hover:decoration-solid"
+                          data-result="subcat-hit"
+                          data-sup="${__escHTML(a.__sup||'')}"
+                          data-cat="${__escHTML(a.__cat||'')}"
+                          data-sub="${__escHTML(a.__sub||'')}"
+                          data-subheading="${__escHTML(h.subheading||'')}"
+                          title="Ver en subtema"
+                        >
+                          <span class="font-medium">${__escHTML(h.subheading)}</span>
+                        </button>
+                        <blockquote class="mt-1 text-xs text-gray-700 border-l-2 border-gray-200 pl-3">
+                          ${renderMD_ART(h.snippetHTML)}
+                        </blockquote>
+                      </li>
+                    `).join('')}
+                  </ul>`
+                : (a.meta?`<div class="mt-2 text-sm text-gray-700 max-w-none">${renderMD_ART(a.meta)}</div>`:'')
+              )
+            : (a.meta?`<div class="mt-1 text-sm text-gray-700 max-w-none">${renderMD_ART(a.meta)}</div>`:'');
+
+          return `
+            <article class="mt-3">
+              ${titleEl}${pill}
+              ${body}
+            </article>`;
+        }).join('')
+      : `<p class="mt-2 text-sm text-gray-600">No results.</p>`
+    }
+
+    <div class="mt-5 group">
+      <!-- header -->
+      <div class="border-t border-b border-slate-200">
+        <div class="flex items-center justify-between py-2">
+          <h4 class="font-semibold text-slate-600 text-sm">
+            Questions related to your search
+          </h4>
+          <label class="inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="toggle-qs" class="sr-only peer" checked>
+            <span class="w-9 h-5 bg-gray-200 rounded-full peer-checked:bg-sky-500 relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-4"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- bloque que se oculta todo junto -->
+      <div class="mt-2 hidden group-has-[input:checked]:block">
+        <div id="qs-list" class="divide-y divide-slate-200">
+          ${data.suggestions.length
+            ? data.suggestions.slice(0,3).map(q=>`
+                <details class="group">
+                  <summary class="flex items-center justify-between cursor-pointer list-none py-2 pl-0">
+                    <span class="text-slate-700 text-sm">${q}</span>
+                    <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                  </summary>
+                </details>`).join('')
+            : `<div class="p-2 text-xs text-gray-600">No matching questions.</div>`}
+        </div>
+
+        ${data.suggestions.length > 3 ? `
+        <div class="border-t border-slate-200 pt-2">
+          <div class="flex items-center gap-3">
+            <button id="qs-more" class="ml-2 font-semibold text-[7px] uppercase tracking-wide text-slate-600 hover:text-slate-800 flex items-center gap-1">
+              More <i class="fa-solid fa-chevron-down text-[9px]"></i>
+            </button>
+            <button id="qs-less" class="font-semibold text-[7px] uppercase tracking-wide text-slate-600 hover:text-slate-800 flex items-center gap-1 hidden">
+              Less <i class="fa-solid fa-chevron-up text-[9px]"></i>
+            </button>
+          </div>
+        </div>`:''}
+      </div>
+    </div>
+   </section>
+
+   <!-- ===== Media (debajo de Questions) ===== -->
+   <section class="mt-8">
+    <h3 class="font-semibold flex items-center gap-2">
+      <i class="fa-regular fa-image text-slate-400"></i>
+      Media (${data.counts.media})
+    </h3>
+
+    ${data.media && data.media.length ? `
+      <div class="flex gap-2 mb-3 flex-wrap">
+        ${['Photos','Illustrations','Functional diag.'].map(lbl=>{
+          const key = lbl==='Photos' ? 'photo'
+                     : lbl==='Illustrations' ? 'illustration' : 'functional';
+          const n = data.media.filter(m =>
+            String(m.kind||m.type||'').toLowerCase().includes(key)
+          ).length;
+          return `<button class="px-3 py-1 rounded-full text-[11px] bg-gray-100 text-gray-700">${lbl} (${n})</button>`;
         }).join('')}
       </div>
 
-      <section class="mt-6">
-        <h3 class="font-semibold">Articles (${data.counts.articles})</h3>
-        ${data.articles.length
-          ? data.articles.map(a=>`
-              <article class="mt-3">
-                <a href="${a.url||'#'}" class="text-sky-600 hover:underline">${a.title}</a>
-                ${a.meta?`<ul class="mt-1 text-sm text-gray-600 list-disc pl-5"><li>${a.meta}</li></ul>`:''}
-              </article>`).join('')
-          : `<p class="mt-2 text-sm text-gray-600">No results.</p>`}
+      <div class="overflow-x-auto">
+        <div class="flex gap-3 pb-2">
+          ${data.media.slice(0,8).map(m=>`
+            <article class="w-[85px]">
+              <a href="${m.url||'#'}"
+                class="block rounded-lg border border-slate-200 overflow-hidden hover:shadow w-[85px] h-[85px]">
+                ${m.thumb
+                  ? `<img src="${m.thumb}" alt="${__escHTML(m.title)}"
+                          class="w-[85px] h-[85px] object-cover">`
+                  : `<div class="w-[85px] h-[85px] bg-slate-100 grid place-items-center text-[8px] text-slate-500">
+                      ${__escHTML((m.kind||m.type||'MEDIA'))}
+                    </div>`}
+              </a>
+              <div class="mt-1 flex items-center gap-1 uppercase text-[8px] tracking-wide text-slate-600 truncate">
+                <i class="fa-regular fa-image text-slate-400 text-[10px]"></i>
+                ${__escHTML(String(m.kind||m.type||'').toUpperCase())}
+              </div>
+              <div class="text-slate-800 line-clamp-2 text-[9px] leading-tight">
+                ${__escHTML(m.title||'(untitled)')}
+              </div>
+            </article>
+          `).join('')}
+        </div>
+      </div>
+
+      <a class="inline-flex items-center gap-1 text-sky-600 text-sm mt-2 hover:underline"
+        href="#" data-see-all="media">
+        See all Media results (${data.counts.media})
+        <i class="fa-solid fa-chevron-right text-xs"></i>
+      </a>
+    ` : `<p class="mt-2 text-sm text-gray-600">No results.</p>`}
+   </section>
+
+   <section class="mt-8">
+    <h3 class="font-semibold flex items-center gap-2">
+  <i class="fa-solid fa-layer-group text-slate-400"></i>
+  Guidelines (${data.counts.guidelines})
+</h3>
+    ${data.guidelines.length
+      ? data.guidelines.map(g=>`
+          <article class="mt-3">
+            <a href="${g.url||'#'}" class="text-sky-600 hover:underline">${g.title}</a>
+            ${g.date?`<div class="text-sm text-gray-500 mt-1">Published: ${g.date}</div>`:''}
+          </article>`).join('')
+      : `<p class="mt-2 text-sm text-gray-600">No results.</p>`}
+   </section>
+  `;
+}
 
 
 
 
 
-       <div class="mt-5 group">
-  <!-- header -->
-<div class="border-t border-b border-slate-200">
-  <div class="flex items-center justify-between py-2">
-    <h4 class="font-semibold text-slate-600 text-sm">
-      Questions related to your search
-    </h4>
-    <label class="inline-flex items-center cursor-pointer">
-      <input type="checkbox" id="toggle-qs" class="sr-only peer" checked>
-      <span class="w-9 h-5 bg-gray-200 rounded-full peer-checked:bg-sky-500 relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-4"></span>
-    </label>
-  </div>
-</div>
+    // --- SUBTEMAS (collection group: subcategorias) -----------------
 
-<!-- bloque que se oculta todo junto -->
-<div class="mt-2 hidden group-has-[input:checked]:block">
-  <div id="qs-list" class="divide-y divide-slate-200">
-    ${data.suggestions.length
-      ? data.suggestions.slice(0,3).map(q=>`
-          <details class="group">
-            <summary class="flex items-center justify-between cursor-pointer list-none py-2 pl-0">
-              <span class="text-slate-700 text-sm">${q}</span>
-              <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
-            </summary>
-          </details>`).join('')
-      : `<div class="p-2 text-xs text-gray-600">No matching questions.</div>`}
-  </div>
+function pickSubtemaFields(doc, query){
+  const d = doc.data() || {};
+  const hits = findHitsInSubtemaData(d, query);
 
-  ${data.suggestions.length > 3 ? `
-<div class="border-t border-slate-200 pt-2">
-  <div class="flex items-center gap-3">
-    <button id="qs-more" class="ml-2 font-semibold text-[7px] uppercase tracking-wide text-slate-600 hover:text-slate-800 flex items-center gap-1">
-      More <i class="fa-solid fa-chevron-down text-[9px]"></i>
-    </button>
-    <button id="qs-less" class="font-semibold text-[7px] uppercase tracking-wide text-slate-600 hover:text-slate-800 flex items-center gap-1 hidden">
-      Less <i class="fa-solid fa-chevron-up text-[9px]"></i>
-    </button>
-  </div>
-</div>`:''}
-</div>
-</div>
+  // Ruta: supracategorias/{SUP}/categorias/{CAT}/subcategorias/{SUB}
+  const subId = doc.id;
+  const catDoc = doc.ref.parent?.parent || null;
+  const supDoc = catDoc?.parent?.parent || null;
 
+  const catId = catDoc ? catDoc.id : '';
+  const supId = supDoc ? supDoc.id : '';
 
+  return {
+    title: d.nombre || d.denomination || d.title || '(sin título)',
+    meta:  d.descripcion || d.descripciongeneral || '',
+    url:   `/subcategoria.html?path=${encodeURIComponent(doc.ref.path)}`,
+    date:  '',
+    __kind: 'subtema',
+    __hits: hits,
+    __sup: supId,           // 👈 NUEVO
+    __cat: catId,           // 👈 NUEVO
+    __sub: subId            // 👈 NUEVO
+  };
+}
 
-
-
-
-
-      </section>
-
-      <section class="mt-8">
-        <h3 class="font-semibold">Guidelines (${data.counts.guidelines})</h3>
-        ${data.guidelines.length
-          ? data.guidelines.map(g=>`
-              <article class="mt-3">
-                <a href="${g.url||'#'}" class="text-sky-600 hover:underline">${g.title}</a>
-                ${g.date?`<div class="text-sm text-gray-500 mt-1">Published: ${g.date}</div>`:''}
-              </article>`).join('')
-          : `<p class="mt-2 text-sm text-gray-600">No results.</p>`}
-      </section>
-    </div>`;
-
-  /* ------------ Orquestador ------------- */
-  async function fetchSearchData(query){
-    const [articles, guidelines, drugs, media] = await Promise.all([
-      searchCollection(COLLECTIONS.articles, query),
-      searchCollection(COLLECTIONS.guidelines, query),
-      searchCollection(COLLECTIONS.drugs, query),
-      searchCollection(COLLECTIONS.media, query),
-    ]);
-    const suggestions = await getRelatedQuestions(query); // << AQUÍ van las preguntas reales
-    return {
-      counts: { overview:1, articles:articles.length, drugs:drugs.length, media:media.length, guidelines:guidelines.length },
-      articles, guidelines, suggestions
-    };
+// 1) por KEYWORDS (rápido si hay índice)
+async function searchSubtemasByKeywords(query, limit=30){
+  if(!window.db) return [];
+  const terms = termsFromQuery(query);
+  if(!terms.length) return [];
+  try{
+    const snap = await db.collectionGroup('subcategorias')
+      .where('keywords','array-contains-any', terms)
+      .limit(limit)
+      .get();
+    const out = [];
+    snap.forEach(doc => out.push(pickSubtemaFields(doc, query))); // <-- aquí
+    return out;
+  }catch(err){
+    // si falta índice, devolvemos vacío para que tome el fallback
+    const msg = String(err && (err.code || err.message || err));
+    if (msg.includes('failed-precondition') || msg.includes('create_exemption')){
+      console.warn('[searchSubtemasByKeywords] Falta índice; usando fallback texto.', err);
+      return [];
+    }
+    throw err;
   }
+}
+
+// 2) Fallback por texto (cliente)
+
+async function searchSubtemasByText(query, limit=30){
+  if(!window.db) return [];
+  const match = buildTextMatcher(query);
+  const snap  = await db.collectionGroup('subcategorias').limit(120).get();
+  const out=[];
+  snap.forEach(doc=>{
+    const d = doc.data()||{};
+    const blob = [
+      d.nombre, d.denomination, d.descripcion,
+      Array.isArray(d.keywords)? d.keywords.join(' '):''
+    ].filter(Boolean).join(' ');
+    if (match(blob)) out.push(pickSubtemaFields(doc, query)); // <-- aquí
+  });
+  return out.slice(0, limit);
+}
+
+// Orquestador de subtemas
+async function searchSubtemas(query){
+  let items = await searchSubtemasByKeywords(query, 30);
+  if(items.length < 5){
+    const fb = await searchSubtemasByText(query, 30);
+    // evitar duplicados por título+url
+    const seen = new Set(items.map(i=>i.title+'|'+i.url));
+    fb.forEach(i=>{ const k=i.title+'|'+i.url; if(!seen.has(k)) items.push(i); });
+  }
+  return items;
+}
+
+
+
+
+// === Helpers para hallar fragmentos dentro de un subtema ===
+
+
+
+// === Helpers multi-hit (reemplaza los anteriores findHit..., _makeSnippet, etc.) ===
+function _escapeRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+// ¿Es parte de “palabra”? (letras con tildes, marcas, números y guion bajo)
+function _isWordChar(ch){ return /\p{L}|\p{M}|\p{N}|_/u.test(ch); }
+
+// Expande [start,end) hasta cubrir la palabra entera
+function _expandToWord(text, start, end){
+  let i = start, j = end;
+  while (i > 0 && _isWordChar(text[i-1])) i--;
+  while (j < text.length && _isWordChar(text[j])) j++;
+  return [i, j];
+}
+
+/** Snippet: marca por caracteres, expande a palabra completa y recorta por palabras */
+// Marca todas las coincidencias expandiéndolas a la PALABRA completa
+function _markAllWholeWord(text, terms = []) {
+  const uniq = Array.from(new Set((terms || []).filter(Boolean)));
+  if (!uniq.length || !text) return text;
+
+  // 1) recolectar rangos [start,end) de TODAS las coincidencias (expandidas a palabra)
+  const ranges = [];
+  for (const t of uniq) {
+    const re = new RegExp(_escapeRe(t), 'gi');
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      const start = m.index;
+      const end   = m.index + m[0].length;
+      const [wStart, wEnd] = _expandToWord(text, start, end); // <-- expande a palabra
+      ranges.push([wStart, wEnd]);
+      // evita loops con matches vacíos
+      if (re.lastIndex === m.index) re.lastIndex++;
+    }
+  }
+
+  if (!ranges.length) return text;
+
+  // 2) fusionar rangos que se solapan o tocan
+  ranges.sort((a,b)=> a[0]-b[0] || a[1]-b[1]);
+  const merged = [];
+  for (const [s,e] of ranges) {
+    if (!merged.length || s > merged[merged.length-1][1]) {
+      merged.push([s,e]);
+    } else {
+      merged[merged.length-1][1] = Math.max(merged[merged.length-1][1], e);
+    }
+  }
+
+  // 3) construir el string con <mark> alrededor de los rangos fusionados
+  let out = '', prev = 0;
+  for (const [s,e] of merged) {
+    out += text.slice(prev, s) + '<mark>' + text.slice(s, e) + '</mark>';
+    prev = e;
+  }
+  out += text.slice(prev);
+  return out;
+}
+
+
+
+
+
+
+// === reemplaza tu _makeSnippet por este ===
+function _makeSnippet(text, terms, radiusWords = 25) {
+  if (!text) return { snippetHTML: '' };
+
+  // 1) encuentra el *primer* match para centrar el recorte
+  let first = null, firstTerm = '';
+  for (const t of (terms || [])) {
+    if (!t) continue;
+    const re = new RegExp(_escapeRe(t), 'i');
+    const m = text.match(re);
+    if (m) { first = { index: m.index, len: m[0].length }; firstTerm = m[0]; break; }
+  }
+
+  // 2) si no hay match → inicio plano (sin marcas)
+  if (!first) {
+    const words = text.trim().split(/\s+/);
+    const slice = words.slice(0, radiusWords * 2).join(' ');
+    const more  = words.length > radiusWords * 2 ? '…' : '';
+    return { snippetHTML: __escHTML(slice) + more };
+  }
+
+  // 3) construye un “window” de ±radiusWords alrededor del primer término
+  const center = _escapeRe(firstTerm);
+  const windowRe = new RegExp(
+    `(?:\\S+\\s+){0,${radiusWords}}\\S*${center}\\S*(?:\\s+\\S+){0,${radiusWords}}`,
+    'i'
+  );
+  const m2 = text.match(windowRe);
+  const rawSlice = m2 ? m2[0] : text;
+
+  // 4) marca **todas** las ocurrencias de *todos* los términos dentro del slice
+  const markedAll = _markAllWholeWord(rawSlice, terms);
+
+  // 5) escapado seguro preservando <mark> y puntos suspensivos si recortamos
+  let safe = __escHTML(markedAll)
+              .replace(/&lt;mark&gt;/g, '<mark>')
+              .replace(/&lt;\/mark&gt;/g, '</mark>');
+  const prefix = m2 && m2.index > 0 ? '…' : '';
+  const suffix = m2 && (m2.index + m2[0].length < text.length) ? '…' : '';
+
+  return { snippetHTML: prefix + safe + suffix };
+}
+
+// --- utils para evaluar si un snippet es trivial
+function _stripHtml(s=''){
+  return String(s)
+    .replace(/<[^>]+>/g, '')       // quita tags
+    .replace(/\s+/g, ' ')          // colapsa espacios
+    .trim();
+}
+function _isTrivialSnippet(snippetHTML, terms){
+  const plain = _stripHtml(snippetHTML).replace(/^…|…$/g, '').trim();
+  if (!plain) return true;
+
+  // 1) muy corto (<= 2 palabras o <= 12 chars)
+  const words = plain.split(/\s+/).filter(Boolean);
+  if (plain.length <= 12 || words.length <= 2) return true;
+
+  // 2) está compuesto solo por los términos buscados (marcados o no)
+  const norm = (s)=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const set  = new Set((terms||[]).map(norm));
+  const onlyFromTerms = words.every(w => set.has(norm(w.replace(/[^\p{L}\p{N}_]+/gu,''))));
+  if (onlyFromTerms) return true;
+
+  return false;
+}
+
+
+
+// Recolecta pares {heading, text} recorriendo el objeto del subtema
+
+
+
+// Recolecta pares {heading, text} pero IGNORA imágenes/media
+function _collectStringsWithHeading(node, currentHeading = '', out = [], parentKey = '') {
+  const keyNorm = String(parentKey || '').toLowerCase();
+
+  // 🔕 listas de claves a ignorar
+  const BLACKLIST_KEYS = ['imagen', 'imagenes', 'imageness', 'images', 'figuras', 'media', 'multimedia', 'photos', 'gallery'];
+
+  // Si toda la rama es de imágenes → no entrar
+  if (BLACKLIST_KEYS.some(k => keyNorm.includes(k))) return out;
+
+  // Si es un "objeto imagen" típico → no recolectar su texto
+  const isImageObj = node && typeof node === 'object' && !Array.isArray(node) &&
+    (
+      ('url' in node && ('descripcion' in node || 'desc' in node || 'caption' in node || 'alt' in node)) ||
+      ('src' in node && ('caption' in node || 'alt' in node))
+    );
+  if (isImageObj) return out;
+
+  if (Array.isArray(node)) {
+    node.forEach(n => _collectStringsWithHeading(n, currentHeading, out, parentKey));
+    return out;
+  }
+
+  if (node && typeof node === 'object') {
+    const maybeTitle = node.titulo || node.title || node.nombre || node.clave || node.heading || '';
+    const nextHeading = (typeof maybeTitle === 'string' && maybeTitle.trim()) ? maybeTitle : currentHeading;
+
+    for (const k of Object.keys(node)) {
+      _collectStringsWithHeading(node[k], nextHeading, out, k); // 👈 pasa la clave hija
+    }
+    return out;
+  }
+
+  if (typeof node === 'string') {
+    out.push({ heading: currentHeading, text: node });
+  }
+
+  return out;
+}
+
+/** Devuelve TODAS las coincidencias relevantes dentro del subtema */
+function findHitsInSubtemaData(data, query, {maxHits=6} = {}){
+  const terms = termsFromQuery(query);
+  if (!terms.length) return [];
+
+  const matchAll   = buildTextMatcher(query);
+  const buckets    = _collectStringsWithHeading(data);
+  const prioritized= buckets.sort((a,b)=>{
+    const score = r => /texto|content|descripcion|body/i.test((r.heading||'')) ? -1 : 0;
+    return score(a) - score(b);
+  });
+
+  const hits = [];
+  const seenKey     = new Set();         // evita duplicados exactos
+  const usedHeading = new Set();         // (opcional) 1 hit por subheading
+
+  for (const item of prioritized){
+    if (!matchAll(item.text)) continue;
+
+    const { snippetHTML } = _makeSnippet(item.text, terms, 90);
+
+    // 🔕 descarta snippets triviales (“vancomicina”, “dique”, etc.)
+    if (_isTrivialSnippet(snippetHTML, terms)) continue;
+
+    // (opcional) máximo 1 hit por subheading para no repetir “Generalidades”
+    const h = item.heading || '(sin subtítulo)';
+    if (usedHeading.has(h)) continue;
+
+    const key = h + '|' + snippetHTML;
+    if (seenKey.has(key)) continue;
+
+    seenKey.add(key);
+    usedHeading.add(h);
+
+    hits.push({ subheading: h, snippetHTML });
+    if (hits.length >= maxHits) break;
+  }
+  return hits;
+}
+// Normaliza texto (minúsculas, sin tildes)
+function _norm(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
+
+// Espera a que el contenido de la subcategoría haya quedado renderizado
+function waitForSubcatRendered({sup,cat,sub}, timeout=1500){
+  return new Promise(resolve=>{
+    let done=false, t;
+    const finish=()=>{ if(done) return; done=true; window.removeEventListener('subcat:rendered', on); clearTimeout(t); resolve(); };
+    const on = (e)=>{ const d=e.detail||{}; if(d.sup===sup && d.cat===cat && d.sub===sub) finish(); };
+    window.addEventListener('subcat:rendered', on, {once:true});
+    t=setTimeout(finish, timeout); // fallback
+  });
+}
+
+// Encuentra el <summary> cuyo texto coincide con el subheading encontrado en la búsqueda
+function findHeadingInSubcontent(text){
+  const needle = _norm(text);
+  if(!needle) return null;
+  const nodes = Array.from(document.querySelectorAll('#subcategoria-body details > summary'));
+  // match exacto/relajado
+  for (const s of nodes){
+    const raw = (s.querySelector('span')?.textContent || s.textContent || '').replace(/^⤷\s*/,'');
+    const n = _norm(raw);
+    if (n === needle || n.includes(needle) || needle.includes(n)) return s;
+  }
+  return null;
+}
+
+// Abre el <details> del objetivo (y ancestros si los hay)
+async function ensureExpandedPathTo(el){
+  if(!el) return;
+  let d = el.closest('details');
+  while(d){ d.open = true; d = d.parentElement?.closest?.('details') || null; }
+}
+
+// Scroll con compensación por header sticky
+function scrollWithOffset(el, extra=8){
+  const container = document.getElementById('main-content');
+  if(!container || !el) return;
+  const cR = container.getBoundingClientRect();
+  const r  = el.getBoundingClientRect();
+  const off = (window.STICKY_H || 0) + extra;
+  const top = container.scrollTop + (r.top - cR.top) - off;
+  container.scrollTo({ top, behavior:'smooth' });
+}
+
+// Pequeño “flash” para que el usuario vea dónde cayó
+function flashHighlight(el){
+  const target = el.querySelector('span') || el;
+  target.classList.remove('flash-mark'); void target.offsetWidth;
+  target.classList.add('flash-mark');
+  target.addEventListener('animationend', ()=>target.classList.remove('flash-mark'), {once:true});
+}
+
+// (opcionales para sincronizar TOC si usas sus nombres en tu handler)
+function findSidebarItemForHeading(text){
+  const n = _norm(text);
+  const btns = document.querySelectorAll('#subcategoria-sidebar-content .toc-h2, #subcategoria-sidebar-content .toc-h3');
+  for (const b of btns){ if (_norm(b.textContent).includes(n)) return b; }
+  return null;
+}
+function selectSidebarItem(btn){
+  if(!btn) return;
+  btn.scrollIntoView({block:'nearest'});
+}
+
+
+  
+
+
+
+  
+  
+    /* ------------ Orquestador ------------- */
+
+
+
+    // Recolector muy simple de imágenes {url, descripcion/desc/caption}
+function _collectImages(node, heading = '', out = []) {
+  if (Array.isArray(node)) { node.forEach(n => _collectImages(n, heading, out)); return out; }
+  if (node && typeof node === 'object') {
+    const h = node.titulo || node.title || node.nombre || heading;
+
+    // ¿Es un nodo imagen?
+    if (node.url && (node.descripcion || node.desc || node.caption)) {
+      out.push({
+        title: node.descripcion || node.desc || node.caption || '(sin descripción)',
+        thumb: node.url,       // úsalo como miniatura
+        url:   node.url,       // o abre la misma url
+        kind:  'photo',
+        from:  h               // opcional: dónde estaba
+      });
+    }
+    for (const k in node) _collectImages(node[k], h, out);
+  }
+  return out;
+}
+
+
+
+
+  async function searchImagesInSubtemas(query, limit = 20) {
+  if (!window.db) return [];
+  const match = buildTextMatcher(query);            // ya lo tienes
+  const snap  = await db.collectionGroup('subcategorias').limit(120).get();
+  const out = [];
+  snap.forEach(doc => {
+    const imgs = _collectImages(doc.data() || {});
+    imgs.forEach(im => { if (match(im.title)) out.push(im); });
+  });
+  return out.slice(0, limit);
+}
+  
+  
+  async function fetchSearchData(query){
+  const [articles, guidelines, drugs, mediaColl, subtemas, mediaFromSub] = await Promise.all([
+    searchCollection(COLLECTIONS.articles,   query),
+    searchCollection(COLLECTIONS.guidelines, query),
+    searchCollection(COLLECTIONS.drugs,      query),
+    searchCollection(COLLECTIONS.media,      query),   // si tienes colección "media"
+    searchSubtemas(query),
+    searchImagesInSubtemas(query) 
+  ]);
+
+  // Mezclamos: subtemas primero, luego artículos normales
+  const articlesMerged = [
+    // etiquetamos mentalmente para el rendering (opcional)
+    ...subtemas.map(a => ({...a, __kind:'subtema'})),
+    ...articles.map(a   => ({...a, __kind:'article'}))
+  ];
+
+  const suggestions = await getRelatedQuestions(query);
+  const media = [...mediaFromSub, ...mediaColl];
+
+  return {
+    counts: { overview:1, articles: articlesMerged.length, drugs: drugs.length,
+              media: media.length, guidelines: guidelines.length },
+    articles:  articlesMerged,
+    guidelines,
+    media,                                           // 👈 asegúrate de devolverlo
+    suggestions
+  };
+}
+
+
+  
+
 
   async function showSearchPage(query){
     const mount = document.getElementById('search-page');
@@ -6504,6 +7652,261 @@ popover.addEventListener('keydown', hideOnEnter);
       const data = await fetchSearchData(query?.trim());
       console.log('[search] query:', query, data);
       mount.innerHTML = resultsView(data);
+
+
+
+      // controlador de tabs (aisla el contenido por pestaña)
+(function wireTabsSwitching(){
+  const bar = document.getElementById('tabsbar');
+  const content = document.getElementById('tab-content');
+  if(!bar || !content) return;
+
+  function setTab(tab){
+  // activa botón
+  bar.querySelectorAll('.tab-btn')
+    .forEach(b => b.classList.toggle('is-active', b.dataset.tab === tab));
+
+  // pinta contenido
+  if (tab === 'overview') {
+  content.innerHTML = renderOverview(data);
+  setupOverviewInteractivity(data);   // <-- re-engancha Questions (opciones, reset, etc.)
+} else if (tab === 'articles') {
+  content.innerHTML = `<section class="mt-6">${renderArticlesBlock(data)}</section>`;
+} else if (tab === 'drugs') {
+  content.innerHTML = `<section class="mt-6">${renderDrugsBlock(data)}</section>`;
+} else if (tab === 'media') {
+  // ⟵ usamos el flag false para ocultar "See all…"
+  content.innerHTML = `<section class="mt-6">${renderMediaBlock(data, false)}</section>`;
+} else if (tab === 'guidelines') {
+    content.innerHTML = `<section class="mt-6">${renderGuidelinesBlock(data)}</section>`;
+  }
+}
+
+  // click en tabs
+  bar.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.tab-btn');
+    if(!btn) return;
+    const tab = btn.dataset.tab;
+    setTab(tab);
+    // recoloca la ink bar (tu inicializador ya existe; lo reusamos)
+    const ink = bar.querySelector('.tabs-ink');
+    if(ink){
+      const r = btn.getBoundingClientRect(), b = bar.getBoundingClientRect();
+      ink.style.left = (r.left - b.left) + bar.scrollLeft + 'px';
+      ink.style.width = r.width + 'px';
+    }
+  });
+
+  // estado inicial
+  setTab('overview');
+})();
+
+
+
+// 3) Wire de tabs + re-enganche de la sección Questions al entrar a Overview
+function wireTabs(data){
+  const bar = document.getElementById('tabsbar');
+  const content = document.getElementById('tab-content');
+  if (!bar || !content) return;
+
+  const renderers = {
+    overview(){ content.innerHTML = renderOverview(data); setupOverviewInteractivity(data); },
+    articles(){ content.innerHTML = renderArticles(data); },
+    drugs(){ content.innerHTML = renderDrugs(data); },
+    media(){ content.innerHTML = renderMedia(data); },
+    guidelines(){ content.innerHTML = renderGuidelines(data); },
+  };
+
+  // inicial
+  setupOverviewInteractivity(data);
+
+  bar.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.tab-btn'); if(!btn) return;
+    const tab = btn.dataset.tab;
+    if (!renderers[tab]) return;
+
+    // activar visualmente
+    bar.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('is-active'));
+    btn.classList.add('is-active');
+
+    // render
+    renderers[tab]();
+
+    // recolocar la "ink" si usas initTabsInk
+    const ink = bar.querySelector('.tabs-ink');
+    if (ink && typeof btn.getBoundingClientRect === 'function'){
+      const r = btn.getBoundingClientRect();
+      const b = bar.getBoundingClientRect();
+      ink.style.left = (r.left - b.left + bar.scrollLeft) + 'px';
+      ink.style.width = r.width + 'px';
+    }
+  });
+}
+
+
+
+// 4) Re-enganche de la interactividad específica de QUESTIONS (misma que tenías)
+function setupOverviewInteractivity(data){
+  // estado local por render
+  let shown   = Math.min(3, data.suggestions.length);
+  const batches = [];
+
+  async function renderQs() {
+    const list   = document.getElementById('qs-list');
+    const btnMore= document.getElementById('qs-more');
+    const btnLess= document.getElementById('qs-less');
+    if (!list) return;
+
+    const abiertos = new Set(
+      Array.from(list.querySelectorAll('details[open] summary span'))
+           .map(el => el.textContent.trim())
+    );
+
+    await renderSuggestionsConOpciones(list, data, shown);
+
+    // restaurar abiertos + animaciones
+    Array.from(list.querySelectorAll('details')).forEach(det => {
+      const txt = det.querySelector('summary span')?.textContent.trim();
+      if (abiertos.has(txt)) det.setAttribute('open', 'true');
+    });
+    wireExpandoAnimations(list);
+
+    if (btnMore) btnMore.classList.toggle('hidden', shown >= data.suggestions.length);
+    if (btnLess) btnLess.classList.toggle('hidden', batches.length === 0);
+  }
+
+  document.getElementById('qs-more')?.addEventListener('click', async () => {
+    const remaining = data.suggestions.length - shown;
+    if (remaining <= 0) return;
+    const add = Math.min(3, remaining);
+    shown += add;
+    batches.push(add);
+    await renderQs();
+  });
+
+  document.getElementById('qs-less')?.addEventListener('click', async () => {
+    if (batches.length === 0) return;
+    const last = batches.pop();
+    shown = Math.max(3, shown - last);
+    await renderQs();
+  });
+
+  // render inicial
+  renderQs();
+}
+
+
+
+      (function initTabsInkAndPanels(barId='tabsbar'){
+  const bar = document.getElementById(barId);
+  if(!bar) return;
+  const ink = bar.querySelector('.tabs-ink');
+  const btns = Array.from(bar.querySelectorAll('.tab-btn'));
+  const panels = Array.from(document.querySelectorAll('[data-tabpanel]'));
+
+  function placeInk(btn){
+    const r = btn.getBoundingClientRect();
+    const b = bar.getBoundingClientRect();
+    ink.style.left = (r.left - b.left + bar.scrollLeft) + 'px';
+    ink.style.width = r.width + 'px';
+  }
+  function showPanel(name){
+    panels.forEach(p=>p.classList.toggle('is-active', p.dataset.tabpanel === name));
+  }
+
+  // inicial
+  const active = btns.find(b=>b.classList.contains('is-active')) || btns[0];
+  if (active){ placeInk(active); showPanel(active.dataset.tab); }
+
+  // click handler
+  bar.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.tab-btn');
+    if(!btn || !bar.contains(btn)) return;
+    btns.forEach(b=>b.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    placeInk(btn);
+    showPanel(btn.dataset.tab);
+    // opcional: scroll al inicio del contenedor principal
+    document.getElementById('main-content')?.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  // re-colocar en resize
+  window.addEventListener('resize', ()=>{
+    const cur = bar.querySelector('.tab-btn.is-active') || btns[0];
+    if(cur) placeInk(cur);
+  });
+})();
+
+
+
+      // Delegación de clicks en resultados "subtema" (Articles)
+// Delegación de clicks en resultados "subtema" (Articles)
+mount.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-result="subcat"]');
+  if (!el) return;
+
+  e.preventDefault();
+  const { sup, cat, sub } = el.dataset;
+  if (!sup || !cat || !sub) return;
+
+  // 1) abrir la subcategoría
+  showSubcategoriaContent(sub, cat, sup);
+
+  // 2) ⬅️ NUEVO: ocultar la página de resultados y mostrar la vista de subcategoría
+  const sp   = document.getElementById('search-page');
+  const subc = document.getElementById('subcategoria-content');
+  sp?.classList.add('hidden');
+  subc?.classList.remove('hidden');
+
+  // 3) ocultar el dropdown del buscador (si estuviera abierto)
+  document.getElementById('search-results')?.classList.add('hidden');
+
+  // 4) quitar foco del input global
+  document.getElementById('global-search')?.blur();
+});
+
+
+mount.addEventListener('click', async (e) => {
+  const el = e.target.closest('[data-result="subcat-hit"]');
+  if (!el) return;
+
+  e.preventDefault();
+  const { sup, cat, sub, subheading } = el.dataset;
+  if (!sup || !cat || !sub) return;
+
+  // 1) abrir la subcategoría
+  await showSubcategoriaContent(sub, cat, sup);
+
+  // 2) ocultar resultados y mostrar la vista de subcategoría
+  document.getElementById('search-page')?.classList.add('hidden');
+  document.getElementById('subcategoria-content')?.classList.remove('hidden');
+
+  // 3) cerrar dropdown y quitar foco
+  document.getElementById('search-results')?.classList.add('hidden');
+  document.getElementById('global-search')?.blur();
+
+  // 4) esperar render de Capa A (si emite evento)
+  updateStickyHeight();
+  await new Promise(r => requestAnimationFrame(r));
+
+  // 5) buscar el heading y abrir acordeones padres si hace falta
+  const target = findHeadingInSubcontent(subheading || '');
+  if (target){
+    await ensureExpandedPathTo(target);
+    scrollWithOffset(target, 72);
+    flashHighlight(target);
+
+    // 6) seleccionar el mismo ítem en la barra lateral (TOC), si existe
+    const tocItem = findSidebarItemForHeading(subheading || '');
+    selectSidebarItem(tocItem);
+  }
+});
+
+
+
+
+
+
 
 
 // Paginación con "deshacer" del último agregado
@@ -6544,6 +7947,7 @@ wireExpandoAnimations(list);
 
 
 
+
 document.getElementById('qs-more')?.addEventListener('click', async () => {
   const remaining = data.suggestions.length - shown;
   if (remaining <= 0) return;
@@ -6574,13 +7978,55 @@ await renderQs();
     mount.classList.remove('hidden');
   }
 
-  // Hook Enter
-  const globalSearch = document.getElementById('global-search');
-  if(globalSearch){
-    globalSearch.addEventListener('keydown',(e)=>{
-      if(e.key==='Enter'){ e.preventDefault(); showSearchPage(globalSearch.value); }
-    });
-  }
+  // Hook Enter (modificado)
+(() => {
+  const input = document.getElementById('global-search');
+  if (!input) return;
+
+  // Handler en CAPTURA para anular otros listeners
+  input.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    // Ocultar vistas actuales
+    document.getElementById('search-results')?.classList.add('hidden');
+    document.getElementById('home-content')?.classList.add('hidden');
+    document.getElementById('articles-panel')?.classList.add('hidden');
+    document.getElementById('panel-2')?.classList.add('hidden');
+    document.getElementById('panel-3')?.classList.add('hidden');
+    document.getElementById('subcategoria-content')?.classList.add('hidden');
+
+    // Sidebars
+    const sb  = document.getElementById('sidebar');              // barra principal
+    const toc = document.getElementById('subcategoria-sidebar'); // barra secundaria
+    toc?.classList.add('hidden');
+    document.body.classList.remove('bars-hidden');
+    sb?.classList.remove('force-hidden');
+
+    // Expandir barra principal
+    if (typeof toggleSidebarCollapse === 'function') {
+      toggleSidebarCollapse(false);
+    } else {
+      sb?.classList.remove('collapsed');
+      sb?.classList.add('open');
+      const main = document.getElementById('main-content');
+      if (main) {
+        main.style.marginLeft  = '';
+        main.style.width       = '100%';
+        main.style.paddingLeft = '64px';
+      }
+    }
+
+    // Mostrar resultados
+    document.getElementById('search-page')?.classList.remove('hidden');
+    showSearchPage(input.value);
+
+    // Quitar foco
+    input.blur();
+  }, true); // capture
+})();
 </script>
 
 
@@ -6602,6 +8048,7 @@ const chunk = (arr, size = 10) => {
 
 // ↳ estado persistente de opciones tachadas (pregunta||opción)
 const markedOpts = new Set();
+const answersState = new Map(); // key: data-qkey (texto exacto de la pregunta o id estable)
 
 // busca opciones por id de DOC y, si no hay id, por texto exacto de "pregunta"
 
@@ -6629,10 +8076,11 @@ async function getOpcionesParaItems(items){
       snap.forEach(d => {
         const data = d.data() || {};
         byKey.set(d.id, {
-          opciones: Array.isArray(data.opciones) ? data.opciones : [],
-          corr: Number(data.corr ?? -1),
-          explicacion: data.explicacion || ''
-        });
+        opciones: Array.isArray(data.opciones) ? data.opciones : [],
+        corr: Number(data.corr ?? -1),
+        explicacion: data.explicacion || '',
+        explicacionimagen: data.explicacionimagen || ''
+      });
       });
     }
   }
@@ -6646,21 +8094,203 @@ async function getOpcionesParaItems(items){
       byKey.set(`__TXT__${t}`, {
         opciones: Array.isArray(data.opciones) ? data.opciones : [],
         corr: Number(data.corr ?? -1),
-        explicacion: data.explicacion || ''
+        explicacion: data.explicacion || '',
+        explicacionimagen: data.explicacionimagen || ''
+        
       });
     }
   }));
 
   return byKey;
 }
+function __escHTML(s){
+  return String(s ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+function renderCorrectExplanation(list){
+  if (!list) return;
+  const corr = Number(list.dataset.corr ?? -1);
+  const txt  = list.dataset.exp || '';
+  const img  = list.dataset.expimg || '';
+
+  const corrRow = list.querySelector(`.option-row[data-idx="${corr}"]`);
+  if (!corrRow) return;
+
+  // ⛔ evita duplicados
+  const li = corrRow.closest('li') || corrRow.parentElement;
+  if (!li) return;
+  if (li.querySelector(':scope > .explicacion-box')) return;
+
+
+  corrRow.classList.remove('rounded-md','ring-1','ring-green-500');
+corrRow.classList.add('border','border-green-500','bg-green-50','rounded-t-md','rounded-b-none');
+
+  // 🧩 Card de explicación (borde y fondo verdes, tipografía más grande)
+  const box = document.createElement('div');
+  box.className = [
+  'explicacion-box',
+  '-mt-px',        // une los bordes (sin separación)
+  'ml-0',          // alinea con el inicio del texto (px-3 + w-3 + gap-3 = 2.25rem)
+  'text-[10px]',
+  'leading-relaxed',
+  'text-slate-800'
+].join(' ');
+
+box.innerHTML = `
+  <div class="border border-green-500 rounded-md rounded-t-none bg-green-50 p-3 md:p-4">
+    ${txt ? `<div class="whitespace-pre-wrap">${__escHTML(txt)}</div>` : ''}
+    ${img ? `
+      <figure class="mt-3">
+        <img src="${__escHTML(img)}" alt="explicación" loading="lazy"
+             class="w-28 h-20 object-cover rounded-md border border-green-200">
+      </figure>` : ''}
+  </div>
+`;
+
+  // ⬇️ Insertar como hermano, justo debajo del row correcto
+  li.insertBefore(box, corrRow.nextSibling);
+}
+
+function applyAnswerState(list, st){
+  if (!list || !st) return;
+  const { locked, selected, corr } = st;
+  const allRows = list.querySelectorAll('.option-row');
+  const allBullets = list.querySelectorAll('.opt-bullet');
+
+  // baseline: todo rojo (err)
+allRows.forEach(r => r.classList.remove(
+  'bg-green-50','bg-green-100','bg-red-100',
+  'ring-1','ring-green-500','ring-red-500',
+  'border','border-green-500','border-red-500',
+  'rounded-b-none','rounded-t-md'
+));
+  allBullets.forEach(b => {
+    b.classList.remove('ok','ok-solid','err','err-solid');
+    b.classList.add('err');
+  });
+
+  const selRow = list.querySelector(`.option-row[data-idx="${selected}"]`);
+  const selBullet = selRow?.querySelector('.opt-bullet');
+  const corrRow = list.querySelector(`.option-row[data-idx="${corr}"]`);
+  const corrBullet = corrRow?.querySelector('.opt-bullet');
+
+  if (selected === corr) {
+    selRow?.classList.add('correct');
+    selBullet?.classList.remove('err');
+    selBullet?.classList.add('ok-solid');
+  } else {
+    selRow?.classList.add('bg-red-100','ring-1','ring-red-500');
+    selBullet?.classList.remove('err');
+    selBullet?.classList.add('err-solid');
+    if (corrRow){
+      corrRow.classList.add('correct');
+      corrBullet?.classList.remove('err');
+      corrBullet?.classList.add('ok');
+    }
+  }
+
+
+    // 🔄 restaurar iconos bloqueados
+  const allIcons = list.querySelectorAll('.opt-x i');
+  allIcons.forEach(icon => { icon.className = 'fas fa-minus text-slate-400'; });
+  const corrIcon = list.querySelector(`.option-row[data-idx="${corr}"] .opt-x i`);
+  if (corrIcon) corrIcon.className = 'fas fa-check text-green-600';
+
+  if (locked){
+    list.dataset.locked = '1';
+    list.classList.add('locked');
+    list.querySelectorAll('.opt-x').forEach(b=>{
+      b.setAttribute('aria-disabled','true');
+
+    renderCorrectExplanation(list);
+    enableReset(list, true);
+
+    });
+    
+  }
+  
+  // 🚫 al estar bloqueado, deshabilitar los botones de tachar
+  if (locked){
+    
+  }
+
+
+
+
+}
+
+function reapplyStrikes(root){
+  // Vuelve a tachar las opciones que el usuario marcó con la X
+  root.querySelectorAll('.opt-list').forEach(list=>{
+    const qText = list.dataset.qkey || '';
+    list.querySelectorAll('.option-row .opt-text').forEach(optEl=>{
+      const key = `${qText}||${optEl.textContent?.trim() || ''}`;
+      if (markedOpts.has(key)) optEl.classList.add('striked');
+    });
+  });
+}
+
+
+function enableReset(list, on){
+  const btn = list.closest('.expando')?.querySelector('.opt-reset');
+  if(!btn) return;
+  btn.disabled = !on;
+  btn.classList.toggle('enabled', !!on);
+}
+
+// util: borra clases que empiecen por un prefijo (p.ej. bg-green-)
+function removeClassesByPrefix(el, prefix){
+  el.classList.forEach(c => { if (c.startsWith(prefix)) el.classList.remove(c); });
+}
+
+function resetQuestion(list){
+  if(!list) return;
+
+  // 1) eliminar explicación si existe
+  list.querySelectorAll(':scope > li > .explicacion-box').forEach(el=>el.remove());
+
+  // 2) desbloquear
+  list.dataset.locked = '0';
+  list.classList.remove('locked');
+
+  // 3) limpiar filas y bullets (incluye bg-green-50 que quedaba)
+  list.querySelectorAll('.option-row').forEach(row=>{
+    row.classList.remove(
+      'correct','bg-red-100','ring-1','ring-green-500','ring-red-500',
+      'border','border-green-500','rounded-t-md','rounded-b-none'
+    );
+    removeClassesByPrefix(row, 'bg-green-');   // <- quita bg-green-50/100/200/etc
+  });
+  list.querySelectorAll('.opt-bullet').forEach(b=>{
+    b.classList.remove('ok','ok-solid','err','err-solid');
+  });
+
+  // 4) restaurar iconos y tachados
+  list.querySelectorAll('.opt-x').forEach(b=>{
+    b.removeAttribute('aria-disabled');
+    const i = b.querySelector('i'); if(i) i.className = 'fas fa-times';
+  });
+
+  const qText = list.dataset.qkey || '';
+  list.querySelectorAll('.opt-text').forEach(opt=>{
+    const key = `${qText}||${(opt.textContent||'').trim()}`;
+    opt.classList.remove('striked'); markedOpts.delete(key);
+  });
+
+  // 5) olvidar estado y desactivar botón
+  answersState.delete(qText);
+  enableReset(list, false);
+}
 
 
 // NUEVO render con soporte id/texto
 async function renderSuggestionsConOpciones(list, data, shown) {
   const letters = i => String.fromCharCode(65 + i);
-  const esc = s => String(s ?? "")
-    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  const esc = s => String(s ?? '')
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
   const items = data.suggestions.slice(0, shown);
   const infoMap = await getOpcionesParaItems(items);
@@ -6677,10 +8307,10 @@ async function renderSuggestionsConOpciones(list, data, shown) {
     const opcionesHtml = opciones.length
       ? opciones.map((op, i) => `
           <li>
-            <div class="option-row flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer hover:bg-slate-50"
+            <div class="option-row flex items-center gap-3 px-3 py-1 rounded-md cursor-pointer hover:bg-slate-50"
                  data-idx="${i}">
-              <span class="opt-bullet w-5 text-sm font-semibold text-slate-600">${letters(i)}</span>
-              <span class="opt-text grow text-[13px] text-slate-800">${esc(op)}</span>
+              <span class="opt-bullet w-3 font-semibold text-slate-500">${letters(i)}</span>
+              <span class="opt-text grow text-[10px] text-slate-800">${esc(op)}</span>
               <button type="button" class="opt-x ml-2 text-slate-400 hover:text-slate-600" aria-label="Tachar opción">
                 <i class="fas fa-times"></i>
               </button>
@@ -6697,13 +8327,36 @@ async function renderSuggestionsConOpciones(list, data, shown) {
 
     <div class="pl-4 pr-2 pb-2 overflow-hidden">
       <div class="expando" style="max-height:0; opacity:0; transition:max-height 250ms ease, opacity 200ms ease;">
-        <ul class="opt-list space-y-1" data-qkey="${esc(texto)}" data-corr="${corr}">
+                <ul class="opt-list list-none p-0 m-0"
+            data-qkey="${esc(texto)}"
+            data-corr="${corr}"
+            data-locked="0"
+            data-exp="${esc(meta.explicacion || '')}"
+            data-expimg="${esc(meta.explicacionimagen || '')}">
           ${opcionesHtml}
-        </ul>
+               </ul>
+        <div class="opt-footer">
+          <div class="opt-divider"></div>
+          <button type="button" class="opt-reset" disabled>Reset question</button>
+        </div>
       </div>
     </div>
   </details>`;
   }).join('');
+
+    reapplyStrikes(list);
+  list.querySelectorAll('.opt-list').forEach(ul=>{
+   const key = ul.dataset.qkey || '';
+    const st = answersState.get(key);
+    if (st) applyAnswerState(ul, st);
+  });
+
+
+
+
+
+
+
 }
 
 
@@ -6764,6 +8417,15 @@ document.addEventListener('click', (e) => {
   const btn = e.target.closest('.opt-x');
   if (!btn) return;
 
+
+
+    // ⛔ si la lista está bloqueada, no permitir tachar
+  const listLocked = btn.closest('.opt-list')?.dataset.locked === '1';
+  if (listLocked) return;
+  // ⛔ si el icono ya no es "X", no permitir tachar
+  const iconEl = btn.querySelector('i');
+  if (iconEl && !iconEl.classList.contains('fa-times')) return;
+
   const row   = btn.closest('.option-row');
   const optEl = row?.querySelector('.opt-text');
   const qText = btn.closest('details')?.querySelector('summary span')?.textContent?.trim() || '';
@@ -6780,33 +8442,103 @@ document.addEventListener('click', (e) => {
   }
 });
 
+document.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.opt-reset');
+  if(!btn) return;
+  const list = btn.closest('.expando')?.querySelector('.opt-list');
+  if(!list) return;
+  resetQuestion(list);
+});
+
 
 document.addEventListener('click', (e) => {
   const row = e.target.closest('.option-row');
   if (!row) return;
-
-  // si el click vino del botón "X" de tachar, se ignora aquí
-  if (e.target.closest('.opt-x')) return;
+  if (e.target.closest('.opt-x')) return; // ignora clicks en la X
 
   const list = row.closest('.opt-list');
   if (!list) return;
 
+
+  if (String(list.dataset.locked) === '1') return;
+
   const corr = Number(list.dataset.corr ?? -1);
   const idx  = Number(row.dataset.idx ?? -1);
 
-  // reset de estilos previos
-  list.querySelectorAll('.option-row').forEach(r => {
-    r.classList.remove('bg-green-100','ring-1','ring-green-500','bg-red-100','ring-red-500');
+  // reset estilos de contenedor (ya lo hacías)
+  list.querySelectorAll('.option-row').forEach(r=>{
+  r.classList.remove('bg-green-100','ring-1','ring-green-500','bg-red-100','ring-red-500');
+  removeClassesByPrefix(r, 'bg-green-');   // <- por si acaso
+});
+
+  // 🔁 reset de TODOS los bullets y deja como baseline "err" (rojo contorno/letra)
+  const allBullets = list.querySelectorAll('.opt-bullet');
+  allBullets.forEach(b=>{
+    b.classList.remove('ok','ok-solid','err','err-solid');
+    b.classList.add('err'); // todos en rojo contorno/letra por defecto
   });
 
-  // marca selección
+  const selectedBullet = row.querySelector('.opt-bullet');
   const corrRow = list.querySelector(`.option-row[data-idx="${corr}"]`);
+  const corrBullet = corrRow?.querySelector('.opt-bullet');
+
   if (idx === corr) {
-    row.classList.add('bg-green-100','ring-1','ring-green-500');
+    // ✅ seleccionó la correcta
+    row.classList.add('correct','rounded-t-md','rounded-b-none');
+    selectedBullet?.classList.remove('err');
+    selectedBullet?.classList.add('ok-solid');   // círculo verde sólido, letra blanca
+    // las demás ya quedaron con borde/letra rojos (err)
   } else {
+    // ❌ seleccionó incorrecta
     row.classList.add('bg-red-100','ring-1','ring-red-500');
-    corrRow?.classList.add('bg-green-100','ring-1','ring-green-500');
+    selectedBullet?.classList.remove('err');
+    selectedBullet?.classList.add('err-solid');  // círculo rojo sólido, letra blanca
+
+    if (corrRow) {
+      corrRow.classList.add('correct');
+      if (corrBullet){
+        corrBullet.classList.remove('err');
+        corrBullet.classList.add('ok');          // correcto: contorno/letra verdes (bg transparente)
+      }
+    }
+    // el resto permanece con borde/letra rojos (err)
   }
+
+  list.dataset.locked = '1';
+  list.classList.add('locked');
+
+  
+
+  const qKey = list.dataset.qkey || '';
+  answersState.set(qKey, { locked: 1, selected: idx, corr });
+
+    // 🔄 cambiar iconos de X → "-" y marcar ✔ en la correcta
+  list.querySelectorAll('.opt-x i').forEach(icon=>{
+    icon.className = 'fas fa-minus text-slate-400'; // todos se vuelven "−"
+  });
+  if (corrRow){
+    const corrIcon = corrRow.querySelector('.opt-x i');
+    if (corrIcon){
+      corrIcon.className = 'fas fa-check text-green-600'; // solo la correcta se convierte en check
+    }
+  }
+
+
+    list.querySelectorAll('.opt-x').forEach(b=>{
+    b.setAttribute('aria-disabled', 'true');
+  });
+
+
+  renderCorrectExplanation(list);
+
+  enableReset(list, true);
+
+
+
+
+  
+
+
 });
 
 
@@ -6815,18 +8547,66 @@ document.addEventListener('click', (e) => {
 
 </script>
 
+<script>
+/* --- util --- */
+function pinMainSidebar() {
+  const sb = document.getElementById('sidebar');
+  if (!sb) return;
+  sb.classList.remove('collapsed', 'force-hidden');
+  sb.classList.add('open');              // quítalo si no usas .open
+  sb.style.position = '';
+  sb.style.width = '';
+  sb.style.paddingLeft = '';
+  sb.style.paddingRight = '';
+  document.body.classList.remove('bars-hidden');
+}
 
+/* selector SOLO subitems dentro de acordeones */
+const SUBITEM_SELECTOR =
+  '#sidebar .sidebar-group > div[id^="accordion-"] a.sidebar-item';
 
+/* whitelist de grupos permitidos */
+const ALLOWED_TITLES = [
+  'clinical resources',
+  'exams & cme',
+  'library',
+  'account & settings',
+  'help & privacy'
+];
 
+function isWhitelistedSubitem(el) {
+  const group = el.closest('.sidebar-group');
+  if (!group) return false;
+  const header = group.querySelector(':scope > button.sidebar-item, :scope > a.sidebar-item');
+  const title = (header?.textContent || '').trim().toLowerCase();
+  return ALLOWED_TITLES.includes(title);
+}
 
+/* click: SOLO subitems de los grupos whitelist mientras la barra esté colapsada */
+document.addEventListener('click', (ev) => {
+  const sb = document.getElementById('sidebar');
+  if (!sb || !sb.classList.contains('collapsed')) return;
 
+  const subitem = ev.target.closest(SUBITEM_SELECTOR);
+  if (!subitem) return;                  // ignorar títulos y otros clics
+  if (!isWhitelistedSubitem(subitem)) return;
 
+  // Fijar barra antes de que navegue/abra acordeón
+  pinMainSidebar();
+}, true); // capture para ejecutar antes de otros handlers
 
+/* teclado (Enter/Espacio) en esos subitems */
+document.addEventListener('keydown', (ev) => {
+  const sb = document.getElementById('sidebar');
+  if (!sb || !sb.classList.contains('collapsed')) return;
+  if (ev.key !== 'Enter' && ev.key !== ' ') return;
 
-
-
-
-
+  const subitem = ev.target.closest(SUBITEM_SELECTOR);
+  if (subitem && isWhitelistedSubitem(subitem)) {
+    pinMainSidebar();
+  }
+});
+</script>
 
 
 
@@ -6834,9 +8614,4 @@ document.addEventListener('click', (e) => {
 
 </html>
 
-
-//19 agosto tarde noche noche noche
-//20 agosto noche noche
-//21 agosto noche
-//22 agosto noche
-//23 agosto amane
+//3 septiembre
