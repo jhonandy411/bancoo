@@ -3500,7 +3500,28 @@ function updateStickyHeight() {
     document.getElementById('search-results')?.classList.add('hidden');
   }
 
+  // Cierra el modal y resetea todo (vídeo/imagen/zoom/split)
+function hardCloseModal(){
+  const modal = document.getElementById('video-modal');
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.classList.remove('split-view');
+  document.body.classList.remove('split-view-active');
+  // limpiar medios
+  const iframe = document.getElementById('modal-iframe');
+  const img    = document.getElementById('modal-image');
+  if (iframe) { iframe.src = ''; iframe.classList.add('hidden'); }
+  if (img)    { img.src = ''; img.classList.add('hidden'); }
+  // paneles
+  document.getElementById('video-desc-panel')?.classList.add('hidden');
+  document.getElementById('video-main-panel')?.classList.remove('hidden');
+}
+
+
+  
+  
   function showView(id){
+    hardCloseModal(); // ← asegura estado limpio SIEMPRE
     hideAllViews();
     document.getElementById(id)?.classList.remove('hidden');
     // confort: sube al top del contenedor scrolleable
@@ -5451,7 +5472,10 @@ function resetModalLayout({ keepCarousel = false, preserveSplit = false } = {}) 
 
 
 function abrirModalMedio(e) {
-   const thumb    = e.currentTarget;
+  if (typeof e?.preventDefault === 'function') e.preventDefault();
+  if (typeof e?.stopPropagation === 'function') e.stopPropagation();
+   const thumb = e?.target?.closest?.('.media-thumb');
+   if (!thumb) return;
   const carousel = document.getElementById('thumbnail-carousel');
 
   // ¿el carrusel ya estaba abierto?
@@ -5546,59 +5570,74 @@ if (imgUrl) {
 
 
 
-   const thumbsContainer = document.getElementById('video-thumbnails');
-  if (imgUrl) {
-    // — Relaciones entre imágenes —
-    const imgNodes = document.querySelectorAll('#subcategoria-body .image-thumb');
-    const relatedImgs = Array.from(imgNodes)
-      .map(n => ({
-        url:  n.dataset.imgUrl,
-        desc: n.dataset.imgDesc
-      }));
-    thumbsContainer.innerHTML = relatedImgs.map(img => `
-      <figure class="media-thumb image-thumb" data-img-url="${img.url}" data-img-desc="${img.desc}">
-        <img src="${img.url}" alt="${img.desc}" class="w-32 h-32 object-cover rounded shadow"/>
-      </figure>
-    `).join('');
-  } else {
-    // — Relaciones entre vídeos —
-    const vidNodes = document.querySelectorAll('#subcategoria-body .video-thumb');
-    const relatedVids = Array.from(vidNodes)
-      .map(n => ({
-        id:        n.dataset.videoId,
-        thumbnail: n.querySelector('img').src,
-        title:     n.dataset.videoTitle
-      }));
-    thumbsContainer.innerHTML = relatedVids.map(v => `
-      <figure class="media-thumb video-thumb" data-video-id="${v.id}" data-video-title="${v.title}">
-        <img src="${v.thumbnail}" alt="${v.title}" class="w-32 h-32 object-cover rounded shadow"/>
-        <div class="play-icon"><i class="fas fa-play"></i></div>
-      </figure>
-    `).join('');
+const thumbsContainer = document.getElementById('video-thumbnails');
 
+// ¿El click vino desde el carrusel?
+  // ¿El click vino del carrusel?
+  const clickedFromCarousel = !!(
+    thumb.closest('#video-thumbnails') ||
+    thumb.closest('#thumbnail-carousel')
+  );
 
-    // —> Si ninguna miniatura está marcada, marcar la primera:
-if (!thumbsContainer.querySelector('.media-thumb.selected')) {
-  const first = thumbsContainer.querySelector('.media-thumb');
-  if (first) first.classList.add('selected');
+// ① Detecta la galería de donde vino el click (Results/Overview/Subcat)
+  // Galería origen (Results/Subcat/etc.)
+  const galleryRoot =
+    thumb.closest('.media-gallery') ||
+    document.querySelector('#subcategoria-body') ||
+    document;                                     // último recurso                                      // último recurso
+
+// ② Recolecta TODAS las miniaturas hermanas visibles en esa galería
+const peers = Array.from(galleryRoot.querySelectorAll('.media-thumb'));
+
+  // ③ Pinta la barra con imágenes o vídeos según lo que se abrió
+  //    ⚠️ Si el click vino del carrusel, NO repintes (evita que desaparezca)
+  if (!clickedFromCarousel && imgUrl) {
+  // — Imágenes —
+  const relatedImgs = peers
+    .filter(n => n.classList.contains('image-thumb'))
+    .map(n => ({
+      url:  n.dataset.imgUrl,
+      desc: n.dataset.imgDesc || ''
+    }));
+
+  thumbsContainer.innerHTML = relatedImgs.map(img => `
+    <figure class="media-thumb image-thumb" data-img-url="${img.url}" data-img-desc="${img.desc}">
+      <img src="${img.url}" alt="${img.desc}" class="w-32 h-32 object-cover rounded shadow" />
+    </figure>
+  `).join('');
+} else if (!clickedFromCarousel) {
+  // — Vídeos —
+  const relatedVids = peers
+    .filter(n => n.classList.contains('video-thumb'))
+    .map(n => ({
+      id:        n.dataset.videoId,
+      thumbnail: n.querySelector('img')?.src || n.dataset.thumbnail || '',
+      title:     n.dataset.videoTitle || ''
+    }));
+
+  thumbsContainer.innerHTML = relatedVids.map(v => `
+    <figure class="media-thumb video-thumb" data-video-id="${v.id}" data-video-title="${v.title}">
+      <img src="${v.thumbnail}" alt="${v.title}" class="w-32 h-32 object-cover rounded shadow" />
+      <div class="play-icon"><i class="fas fa-play"></i></div>
+    </figure>
+  `).join('');
 }
 
-    
-  }
-  // Re-asignar el manejador de clicks a todas las miniaturas recién inyectadas
-  // Eliminar selección previa
-thumbsContainer.querySelectorAll('.media-thumb').forEach(t => {
+// ④ Re-asignar manejadores y marcar la miniatura actual como “selected”
+//    (si no repintamos, solo actualizamos selección)
+const allThumbs = thumbsContainer.querySelectorAll('.media-thumb');
+allThumbs.forEach(t => {
   t.classList.remove('selected');
+  // reengancha handler por si repintamos
+  t.removeEventListener('click', abrirModalMedio);
   t.addEventListener('click', abrirModalMedio);
 });
 
-// Marcar la actual como seleccionada
 setTimeout(() => {
-  const allThumbs = thumbsContainer.querySelectorAll('.media-thumb');
-  const selected = imgUrl
+  const sel = imgUrl
     ? Array.from(allThumbs).find(t => t.dataset.imgUrl === imgUrl)
     : Array.from(allThumbs).find(t => t.dataset.videoId === videoId);
-  if (selected) selected.classList.add('selected');
+  sel?.classList.add('selected');
 }, 0);
 
   // ③ Volvemos a enlazar el click sobre esas miniaturas
@@ -5606,7 +5645,10 @@ setTimeout(() => {
     .forEach(t =>{ t.addEventListener('click', abrirModalMedio);});
 }
 
-
+ // Delegación global (sirve para Results, Subcat, etc.)
+ document.addEventListener('click', (ev) => {
+   if (ev.target.closest('.media-thumb')) abrirModalMedio(ev);
+ });
 
 
 
@@ -5630,10 +5672,6 @@ setTimeout(() => {
 
 
 
-  document.addEventListener('click', function(e) {
-    const thumb = e.target.closest('.media-thumb');
-    if (thumb) return abrirModalMedio({ currentTarget: thumb });
-  });
 
   closeBtn.addEventListener('click', cerrarModal);
   modal.addEventListener('click', e => {
@@ -5643,15 +5681,7 @@ setTimeout(() => {
 
 
 // 2) Al hacer click en una miniatura, rellenar y mostrar modal
-thumbs.forEach(thumb => {
-  thumb.addEventListener('click', () => {
-    const vid   = thumb.dataset.videoId;
-    const title = thumb.dataset.videoTitle || '';
-    iframe.src  = `https://www.youtube.com/embed/${vid}?autoplay=1`;
-    titleEl.textContent = title;
-    modal.classList.remove('hidden');
-  });
-});
+
 
 // 3) Cerrar modal con la “X”
 closeBtn.addEventListener('click', () => {
@@ -6127,9 +6157,15 @@ async function exitSplitIfAny() {
       }
     } catch {}
 
-    // ⚠️ clave: vaciar y remover para que NO se reactive en background
+    // ❗️NO eliminar el del modal: sólo limpiar su src
+    if (f.id === 'modal-iframe') {
+      try { f.src = ''; } catch {}
+      return; // no lo remuevas del DOM
+    }
+    // Para el resto, con limpiar el src alcanza
     try { f.removeAttribute('src'); } catch {}
-    try { f.parentElement?.removeChild(f); } catch {}
+    // (si querés aún remover otros iframes, ok, pero nunca el del modal)
+    // f.parentElement?.removeChild(f);
   });
 
   // 3) Cerrar split + modal + UI
@@ -6956,14 +6992,20 @@ function renderMediaBlock(data, showSeeAll = true){
     }).join('')}
   </div>
   <div class="overflow-x-auto">
-    <div class="flex gap-3 pb-2">
+    <div class="flex gap-3 pb-2 media-gallery" data-gallery="results-media">
       ${data.media.slice(0,8).map(m=>`
         <article class="w-[85px]">
-          <a href="${m.url||'#'}" class="block rounded-lg border border-slate-200 overflow-hidden hover:shadow w-[85px] h-[85px]">
-            ${m.thumb
-              ? `<img src="${m.thumb}" alt="${__escHTML(m.title)}" class="w-[85px] h-[85px] object-cover">`
-              : `<div class="w-[85px] h-[85px] bg-slate-100 grid place-items-center text-[8px] text-slate-500">${__escHTML((m.kind||m.type||'MEDIA'))}</div>`}
-          </a>
+          <figure
+  class="media-thumb image-thumb block rounded-lg border border-slate-200 overflow-hidden hover:shadow w-[85px] h-[85px] cursor-pointer"
+  data-img-url="${__escHTML(m.url || m.thumb || '')}"
+  data-img-desc="${__escHTML(m.title || '(untitled)')}"
+  title="Open preview"
+>
+  ${m.thumb || m.url
+    ? `<img src="${__escHTML(m.thumb || m.url)}" alt="${__escHTML(m.title || '')}" class="w-[85px] h-[85px] object-cover">`
+    : `<div class="w-[85px] h-[85px] bg-slate-100 grid place-items-center text-[8px] text-slate-500">${__escHTML((m.kind||m.type||'MEDIA'))}</div>`
+  }
+</figure>
           <div class="mt-1 flex items-center gap-1 uppercase text-[8px] tracking-wide text-slate-600 truncate">
             <i class="fa-regular fa-image text-slate-400 text-[10px]"></i>
             ${__escHTML(String(m.kind||m.type||'').toUpperCase())}
@@ -7139,18 +7181,20 @@ function renderOverview(data){
       </div>
 
       <div class="overflow-x-auto">
-        <div class="flex gap-3 pb-2">
+        <div class="flex gap-3 pb-2 media-gallery" data-gallery="results-media">
           ${data.media.slice(0,8).map(m=>`
             <article class="w-[85px]">
-              <a href="${m.url||'#'}"
-                class="block rounded-lg border border-slate-200 overflow-hidden hover:shadow w-[85px] h-[85px]">
-                ${m.thumb
-                  ? `<img src="${m.thumb}" alt="${__escHTML(m.title)}"
-                          class="w-[85px] h-[85px] object-cover">`
-                  : `<div class="w-[85px] h-[85px] bg-slate-100 grid place-items-center text-[8px] text-slate-500">
-                      ${__escHTML((m.kind||m.type||'MEDIA'))}
-                    </div>`}
-              </a>
+              <figure
+  class="media-thumb image-thumb block rounded-lg border border-slate-200 overflow-hidden hover:shadow w-[85px] h-[85px] cursor-pointer"
+  data-img-url="${__escHTML(m.url || m.thumb || '')}"
+  data-img-desc="${__escHTML(m.title || '(untitled)')}"
+  title="Open preview"
+>
+  ${m.thumb || m.url
+    ? `<img src="${__escHTML(m.thumb || m.url)}" alt="${__escHTML(m.title || '')}" class="w-[85px] h-[85px] object-cover">`
+    : `<div class="w-[85px] h-[85px] bg-slate-100 grid place-items-center text-[8px] text-slate-500">${__escHTML((m.kind||m.type||'MEDIA'))}</div>`
+  }
+</figure>
               <div class="mt-1 flex items-center gap-1 uppercase text-[8px] tracking-wide text-slate-600 truncate">
                 <i class="fa-regular fa-image text-slate-400 text-[10px]"></i>
                 ${__escHTML(String(m.kind||m.type||'').toUpperCase())}
@@ -8610,8 +8654,47 @@ document.addEventListener('keydown', (ev) => {
 
 
 
+<script>
+/**
+ * Cierra split y modal al lanzar una nueva búsqueda con Enter
+ * (no interfiere con tu lógica existente).
+ */
+(function closeSplitAndModalOnSearchEnter(){
+  if (window.__closeOnSearchEnterBound) return;
+  window.__closeOnSearchEnterBound = true;
+
+  document.addEventListener('keydown', function(e){
+    // Solo si el Enter viene del input de búsqueda global
+    if (e.key !== 'Enter') return;
+    const t = e.target;
+    if (!t || t.id !== 'global-search') return;
+
+    try {
+      // Preferir tu helper completo si existe
+      if (typeof window.exitSplitIfAny === 'function') {
+        window.exitSplitIfAny();
+        return;
+      }
+      // Alternativas suaves si no está ese helper
+      if (typeof window.hardCloseModal === 'function') window.hardCloseModal();
+      else if (typeof window.cerrarModal === 'function') window.cerrarModal();
+      else {
+        // Fallback mínimo y seguro
+        const modal = document.getElementById('video-modal');
+        const iframe = document.getElementById('modal-iframe');
+        modal?.classList.add('hidden');
+        modal?.classList.remove('split-view','video-mode');
+        document.body.classList.remove('split-view-active');
+        if (iframe) iframe.src = '';
+      }
+    } catch(_) { /* no-op */ }
+  }, true); // ← capture: corre incluso si otro listener hace stopPropagation
+})();
+</script>
+
+
 </body>
 
 </html>
 
-//3 septiembre
+//3 septiembre ACTUAL
