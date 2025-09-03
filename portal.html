@@ -6982,13 +6982,28 @@ function renderMediaBlock(data, showSeeAll = true){
   if (!data.media?.length) return renderEmptyState('media');
   return `
   <h3 class="font-semibold flex items-center gap-2">
-    <i class="fa-regular fa-image text-slate-400"></i> Media (${data.counts.media})
+    <i class="fa-regular fa-image text-slate-400"></i>
+    Media (${data.counts.media})
   </h3>
-  <div class="flex gap-2 mb-3 flex-wrap">
+  <div class="flex gap-4 mb-3 mt-2 flex-wrap items-center">
     ${['Photos','Illustrations','Functional diag.'].map(lbl=>{
-      const key = lbl==='Photos' ? 'photo' : lbl==='Illustrations' ? 'illustration' : 'functional';
-      const n = data.media.filter(m => String(m.kind||m.type||'').toLowerCase().includes(key)).length;
-      return `<button class="px-3 py-1 rounded-full text-[11px] bg-gray-100 text-gray-700">${lbl} (${n})</button>`;
+      const key = lbl==='Photos' ? 'photo'
+                 : lbl==='Illustrations' ? 'illustration' : 'functional';
+      const n = data.media.filter(m =>
+        String(m.kind||m.type||'').toLowerCase().includes(key)
+      ).length;
+      return `
+        <button
+          class="inline-flex items-center gap-1.5 h-8 px-3 rounded-full
+                 bg-white text-slate-700 text-[10px] font-medium
+                 border border-slate-300/70
+                 shadow-[0_1px_1px_rgba(15,23,42,.05),inset_0_1px_0_rgba(255,255,255,.9)]
+                 hover:border-sky-300 hover:text-sky-700 transition"
+          type="button">
+          <span>${lbl}</span>
+          <span class="text-slate-500">(${n})</span>
+        </button>
+      `;
     }).join('')}
   </div>
   <div class="overflow-x-auto">
@@ -6996,14 +7011,19 @@ function renderMediaBlock(data, showSeeAll = true){
       ${data.media.slice(0,8).map(m=>`
         <article class="w-[85px]">
           <figure
-  class="media-thumb image-thumb block rounded-lg border border-slate-200 overflow-hidden hover:shadow w-[85px] h-[85px] cursor-pointer"
+  class="media-thumb image-thumb block w-[85px] h-[85px] cursor-pointer
+         bg-transparent shadow-none focus:outline-none focus:ring-0"
   data-img-url="${__escHTML(m.url || m.thumb || '')}"
   data-img-desc="${__escHTML(m.title || '(untitled)')}"
   title="Open preview"
 >
   ${m.thumb || m.url
-    ? `<img src="${__escHTML(m.thumb || m.url)}" alt="${__escHTML(m.title || '')}" class="w-[85px] h-[85px] object-cover">`
-    : `<div class="w-[85px] h-[85px] bg-slate-100 grid place-items-center text-[8px] text-slate-500">${__escHTML((m.kind||m.type||'MEDIA'))}</div>`
+    ? `<img src="${__escHTML(m.thumb || m.url)}"
+             alt="${__escHTML(m.title || '')}"
+             class="w-[85px] h-[85px] object-cover rounded-lg">`
+    : `<div class="w-[85px] h-[85px] grid place-items-center text-[8px] text-slate-500 rounded-lg bg-slate-100">
+         ${__escHTML((m.kind||m.type||'MEDIA'))}
+       </div>`
   }
 </figure>
           <div class="mt-1 flex items-center gap-1 uppercase text-[8px] tracking-wide text-slate-600 truncate">
@@ -7023,6 +7043,24 @@ function renderMediaBlock(data, showSeeAll = true){
     </a>` : ``}
   `;
 }
+
+// Ir a la pestaña "Media" desde el link "See all Media results"
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a[data-see-all="media"]');
+  if (!link) return;
+  e.preventDefault();
+
+  // Si ya tenés handler de tabs, delega con click:
+  const tabBtn = document.querySelector('.tabsbar .tab-btn[data-tab="media"]');
+  if (tabBtn) { tabBtn.click(); return; }
+
+  // Fallback: activar manualmente si no existe el handler de tabs
+  const content = document.getElementById('tab-content');
+  document.querySelectorAll('.tabsbar .tab-btn')
+    .forEach(b => b.classList.toggle('is-active', b.dataset.tab === 'media'));
+  content.innerHTML = renderMediaBlock(window.__searchData || window.__lastResults || {}, false);
+});
+
 
 /* === Guidelines === */
 function renderGuidelinesBlock(data){
@@ -7164,44 +7202,61 @@ function renderOverview(data){
    <!-- ===== Media (debajo de Questions) ===== -->
    <section class="mt-8">
     <h3 class="font-semibold flex items-center gap-2">
-      <i class="fa-regular fa-image text-slate-400"></i>
-      Media (${data.counts.media})
-    </h3>
+  <i class="fa-regular fa-image text-slate-400"></i>
+  Media (${data.counts.media})
+</h3>
 
-    ${data.media && data.media.length ? `
-      <div class="flex gap-2 mb-3 flex-wrap">
-        ${['Photos','Illustrations','Functional diag.'].map(lbl=>{
-          const key = lbl==='Photos' ? 'photo'
-                     : lbl==='Illustrations' ? 'illustration' : 'functional';
-          const n = data.media.filter(m =>
-            String(m.kind||m.type||'').toLowerCase().includes(key)
-          ).length;
-          return `<button class="px-3 py-1 rounded-full text-[11px] bg-gray-100 text-gray-700">${lbl} (${n})</button>`;
-        }).join('')}
-      </div>
+${data.media && data.media.length ? `
+  <div class="flex gap-4 mb-3 mt-2 flex-wrap items-center">
+    ${['Photos','Illustrations','Functional diag.'].map(lbl=>{
+      const key = lbl==='Photos' ? 'photo'
+                 : lbl==='Illustrations' ? 'illustration' : 'functional';
+      const n = data.media.filter(m =>
+        String(m.kind||m.type||'').toLowerCase().includes(key)
+      ).length;
+
+      return `
+        <button
+          class="inline-flex items-center gap-1.5 h-8 px-3 rounded-full
+                 bg-white text-slate-700 text-[10px] font-medium
+                 border border-slate-300/70
+                 shadow-[0_1px_1px_rgba(15,23,42,.05),inset_0_1px_0_rgba(255,255,255,.9)]
+                 hover:border-sky-300 hover:text-sky-700 transition"
+          type="button">
+          <span>${lbl}</span>
+          <span class="text-slate-500">(${n})</span>
+        </button>
+      `;
+    }).join('')}
+  </div>
 
       <div class="overflow-x-auto">
         <div class="flex gap-3 pb-2 media-gallery" data-gallery="results-media">
           ${data.media.slice(0,8).map(m=>`
             <article class="w-[85px]">
-              <figure
-  class="media-thumb image-thumb block rounded-lg border border-slate-200 overflow-hidden hover:shadow w-[85px] h-[85px] cursor-pointer"
+             <figure
+  class="media-thumb image-thumb block w-[85px] h-[85px] cursor-pointer
+         bg-transparent shadow-none focus:outline-none focus:ring-0"
   data-img-url="${__escHTML(m.url || m.thumb || '')}"
   data-img-desc="${__escHTML(m.title || '(untitled)')}"
   title="Open preview"
 >
   ${m.thumb || m.url
-    ? `<img src="${__escHTML(m.thumb || m.url)}" alt="${__escHTML(m.title || '')}" class="w-[85px] h-[85px] object-cover">`
-    : `<div class="w-[85px] h-[85px] bg-slate-100 grid place-items-center text-[8px] text-slate-500">${__escHTML((m.kind||m.type||'MEDIA'))}</div>`
+    ? `<img src="${__escHTML(m.thumb || m.url)}"
+             alt="${__escHTML(m.title || '')}"
+             class="w-[85px] h-[85px] object-cover rounded-lg">`
+    : `<div class="w-[85px] h-[85px] grid place-items-center text-[8px] text-slate-500 rounded-lg bg-slate-100">
+         ${__escHTML((m.kind||m.type||'MEDIA'))}
+       </div>`
   }
 </figure>
-              <div class="mt-1 flex items-center gap-1 uppercase text-[8px] tracking-wide text-slate-600 truncate">
-                <i class="fa-regular fa-image text-slate-400 text-[10px]"></i>
-                ${__escHTML(String(m.kind||m.type||'').toUpperCase())}
-              </div>
-              <div class="text-slate-800 line-clamp-2 text-[9px] leading-tight">
-                ${__escHTML(m.title||'(untitled)')}
-              </div>
+              <div class="mt-0.2 flex items-center gap-1 uppercase text-[8px] tracking-wide text-slate-600 truncate">
+  <i class="fa-regular fa-image text-slate-400 text-[10px]"></i>
+  ${__escHTML(String(m.kind||m.type||'').toUpperCase())}
+</div>
+<div class="mt-0.5 text-slate-800 line-clamp-2 text-[9px] leading-tight">
+  ${__escHTML(m.title||'(untitled)')}
+</div>
             </article>
           `).join('')}
         </div>
@@ -8697,4 +8752,4 @@ document.addEventListener('keydown', (ev) => {
 
 </html>
 
-//3 septiembre ACTUAL
+//3 septiembre noche
