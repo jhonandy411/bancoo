@@ -104,7 +104,6 @@ html, body {
     /* Estilos específicos para la sidebar y el contenido principal */
     .dashboard-container {
         display: flex;
-        top: 3rem;    /* deja espacio para el header fijo */
   bottom: 0; 
         height: calc(100vh - 3rem); /* Altura restante de la ventana después del header */
         position: relative; /* Para que la sidebar fixed se posicione correctamente dentro */
@@ -142,7 +141,7 @@ html, body {
 
 /* Sidebar secundario por debajo */
 #subcategoria-sidebar {
-  z-index: 10;       /* Menor que el principal */
+  z-index: 50;       /* Menor que el principal */
 }
 #main-content { overflow-x: clip; } /* o hidden */
 
@@ -2705,6 +2704,49 @@ blockquote {
 
 
 
+/* Solo en móvil y SOLO cuando #subcategoria-content está visible */
+@media (max-width: 639.98px){
+  #main-content.subcat-active{
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  #main-content.subcat-active #subcategoria-content{
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+
+
+/* Overlay móvil: solo se activa en < 640px */
+#mobile-overlay { display: none; }
+@media (max-width: 639.98px){
+  #mobile-overlay.show {
+    position: fixed;
+    top: 3rem;   /* igual a la altura de tu header h-[3rem] */
+    left: 0; right: 0; bottom: 0;
+    background: rgba(2, 6, 23, .45); /* gris oscuro translúcido */
+    /* Debe quedar POR DEBAJO de ambas sidebars y POR ENCIMA del contenido */
+    z-index: 45;  /* #subcategoria-sidebar tiene 10 y #sidebar 60 */
+    display: block;
+  }
+}
+
+
+#results{
+  position: relative;   /* o fixed/absolute según tu layout */
+  z-index: 90;          /* > 45 del overlay móvil */
+}
+/* el header / topbar que contiene el input */
+#topbar, .site-header, #global-search-wrap {
+  position: relative;     /* crea stacking context propio */
+  z-index: 250;           /* mayor que el sidebar (60/70) y el #sb-switch (120) */
+}
+
+/* el wrapper REAL del buscador */
+#searchbox { position: relative; z-index: 255; }
+/* el dropdown */
+#search-results { position: absolute; z-index: 260; }
 
 
 
@@ -2715,18 +2757,321 @@ blockquote {
 
 
 
+/* ====== VARIABLES GLOBALES ====== */
+:root{
+  --sb-collapsed: 40px;
+  --subcat-width: 180px;
+  --bars-w: calc(var(--sb-collapsed) + var(--subcat-width));
+}
+
+/* ====== OVERLAY BASE ====== */
+#mobile-overlay{ display:none; }
+#mobile-overlay.show{
+  position: fixed;
+  top: 3rem; bottom: 0; right: 0;
+  left: var(--bars-w);
+  background: rgba(2,6,23,.45);
+  z-index: 60 !important;
+  display: block !important;
+  pointer-events: auto;
+}
+/* Estados especiales del overlay */
+.toc-hidden #mobile-overlay.show{ left: var(--sb-collapsed); }
+body.bars-hidden #mobile-overlay.show{ left: 0; }
 
 
+/* ===================== <640px ===================== */
+@media (max-width: 639.98px){
 
+  /* Estado base: solo un panel (mobile-solo) */
+  body.split-view-active.mobile-solo{
+    --split-left: 0px;
+    --split-w: 100vw;
+  }
 
+  /* Panel izquierdo (app) a pantalla completa */
+  body.split-view-active.mobile-solo .dashboard-container{
+    position: fixed;
+    top: 3rem; left: 0; right: 0; bottom: 0;
+    width: 100% !important;
+    height: auto;
+    overflow: hidden;     /* el scroll vive en #main-content */
+    background: #fff;
+    z-index: 30 !important;
+  }
 
+  /* Scroller real */
+  body.split-view-active.mobile-solo #main-content{
+    position: absolute; inset: 0;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding: 0 1rem !important;
+    background: #fff !important;
+    scroll-padding-top: 56px;
+  }
+
+  /* Afinados del contenido izquierdo */
+  body.split-view-active.mobile-solo #subcategoria-content{
+    margin-top: 0 !important; padding-top: 0 !important;
+  }
+  body.split-view-active.mobile-solo #subcat-header{
+    position: sticky; top: 0; z-index: 50; background:#fff;
+  }
+  body.split-view-active.mobile-solo #subcategoria-body > :first-child{
+    margin-top: 0 !important;
+  }
+
+  /* Sin gutter y ancho total reales */
+  body.split-view-active.mobile-solo .dashboard-container{
+    left: 0 !important; right: 0 !important; width: 100vw !important;
+  }
+  body.split-view-active.mobile-solo #main-content{
+    margin: 0 !important; width: 100% !important; max-width: none !important;
+    padding: 0 !important; box-sizing: border-box;
+  }
+  body.split-view-active.mobile-solo #main-content.sidebar-open{ margin-left: 0 !important; }
+
+  /* Ocultar barras por defecto en mobile-solo */
+  body.split-view-active.mobile-solo #sidebar,
+  body.split-view-active.mobile-solo #subcategoria-sidebar{
+    display: none !important;
+  }
+
+  /* RIGHT (modal) a pantalla completa */
+  body.split-view-active.mobile-solo #video-modal.split-view{
+    position: fixed !important;
+    top: 3rem !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    width: 100% !important; height: auto !important;
+    pointer-events: auto !important;
+  }
+  body.split-view-active.mobile-solo #video-modal.split-view > div{ position: absolute; inset: 0; }
+
+  /* Toggle de qué lado se ve */
+  body.split-view-active.mobile-solo.show-left  .dashboard-container{ display:block !important; }
+  body.split-view-active.mobile-solo.show-left  #video-modal{        display:none  !important; }
+  body.split-view-active.mobile-solo.show-right .dashboard-container{ display:none  !important; }
+  body.split-view-active.mobile-solo.show-right #video-modal{         display:flex !important; }
+
+  /* Botón flotante para alternar */
+  #mobile-split-switch{
+    position: fixed; left: 50%; transform: translateX(-50%);
+    bottom: calc(env(safe-area-inset-bottom) + 10px);
+    z-index: 300; padding: .55rem .9rem; border-radius: 9999px;
+    background: #1f2937; color: #fff; font-weight: 700; font-size: .75rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,.25); display: none;
+  }
+  body.split-view-active.mobile-solo #mobile-split-switch{ display:block; }
+
+  /* ===== Mostrar la DERECHA (imagen) con barras superpuestas ===== */
+  body.split-view-active.mobile-solo.show-right .dashboard-container{ display: contents !important; }
+  body.split-view-active.mobile-solo.show-right #main-content{ display: none !important; }
+
+  /* Barra principal colapsada fija */
+  body.split-view-active.mobile-solo.show-right #sidebar{
+    position: fixed !important; top: 3rem !important; bottom: 0 !important; left: 0 !important;
+    z-index: 120 !important; width: var(--sb-collapsed) !important;
+    padding-left: 0 !important; padding-right: 0 !important;
+    border-right: 1px solid #e5e7eb; background: #fff;
+    display: block !important;
+  }
+  /* Look colapsado: solo iconos */
+  body.split-view-active.mobile-solo.show-right #sidebar .sidebar-group span{ display: none !important; }
+  body.split-view-active.mobile-solo.show-right #sidebar .sidebar-group i{
+    margin: auto !important; justify-content: center !important;
+  }
+
+  /* TOC fijo junto a la principal (visible aunque tenga .hidden) */
+  body.split-view-active.mobile-solo.show-right #subcategoria-sidebar,
+  body.split-view-active.mobile-solo.show-right #subcategoria-sidebar.hidden{
+    position: fixed !important; top: 3rem !important; bottom: 0 !important;
+    left: var(--sb-collapsed) !important; width: var(--subcat-width) !important;
+    z-index: 120 !important; background: #fff; border-right: 1px solid #e5e7eb;
+    overflow-y: auto; display: block !important;
+  }
+  /* (tenías padding solo en show-right) */
+
+  /* Modal por debajo de las barras */
+  body.split-view-active.mobile-solo.show-right #video-modal.split-view{ z-index: 40 !important; }
+
+  /* Alternar visibilidad con .bars-hidden (ambos lados) */
+  body.split-view-active.mobile-solo.show-right.bars-hidden #sidebar,
+  body.split-view-active.mobile-solo.show-right.bars-hidden #subcategoria-sidebar{
+    display: none !important;
+  }
+
+  /* ===== Mostrar la IZQUIERDA con barras superpuestas ===== */
+  body.split-view-active.mobile-solo.show-left #sidebar{
+    display: block !important; position: fixed !important;
+    top: 3rem !important; bottom: 0 !important; left: 0 !important;
+    z-index: 120 !important; width: var(--sb-collapsed) !important;
+    border-right: 1px solid #e5e7eb; background: #fff;
+  }
+  body.split-view-active.mobile-solo.show-left #subcategoria-sidebar,
+  body.split-view-active.mobile-solo.show-left #subcategoria-sidebar.hidden{
+    display: block !important; position: fixed !important;
+    top: 3rem !important; bottom: 0 !important; left: var(--sb-collapsed) !important;
+    width: var(--subcat-width) !important; z-index: 120 !important;
+    background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto;
+  }
+  /* Overlay visible en show-left (además del modo .show base) */
+  body.split-view-active.mobile-solo.show-left #mobile-overlay{ display: block !important; }
+  body.split-view-active.mobile-solo.show-left.bars-hidden #sidebar,
+  body.split-view-active.mobile-solo.show-left.bars-hidden #subcategoria-sidebar,
+  body.split-view-active.mobile-solo.show-left.bars-hidden #mobile-overlay{
+    display: none !important;
+  }
+
+  /* ===== Hover: la barra principal flota SOBRE el TOC ===== */
+  body.split-view-active.mobile-solo.show-left  #sidebar.collapsed:hover,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover{
+    position: fixed !important; top: 3rem !important; bottom: 0 !important; left: 0 !important;
+    width: calc(var(--sb-collapsed) + var(--subcat-width)) !important;
+    z-index: 140 !important; background: #fff !important;
+    box-shadow: 2px 0 12px rgba(0,0,0,.14);
+  }
+  body.split-view-active.mobile-solo.show-left  #sidebar.collapsed:hover ~ #subcategoria-sidebar,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover ~ #subcategoria-sidebar{
+    left: var(--sb-collapsed) !important;
+    z-index: 120 !important;
+    pointer-events: none;
+  }
+
+  /* FIX: en show-right, mostrar textos al expandir la barra principal */
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover{
+    width: calc(var(--sb-collapsed) + var(--subcat-width)) !important;
+  }
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover .sidebar-group span{
+    display: inline !important;
+  }
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover .sidebar-group i{
+    margin: 0 !important; justify-content: flex-start !important;
+  }
+  body.split-view-active.mobile-solo.show-right #sidebar.open .sidebar-group span{
+    display: inline !important;
+  }
+  body.split-view-active.mobile-solo.show-right #sidebar.open .sidebar-group i{
+    margin: 0 !important; justify-content: flex-start !important;
+  }
+
+  /* === FIX TOC alignment — padding igual en ambos lados === */
+  body.split-view-active.mobile-solo #subcategoria-sidebar-content{
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    /* si querés menos alto arriba/abajo, ajustá este padding-top/bottom */
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+  }
+
+  /* Lista limpia (sin sangrías por defecto) */
+  #subcategoria-sidebar-content ul{
+    list-style: none; margin: 0; padding: 0;
+  }
+  #subcategoria-sidebar-content li{ margin: 0; }
+
+  /* Fila del TOC ocupando todo el ancho, sin padding lateral */
+  #subcategoria-sidebar-content a.toc-row{
+    display: flex; align-items: center;
+    gap: .5rem;                /* espacio entre icono y texto (no agrega sangría lateral) */
+    padding: .45rem 0 !important; /* <-- sin padding L/R */
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    border-radius: 0 !important;  /* bordes rectos, pegados a la columna */
+    text-decoration: none;
+    box-sizing: border-box;
+  }
+
+  /* Resaltado que toca los bordes de la columna */
+  #subcategoria-sidebar-content a.toc-row.is-active{
+    background: #eef2f7;
+    border-left: 3px solid #93c5fd; /* opcional; toca el borde izquierdo */
+  }
+
+  /* Icono sin “empujar” raro: ancho fijo y alineado */
+  #subcategoria-sidebar-content a.toc-row i{
+    min-width: 1rem; text-align: center;
+  }
+}
 
 
 /* Asegura que al hacer scroll el título quede justo debajo del header de 4rem */
 
-  
-  
-  
+/* —— MOBILE <640 + split —— */
+@media (max-width: 639.98px){
+  /* --- altura del switch en móvil (mantenela en sync con el botón) --- */
+  :root {
+    --switch-h: 34px;
+    --toc-px: .75rem; /* usado arriba; podés cambiarlo una sola vez aquí */
+  }
+
+  /* SWITCH VIEW full-width al fondo */
+  #mobile-split-switch{
+    position: fixed;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: env(safe-area-inset-bottom);
+    min-height: var(--switch-h);
+    transform: none !important;
+    display: flex; align-items: center; justify-content: center; gap:.5rem;
+    padding: .55rem 1rem;
+    padding-left: calc(1rem + env(safe-area-inset-left));
+    padding-right: calc(1rem + env(safe-area-inset-right));
+    border: 0; border-radius: 0;
+    background:rgb(95, 112, 130); color:#fff; font-weight:700; font-size:.75rem; letter-spacing:.04em;
+    z-index: 400;
+    width: 100% !important;
+  }
+
+  /* Flecha → cuando estás en el panel izquierdo */
+  body.split-view-active.mobile-solo.show-left #mobile-split-switch::after{
+    content: "\f061"; /* fas fa-arrow-right */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-left: .5rem;
+  }
+
+  /* Flecha ← cuando estás en el panel derecho */
+  body.split-view-active.mobile-solo.show-right #mobile-split-switch::before{
+    content: "\f060"; /* fas fa-arrow-left */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: .5rem;
+  }
+
+  /* Riel detrás del switch */
+  body.split-view-active.mobile-solo #video-modal.split-view::after{
+    content:""; position: fixed; left:0; right:0; bottom:0;
+    height: var(--switch-h);
+    background:#f1f5f9; border-top:1px solid #e5e7eb; z-index:380;
+  }
+
+  /* UP (cuando NO está dentro del carrusel) → por encima del switch */
+  #video-modal.split-view #toggle-thumbnails:not(.in-carousel){
+    position: fixed !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: calc(env(safe-area-inset-bottom) + var(--switch-h) + 2px) !important;
+    z-index: 410 !important;
+  }
+
+  /* Si el UP está dentro del carrusel */
+  #video-modal.split-view #thumbnail-carousel #toggle-thumbnails.in-carousel{
+    position: absolute !important;
+    top: .25rem !important;
+    bottom: auto !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 420 !important;
+  }
+
+  /* Que el carrusel no tape al switch */
+  body.split-view-active.mobile-solo #video-modal.split-view #thumbnail-carousel{
+    bottom: calc(var(--switch-h)) !important;
+    z-index: 350 !important;
+  }
+}
+
+/* ==== Ubicación del TOC como en la captura (ambos lados) ==== */
+
+
   
   
   </style>
@@ -2810,7 +3155,7 @@ blockquote {
 
 
   
-<header class="fixed top-0 left-0 right-0 z-50 bg-white border-b flex items-center justify-between px-4 h-[3rem] shadow">
+<header id="topbar" class="fixed top-0 left-0 right-0 z-50 bg-white border-b flex items-center justify-between px-4 h-[3rem] shadow">
   <!-- Sección izquierda -->
   <div class="flex items-center space-x-4">
     <!-- Botón menú -->
@@ -2886,6 +3231,9 @@ blockquote {
     <div id="user-initial" class="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center font-semibold cursor-pointer">M</div>
   </div>
 </header>
+
+
+<div id="mobile-overlay" class="hidden"></div>
 
 <!-- Menú flotante de usuario -->
 <!-- Menú flotante de usuario (compacto) -->
@@ -3226,7 +3574,7 @@ blockquote {
 
 
 
-<div id="subcategoria-content" class="hidden p-6 pt-10 mt-6">
+<div id="subcategoria-content" class="hidden !px-0 sm:!px-1 md:!px-2 pt-10 mt-6">
   <h2 id="subcategoria-title" class="text-2xl font-bold mb-4"></h2>
   <div id="subcategoria-body" class="space-y-6"></div>
 </div>
@@ -3541,6 +3889,13 @@ function hardCloseModal(){
     hideAllViews();
     document.getElementById(id)?.classList.remove('hidden');
     // confort: sube al top del contenedor scrolleable
+
+    const mc = document.getElementById('main-content');
+  mc.classList.toggle('subcat-active', id === 'subcategoria-content');
+
+
+
+
     document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -3690,12 +4045,27 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   // Oculta la TOC desde el inicio para evitar el "flash"
   const tocEl = document.getElementById('subcategoria-sidebar');
   tocEl?.classList.add('hidden');
+
+
+    // — Móvil: ocultar sidebars (principal y TOC) de inicio —
+  const isMobile = window.matchMedia('(max-width: 639.98px)').matches;
+  if (isMobile) {
+    // principal
+    const mainSidebar = document.getElementById('sidebar');
+    mainSidebar?.classList.add('force-hidden'); // usa tu CSS existente
+    // opcional: marca de estado para ocultar el botón flotante, etc.
+    document.body.classList.add('bars-hidden');
+  }
+
+
+
   showSubcat();
 
   // — Referencias al DOM —
   const contentSection = document.getElementById("subcategoria-content");
   const titleEl        = document.getElementById("subcategoria-title");
   const bodyEl         = document.getElementById("subcategoria-body");
+  
 
   // — Obtener datos de Firestore —
   const doc = await db
@@ -3715,30 +4085,34 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
 
 
   const headerHtml = `
-  <!-- fila principal: dos columnas, sin padding lateral ni superior, solo padding-bottom -->
-  <div class="px-6 flex justify-between items-start pb-4">
+<!-- fila principal: columna en xs, fila en sm+ -->
+<div class="px-6 flex flex-col sm:flex-row sm:justify-between items-start gap-2 pb-4">
   <!-- Columna izquierda: título y botón -->
   <div class="flex flex-col space-y-3">
-  <h1 class="text-3xl font-bold">
-    ${data.nombre || subcategoriaId}
-  </h1>
-  <button class="flex items-center justify-center bg-gray-100 text-[#546E7A] text-[8px] font-semibold uppercase rounded-sm space-x-1"
-        style="width:95px; height:18px;">
-  <!-- Ícono triangular -->
-  <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20">
-    <path d="M6 4l8 6-8 6V4z" />
-  </svg>
-  <span>Qbank Session</span>
-</button>
-</div>
+    <h1 class="text-3xl font-bold">
+      ${data.nombre || subcategoriaId}
+    </h1>
+
+    <button class="flex items-center justify-center bg-gray-100 text-[#546E7A] text-[8px] font-semibold uppercase rounded-sm space-x-1"
+            style="width:95px; height:18px;">
+      <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M6 4l8 6-8 6V4z"/></svg>
+      <span>Qbank Session</span>
+    </button>
+  </div>
+
   <!-- Columna derecha: metadata -->
-  <div class="flex flex-col items-end space-y-2 text-sm">
+  <div class="flex flex-col w-full sm:w-auto items-start sm:items-end mt-2 sm:mt-0 text-sm">
     <span class="text-gray-500">Last edited: ${data.lastEdited || '—'}</span>
-    <a href="#" class="text-blue-600 hover:underline">Content policy</a>
-    <label class="inline-flex items-center space-x-1">
-      <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600"/>
-      <span>Learned</span>
-    </label>
+
+    <!-- En xs: fila con justify-between; en sm+: apilados -->
+    <div class="flex w-full sm:w-auto flex-row sm:flex-col justify-between sm:justify-end items-center sm:items-end gap-1 mt-1">
+      <a href="#" class="text-blue-600 hover:underline">Content policy</a>
+
+      <label class="inline-flex items-center gap-1">
+        <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600"/>
+        <span>Learned</span>
+      </label>
+    </div>
   </div>
 </div>
 
@@ -3749,8 +4123,8 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     <div class="mx-20 px-6 py-1 flex items-center justify-between overflow-visible">
       <!-- Izquierda -->
       <div class="flex items-center">
-        <i class="fas fa-highlighter text-slate-600 text-sm mr-1.5"></i>
-<span class="hl-title text-sm" style="font-weight:400; font-size:0.8rem;">MY HIGHLIGHTING</span>
+        <i class="fas fa-highlighter text-slate-600 text-sm mr-0 sm:mr-1.5"></i>
+<span class="hl-title text-sm hidden sm:inline" style="font-weight:400; font-size:0.8rem;">MY HIGHLIGHTING</span>
       </div>
 
       <!-- Derecha -->
@@ -4417,8 +4791,13 @@ tocSections.forEach(sec => {
 tocHTML += `</nav>`;
 subWrap.innerHTML = tocHTML;
   // Muestra la TOC SOLO cuando el contenido ya está pintado
+  
+  
+    // Muestra la TOC SOLO cuando el contenido ya está pintado (NO en móvil)
   requestAnimationFrame(() => requestAnimationFrame(() => {
-    subSidebar.classList.remove('hidden');
+    if (window.matchMedia('(min-width: 640px)').matches) {
+      subSidebar.classList.remove('hidden');
+    }
   }));
 
 // —— FIX: lock de selección TOC durante scroll programático ——
@@ -4701,6 +5080,7 @@ window.dispatchEvent(new CustomEvent('subcat:rendered', {
 
   // — Opcional: colapsar la sidebar principal si lo necesitas —
   toggleSidebarCollapse(true);
+  
 }
 
 
@@ -5331,7 +5711,7 @@ document.getElementById("sidebar").addEventListener("mouseleave", () => {
 
       <!-- Panel de descripción oculto -->
   <!-- Panel de descripción en split-view -->
-<aside id="video-desc-panel" class="video-desc-panel hidden">
+<aside id="video-desc-panel" class="video-desc-panel hidden" style="min-width:200px;">
   <div class="p-4 overflow-y-auto h-full">
     <!-- 1) Aquí irá el título del vídeo -->
     <h3 id="video-desc-title" class="text-lg font-semibold mb-2"></h3>
@@ -5359,7 +5739,7 @@ document.getElementById("sidebar").addEventListener("mouseleave", () => {
 <aside 
   id="video-main-panel" 
   class="w-1/4 bg-gray-900 text-white p-6 flex flex-col overflow-y-auto"
-  style="height: 100%;"
+  style="height:100%; min-width:200px;"
 >
   <h2 id="modal-title" class="text-xl font-semibold mb-2">Título del vídeo</h2>
   <span class="text-sm text-gray-400">© BANCOMICINA</span>
@@ -6373,6 +6753,20 @@ function placeSwitch(){
       requestAnimationFrame(placeSwitch);
     }
   });
+
+
+
+    // NEW: click en overlay móvil reutiliza el toggle de #sb-switch
+  const overlay = document.getElementById('mobile-overlay');
+  if (overlay) {
+    overlay.addEventListener('click', () => {
+      if (!document.body.classList.contains('bars-hidden')) {
+        btn.click();              // usa el mismo handler para ocultar barras
+      }
+      overlay.classList.remove('show'); // cierra el velo
+    });
+  }
+
 
   // Si cambias el modo "split-view" o similares, vuelve a posicionar
   const ro = new ResizeObserver(placeSwitch);
@@ -8209,6 +8603,13 @@ await renderQs();
     // Sidebars
     const sb  = document.getElementById('sidebar');              // barra principal
     const toc = document.getElementById('subcategoria-sidebar'); // barra secundaria
+
+
+    
+
+
+
+
     toc?.classList.add('hidden');
     document.body.classList.remove('bars-hidden');
     sb?.classList.remove('force-hidden');
@@ -8857,8 +9258,215 @@ document.addEventListener('keydown', (ev) => {
 </script>
 
 
+<script>
+(function(){
+  const overlay   = document.getElementById('mobile-overlay');
+  const sbMain    = document.getElementById('sidebar');
+  const sbTOC     = document.getElementById('subcategoria-sidebar');
+
+  const isMobile = () => window.matchMedia('(max-width: 639.98px)').matches;
+
+  const isShown = (el, isMain=false) => {
+    if (!el) return false;
+    if (isMain && el.classList.contains('force-hidden')) return false;
+    if (el.classList.contains('hidden')) return false;
+    return el.offsetWidth > 0 && el.offsetHeight > 0;
+  };
+
+  function hideSidebarsMobile(){
+    if (!isMobile()) return;
+    if (sbMain) sbMain.classList.add('force-hidden');
+    if (sbTOC)  sbTOC.classList.add('hidden');
+    overlay.classList.remove('show');
+    overlay.classList.add('hidden');
+  }
+
+  function updateMobileOverlay(){
+    const show = isMobile() && (isShown(sbMain, true) || isShown(sbTOC, false));
+    overlay.classList.toggle('show', show);
+    overlay.classList.toggle('hidden', !show);
+  }
+
+  overlay.addEventListener('click', hideSidebarsMobile);
+
+  // —— REGLA pedida: cerrar solo en items sin subitems y en subitems ——
+  function isDirectTopLink(target){
+    const a = target.closest('a.sidebar-item');
+    if (!a) return false;
+    // si está dentro de un acordeón, NO es top-level directo
+    if (a.closest('div[id^="accordion-"]')) return false;
+    const group = a.closest('.sidebar-group');
+    if (!group) return false;
+    // el grupo NO debe tener acordeón (o sea, item sin subitems)
+    const hasAccordion = !!group.querySelector('div[id^="accordion-"]');
+    return !hasAccordion;
+  }
+  function isAccordionSubitem(target){
+    return !!target.closest('div[id^="accordion-"] a.sidebar-item');
+  }
+
+  // Main sidebar: cierra SOLO si cumple las reglas anteriores
+  if (sbMain){
+    sbMain.addEventListener('click', (ev) => {
+      if (!isMobile()) return;
+      if (isDirectTopLink(ev.target) || isAccordionSubitem(ev.target)){
+        hideSidebarsMobile();
+      }
+      // Nota: clicks en botones de grupo (que abren/cierra acordeón) NO cierran
+    });
+  }
+
+  // TOC: si quieres que también cierre al navegar, mantenemos cierre en h2/h3/enlaces
+  if (sbTOC){
+    sbTOC.addEventListener('click', (ev) => {
+      if (!isMobile()) return;
+      if (ev.target.closest('.toc-h2, .toc-h3, a')) hideSidebarsMobile();
+    });
+  }
+
+  const moCfg = { attributes: true, attributeFilter: ['class','style'], subtree: true };
+  const mo = new MutationObserver(updateMobileOverlay);
+  if (sbMain) mo.observe(sbMain, moCfg);
+  if (sbTOC)  mo.observe(sbTOC,  moCfg);
+
+  const ro = new ResizeObserver(updateMobileOverlay);
+  if (sbMain) ro.observe(sbMain);
+  if (sbTOC)  ro.observe(sbTOC);
+
+  window.addEventListener('resize', updateMobileOverlay);
+  document.addEventListener('DOMContentLoaded', updateMobileOverlay);
+  updateMobileOverlay();
+})();
+</script>
+
+<script>
+(function () {
+  const isMobile = () => window.matchMedia('(max-width: 639.98px)').matches;
+
+  function hideSidebarsOnMobile() {
+    if (!isMobile()) return;
+    const sbMain  = document.getElementById('sidebar');
+    const sbTOC   = document.getElementById('subcategoria-sidebar');
+    const overlay = document.getElementById('mobile-overlay');
+
+    if (sbMain) sbMain.classList.add('force-hidden'); // oculta barra principal
+    if (sbTOC)  sbTOC.classList.add('hidden');        // oculta TOC
+    if (overlay){                                     // quita overlay si quedó
+      overlay.classList.remove('show');
+      overlay.classList.add('hidden');
+      overlay.style.left = '0px';
+    }
+  }
+
+  // 👉 Úsala al abrir los resultados
+  window.hideSidebarsOnMobileForResults = hideSidebarsOnMobile;
+
+  // 👉 Auto: si #search-page existe y se hace visible
+  const sp = document.getElementById('search-page');
+  if (sp) {
+    new MutationObserver(() => {
+      if (!isMobile()) return;
+      const visible = !sp.classList.contains('hidden');
+      if (visible) hideSidebarsOnMobile();
+    }).observe(sp, { attributes: true, attributeFilter: ['class','style'] });
+  }
+})();
+</script>
+
+<script>
+(function(){
+  const modal = document.getElementById('video-modal');
+
+  function isMobile(){ return window.matchMedia('(max-width: 639.98px)').matches; }
+
+  function ensureSwitchBtn(){
+    let btn = document.getElementById('mobile-split-switch');
+    if (!btn){
+      btn = document.createElement('button');
+      btn.id = 'mobile-split-switch';
+      btn.type = 'button';
+      btn.textContent = 'SWITCH VIEW';
+      document.body.appendChild(btn);
+      btn.addEventListener('click', ()=>{
+        const b = document.body;
+        if (b.classList.contains('show-right')){
+          b.classList.remove('show-right'); b.classList.add('show-left');
+        } else {
+          b.classList.remove('show-left'); b.classList.add('show-right');
+        }
+      });
+    }
+    return btn;
+  }
+
+  function removeSwitchBtn(){
+    document.getElementById('mobile-split-switch')?.remove();
+  }
+
+  function applyMobileSolo(){
+    const body = document.body;
+    const activeSplit = modal && !modal.classList.contains('hidden') && modal.classList.contains('split-view');
+
+    if (isMobile() && activeSplit){
+      body.classList.add('mobile-solo');             // activa modo “solo uno”
+      if (!body.classList.contains('show-left') && !body.classList.contains('show-right')){
+        body.classList.add('show-right');            // por defecto: muestra el modal
+      }
+      ensureSwitchBtn();
+    } else {
+      body.classList.remove('mobile-solo','show-left','show-right');
+      removeSwitchBtn();
+    }
+  }
+
+  /* Observa cambios en el modal (cuando entras/sales de split-view) */
+  if (modal){
+    const mo = new MutationObserver(applyMobileSolo);
+    mo.observe(modal, { attributes:true, attributeFilter:['class'] });
+  }
+
+  /* Recalcula al cargar y al redimensionar */
+  window.addEventListener('load',   applyMobileSolo);
+  window.addEventListener('resize', applyMobileSolo);
+
+  /* Limpieza al cerrar fuerte el modal (engancha tu función existente) */
+  const _hardCloseModal = window.hardCloseModal;
+  window.hardCloseModal = function(){
+    try{ _hardCloseModal && _hardCloseModal(); }finally{
+      document.body.classList.remove('mobile-solo','show-left','show-right');
+      removeSwitchBtn();
+    }
+  };
+})();
+</script>
+
+<script>
+  // Ocultar barras al seleccionar un item del TOC (h2, h3 o enlace)
+  document.addEventListener('click', function (e) {
+    const tocItem = e.target.closest(
+      '#subcategoria-sidebar .toc-h2, ' +
+      '#subcategoria-sidebar .toc-h3, ' +
+      '#subcategoria-sidebar a, ' +
+      '#subcategoria-sidebar .toc-a'
+    );
+    if (!tocItem) return;
+
+    // Oculta barras laterales usando la clase que ya manejan tus CSS
+    document.body.classList.add('bars-hidden');
+
+    // Quita el velo gris si estuviera activo
+    const overlay = document.getElementById('mobile-overlay');
+    if (overlay) overlay.classList.remove('show');
+  });
+</script>
+
+
+
+<button id="mobile-split-switch" type="button">
+  <i class="fas fa-arrow-left"></i><span>SWITCH VIEW</span>
+</button>
 </body>
 
 </html>
 
-//4 septiembre ACtual tarde
+//15 septiembre amanecida
