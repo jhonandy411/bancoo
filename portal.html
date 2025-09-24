@@ -123,7 +123,7 @@ html, body {
         overflow-x: hidden; /* Oculta el contenido horizontalmente cuando está cerrada */
         transition: width 0.3s ease, padding 0.3s ease; /* Transición suave para ancho y padding */
         flex-shrink: 0; /* Evita que se encoja */
-        z-index: 60; /* Asegura que esté por encima del contenido principal */
+        z-index: 150 !important; /* Asegura que esté por encima del contenido principal */
         padding-top: 1rem; /* Espacio superior dentro de la sidebar */
     }
 
@@ -141,7 +141,7 @@ html, body {
 
 /* Sidebar secundario por debajo */
 #subcategoria-sidebar {
-  z-index: 50;       /* Menor que el principal */
+  z-index: 140 !important;      /* Menor que el principal */
 }
 #main-content { overflow-x: clip; } /* o hidden */
 
@@ -2408,7 +2408,7 @@ body.split-view-active .dashboard-container{ width:60vw; }
   border-radius: 9999px;
   box-shadow: 0 6px 6px rgba(164, 163, 163, 0.12);
   color:#546E7A;
-  z-index: 120;                          /* por encima de las barras */
+   z-index: 150 !important;                         /* por encima de las barras */
   cursor: pointer;
 }
 #sb-switch i{ font-size: 10px; }
@@ -2727,7 +2727,6 @@ blockquote {
     left: 0; right: 0; bottom: 0;
     background: rgba(2, 6, 23, .45); /* gris oscuro translúcido */
     /* Debe quedar POR DEBAJO de ambas sidebars y POR ENCIMA del contenido */
-    z-index: 45;  /* #subcategoria-sidebar tiene 10 y #sidebar 60 */
     display: block;
   }
 }
@@ -2771,7 +2770,7 @@ blockquote {
   top: 3rem; bottom: 0; right: 0;
   left: var(--bars-w);
   background: rgba(2,6,23,.45);
-  z-index: 60 !important;
+  z-index: 110 !important;
   display: block !important;
   pointer-events: auto;
 }
@@ -3010,7 +3009,9 @@ body.bars-hidden #mobile-overlay.show{ left: 0; }
     bottom: env(safe-area-inset-bottom);
     min-height: var(--switch-h);
     transform: none !important;
-    display: flex; align-items: center; justify-content: center; gap:.5rem;
+    
+     
+    align-items: center; justify-content: center; gap:.5rem;
     padding: .55rem 1rem;
     padding-left: calc(1rem + env(safe-area-inset-left));
     padding-right: calc(1rem + env(safe-area-inset-right));
@@ -3018,6 +3019,7 @@ body.bars-hidden #mobile-overlay.show{ left: 0; }
     background:rgb(95, 112, 130); color:#fff; font-weight:700; font-size:.75rem; letter-spacing:.04em;
     z-index: 400;
     width: 100% !important;
+  
   }
 
   /* Flecha → cuando estás en el panel izquierdo */
@@ -3071,6 +3073,96 @@ body.bars-hidden #mobile-overlay.show{ left: 0; }
 
 /* ==== Ubicación del TOC como en la captura (ambos lados) ==== */
 
+
+@media (max-width: 639.98px){
+  body.bars-hidden #sidebar,
+  body.bars-hidden #sb-switch,
+  body.bars-hidden #mobile-overlay {
+    display: none !important;
+  }
+}
+
+#sidebar, #subcategoria-sidebar {
+  transition: opacity .12s ease, transform .12s ease;
+}
+#sidebar.force-hidden,
+body.bars-hidden #sidebar,
+#subcategoria-sidebar.hidden {
+  opacity: 0;
+  transform: translateX(-8px);
+}
+
+/* ≥640px: mostrar barras y eliminar cualquier “invisibilidad” heredada */
+@media (min-width: 640px){
+  body.bars-hidden #sidebar,
+  body.bars-hidden #sb-switch,
+  body.bars-hidden #mobile-overlay {
+    display: block !important;     /* evita display:none heredados */
+  }
+  body.bars-hidden #sidebar {
+    opacity: 1 !important;
+    transform: none !important;    /* que NO quede “fantasma” ocupando ancho */
+  }
+
+  /* Deja oculta la segunda barra si no tienes contenido para ella,
+     así no aparece la columna blanca vacía */
+  #subcategoria-sidebar.hidden { display: none !important; }
+}
+
+/* <640px: barras ocultas por defecto (móvil) */
+@media (max-width: 639.98px){
+  body.bars-hidden #sidebar,
+  body.bars-hidden #subcategoria-sidebar {
+    display: none !important;
+  }
+}
+
+
+/* ——— POPUP de resaltado ——— */
+#hl-popover{
+  position: fixed;
+  display: none;                 /* se muestra por JS */
+  background:#0f172a;
+  color:#fff;
+  padding:3px 4px;               /* compacto */
+  border-radius:6px;
+  box-shadow:0 6px 16px rgba(0,0,0,.25);
+  z-index:1000;
+  transform:translate(-50%, -100%);
+  gap:2px;                       /* separación mínima entre botones */
+}
+
+/* flechita apuntando al texto */
+#hl-popover::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-5px;
+  transform:translateX(-50%);
+  border-width:5px 5px 0 5px;
+  border-style:solid;
+  border-color:#0f172a transparent transparent transparent;
+}
+
+#hl-popover .hlp-btn{
+  width:24px; height:24px;       /* botones más pequeños */
+  border-radius:9999px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border:1px solid rgba(255,255,255,.18);
+  cursor:pointer;
+}
+#hl-popover .hlp-apply{ background:rgb(56, 189, 248); border-color:transparent; }
+#hl-popover .hlp-clear{ background:transparent; }
+#hl-popover i{ font-size:12px; line-height:1; }
+
+/* Texto resaltado por el usuario */
+.my-hl{
+  background:rgb(153, 230, 255);
+  border-radius:2px;
+  padding:0 .05em;
+
+
+}
 
   
   
@@ -3155,9 +3247,9 @@ body.bars-hidden #mobile-overlay.show{ left: 0; }
 
 
   
-<header id="topbar" class="fixed top-0 left-0 right-0 z-50 bg-white border-b flex items-center justify-between px-4 h-[3rem] shadow">
-  <!-- Sección izquierda -->
-  <div class="flex items-center space-x-4">
+<header id="topbar" class="fixed top-0 left-0 right-0 z-50 bg-white border-b flex items-center px-4 h-[3rem] shadow">
+  <!-- Izquierda -->
+  <div class="flex items-center space-x-4 shrink-0">
     <!-- Botón menú -->
     <button id="menu-toggle" class="text-gray-700 hover:text-black focus:outline-none">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -3165,14 +3257,14 @@ body.bars-hidden #mobile-overlay.show{ left: 0; }
       </svg>
     </button>
 
-    <!-- Logo + texto -->
-    <div class="flex items-center space-x-2">
-  <img src="./assets/logo.png" alt="Logo" class="w-6 h-6" />
-  <span class="hidden sm:inline text-xl font-semibold text-gray-800 font-[Inter]">BANCOMICINA</span>
-</div>
+ <!-- Logo + texto -->
+    <div class="flex items-center space-x-2 max-[420px]:hidden">
+      <img src="./assets/logo.png" alt="Logo" class="w-6 h-6" />
+      <span class="hidden sm:inline text-xl font-semibold text-gray-800 font-[Inter]">BANCOMICINA</span>
+    </div>
 
     <!-- Dropdown modo -->
-    <div class="relative" id="mode-dropdown">
+    <div class="relative max-sm:hidden" id="mode-dropdown">
       <button id="mode-btn"
         class="text-xs font-medium bg-[rgb(234,245,248)] text-[rgb(29,125,138)] px-2 py-1 rounded-full flex items-center space-x-1">
         <span id="mode-label">CLÍNICO</span>
@@ -3182,36 +3274,43 @@ body.bars-hidden #mobile-overlay.show{ left: 0; }
     </div>
   </div>
 
-  <!-- Buscador centrado -->
-  <div class="flex-1 flex justify-center">
-    <div class="flex items-center gap-1 w-full max-w-[980px]"> <!-- opcional: límite -->
-      <!-- Selector idioma -->
-      <button class="flex items-center gap-1 bg-[#EEF3F7] text-slate-700 rounded-md px-2.5 h-7 text-xs shadow-sm">
+<!-- Buscador centrado -->
+<div class="flex-1 flex justify-center">
+  <div class="flex items-center gap-1 w-full max-w-[980px] min-w-0">
+
+    <!-- Selector idioma con dropdown -->
+    <div class="relative ml-2" id="lang-dropdown">
+      <button id="lang-btn"
+        class="flex items-center gap-1 bg-[#EEF3F7] text-slate-700 rounded-md px-2.5 h-7 text-xs shadow-sm">
         <span class="font-medium">EN</span>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
           <path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 011.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z"/>
         </svg>
       </button>
 
-      <!-- Barra de búsqueda -->
-      <!-- Barra de búsqueda -->
-<div id="searchbox" class="relative flex items-center gap-2 bg-[#EEF3F7] rounded-md px-2 h-7 flex-1 min-w-0 w-full">
+      <!-- Dropdown oculto -->
+      <div id="lang-menu"
+           class="absolute top-full left-0 mt-1 w-36 bg-white border border-gray-200 rounded-md shadow-lg hidden text-sm z-50">
+        <button class="w-full text-left px-3 py-2 hover:bg-gray-100">EN <span class="text-gray-500">(English)</span></button>
+        <button class="w-full text-left px-3 py-2 hover:bg-gray-100">ES <span class="text-gray-500">(Español)</span></button>
+      </div>
+    </div>
+
+    <!-- Barra de búsqueda -->
+      <div id="searchbox"
+           class="relative flex items-center gap-2 bg-[#EEF3F7] rounded-md px-2 h-7
+                  flex-1 basis-0 min-w-0">
   <!-- Icono lupa -->
-  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 110-15 7.5 7.5 0 010 15z"/>
-  </svg>
+  <svg xmlns="http://www.w3.org/2000/svg"
+       class="w-4 h-4 text-slate-500 ml-1 shrink-0" ...>...</svg>
 
-  <!-- Input -->
-  <input
-    id="global-search"
-    type="text"
-    placeholder="Ask a medical question"
-    autocomplete="off"
-    class="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 placeholder-slate-400 text-[12px] leading-6"
-  />
+  <!-- Input (con ellipsis) -->
+<input id="global-search" type="text" placeholder="Ask a medical question" autocomplete="off"
+               class="flex-1 min-w-0 bg-transparent border-0 focus:outline-none focus:ring-0
+                      placeholder-slate-400 text-[12px] leading-6 truncate" />
 
-  <!-- Hint ⌘+K -->
-  <span class="pr-1 text-slate-500 text-sm font-medium">⌘+K</span>
+  <!-- Hint: que no se deforme y se oculte en pantallas chicas -->
+  <span class="pr-1 text-slate-500 text-sm font-medium shrink-0 max-sm:hidden">⌘+K</span>
 
   <!-- Resultados -->
   <div id="search-results"
@@ -3223,9 +3322,9 @@ body.bars-hidden #mobile-overlay.show{ left: 0; }
     </div>
   </div>
 
-  <!-- Sección derecha -->
-  <div class="flex items-center space-x-4">
-    <button class="text-gray-600 hover:text-black">
+   <!-- Derecha -->
+  <div class="flex items-center space-x-4 shrink-0">
+    <button class="text-gray-600 hover:text-black max-sm:hidden">
       <i class="far fa-bookmark text-lg"></i>
     </button>
     <div id="user-initial" class="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center font-semibold cursor-pointer">M</div>
@@ -3656,6 +3755,8 @@ body.bars-hidden #mobile-overlay.show{ left: 0; }
       userSection.classList.add("hidden");
     }
   });
+
+  
 
   
   
@@ -4119,12 +4220,13 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
 <!-- solo este bloque irá dentro de #subcat-header -->
 <div id="subcat-header">
   <div class="highlighting-bar -mx-20 border-y border-gray-200 bg-white z-30 relative overflow-visible">
-    <!-- contenido centrado al grid del card -->
     <div class="mx-20 px-6 py-1 flex items-center justify-between overflow-visible">
       <!-- Izquierda -->
-      <div class="flex items-center">
-        <i class="fas fa-highlighter text-slate-600 text-sm mr-0 sm:mr-1.5"></i>
-<span class="hl-title text-sm hidden sm:inline" style="font-weight:400; font-size:0.8rem;">MY HIGHLIGHTING</span>
+      <div id="highlight-toggle" class="flex items-center cursor-pointer select-none">
+        <i id="highlight-icon" class="fas fa-highlighter text-slate-600 text-sm mr-0 sm:mr-1.5"></i>
+        <span class="hl-title text-sm hidden sm:inline" style="font-weight:400; font-size:0.8rem;">
+          MY HIGHLIGHTING
+        </span>
       </div>
 
       <!-- Derecha -->
@@ -4194,6 +4296,37 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   // Convertir el string a nodos y añadir al wrapper
   const headerNode = document.createRange().createContextualFragment(headerHtml);
   wrapper.appendChild(headerNode);
+
+// ---- My Highlighting: toggle + persistencia ----
+const subcatHeaderEl = wrapper.querySelector('#subcat-header');
+const hlToggle = subcatHeaderEl.querySelector('#highlight-toggle');
+const hlIcon   = subcatHeaderEl.querySelector('#highlight-icon');
+const hlTitle  = subcatHeaderEl.querySelector('.hl-title');
+
+// estado guardado (opcional): arranca desactivado si no existe
+let hlOn = JSON.parse(localStorage.getItem('hl:on') || 'false');
+applyHL();
+
+hlToggle.addEventListener('click', (e) => {
+  e.preventDefault();
+  hlOn = !hlOn;
+  localStorage.setItem('hl:on', JSON.stringify(hlOn));
+  applyHL();
+});
+
+function applyHL(){
+  // color del ícono
+  hlIcon.classList.toggle('text-blue-500', hlOn);
+  hlIcon.classList.toggle('text-slate-600', !hlOn);
+  // peso del texto
+  hlTitle?.classList.toggle('font-bold', hlOn);
+  // clase de barra (por si querés estilizar todo el header)
+  subcatHeaderEl.classList.toggle('hl-on', hlOn);
+}
+
+
+
+
 
 // —— Fuente “AA” (solo contenido) ——
 const fontBtn   = wrapper.querySelector('#font-btn');
@@ -5881,6 +6014,15 @@ function resetModalLayout({ keepCarousel = false, preserveSplit = false } = {}) 
   const mi       = document.getElementById('modal-image');
   const iframeEl = document.getElementById('modal-iframe');
 
+  // Ahora: en <640px la descripción arranca cerrada
+const isMobile = window.matchMedia('(max-width: 639.98px)').matches;
+const mainDesc  = document.getElementById('video-main-panel');
+const splitDesc = document.getElementById('video-desc-panel');
+
+mainDesc.classList.toggle('hidden', isMobile); // oculto en móvil
+splitDesc.classList.add('hidden');             // siempre cerrada al iniciar
+if (videoArea) videoArea.style.width = isMobile ? '100%' : '75%';
+
   // Estado base imagen
   mi.classList.add('hidden');
   mi.removeAttribute('src');
@@ -6889,6 +7031,370 @@ function placeSwitch(){
 </script>
 
 
+<!-- === flotante resaltar === -->
+<script>
+(function(){
+  const CONTENT_ID     = 'subcategoria-body';
+  const SCROLL_HOST_ID = 'main-content';
+  const POP_ID         = 'hl-popover';
+
+  // ——— Popover (igual que ya tenías) ———
+  let pop = document.getElementById(POP_ID);
+  if (!pop) {
+    pop = document.createElement('div');
+    pop.id = POP_ID;
+    pop.setAttribute('role','toolbar');
+    pop.innerHTML = `
+      <button class="hlp-btn hlp-apply" title="Resaltar"><i class="fas fa-highlighter"></i></button>
+      <button class="hlp-btn hlp-clear"  title="Quitar resaltado"><i class="fas fa-eraser"></i></button>
+    `;
+    document.body.appendChild(pop);
+  }
+  const applyBtn   = pop.querySelector('.hlp-apply');
+  const clearBtn   = pop.querySelector('.hlp-clear');
+
+  const content    = document.getElementById(CONTENT_ID);
+  const scrollHost = document.getElementById(SCROLL_HOST_ID);
+
+  // ✨ track del .my-hl bajo el cursor (para des-resaltar sin selección)
+  let hoverHL = null;
+  let lastHoverHL = null;     // recuerda el último .my-hl visto (útil al saltar al popup)
+  let popHovered = false;     // true mientras el mouse está encima del popup
+  let hideTO = null;          // timeout de ocultado con gracia
+
+  // ✨ NUEVO: agrupar spans de un mismo resaltado para borrar todo el bloque
+  let HL_SEQ = 0;
+  let CURRENT_GROUP_ID = null;
+  const newGroupId = () => 'hl-' + (++HL_SEQ);
+
+  const selRect = () => {
+    const s = window.getSelection();
+    if (!s || s.rangeCount === 0 || s.isCollapsed) return null;
+    const r = s.getRangeAt(0).getBoundingClientRect();
+    return (r && (r.width || r.height)) ? r : null;
+  };
+  const isInside = (node) => {
+    if (!node) return false;
+    const el = node.nodeType === 1 ? node : node.parentElement;
+    return el && content && content.contains(el);
+  };
+  const positionPopoverAtRect = (r) => {
+    pop.style.display = 'flex';
+    pop.style.left = (r.left + r.width/2) + 'px';
+    pop.style.top  = (r.top - 8) + 'px';
+  };
+
+  // ⛔️ No mostrar si la selección toca títulos (<summary>), controles (Collapse/Notes/Feedback)
+  // o leyendas/textos de imágenes/videos.
+  const FORBIDDEN_SEL = `
+    summary,
+    .collapse-controls, .collapse-controls *,
+    .media-thumb, .media-thumb *,
+    .thumb-caption, .thumb-caption *
+  `;
+  function selectionIntersectsForbidden(){
+    const s = window.getSelection();
+    if (!s || s.rangeCount === 0) return false;
+    const range = s.getRangeAt(0);
+    const nodes = content ? content.querySelectorAll(FORBIDDEN_SEL) : [];
+    for (const n of nodes) {
+      try { if (range.intersectsNode(n)) return true; } catch {}
+    }
+    return false;
+  }
+
+  function showPopover(){
+    const on = JSON.parse(localStorage.getItem('hl:on') || 'false');
+    if (!on) return hidePopover();
+
+    // 1) Si hay selección válida, usar su rect
+    const s = window.getSelection();
+    if (s && s.rangeCount && !s.isCollapsed && isInside(s.anchorNode) && !selectionIntersectsForbidden()) {
+      const r = selRect(); if (!r) return hidePopover();
+      positionPopoverAtRect(r);
+      return;
+    }
+
+    // 2) Si NO hay selección pero el cursor está sobre un .my-hl, mostrar allí
+    if (hoverHL && content.contains(hoverHL)) {
+      const r = hoverHL.getBoundingClientRect();
+      if (r && (r.width || r.height)) {
+        positionPopoverAtRect(r);
+        return;
+      }
+    }
+
+    // 3) Si el mouse está sobre el popup, manténlo visible
+    if (popHovered && pop.style.display !== 'none') return;
+
+    hidePopover();
+  }
+  function hidePopover(){
+    clearTimeout(hideTO);
+    pop.style.display = 'none';
+  }
+
+  // Mostrar al soltar selección
+  document.addEventListener('mouseup', () => setTimeout(showPopover, 0));
+  // Ocultar en scroll del contenedor de lectura
+  scrollHost?.addEventListener('scroll', () => { hoverHL = null; lastHoverHL = null; hidePopover(); }, { passive:true });
+  // Ocultar si clicas fuera o con ESC
+  document.addEventListener('mousedown', (e) => { if (!pop.contains(e.target)) hidePopover(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hidePopover(); });
+
+  // Mantener el popup al mover el cursor desde el highlight hacia el popup
+  pop.addEventListener('mouseenter', () => {
+    popHovered = true;
+    clearTimeout(hideTO);
+  });
+  pop.addEventListener('mouseleave', () => {
+    popHovered = false;
+    const s = window.getSelection();
+    if (!(s && s.rangeCount && !s.isCollapsed) && !hoverHL) hidePopover();
+  });
+
+  // detectar hover sobre .my-hl (sin selección) para mostrar popover y permitir borrar
+  content?.addEventListener('mousemove', (e) => {
+    const s = window.getSelection();
+    if (s && s.rangeCount && !s.isCollapsed) return; // si estás seleccionando, no interferir
+    const targetHL = (e.target.closest && e.target.closest('.my-hl')) || null;
+
+    if (targetHL) {
+      hoverHL = targetHL;
+      lastHoverHL = targetHL;
+      clearTimeout(hideTO);
+      showPopover();
+    } else {
+      hoverHL = null;
+      clearTimeout(hideTO);
+      hideTO = setTimeout(() => {
+        if (!popHovered) hidePopover();
+      }, 220);
+    }
+  }, { passive:true });
+
+  // ——— Utilidades ———
+  function splitText(node, offset){
+    if (node.nodeType !== Node.TEXT_NODE) return node;
+    if (offset <= 0 || offset >= node.nodeValue.length) return node;
+    return node.splitText(offset); // devuelve el nodo “derecha”
+  }
+  function nextTextIn(root, from){
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(){ return NodeFilter.FILTER_ACCEPT; }
+    });
+    tw.currentNode = from;
+    return tw.nextNode();
+  }
+  function prevTextIn(root, from){
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(){ return NodeFilter.FILTER_ACCEPT; }
+    });
+    tw.currentNode = from;
+    return tw.previousNode();
+  }
+  function descendToText(container, offset, root, fromEnd){
+    if (container.nodeType === Node.TEXT_NODE) return { node: container, offset };
+    const cn = container.childNodes;
+    let idx = fromEnd ? Math.max(0, Math.min(offset-1, cn.length-1)) : Math.max(0, Math.min(offset, cn.length-1));
+    let probe = cn[idx] || container;
+
+    let txt = fromEnd ? lastText(probe) : firstText(probe);
+    if (!txt) txt = fromEnd ? prevTextIn(root, probe) : nextTextIn(root, probe);
+
+    return { node: txt || container, offset: (fromEnd ? (txt?.nodeValue?.length || 0) : 0) };
+
+    function firstText(node){
+      const t = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, { acceptNode(){ return NodeFilter.FILTER_ACCEPT; } });
+      return t.nextNode();
+    }
+    function lastText(node){
+      const t = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, { acceptNode(){ return NodeFilter.FILTER_ACCEPT; } });
+      let last=null, cur;
+      while((cur=t.nextNode())) last=cur;
+      return last;
+    }
+  }
+
+  // Normaliza EXACTAMENTE al texto seleccionado (sin arrastrar más contenido)
+  function normalizeRangeToText(range, root){
+    let { startContainer, startOffset, endContainer, endOffset } = range;
+
+    if (startContainer.nodeType !== Node.TEXT_NODE) {
+      ({ node: startContainer, offset: startOffset } =
+        descendToText(startContainer, startOffset, root, /*fromEnd*/false));
+    }
+    if (endContainer.nodeType !== Node.TEXT_NODE) {
+      ({ node: endContainer, offset: endOffset } =
+        descendToText(endContainer, endOffset, root, /*fromEnd*/true));
+    }
+
+    // Asegura orden (start <= end)
+    const test = document.createRange();
+    try { test.setStart(startContainer, startOffset); test.setEnd(endContainer, endOffset); } catch {}
+    if (test.collapsed && (startContainer !== endContainer || endOffset < startOffset)) {
+      [startContainer, endContainer] = [endContainer, startContainer];
+      [startOffset,   endOffset]     = [endOffset,   startOffset];
+    }
+
+    // Caso 1: selección dentro del MISMO nodo de texto
+    if (startContainer === endContainer && startContainer.nodeType === 3) {
+      let node = startContainer;
+      if (endOffset < node.nodeValue.length) splitText(node, endOffset);
+      if (startOffset > 0) node = splitText(node, startOffset);
+      return { startText: node, endText: node };
+    }
+
+    // Caso 2: selección abarca varios nodos -> corta ambos bordes
+    if (startContainer.nodeType === 3) {
+      const right = splitText(startContainer, startOffset);
+      if (right) startContainer = right;
+    }
+    if (endContainer.nodeType === 3) {
+      if (endOffset < endContainer.nodeValue.length) splitText(endContainer, endOffset);
+    }
+
+    return { startText: startContainer, endText: endContainer };
+  }
+
+  // Acepta TODOS los nodos de texto; luego sólo envolvemos los no vacíos.
+  function collectTextsBetween(root, startText, endText){
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(){ return NodeFilter.FILTER_ACCEPT; }
+    });
+    const nodes = [];
+    let cur = startText;
+    while (cur) {
+      nodes.push(cur);
+      if (cur === endText) break;
+      tw.currentNode = cur;
+      cur = tw.nextNode();
+      if (!cur) break;
+    }
+    return nodes;
+  }
+
+  function wrapTextNode(n){
+    if (!n.nodeValue || !n.nodeValue.trim().length) return;
+    if (n.parentNode && n.parentNode.classList && n.parentNode.classList.contains('my-hl')) return;
+    const span = document.createElement('span');
+    span.className = 'my-hl';
+    if (CURRENT_GROUP_ID) span.dataset.hlId = CURRENT_GROUP_ID;  // <- agrupa
+    n.parentNode.insertBefore(span, n);
+    span.appendChild(n);
+  }
+
+  function mergeAdjacent(root){
+    const list = root.querySelectorAll('.my-hl');
+    for (let i=0;i<list.length;i++){
+      const a = list[i], b = a.nextSibling;
+      if (b && b.nodeType === 1 && b.classList.contains('my-hl') &&
+          a.dataset.hlId === b.dataset.hlId) { // solo fusiona del mismo grupo
+        while (b.firstChild) a.appendChild(b.firstChild);
+        b.remove();
+        i--;
+      }
+    }
+  }
+
+  // ——— Acción: aplicar resaltado MULTILÍNEA/preciso ———
+  function highlightSelection(){
+    const s = window.getSelection();
+    if (!s || s.rangeCount === 0 || s.isCollapsed || !isInside(s.anchorNode)) { hidePopover(); return; }
+    if (selectionIntersectsForbidden()) { hidePopover(); return; }
+
+    const range = s.getRangeAt(0);
+    const { startText, endText } = normalizeRangeToText(range, content);
+    if (!startText || !endText || startText.nodeType !== 3 || endText.nodeType !== 3) { hidePopover(); return; }
+
+    // 🔗 asigna un id de grupo para todos los spans de este resaltado
+    CURRENT_GROUP_ID = newGroupId();
+    const texts = collectTextsBetween(content, startText, endText);
+    texts.forEach(wrapTextNode);
+    CURRENT_GROUP_ID = null;
+
+    // limpiar selección (coloca el cursor al final del segmento resaltado)
+    s.removeAllRanges();
+    const after = document.createRange();
+    after.setStartAfter(endText);
+    after.collapse(true);
+    s.addRange(after);
+
+    mergeAdjacent(content);
+    hidePopover();
+  }
+
+  // ——— Borrar resaltado: elimina TODO el bloque resaltado ———
+  function clearHighlight(){
+    // 1) Si el cursor está/estuvo sobre un .my-hl y saltaste al popup, usa ese
+    const target = (hoverHL && content.contains(hoverHL))
+                ? hoverHL
+                : (lastHoverHL && content.contains(lastHoverHL) ? lastHoverHL : null);
+
+    if (target) {
+      const groupId = target.dataset.hlId || null;
+      if (groupId) {
+        // Des-resalta todo el bloque del mismo grupo
+        const all = content.querySelectorAll(`.my-hl[data-hl-id="${groupId}"]`);
+        all.forEach(el => {
+          const p = el.parentNode;
+          while (el.firstChild) p.insertBefore(el.firstChild, el);
+          el.remove();
+          p.normalize();
+        });
+      } else {
+        // Compatibilidad: si no tiene groupId, borra solo ese nodo (resaltados antiguos)
+        const p  = target.parentNode;
+        while (target.firstChild) p.insertBefore(target.firstChild, target);
+        target.remove();
+        p.normalize();
+      }
+      hoverHL = null;
+      lastHoverHL = null;
+      hidePopover();
+      return;
+    }
+
+    // 2) Si no, usar la selección actual (comportamiento previo)
+    const s = window.getSelection();
+    const r = s && s.rangeCount ? s.getRangeAt(0) : null;
+    if (!content) return hidePopover();
+    let targets = [];
+    if (r) {
+      targets = Array.from(content.querySelectorAll('.my-hl')).filter(n => r.intersectsNode(n));
+    }
+    if (targets.length === 0 && s && s.anchorNode) {
+      const near = (s.anchorNode.nodeType === 1 ? s.anchorNode : s.anchorNode.parentElement)?.closest('.my-hl');
+      if (near) targets = [near];
+    }
+
+    // Si todos los seleccionados comparten grupo, borra el grupo completo
+    const groupSet = new Set(targets.map(n => n.dataset.hlId).filter(Boolean));
+    if (groupSet.size === 1) {
+      const gid = [...groupSet][0];
+      const all = content.querySelectorAll(`.my-hl[data-hl-id="${gid}"]`);
+      all.forEach(el => {
+        const p = el.parentNode;
+        while (el.firstChild) p.insertBefore(el.firstChild, el);
+        el.remove();
+        p.normalize();
+      });
+    } else {
+      targets.forEach(el => {
+        const p = el.parentNode;
+        while (el.firstChild) p.insertBefore(el.firstChild, el);
+        el.remove();
+        p.normalize();
+      });
+    }
+    hidePopover();
+  }
+
+  // ——— Bind ———
+  applyBtn.addEventListener('click', highlightSelection);
+  clearBtn.addEventListener('click', clearHighlight);
+})();
+</script>
 
 <!-- === Otro === -->
 
@@ -9258,6 +9764,7 @@ document.addEventListener('keydown', (ev) => {
 </script>
 
 
+
 <script>
 (function(){
   const overlay   = document.getElementById('mobile-overlay');
@@ -9460,13 +9967,114 @@ document.addEventListener('keydown', (ev) => {
   });
 </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Solo el dropdown del TOPBAR
+  const dd  = document.querySelector('#topbar #lang-dropdown');
+  if (!dd) return;
+
+  const langBtnTop  = dd.querySelector('#lang-btn');
+  const langMenuTop = dd.querySelector('#lang-menu');
+
+  langBtnTop.addEventListener('click', (e) => {
+    e.stopPropagation();
+    langMenuTop.classList.toggle('hidden');
+  });
+
+  // Cerrar si clic fuera
+  document.addEventListener('click', (e) => {
+    if (!dd.contains(e.target)) langMenuTop.classList.add('hidden');
+  });
+});
+</script>
+
+<script>
+  (function () {
+    const mq = window.matchMedia('(min-width: 640px)');
+
+    function applyLayout() {
+      const isDesktop = mq.matches;
+      const body = document.body;
+      const sidebar = document.getElementById('sidebar');
+      const subcat  = document.getElementById('subcategoria-sidebar');
+
+      if (isDesktop) {
+        // Desktop: barras visibles
+        body.classList.remove('bars-hidden');
+        sidebar.classList.add('open');
+        sidebar.classList.remove('collapsed','force-hidden');
+
+        // La segunda barra solo si realmente la vas a usar
+        if (!subcat.dataset.forceShow) subcat.classList.add('hidden');
+      } else {
+        // Móvil: ocultas por defecto
+        body.classList.add('bars-hidden');
+        sidebar.classList.remove('open');
+        sidebar.classList.add('collapsed');
+        subcat.classList.add('hidden');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', applyLayout);
+    mq.addEventListener('change', applyLayout);
+  })();
+</script>
+
+
+<script>
+/* ==== Vaciar buscador al cambiar de segmento ==== */
+(function () {
+  const input   = document.getElementById('global-search');
+  const results = document.getElementById('search-results');
+
+  function clearSearchBox() {
+    if (!input) return;
+    input.value = '';
+    // dispara listeners que dependan de "input"
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    // oculta/limpia el dropdown si estuviera abierto
+    if (results) { results.innerHTML = ''; results.classList.add('hidden'); }
+  }
+
+  // 1) Clic en enlaces de la sidebar (Home, Articles, etc.)
+  document.getElementById('sidebar')?.addEventListener('click', (e) => {
+    const a = e.target.closest('a');      // solo <a>, no botones de acordeón
+    if (a) clearSearchBox();
+  });
+
+  // 2) Botones/enlaces fuera de la sidebar que navegan (p.ej. "Go to library")
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('a,button');
+    if (!el || el.closest('#searchbox')) return; // no limpiar si el click es en el propio buscador
+    const oc = el.getAttribute('onclick') || '';
+    if (/(show(Home|Articles|SecondPanel|ThirdPanel)|goToLibraryArticles)/i.test(oc)) {
+      clearSearchBox();
+    }
+  });
+
+  // 3) Opción futura: si tu código emite un evento al cambiar de segmento
+  // window.dispatchEvent(new Event('segment:change'))
+  window.addEventListener('segment:change', clearSearchBox);
+})();
+</script>
+
+
+
 
 
 <button id="mobile-split-switch" type="button">
   <i class="fas fa-arrow-left"></i><span>SWITCH VIEW</span>
 </button>
+
+
+
+
+
+
+
+
 </body>
 
 </html>
 
-//15 septiembre amanecida
+//24 septiembre madrugada
