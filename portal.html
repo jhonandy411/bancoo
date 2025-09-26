@@ -3164,6 +3164,28 @@ body.bars-hidden #sidebar,
 
 }
 
+/* Cuando el toggle esté OFF, quitamos TODA la apariencia del resaltado */
+#subcategoria-body.hl-hidden .my-hl{
+  background: transparent !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  outline: none !important;
+  text-shadow: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background-image: none !important;
+  /* (opcional) si tu tema usa subrayados/efectos con pseudo-elementos */
+}
+#subcategoria-body.hl-hidden .my-hl::before,
+#subcategoria-body.hl-hidden .my-hl::after{
+  display: none !important;
+}
+
+
+
+
+
   
   
   </style>
@@ -4303,7 +4325,7 @@ const hlToggle = subcatHeaderEl.querySelector('#highlight-toggle');
 const hlIcon   = subcatHeaderEl.querySelector('#highlight-icon');
 const hlTitle  = subcatHeaderEl.querySelector('.hl-title');
 
-// estado guardado (opcional): arranca desactivado si no existe
+// estado guardado
 let hlOn = JSON.parse(localStorage.getItem('hl:on') || 'false');
 applyHL();
 
@@ -4315,13 +4337,19 @@ hlToggle.addEventListener('click', (e) => {
 });
 
 function applyHL(){
-  // color del ícono
+  // UI del botón
   hlIcon.classList.toggle('text-blue-500', hlOn);
   hlIcon.classList.toggle('text-slate-600', !hlOn);
-  // peso del texto
   hlTitle?.classList.toggle('font-bold', hlOn);
-  // clase de barra (por si querés estilizar todo el header)
   subcatHeaderEl.classList.toggle('hl-on', hlOn);
+
+  // ⬇️ NUEVO: cuando está OFF, escondemos visualmente TODOS los resaltados
+  const bodyEl = document.getElementById('subcategoria-body');
+  bodyEl?.classList.toggle('hl-hidden', !hlOn);
+
+  // Asegura que el popover no quede visible al apagar
+  if (!hlOn) document.getElementById('hl-popover')?.style && 
+              (document.getElementById('hl-popover').style.display = 'none');
 }
 
 
@@ -7034,11 +7062,12 @@ function placeSwitch(){
 <!-- === flotante resaltar === -->
 <script>
 (function(){
+  // === Config / refs ===
   const CONTENT_ID     = 'subcategoria-body';
   const SCROLL_HOST_ID = 'main-content';
   const POP_ID         = 'hl-popover';
 
-  // ——— Popover (igual que ya tenías) ———
+  // Popover único
   let pop = document.getElementById(POP_ID);
   if (!pop) {
     pop = document.createElement('div');
@@ -7056,17 +7085,51 @@ function placeSwitch(){
   const content    = document.getElementById(CONTENT_ID);
   const scrollHost = document.getElementById(SCROLL_HOST_ID);
 
-  // ✨ track del .my-hl bajo el cursor (para des-resaltar sin selección)
+  // Estado UI
   let hoverHL = null;
-  let lastHoverHL = null;     // recuerda el último .my-hl visto (útil al saltar al popup)
-  let popHovered = false;     // true mientras el mouse está encima del popup
-  let hideTO = null;          // timeout de ocultado con gracia
+  let lastHoverHL = null;
+  let popHovered = false;
+  let hideTO = null;
 
-  // ✨ NUEVO: agrupar spans de un mismo resaltado para borrar todo el bloque
-  let HL_SEQ = 0;
-  let CURRENT_GROUP_ID = null;
-  const newGroupId = () => 'hl-' + (++HL_SEQ);
+  // === Estado de persistencia/ámbito ===
+  let STATE = { sup:null, cat:null, sub:null };
+  const BODY = () => document.getElementById(CONTENT_ID);
+  const authed = () => !!firebase.auth().currentUser;
+  const uid    = () => firebase.auth().currentUser?.uid;
+  const cKey   = () => [STATE.sup, STATE.cat, STATE.sub].join('/');
 
+  // === Reglas para no permitir selección en títulos/controles ===
+  const FORBIDDEN_SEL = `
+    summary,
+    .collapse-controls, .collapse-controls *,
+    .media-thumb, .media-thumb *,
+    .thumb-caption, .thumb-caption *,
+    /* zonas fuera del contenido donde NO debe salir el popover */
+    #subcat-header, #subcat-header *,
+    .highlighting-bar, .highlighting-bar *,
+    #font-menu, #font-menu *,
+    #lang-menu, #lang-menu *
+  `;
+  function selectionIntersectsForbidden(){
+    const s = window.getSelection();
+    if (!s || s.rangeCount === 0) return false;
+    const range = s.getRangeAt(0);
+    const nodes = content ? content.querySelectorAll(FORBIDDEN_SEL) : [];
+    for (const n of nodes) {
+      try { if (range.intersectsNode(n)) return true; } catch{}
+    }
+    return false;
+  }
+
+  // ⬇️ NUEVO: la selección debe empezar y terminar dentro de #subcategoria-body
+  function selectionInsideContentStrict(){
+    const s = window.getSelection();
+    if (!s || s.rangeCount === 0 || s.isCollapsed) return false;
+    const r = s.getRangeAt(0);
+    return !!(content && content.contains(r.startContainer) && content.contains(r.endContainer));
+  }
+
+  // === Visual del popover ===
   const selRect = () => {
     const s = window.getSelection();
     if (!s || s.rangeCount === 0 || s.isCollapsed) return null;
@@ -7083,82 +7146,51 @@ function placeSwitch(){
     pop.style.left = (r.left + r.width/2) + 'px';
     pop.style.top  = (r.top - 8) + 'px';
   };
-
-  // ⛔️ No mostrar si la selección toca títulos (<summary>), controles (Collapse/Notes/Feedback)
-  // o leyendas/textos de imágenes/videos.
-  const FORBIDDEN_SEL = `
-    summary,
-    .collapse-controls, .collapse-controls *,
-    .media-thumb, .media-thumb *,
-    .thumb-caption, .thumb-caption *
-  `;
-  function selectionIntersectsForbidden(){
-    const s = window.getSelection();
-    if (!s || s.rangeCount === 0) return false;
-    const range = s.getRangeAt(0);
-    const nodes = content ? content.querySelectorAll(FORBIDDEN_SEL) : [];
-    for (const n of nodes) {
-      try { if (range.intersectsNode(n)) return true; } catch {}
-    }
-    return false;
-  }
-
   function showPopover(){
     const on = JSON.parse(localStorage.getItem('hl:on') || 'false');
     if (!on) return hidePopover();
 
-    // 1) Si hay selección válida, usar su rect
+    // Selección válida (100% dentro del content y no prohibida)
     const s = window.getSelection();
-    if (s && s.rangeCount && !s.isCollapsed && isInside(s.anchorNode) && !selectionIntersectsForbidden()) {
+    if (s && s.rangeCount && !s.isCollapsed && selectionInsideContentStrict() && !selectionIntersectsForbidden()) {
       const r = selRect(); if (!r) return hidePopover();
       positionPopoverAtRect(r);
       return;
     }
-
-    // 2) Si NO hay selección pero el cursor está sobre un .my-hl, mostrar allí
+    // Hover sobre .my-hl
     if (hoverHL && content.contains(hoverHL)) {
       const r = hoverHL.getBoundingClientRect();
-      if (r && (r.width || r.height)) {
-        positionPopoverAtRect(r);
-        return;
-      }
+      if (r && (r.width || r.height)) { positionPopoverAtRect(r); return; }
     }
-
-    // 3) Si el mouse está sobre el popup, manténlo visible
+    // Mantener si el mouse está sobre el popup
     if (popHovered && pop.style.display !== 'none') return;
-
     hidePopover();
   }
-  function hidePopover(){
-    clearTimeout(hideTO);
-    pop.style.display = 'none';
-  }
+  function hidePopover(){ clearTimeout(hideTO); pop.style.display = 'none'; pop.dataset.target = ''; }
 
-  // Mostrar al soltar selección
-  document.addEventListener('mouseup', () => setTimeout(showPopover, 0));
-  // Ocultar en scroll del contenedor de lectura
+  // Cierra si la selección no está dentro del content
+  document.addEventListener('mouseup', () => {
+    setTimeout(() => {
+      if (!selectionInsideContentStrict()) { hidePopover(); return; }
+      showPopover();
+    }, 0);
+  });
+
   scrollHost?.addEventListener('scroll', () => { hoverHL = null; lastHoverHL = null; hidePopover(); }, { passive:true });
-  // Ocultar si clicas fuera o con ESC
   document.addEventListener('mousedown', (e) => { if (!pop.contains(e.target)) hidePopover(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hidePopover(); });
-
-  // Mantener el popup al mover el cursor desde el highlight hacia el popup
-  pop.addEventListener('mouseenter', () => {
-    popHovered = true;
-    clearTimeout(hideTO);
-  });
+  pop.addEventListener('mouseenter', () => { popHovered = true; clearTimeout(hideTO); });
   pop.addEventListener('mouseleave', () => {
     popHovered = false;
     const s = window.getSelection();
     if (!(s && s.rangeCount && !s.isCollapsed) && !hoverHL) hidePopover();
   });
 
-  // detectar hover sobre .my-hl (sin selección) para mostrar popover y permitir borrar
+  // Hover sobre highlight
   content?.addEventListener('mousemove', (e) => {
     const s = window.getSelection();
-    if (s && s.rangeCount && !s.isCollapsed) return; // si estás seleccionando, no interferir
+    if (s && s.rangeCount && !s.isCollapsed) return;
     const targetHL = (e.target.closest && e.target.closest('.my-hl')) || null;
-
     if (targetHL) {
       hoverHL = targetHL;
       lastHoverHL = targetHL;
@@ -7167,31 +7199,23 @@ function placeSwitch(){
     } else {
       hoverHL = null;
       clearTimeout(hideTO);
-      hideTO = setTimeout(() => {
-        if (!popHovered) hidePopover();
-      }, 220);
+      hideTO = setTimeout(() => { if (!popHovered) hidePopover(); }, 220);
     }
   }, { passive:true });
 
-  // ——— Utilidades ———
+  // === Utilidades DOM ===
   function splitText(node, offset){
     if (node.nodeType !== Node.TEXT_NODE) return node;
     if (offset <= 0 || offset >= node.nodeValue.length) return node;
-    return node.splitText(offset); // devuelve el nodo “derecha”
+    return node.splitText(offset);
   }
   function nextTextIn(root, from){
-    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-      acceptNode(){ return NodeFilter.FILTER_ACCEPT; }
-    });
-    tw.currentNode = from;
-    return tw.nextNode();
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode(){ return NodeFilter.FILTER_ACCEPT; }});
+    tw.currentNode = from; return tw.nextNode();
   }
   function prevTextIn(root, from){
-    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-      acceptNode(){ return NodeFilter.FILTER_ACCEPT; }
-    });
-    tw.currentNode = from;
-    return tw.previousNode();
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode(){ return NodeFilter.FILTER_ACCEPT; }});
+    tw.currentNode = from; return tw.previousNode();
   }
   function descendToText(container, offset, root, fromEnd){
     if (container.nodeType === Node.TEXT_NODE) return { node: container, offset };
@@ -7201,51 +7225,31 @@ function placeSwitch(){
 
     let txt = fromEnd ? lastText(probe) : firstText(probe);
     if (!txt) txt = fromEnd ? prevTextIn(root, probe) : nextTextIn(root, probe);
-
     return { node: txt || container, offset: (fromEnd ? (txt?.nodeValue?.length || 0) : 0) };
 
-    function firstText(node){
-      const t = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, { acceptNode(){ return NodeFilter.FILTER_ACCEPT; } });
-      return t.nextNode();
-    }
-    function lastText(node){
-      const t = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, { acceptNode(){ return NodeFilter.FILTER_ACCEPT; } });
-      let last=null, cur;
-      while((cur=t.nextNode())) last=cur;
-      return last;
-    }
+    function firstText(node){ const t = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, { acceptNode(){ return NodeFilter.FILTER_ACCEPT; } }); return t.nextNode(); }
+    function lastText(node){ const t = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, { acceptNode(){ return NodeFilter.FILTER_ACCEPT; } }); let last=null, cur; while((cur=t.nextNode())) last=cur; return last; }
   }
-
-  // Normaliza EXACTAMENTE al texto seleccionado (sin arrastrar más contenido)
   function normalizeRangeToText(range, root){
     let { startContainer, startOffset, endContainer, endOffset } = range;
-
     if (startContainer.nodeType !== Node.TEXT_NODE) {
-      ({ node: startContainer, offset: startOffset } =
-        descendToText(startContainer, startOffset, root, /*fromEnd*/false));
+      ({ node: startContainer, offset: startOffset } = descendToText(startContainer, startOffset, root, false));
     }
     if (endContainer.nodeType !== Node.TEXT_NODE) {
-      ({ node: endContainer, offset: endOffset } =
-        descendToText(endContainer, endOffset, root, /*fromEnd*/true));
+      ({ node: endContainer, offset: endOffset } = descendToText(endContainer, endOffset, root, true));
     }
-
-    // Asegura orden (start <= end)
     const test = document.createRange();
     try { test.setStart(startContainer, startOffset); test.setEnd(endContainer, endOffset); } catch {}
     if (test.collapsed && (startContainer !== endContainer || endOffset < startOffset)) {
       [startContainer, endContainer] = [endContainer, startContainer];
       [startOffset,   endOffset]     = [endOffset,   startOffset];
     }
-
-    // Caso 1: selección dentro del MISMO nodo de texto
     if (startContainer === endContainer && startContainer.nodeType === 3) {
       let node = startContainer;
       if (endOffset < node.nodeValue.length) splitText(node, endOffset);
       if (startOffset > 0) node = splitText(node, startOffset);
       return { startText: node, endText: node };
     }
-
-    // Caso 2: selección abarca varios nodos -> corta ambos bordes
     if (startContainer.nodeType === 3) {
       const right = splitText(startContainer, startOffset);
       if (right) startContainer = right;
@@ -7253,67 +7257,253 @@ function placeSwitch(){
     if (endContainer.nodeType === 3) {
       if (endOffset < endContainer.nodeValue.length) splitText(endContainer, endOffset);
     }
-
     return { startText: startContainer, endText: endContainer };
   }
-
-  // Acepta TODOS los nodos de texto; luego sólo envolvemos los no vacíos.
   function collectTextsBetween(root, startText, endText){
-    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-      acceptNode(){ return NodeFilter.FILTER_ACCEPT; }
-    });
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode(){ return NodeFilter.FILTER_ACCEPT; } });
     const nodes = [];
     let cur = startText;
-    while (cur) {
-      nodes.push(cur);
-      if (cur === endText) break;
-      tw.currentNode = cur;
-      cur = tw.nextNode();
-      if (!cur) break;
-    }
+    while (cur) { nodes.push(cur); if (cur === endText) break; tw.currentNode = cur; cur = tw.nextNode(); if (!cur) break; }
     return nodes;
   }
-
-  function wrapTextNode(n){
+  function wrapTextNode(n, gid){
     if (!n.nodeValue || !n.nodeValue.trim().length) return;
     if (n.parentNode && n.parentNode.classList && n.parentNode.classList.contains('my-hl')) return;
     const span = document.createElement('span');
     span.className = 'my-hl';
-    if (CURRENT_GROUP_ID) span.dataset.hlId = CURRENT_GROUP_ID;  // <- agrupa
+    span.dataset.hlId = gid;
     n.parentNode.insertBefore(span, n);
     span.appendChild(n);
   }
-
   function mergeAdjacent(root){
     const list = root.querySelectorAll('.my-hl');
     for (let i=0;i<list.length;i++){
       const a = list[i], b = a.nextSibling;
-      if (b && b.nodeType === 1 && b.classList.contains('my-hl') &&
-          a.dataset.hlId === b.dataset.hlId) { // solo fusiona del mismo grupo
+      if (b && b.nodeType === 1 && b.classList.contains('my-hl') && a.dataset.hlId === b.dataset.hlId) {
         while (b.firstChild) a.appendChild(b.firstChild);
-        b.remove();
-        i--;
+        b.remove(); i--;
       }
     }
   }
 
-  // ——— Acción: aplicar resaltado MULTILÍNEA/preciso ———
+  // === TextQuoteSelector ===
+  function scanTextNodes(root){
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(n){ return n.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT; }
+    });
+    let n, full='', nodes=[];
+    while((n = tw.nextNode())){
+      nodes.push({node:n, start:full.length, end:full.length + n.nodeValue.length});
+      full += n.nodeValue;
+    }
+    return {full, nodes};
+  }
+
+  // --- FIX de límites ---
+  function offsetsToRange(root, start, end, map){
+    const rng = document.createRange();
+
+    // start: x.start <= start < x.end
+    let s = null;
+    for (const x of map.nodes) {
+      if (start >= x.start && start < x.end) { s = x; break; }
+    }
+    if (!s) {
+      for (let i = 0; i < map.nodes.length; i++){
+        const x = map.nodes[i];
+        if (x.end === start) { s = map.nodes[i+1] || x; break; }
+      }
+      if (!s) s = map.nodes[map.nodes.length - 1];
+    }
+
+    // end exclusivo: x.start < end <= x.end
+    let e = null;
+    for (const x of map.nodes) {
+      if (end > x.start && end <= x.end) { e = x; break; }
+    }
+    if (!e) {
+      for (let i = 0; i < map.nodes.length; i++){
+        const x = map.nodes[i];
+        if (x.start === end) { e = map.nodes[i-1] || x; break; }
+      }
+      if (!e) {
+        for (let i = map.nodes.length - 1; i >= 0; i--){
+          const x = map.nodes[i];
+          if (end > x.start) { e = x; break; }
+        }
+        if (!e) e = map.nodes[0];
+      }
+    }
+
+    rng.setStart(s.node, Math.min(Math.max(start - s.start, 0), s.node.nodeValue.length));
+    rng.setEnd  (e.node, Math.min(Math.max(end   - e.start, 0), e.node.nodeValue.length));
+    return rng;
+  }
+
+  // --- Normalización selector ---
+  function normalizeSelectorText(s){
+    return (s || '').replace(/\u00A0/g,' ').replace(/[\r\n\u2028\u2029]+/g,'');
+  }
+
+  // === aplanado (flat) ===
+  function buildFlat(full){
+    const flatChars = [];
+    const flat2raw  = [];
+    const raw2flat  = new Array(full.length).fill(-1);
+    for (let i=0;i<full.length;i++){
+      const ch = full[i];
+      if (ch === '\r' || ch === '\n' || ch === '\u2028' || ch === '\u2029') continue;
+      const out = (ch === '\u00A0') ? ' ' : ch;
+      raw2flat[i] = flatChars.length;
+      flatChars.push(out);
+      flat2raw.push(i);
+    }
+    return { flat: flatChars.join(''), flat2raw, raw2flat };
+  }
+
+  // helper: (nodo,offset) -> offset global en 'full' sin tocar el DOM
+  function toGlobalOffset(root, container, offset, map, fromEnd){
+    const r = (container && container.nodeType === Node.TEXT_NODE)
+      ? { node: container, offset }
+      : descendToText(container, offset, root, !!fromEnd);
+    const rec = map.nodes.find(x => x.node === r.node);
+    if (!rec) return 0;
+    return rec.start + Math.max(0, Math.min(r.offset, r.node.nodeValue.length));
+  }
+
+  // === findQuoteRange (usa at/len si existen y valida) ===
+  function findQuoteRange(root, sel){
+    const map  = scanTextNodes(root);
+    const full = map.full;
+    const norm = (s) => (s || '').replace(/\u00A0/g,' ').replace(/[\r\n\u2028\u2029]+/g,'');
+
+    if (typeof sel.at === 'number' && sel.at >= 0) {
+      const start = Math.max(0, Math.min(sel.at, full.length));
+      const rawLen = (typeof sel.len === 'number' && sel.len > 0) ? sel.len : (sel.exact ? sel.exact.length : 0);
+      const end = Math.max(start, Math.min(start + rawLen, full.length));
+      const sliceNow = norm(full.slice(start, end));
+      const needle   = norm(sel.exact || '');
+      if (needle && sliceNow === needle) {
+        return offsetsToRange(root, start, end, map);
+      }
+      // si no coincide, reanclar por contexto…
+    }
+
+    const needle = norm(sel.exact || '');
+    if (!needle) return null;
+
+    const flatChars = [], flat2raw  = [];
+    for (let i = 0; i < full.length; i++){
+      const ch = full[i];
+      if (ch === '\r' || ch === '\n' || ch === '\u2028' || ch === '\u2029') continue;
+      flatChars.push(ch === '\u00A0' ? ' ' : ch);
+      flat2raw.push(i);
+    }
+    const flat  = flatChars.join('');
+    const preN  = norm(sel.prefix || '');
+    const postN = norm(sel.suffix || '');
+
+    const matches = [];
+    let from = 0;
+    while (true) {
+      const idx = flat.indexOf(needle, from);
+      if (idx < 0) break;
+      const j = idx + needle.length;
+      const beforeOK = !preN  || (idx >= preN.length && flat.slice(idx - preN.length, idx) === preN);
+      const afterOK  = !postN || (flat.slice(j, j + postN.length) === postN);
+      if (beforeOK && afterOK) matches.push(idx);
+      from = idx + 1;
+    }
+    if (matches.length === 0) return null;
+
+    let pick = matches[0];
+    if (typeof sel.at === 'number' && sel.at >= 0) {
+      let best = null, bestDist = Infinity;
+      for (const m of matches) {
+        const rawStart = flat2raw[m];
+        const dist = Math.abs(rawStart - sel.at);
+        if (dist < bestDist) { bestDist = dist; best = m; }
+      }
+      if (best !== null) pick = best;
+    }
+
+    const rawStart = flat2raw[pick];
+    const rawEndFlat = pick + needle.length;
+    const rawEnd = (rawEndFlat < flat2raw.length) ? flat2raw[rawEndFlat] : full.length;
+
+    return offsetsToRange(root, rawStart, rawEnd, map);
+  }
+
+  // === quoteFromRange (guarda at/len crudos) ===
+  function quoteFromRange(range){
+    const map   = scanTextNodes(BODY());
+    const gStart = toGlobalOffset(content, range.startContainer, range.startOffset, map, false);
+    const gEnd   = toGlobalOffset(content, range.endContainer,   range.endOffset,   map, true);
+
+    const start  = Math.max(0, Math.min(gStart, gEnd));
+    const end    = Math.max(start, gEnd);
+    const rawLen = end - start;
+
+    const rawExact  = map.full.slice(start, end);
+    const ctx       = 32;
+    const rawPrefix = map.full.slice(Math.max(0, start - ctx), start);
+    const rawSuffix = map.full.slice(end, Math.min(map.full.length, end + ctx));
+
+    return {
+      at:   start,
+      len:  rawLen,
+      exact:  normalizeSelectorText(rawExact),
+      prefix: normalizeSelectorText(rawPrefix),
+      suffix: normalizeSelectorText(rawSuffix)
+    };
+  }
+
+  // hash estable para gid
+  function makeGID(sel){
+    const s = cKey() + '|' + JSON.stringify(sel);
+    let h=0; for(let i=0;i<s.length;i++){ h=((h<<5)-h)+s.charCodeAt(i); h|=0; }
+    return 'hl-' + Math.abs(h);
+  }
+
+  // === Acciones: aplicar / borrar (DOM + Firestore) ===
+  async function persistSave(gid, selector){
+    if (!authed()) return;
+    try {
+      await db.collection('users').doc(uid())
+        .collection('highlights').doc(gid).set({
+          contentKey: cKey(),
+          selector,
+          color: null,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge:true });
+    } catch(e){ console.error('saveHL', e); }
+  }
+  async function persistDelete(gid){
+    if (!authed()) return;
+    try { await db.collection('users').doc(uid()).collection('highlights').doc(gid).delete(); }
+    catch(e){ console.error('delHL', e); }
+  }
+
   function highlightSelection(){
     const s = window.getSelection();
     if (!s || s.rangeCount === 0 || s.isCollapsed || !isInside(s.anchorNode)) { hidePopover(); return; }
     if (selectionIntersectsForbidden()) { hidePopover(); return; }
 
     const range = s.getRangeAt(0);
+
+    // 1) Construir selector (at/len exactos)
+    const sel = quoteFromRange(range);
+    if (!sel.exact.trim()) { hidePopover(); return; }
+    const gid = makeGID(sel);
+
+    // 2) Normalizar y envolver
     const { startText, endText } = normalizeRangeToText(range, content);
     if (!startText || !endText || startText.nodeType !== 3 || endText.nodeType !== 3) { hidePopover(); return; }
 
-    // 🔗 asigna un id de grupo para todos los spans de este resaltado
-    CURRENT_GROUP_ID = newGroupId();
     const texts = collectTextsBetween(content, startText, endText);
-    texts.forEach(wrapTextNode);
-    CURRENT_GROUP_ID = null;
+    texts.forEach(n => wrapTextNode(n, gid));
 
-    // limpiar selección (coloca el cursor al final del segmento resaltado)
+    // limpiar selección
     s.removeAllRanges();
     const after = document.createRange();
     after.setStartAfter(endText);
@@ -7322,56 +7512,17 @@ function placeSwitch(){
 
     mergeAdjacent(content);
     hidePopover();
+
+    // persistir
+    persistSave(gid, sel);
   }
 
-  // ——— Borrar resaltado: elimina TODO el bloque resaltado ———
-  function clearHighlight(){
-    // 1) Si el cursor está/estuvo sobre un .my-hl y saltaste al popup, usa ese
+  async function clearHighlight(){
     const target = (hoverHL && content.contains(hoverHL))
                 ? hoverHL
                 : (lastHoverHL && content.contains(lastHoverHL) ? lastHoverHL : null);
 
-    if (target) {
-      const groupId = target.dataset.hlId || null;
-      if (groupId) {
-        // Des-resalta todo el bloque del mismo grupo
-        const all = content.querySelectorAll(`.my-hl[data-hl-id="${groupId}"]`);
-        all.forEach(el => {
-          const p = el.parentNode;
-          while (el.firstChild) p.insertBefore(el.firstChild, el);
-          el.remove();
-          p.normalize();
-        });
-      } else {
-        // Compatibilidad: si no tiene groupId, borra solo ese nodo (resaltados antiguos)
-        const p  = target.parentNode;
-        while (target.firstChild) p.insertBefore(target.firstChild, target);
-        target.remove();
-        p.normalize();
-      }
-      hoverHL = null;
-      lastHoverHL = null;
-      hidePopover();
-      return;
-    }
-
-    // 2) Si no, usar la selección actual (comportamiento previo)
-    const s = window.getSelection();
-    const r = s && s.rangeCount ? s.getRangeAt(0) : null;
-    if (!content) return hidePopover();
-    let targets = [];
-    if (r) {
-      targets = Array.from(content.querySelectorAll('.my-hl')).filter(n => r.intersectsNode(n));
-    }
-    if (targets.length === 0 && s && s.anchorNode) {
-      const near = (s.anchorNode.nodeType === 1 ? s.anchorNode : s.anchorNode.parentElement)?.closest('.my-hl');
-      if (near) targets = [near];
-    }
-
-    // Si todos los seleccionados comparten grupo, borra el grupo completo
-    const groupSet = new Set(targets.map(n => n.dataset.hlId).filter(Boolean));
-    if (groupSet.size === 1) {
-      const gid = [...groupSet][0];
+    const removeGroup = async (gid) => {
       const all = content.querySelectorAll(`.my-hl[data-hl-id="${gid}"]`);
       all.forEach(el => {
         const p = el.parentNode;
@@ -7379,6 +7530,35 @@ function placeSwitch(){
         el.remove();
         p.normalize();
       });
+      await persistDelete(gid);
+    };
+
+    if (target) {
+      const gid = target.dataset.hlId || null;
+      if (gid) { await removeGroup(gid); }
+      else {
+        const p  = target.parentNode;
+        while (target.firstChild) p.insertBefore(target.firstChild, target);
+        target.remove(); p.normalize();
+      }
+      hoverHL = null; lastHoverHL = null; hidePopover(); return;
+    }
+
+    const s = window.getSelection();
+    const r = s && s.rangeCount ? s.getRangeAt(0) : null;
+    if (!content) return hidePopover();
+
+    let targets = [];
+    if (r) targets = Array.from(content.querySelectorAll('.my-hl')).filter(n => r.intersectsNode(n));
+    if (targets.length === 0 && s && s.anchorNode) {
+      const near = (s.anchorNode.nodeType === 1 ? s.anchorNode : s.anchorNode.parentElement)?.closest('.my-hl');
+      if (near) targets = [near];
+    }
+
+    const groupSet = new Set(targets.map(n => n.dataset.hlId).filter(Boolean));
+    if (groupSet.size === 1) {
+      const gid = [...groupSet][0];
+      await removeGroup(gid);
     } else {
       targets.forEach(el => {
         const p = el.parentNode;
@@ -7390,9 +7570,43 @@ function placeSwitch(){
     hidePopover();
   }
 
-  // ——— Bind ———
+  // === Rehidratación desde Firestore ===
+  async function restoreAll(){
+    if (!authed() || !STATE.sup) return;
+    try {
+      const snap = await db.collection('users').doc(uid())
+        .collection('highlights')
+        .where('contentKey','==', cKey())
+        .get();
+      snap.forEach(doc => {
+        const { selector, color } = doc.data() || {};
+        const rng = findQuoteRange(BODY(), selector);
+        if (!rng) return;
+        const { startText, endText } = normalizeRangeToText(rng, content);
+        const texts = collectTextsBetween(content, startText, endText);
+        texts.forEach(n => wrapTextNode(n, doc.id));
+        if (color) {
+          content.querySelectorAll(`.my-hl[data-hl-id="${doc.id}"]`)
+                 .forEach(el => el.style.background = color);
+        }
+      });
+      mergeAdjacent(content);
+    } catch(e){ console.error('restoreHL', e); }
+  }
+
+  // === Bind del popover a acciones ===
   applyBtn.addEventListener('click', highlightSelection);
   clearBtn.addEventListener('click', clearHighlight);
+
+  // === Hook al render de subcategoría ===
+  window.addEventListener('subcat:rendered', (ev) => {
+    STATE.sup = ev.detail.sup;
+    STATE.cat = ev.detail.cat;
+    STATE.sub = ev.detail.sub;
+    hidePopover();
+    restoreAll();
+  });
+
 })();
 </script>
 
@@ -10077,4 +10291,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </html>
 
-//24 septiembre madrugada
+//26 septiembre madrugada madrugada
