@@ -3159,7 +3159,7 @@ body.bars-hidden #sidebar,
 .my-hl{
   background:rgb(153, 230, 255);
   border-radius:2px;
-  padding:0 .05em;
+  padding:0;
 
 
 }
@@ -3181,6 +3181,198 @@ body.bars-hidden #sidebar,
 #subcategoria-body.hl-hidden .my-hl::after{
   display: none !important;
 }
+
+
+
+/* === NOTES panel (limpio) === */
+.notes-card {
+  border: 1px solid #e5e7eb;
+  border-radius: .5rem;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+  margin: .5rem 1rem 1rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Toolbar superior */
+.notes-toolbar {
+  order: 1;
+  display: flex;
+  gap: .25rem;
+  padding: .35rem .5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;         /* gris suave */
+}
+
+/* Botones de formato (iconos) */
+.notes-tool {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent; /* borde transparente (no blanco) */
+  border-radius: .375rem;
+  color: #475569;
+  background: transparent;
+  cursor: pointer;
+}
+.notes-tool:hover,
+.notes-tool:focus-visible {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #0f172a;
+  outline: none;
+}
+
+/* ===== Dropdown "Formato" (ventana flotante) ===== */
+.notes-format { position: relative; }            /* contenedor del botón ¶ */
+.notes-format .notes-tool { padding: 0; }        /* mismo tamaño que los demás */
+
+/* caja flotante */
+.notes-menu {
+  position: absolute;
+  top: calc(100% + .25rem);
+  left: 0;
+  min-width: 220px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: .5rem;
+  box-shadow: 0 12px 30px rgba(2,6,23,.12), 0 4px 10px rgba(2,6,23,.06);
+  padding: .25rem;
+  z-index: 20;
+  display: none;                                  /* se muestra con .open */
+}
+.notes-menu.open { display: block; }
+
+/* cada opción del menú */
+.notes-menu-item {
+  width: 100%;
+  display: block;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: .375rem;
+  padding: .55rem .65rem;
+  color: #0f172a;
+  font-size: .92rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.notes-menu-item .subtitle {                      /* por si añades "Normal" vs tamaños */
+  display: block;
+  font-size: .78rem;
+  color: #64748b;
+  margin-top: .15rem;
+}
+
+.notes-menu-item:hover,
+.notes-menu-item:focus-visible {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  outline: none;
+}
+
+.notes-menu-item.is-active {
+  background: #eef2ff;                            /* leve señal de activo */
+  border-color: #c7d2fe;
+}
+
+/* pip/triangulito opcional */
+.notes-menu::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 14px;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-left: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e7eb;
+  transform: rotate(45deg);
+}
+
+/* Editor */
+.notes-editor {
+  order: 2;
+  flex: 1 1 auto;
+  overflow: auto;
+  min-height: 140px;
+  padding: .75rem .9rem;
+  font-size: .9rem;
+  line-height: 1.5;
+  outline: none;
+}
+.notes-empty { color: #94a3b8; }
+
+/* Footer sticky con título/contador + acciones */
+.notes-head {
+  order: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .5rem .75rem;
+  border-top: 1px solid #e5e7eb;
+  background: transparent;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+}
+
+/* Título + contador */
+.notes-title-wrap { display: flex; align-items: baseline; gap: .5rem; }
+.notes-title      { color: #94a3b8; font-weight: 600; font-size: .9rem; line-height: 1; }
+.notes-counter    { font-size: .75rem; color: #94a3b8; letter-spacing: .02em; line-height: 1; }
+.notes-counter.is-over { color: #dc2626; font-weight: 600; }
+
+/* Acciones */
+.notes-actions { display: flex; gap: .5rem; }
+
+/* Botones Cancel/Save */
+.notes-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+
+  padding: .25rem 1rem;     /* menos vertical, más horizontal */
+  min-height: 25px;
+  min-width: 70px;
+  line-height: 1.4;
+
+  font-size: .8rem;
+  font-weight: 600;
+
+  border: 1px solid #cbd5e1;   /* borde gris como la captura */
+  border-radius: .375rem;
+  background: #fff;
+  color: #334155;
+}
+.notes-btn-sm.primary {
+  background: #0ea5e9;
+  border-color: #0ea5e9;
+  color: #fff;
+}
+
+
+/* ▼ Pégalo en tu CSS (o inyecta un <style>) */
+.notes-card .notes-editor ol{
+  list-style: decimal !important;
+  margin-left: 1.25rem;   /* sangría cómoda */
+  padding-left: .75rem;
+}
+.notes-card .notes-editor ul{
+  list-style: disc !important;
+  margin-left: 1.25rem;
+  padding-left: .75rem;
+}
+.notes-card .notes-editor li{
+  display: list-item;     /* por si algún reset puso display:block */
+  margin: .2rem 0;
+}
+
+
 
 
 
@@ -3969,6 +4161,73 @@ function updateStickyHeight() {
   const hdr = document.querySelector('#subcat-header');
   STICKY_H = hdr ? (hdr.getBoundingClientRect().height || 0) : 0;
 }
+
+
+
+/* === Library (Articles) view — history/state helpers === */
+// Single source of truth for current Library selection and horizontal scroll
+window.__LIB_CTX__ = { sup: null, cat: null, scrollLeft: 0 };
+
+window.setLibraryState = function(partial) {
+  window.__LIB_CTX__ = Object.assign({}, window.__LIB_CTX__, partial || {});
+};
+
+window.getLibraryState = function() {
+  return window.__LIB_CTX__;
+};
+
+// Snapshot current Library state into History so Back/Forward can restore it
+window.snapshotLibraryAndPush = function() {
+  try {
+    const art = document.getElementById('articles-panel');
+    const snap = {
+      view: 'library',
+      sup: window.__LIB_CTX__.sup || null,
+      cat: window.__LIB_CTX__.cat || null,
+      scrollLeft: (art && typeof art.scrollLeft === 'number') ? art.scrollLeft : 0
+    };
+    if (history.state && history.state.view === 'library') {
+      history.replaceState(snap, '', '');
+    } else {
+      history.pushState(snap, '', '');
+    }
+  } catch {}
+};
+
+// Rebuild the three-column Library view (P1/P2/P3) from a saved state
+window.restoreLibraryFromState = async function(s) {
+  // Ensure the Library view is shown and data is present
+  showArticles();
+  await cargarSupracategorias();
+
+  // Select the supracategory in Panel 1 (by id used in onclick)
+  const p1a = Array.from(document.querySelectorAll('#articles-panel > div:first-child a.articles-panel-list-item'))
+    .find(a => (a.getAttribute('onclick') || '').includes(`'${s.sup}'`));
+  if (p1a) {
+    document.querySelectorAll('#articles-panel > div:first-child li').forEach(li => li.classList.remove('is-selected'));
+    p1a.closest('li')?.classList.add('is-selected');
+  }
+
+  // Build Panel 2 for the selected supracategory
+  await showSecondPanel(p1a || null, s.sup);
+
+  // If a category was saved, select it and build Panel 3
+  if (s.cat) {
+    const p2a = Array.from(document.querySelectorAll('#panel-2 a.articles-panel-list-item'))
+      .find(a => (a.getAttribute('onclick') || '').includes(`'${s.cat}'`));
+    if (p2a) {
+      await showThirdPanel(p2a, s.cat);
+    }
+  }
+
+  // Restore horizontal scroll position
+  const art = document.getElementById('articles-panel');
+  if (art) art.scrollLeft = s.scrollLeft || 0;
+
+  // Sync live context
+  setLibraryState({ sup: s.sup || null, cat: s.cat || null, scrollLeft: s.scrollLeft || 0 });
+};
+
 </script>
 
 
@@ -4090,70 +4349,87 @@ const nombreCategoria = doc.id; // usa el ID del documento como nombre visible
 
 
   scrollPanelIntoView(panel2);
+
+
+  // Persist Library selection (Panel 1 opened) in History
+  setLibraryState({ sup: supracategoriaId, cat: null });
+  snapshotLibraryAndPush();
 }
 
-  async function showThirdPanel(clickedElement, categoriaId) {
+async function showThirdPanel(clickedElement, categoriaId) {
   const panel3 = document.getElementById("panel-3");
   const thirdPanelTitle = document.getElementById("third-panel-title");
 
-  // Reiniciar y marcar el elemento clickeado en el panel 2
-  // Reiniciar y marcar selección en panel 2
-document.querySelectorAll('#panel-2 li')
-  .forEach(li => li.classList.remove('is-selected'));
-clickedElement.closest('li').classList.add('is-selected');
+  // selección en panel 2
+  document.querySelectorAll('#panel-2 li').forEach(li => li.classList.remove('is-selected'));
+  clickedElement.closest('li').classList.add('is-selected');
   currentActivePanel2Item = clickedElement;
 
-  // Mostrar el panel 3
+  // mostrar panel 3
   panel3.classList.remove("hidden");
   thirdPanelTitle.textContent = categoriaId;
 
-  // Limpiar contenido anterior
   const panel3List = panel3.querySelector("ul");
   panel3List.innerHTML = "";
 
-  // 🔥 Obtener ID de supracategoría seleccionada (de panel 1)
-// ✅ lee el <li> marcado con .is-selected
-const supracategoriaId = document
-  .querySelector('#articles-panel > div:first-child li.is-selected span')
-  ?.textContent;
-  
-  if (!supracategoriaId) {
-    console.error("No se encontró la supracategoría seleccionada");
-    return;
-  }
+  // supracategoría seleccionada desde panel 1
+  const supracategoriaId = document
+    .querySelector('#articles-panel > div:first-child li.is-selected span')
+    ?.textContent;
+  if (!supracategoriaId) { console.error("No se encontró la supracategoría seleccionada"); return; }
 
-  // 🔥 Obtener subcategorías desde Firestore
-    // 🔥 Obtener subcategorías desde Firestore, ya ordenadas por su campo "orden"
+  // traer subcategorías (ordenadas)
   const snapshot = await db.collection("supracategorias")
     .doc(supracategoriaId)
-    .collection("categorias")
-    .doc(categoriaId)
+    .collection("categorias").doc(categoriaId)
     .collection("subcategorias")
-    .orderBy("orden", "asc")  // ascendente, usa "desc" si lo prefieres al revés
+    .orderBy("orden", "asc")
     .get();
 
+  // 1) Construir TODO en memoria y pintar de una
+  const frag   = document.createDocumentFragment();
+  const liById = new Map();
+
   snapshot.forEach(doc => {
-    const data     = doc.data();
-    const nombre   = data.denominacion || doc.id;   // ojo con la e de denominación
-    const li       = document.createElement("li");
+    const data   = doc.data();
+    const nombre = data.denominacion || doc.id;
+
+    const li = document.createElement("li");
+    li.dataset.sub = doc.id;
     li.innerHTML = `
-  <a href="#" class="articles-panel-list-item"
-     onclick="markSelected(this); showSubcategoriaContent('${doc.id}','${categoriaId}','${supracategoriaId}')">
-    <span class="ap-icon ap3" aria-hidden="true"></span>
-    <span>${nombre}</span>
-  </a>`;
-    panel3List.appendChild(li);
+      <a href="#" class="articles-panel-list-item"
+         onclick="markSelected(this); showSubcategoriaContent('${doc.id}','${categoriaId}','${supracategoriaId}')">
+        <span class="ap-icon ap3" aria-hidden="true"></span>
+        <span>${nombre}</span>
+      </a>`;
+    liById.set(doc.id, li);
+    frag.appendChild(li);
   });
 
-  // Reset visual
-  document.querySelectorAll('#panel-3 .articles-panel-list-item').forEach(item => {
-    item.classList.remove('selected');
-  });
-  currentActivePanel3Item = null;
+  panel3List.appendChild(frag); // ← aparece toda la lista inmediata
+
+  // 2) Resolver “learned” en paralelo (sin bloquear el render)
+// learned: solo pinta is-learned (NO is-selected)
+Promise.allSettled(
+  [...liById.keys()].map(id =>
+    isLearned(id).then(on => { liById.get(id)?.classList.toggle('is-learned', on); })
+  )
+).catch(()=>{});
+
+// reset correcto (quita selección, no el learned)
+panel3.querySelectorAll('#panel-3 li').forEach(li => li.classList.remove('is-selected'));
+currentActivePanel3Item = null;
+
+  scrollPanelIntoView(panel3);
 
 
-   scrollPanelIntoView(panel3);
+
+  // Persist Library selection (Panel 2 -> Panel 3) in History
+  setLibraryState({ cat: categoriaId });
+  snapshotLibraryAndPush();
 }
+
+
 
 
 function markSelected(el) {
@@ -4166,6 +4442,7 @@ function markSelected(el) {
 async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategoriaId) {
   // — Cambiar de vista de forma centralizada —
   // Oculta la TOC desde el inicio para evitar el "flash"
+  setCurrentSubcatCtx({ supracategoriaId, categoriaId, subcategoriaId });
   const tocEl = document.getElementById('subcategoria-sidebar');
   tocEl?.classList.add('hidden');
 
@@ -4231,10 +4508,11 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     <div class="flex w-full sm:w-auto flex-row sm:flex-col justify-between sm:justify-end items-center sm:items-end gap-1 mt-1">
       <a href="#" class="text-blue-600 hover:underline">Content policy</a>
 
-      <label class="inline-flex items-center gap-1">
-        <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600"/>
-        <span>Learned</span>
-      </label>
+<label class="inline-flex items-center gap-1">
+  <input id="learned-checkbox" data-sub="{{subcategoriaId}}"
+         type="checkbox" class="form-checkbox h-4 w-4 text-blue-600"/>
+  <span>Learned</span>
+</label>
     </div>
   </div>
 </div>
@@ -4641,6 +4919,8 @@ sortedDefs.forEach(([key, bloque]) => {
 
   const section = document.createElement("details");
   section.className = "group";
+    // ID estable para notas de este H2
+  section.dataset.noteId = `${supracategoriaId}/${categoriaId}/${subcategoriaId}/h2:${key}`;
    section.innerHTML = `
   <summary class="py-2 group-open:py-3 flex items-center justify-between">
     <span class="text-xs md:text-sm leading-5 transition-[font-size] duration-150 group-open:!text-[16px] group-open:leading-[22px]">
@@ -4690,10 +4970,10 @@ ${bloque.texto ? `<div class="texto-lista">${renderMD(bloque.texto)}</div>` : ``
     <span>COLLAPSE</span>
   </button>
   <div class="flex items-center space-x-6">
-    <button class="flex items-center space-x-1">
-      <i class="fas fa-pen"></i>
-      <span>NOTES</span>
-    </button>
+   <button type="button" class="flex items-center space-x-1 notes-btn relative">
+<span class="absolute -left-3 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full notes-indicator"></span>       <i class="fas fa-pen"></i>
+       <span>NOTES</span>
+   </button>
     <button class="flex items-center space-x-1">
       <i class="fas fa-comment-dots"></i>
       <span>FEEDBACK</span>
@@ -4724,6 +5004,10 @@ ${bloque.texto ? `<div class="texto-lista">${renderMD(bloque.texto)}</div>` : ``
 
   wrapper.appendChild(section);
 
+
+
+  
+
   // —— Subsubtítulos como títulos hermanos (con prefijo ⤷) ——
 if (bloque.children && typeof bloque.children === 'object') {
   const childEntries = Object.entries(bloque.children)
@@ -4735,6 +5019,8 @@ if (bloque.children && typeof bloque.children === 'object') {
 
     const child = document.createElement('details');
     child.className = 'group';
+    // ID estable para notas de este H3
+child.dataset.noteId = `${supracategoriaId}/${categoriaId}/${subcategoriaId}/h3:${ck}`;
     child.innerHTML = `
       <summary class="py-2 group-open:py-3 flex items-center justify-between">
         <span class="text-xs md:text-sm leading-5">
@@ -4777,8 +5063,11 @@ if (bloque.children && typeof bloque.children === 'object') {
           <i class="fas fa-grip-lines-vertical"></i><span>COLLAPSE</span>
         </button>
         <div class="flex items-center space-x-6">
-          <button class="flex items-center space-x-1"><i class="fas fa-pen"></i><span>NOTES</span></button>
-          <button class="flex items-center space-x-1"><i class="fas fa-comment-dots"></i><span>FEEDBACK</span></button>
+   <button type="button" class="flex items-center space-x-1 notes-btn relative">
+<span class="absolute -left-3 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full notes-indicator"></span>
+       <i class="fas fa-pen"></i>
+       <span>NOTES</span>
+   </button>          <button class="flex items-center space-x-1"><i class="fas fa-comment-dots"></i><span>FEEDBACK</span></button>
         </div>
       </div>
     `;
@@ -4893,8 +5182,21 @@ wrapper.querySelectorAll('.media-thumb').forEach(thumb => {
 const topicTitle = (data.nombre || subcategoriaId);
 
 // 1) Lista real de <details> en el orden en que se pintaron
+// Todos los <details> recién renderizados
 const detailsList = Array.from(document.querySelectorAll('#subcategoria-body details'));
 
+// Pinta por defecto VERDE (si aún no sabemos)
+detailsList.forEach(d => paintNotesIndicator(d, false));
+
+// Al expandir: chequea Firestore y pinta rojo/verde
+detailsList.forEach(d => {
+  d.addEventListener('toggle', () => {
+    if (d.open) updateNotesBadge(d);
+  });
+});
+
+// Si alguno ya viene abierto, actualízalo ahora
+detailsList.filter(d => d.hasAttribute('open')).forEach(updateNotesBadge);
 // 2) Calculamos los índices que tendrá cada botón del TOC
 let cursor = 0;
 const tocSections = sortedDefs.map(([k, bloque]) => {
@@ -5241,11 +5543,112 @@ window.dispatchEvent(new CustomEvent('subcat:rendered', {
 
   // — Opcional: colapsar la sidebar principal si lo necesitas —
   toggleSidebarCollapse(true);
+  applyNotesBadgesInPage();  // pinta el botón NOTES en teal si ya hay nota guardada
   
+
+
+
+  // ✅ ⬇️ Pega aquí el bloque del checkbox learned
+  const cb = document.querySelector('#learned-checkbox');
+  if (cb) {
+    cb.checked = await isLearned(subcategoriaId);
+cb.addEventListener('change', async (e) => {
+  const on = e.target.checked;
+  await setLearned(subcategoriaId, on);
+  document.querySelector(`#panel-3 li[data-sub="${subcategoriaId}"]`)
+    ?.classList.toggle('is-learned', on);
+});
+  }
+
+  // ← al final de showSubcategoriaContent(...)
+
+
+  try {
+
+
+    snapshotLibraryAndPush();
+  history.pushState(
+    { view: 'subcat',
+      sub: subcategoriaId,
+      cat: categoriaId,
+      sup: supracategoriaId
+    },
+    '',
+    '' // opcional: '#sub=' + subcategoriaId
+  );
+} catch {}
+
+
+
+// Habilita “Atrás/Adelante” del navegador
+if (!window.__POPSTATE_WIRED__) {
+  window.__POPSTATE_WIRED__ = true;
+
+  window.addEventListener('popstate', async (e) => {
+    const s = e.state;
+    if (s && s.view === 'subcat') {
+      // Navegar entre subcategorías con Atrás/Adelante
+      await showSubcategoriaContent(s.sub, s.cat, s.sup);
+    } else if (s && s.view === 'library') {
+      // ← Volver a los 3 paneles tal como estaban, y reabrir barra
+      await restoreLibraryFromState(s);
+    } else {
+      // Fallback sensato
+      toggleSidebarCollapse(false);
+      showArticles();
+    }
+  });
 }
 
 
+}
+
+
+
+
+
+
+
+
+
 </script>
+
+
+<script>
+  // Hacemos globales para que todos los scripts puedan usarlas
+  window.slugify = s => String(s||'')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^\p{L}\p{N}]+/gu,'-')
+    .replace(/^-+|-+$/g,'')
+    .slice(0,80);
+
+  // ID seguro de Firestore: supracat__cat__sub__titulo
+  window.noteDocIdFromDetails = function(detailsEl){
+    const ctx = window.__CURRENT_SUBCAT_CTX__ || {};
+    const title =
+      detailsEl?.querySelector('summary span')?.textContent?.trim() ||
+      detailsEl?.querySelector('summary')?.textContent?.trim() || 'section';
+    return [
+      window.slugify(ctx.supracategoriaId),
+      window.slugify(ctx.categoriaId),
+      window.slugify(ctx.subcategoriaId),
+      window.slugify(title)
+    ].filter(Boolean).join('__');
+  };
+
+  // Helper para considerar “vacío” HTML como <p><br></p>, &nbsp;, etc.
+  window.isEmptyHtml = function(html){
+    const s = String(html||'')
+      .replace(/<br\s*\/?>/gi,'')
+      .replace(/<\/?p[^>]*>/gi,'')
+      .replace(/&nbsp;/gi,' ')
+      .replace(/\s+/g,' ')
+      .trim();
+    return s.length === 0;
+  };
+</script>
+
 
 
 <script>
@@ -5562,6 +5965,68 @@ toggleBtn.style.bottom = '0';
   window.db = window.db || firebase.firestore();
 </script>
 
+
+
+<script>
+/* === NOTES BADGES — rojo si hay nota, verde si no === */
+
+// Usa data-note-id que setearemos al crear cada <details>
+function getNoteRefFor(detailsEl) {
+  const user = firebase.auth().currentUser;
+  if (!user || !window.db) return null;
+  const noteId = window.noteDocIdFromDetails(detailsEl); // 👈 unificado
+  return db.collection('users').doc(user.uid).collection('notes').doc(noteId);
+}
+
+function paintNotesIndicator(detailsEl, hasNote) {
+  const btn = detailsEl.querySelector('.notes-btn');
+  if (!btn) return;
+
+  // Reutiliza o crea el dot
+  let dot = btn.querySelector('.notes-indicator');
+  if (!dot) {
+    dot = document.createElement('span');
+    dot.className = 'absolute -left-3 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full notes-indicator';
+    btn.prepend(dot);
+  }
+
+  // Asegura uno u otro color SIEMPRE
+  dot.classList.remove('bg-red-500', 'bg-transparent-500');
+  dot.classList.add(hasNote ? 'bg-red-500' : 'bg-transparent-500');
+}
+
+async function updateNotesBadge(detailsEl) {
+  try {
+    const ref = getNoteRefFor(detailsEl);
+    if (!ref) { paintNotesIndicator(detailsEl, false); return; }
+    const snap = await ref.get();
+    const content = snap.exists ? (snap.data()?.content || '') : '';
+    const hasNote = !window.isEmptyHtml(content);
+    paintNotesIndicator(detailsEl, hasNote);   // rojo si hay nota, verde si no
+  } catch (err) {
+    console.error('Notes badge check failed:', err);
+    paintNotesIndicator(detailsEl, false);     // en error, verde
+  }
+}
+
+// Llamar tras renderizar #subcategoria-body (la invocas al final de showSubcategoriaContent)
+window.applyNotesBadgesInPage = function () {
+  const list = Array.from(document.querySelectorAll('#subcategoria-body details'));
+  // default verde hasta tener respuesta
+  list.forEach(d => paintNotesIndicator(d, false));
+  // al expandir, mirar Firestore
+  list.forEach(d => {
+    d.addEventListener('toggle', () => {
+      if (d.open) updateNotesBadge(d);
+    });
+  });
+  // si alguno ya llega abierto
+  list.filter(d => d.hasAttribute('open')).forEach(updateNotesBadge);
+};
+</script>
+
+
+
 <script>
 function toggleSidebarCollapse(force = null) {
   const sidebar     = document.getElementById("sidebar");
@@ -5764,34 +6229,53 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <script>
-  const db = firebase.firestore();
+const db = firebase.firestore();
 
-  async function cargarSupracategorias() {
+// ✅ Variable para evitar múltiples cargas simultáneas
+let isLoadingSupracategorias = false;
+
+async function cargarSupracategorias() {
+  // ⛔ Evitar ejecuciones simultáneas
+  if (isLoadingSupracategorias) return;
+  isLoadingSupracategorias = true;
+  
+  try {
     const panel1 = document.querySelector('#articles-panel > div:first-child ul');
-    panel1.innerHTML = ""; // Limpiar contenido anterior
-
+    if (!panel1) return;
+    
+    // ✅ Limpiar completamente el panel antes de cargar
+    panel1.innerHTML = "";
+    
     const snapshot = await db.collection("supracategorias").get();
+    
+    // ✅ Crear un fragmento para insertar todo de una vez (más eficiente)
+    const fragment = document.createDocumentFragment();
+    
     snapshot.forEach(doc => {
-   
       const nombre = doc.data().nombre;
       const li = document.createElement("li");
       li.innerHTML = `<a href="#" onclick="showSecondPanel(this, '${doc.id}')" class="articles-panel-list-item"><i class="ap-icon ap2"></i><span>${nombre}</span></a>`;
-      panel1.appendChild(li);
-
-
-
-
-
-
+      fragment.appendChild(li);
     });
+    
+    panel1.appendChild(fragment);
+  } finally {
+    isLoadingSupracategorias = false;
   }
+}
 
-  // Llamar cuando el usuario hace clic en "Articles"
-  document.querySelector('#group-library a').addEventListener('click', () => {
-    cargarSupracategorias();
-  });
-
-
+// ✅ Llamar SOLO cuando el usuario hace clic en "Articles" (una sola vez por sesión)
+(function setupArticlesLoader() {
+  const articlesLink = document.querySelector('#group-library a');
+  if (!articlesLink) return;
+  
+  // Reemplazar cualquier listener existente clonando el elemento
+  const newLink = articlesLink.cloneNode(true);
+  articlesLink.replaceWith(newLink);
+  
+  // Agregar el listener una sola vez
+  newLink.addEventListener('click', cargarSupracategorias);
+})();
 
 </script>
 
@@ -7059,13 +7543,630 @@ function placeSwitch(){
 </script>
 
 
-<!-- === flotante resaltar === -->
+
+
+<!-- === Retroceder === -->
+
+<script>
+/* Library history + restore sidebar + FIX first→second panel (compact, idempotent) */
+(function () {
+  // Evita navegación en <a href="#"> dentro del sidebar y los 3 paneles
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href="#"]');
+    if (a && (a.closest('#sidebar') || a.closest('#articles-panel'))) e.preventDefault();
+  });
+
+  // Cache originales
+  const fn = {
+    home:  window.showHome,
+    lib:   window.showArticles,
+    p2:    window.showSecondPanel,
+    p3:    window.showThirdPanel,
+    sub:   window.showSubcategoriaContent
+  };
+
+  // Guardar / Restaurar estado de la barra principal
+  let sbPrev = null;
+  const saveSB = () => {
+    const sb = document.getElementById('sidebar'), b = document.body;
+    if (!sb) return;
+    sbPrev = {
+      collapsed: sb.classList.contains('collapsed'),
+      forceHidden: sb.classList.contains('force-hidden'),
+      open: sb.classList.contains('open'),
+      barsHidden: b.classList.contains('bars-hidden')
+    };
+  };
+  const restoreSB = () => {
+    if (!sbPrev) return;
+    const sb = document.getElementById('sidebar'), b = document.body;
+    sb.classList.remove('collapsed','force-hidden','open');
+    if (sbPrev.forceHidden) sb.classList.add('force-hidden');
+    if (sbPrev.collapsed)   sb.classList.add('collapsed');
+    else if (sbPrev.open)   sb.classList.add('open');
+    b.classList.toggle('bars-hidden', !!sbPrev.barsHidden);
+  };
+
+  const push = (view, extra={}) => history.pushState({ view, ...extra }, '', '');
+
+  // Wrappers con historial y restauración de barra
+  window.showHome     = () => { restoreSB(); fn.home(); push('home'); };
+  window.showArticles = () => { restoreSB(); fn.lib();  push('library'); };
+
+  // FIX: asegurar que el panel-2 se muestre tras cargar categorías
+  window.showSecondPanel = async (el, sup) => {
+    await fn.p2(el, sup);
+    requestAnimationFrame(() => document.getElementById('panel-2')?.classList.remove('hidden'));
+    push('library', { sup });
+  };
+
+  window.showThirdPanel = async (el, cat) => {
+    await fn.p3(el, cat);
+    const sup = document.querySelector('#articles-panel > div:first-child li.is-selected span')?.textContent?.trim();
+    push('library', { sup, cat });
+  };
+
+  window.showSubcategoriaContent = async (...args) => { saveSB(); return fn.sub(...args); };
+
+  // Restaurar EXACTAMENTE los 3 paneles como estaban (sin pushState)
+  let restoring = false;
+  window.restoreLibraryFromState = async (s) => {
+    if (restoring) return;
+    restoring = true;
+    try {
+      restoreSB();
+      fn.lib(); // sin push
+      if (s?.sup) {
+        const a1 = [...document.querySelectorAll('#articles-panel > div:first-child li a')]
+          .find(a => a.textContent.trim() === s.sup);
+        if (a1) await fn.p2(a1, s.sup); // sin push
+        requestAnimationFrame(() => document.getElementById('panel-2')?.classList.remove('hidden'));
+      }
+      if (s?.cat) {
+        const a2 = [...document.querySelectorAll('#panel-2 a')]
+          .find(a => a.textContent.trim() === s.cat);
+        if (a2) await fn.p3(a2, s.cat); // sin push
+      }
+    } finally {
+      restoring = false;
+    }
+  };
+
+  // Back/forward: bloquear el listener original + restaurar sin duplicar
+  window.addEventListener('popstate', (e) => {
+    const s = e.state;
+    if (s?.view === 'home') {
+      e.stopImmediatePropagation?.();
+      restoreSB();
+      return fn.home(); // sin push
+    }
+    if (s?.view === 'library') {
+      e.stopImmediatePropagation?.();
+      return window.restoreLibraryFromState(s);
+    }
+    e.stopImmediatePropagation?.();
+    restoreSB(); fn.lib(); // fallback sin push
+  }, true);
+})();
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- === NOTES panel === -->
+<script>
+(function(){
+  // ===== Utils =====
+  const hasFirestore = !!(firebase.firestore);
+  const db = hasFirestore ? (window.db || firebase.firestore()) : null;
+
+  // Contexto opcional por subcategoría
+  window.__CURRENT_SUBCAT_CTX__ = window.__CURRENT_SUBCAT_CTX__ || null;
+  window.setCurrentSubcatCtx = function(ctx){ window.__CURRENT_SUBCAT_CTX__ = ctx || null; };
+
+  const slugify = s => String(s||'')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^\p{L}\p{N}]+/gu,'-')
+    .replace(/^-+|-+$/g,'')
+    .slice(0,80);
+
+  function makeNoteId(detailsEl){
+    const ctx = window.__CURRENT_SUBCAT_CTX__ || {};
+    const title =
+      detailsEl?.querySelector('summary span')?.textContent?.trim() ||
+      detailsEl?.querySelector('summary')?.textContent?.trim() || 'section';
+
+    const parts = [
+      slugify(ctx.supracategoriaId),
+      slugify(ctx.categoriaId),
+      slugify(ctx.subcategoriaId),
+      slugify(title)
+    ].filter(Boolean);
+    return parts.join('__') || slugify(title);
+  }
+
+  // ===== UI =====
+  function ensureNotesCard(containerEl){
+    let card = containerEl.querySelector(':scope > .notes-card');
+    if (card) return card;
+
+    card = document.createElement('div');
+    card.className = 'notes-card';
+    card.innerHTML = `
+      <div class="notes-head">
+        <div class="notes-title-wrap">
+          <div class="notes-title">Notes</div>
+          <span class="notes-counter" id="notes-counter">0/1000</span>
+        </div>
+        <div class="notes-actions">
+          <button type="button" class="notes-btn-sm" data-act="cancel">Cancel</button>
+          <button type="button" class="notes-btn-sm primary" data-act="save">Save</button>
+        </div>
+      </div>
+
+      <div class="notes-toolbar">
+        <button class="notes-tool" data-cmd="bold" title="Bold"><i class="fas fa-bold"></i></button>
+        <button class="notes-tool" data-cmd="italic" title="Italic"><i class="fas fa-italic"></i></button>
+        <button class="notes-tool" data-cmd="underline" title="Underline"><i class="fas fa-underline"></i></button>
+
+        <button class="notes-tool" data-cmd="insertUnorderedList" title="Bulleted list"><i class="fas fa-list-ul"></i></button>
+        <button class="notes-tool" data-cmd="insertOrderedList"  title="Numbered list"><i class="fas fa-list-ol"></i></button>
+
+        <!-- Menú de formato -->
+        <div class="notes-format">
+          <button class="notes-tool notes-format-toggle" type="button" title="Paragraph formats">
+            <i class="fas fa-paragraph"></i>
+          </button>
+          <div class="notes-menu" data-menu="format">
+            <button type="button" class="notes-menu-item" data-format="p">Normal</button>
+            <button type="button" class="notes-menu-item" data-format="h2"><span style="font-weight:700;font-size:1.1em">Heading 2</span></button>
+            <button type="button" class="notes-menu-item" data-format="h3"><span style="font-weight:700;">Heading 3</span></button>
+            <button type="button" class="notes-menu-item" data-format="h4"><span style="font-weight:700;">Heading 4</span></button>
+          </div>
+        </div>
+
+        <button class="notes-tool" data-cmd="undo" title="Undo (⌘Z)"><i class="fas fa-undo"></i></button>
+        <button class="notes-tool" data-cmd="redo" title="Redo (⌘⇧Z)"><i class="fas fa-redo"></i></button>
+
+        <button class="notes-tool" data-cmd="formatBlock" data-value="blockquote" title="Quote"><i class="fas fa-quote-right"></i></button>
+        <button class="notes-tool" data-cmd="removeFormat" title="Clear"><i class="fas fa-eraser"></i></button>
+      </div>
+
+      <div class="notes-editor notes-empty" contenteditable="true" spellcheck="true">
+        Write your notes here…
+      </div>
+    `;
+    containerEl.appendChild(card);
+
+    const editor = card.querySelector('.notes-editor');
+
+    // Desactivar/activar Redo según disponibilidad
+const redoBtn = card.querySelector('.notes-tool[data-cmd="redo"]');
+
+function updateRedoState(){
+  const canRedo = typeof document.queryCommandEnabled === 'function'
+    ? document.queryCommandEnabled('redo')
+    : false;
+  redoBtn.toggleAttribute('disabled', !canRedo);
+  redoBtn.classList.toggle('opacity-40', !canRedo);
+  redoBtn.classList.toggle('pointer-events-none', !canRedo);
+}
+
+// Actualizar en eventos típicos
+['input','keyup','mouseup'].forEach(ev => editor.addEventListener(ev, updateRedoState));
+document.addEventListener('selectionchange', updateRedoState);
+
+// Tras cualquier botón que use execCommand, actualizar estado
+card.querySelectorAll('.notes-tool').forEach(b=>{
+  if (b.closest('.notes-format')) return;
+  b.addEventListener('click', () => setTimeout(updateRedoState, 0));
+});
+
+updateRedoState();
+
+    // Placeholder on focus/blur
+    editor.addEventListener('focus', ()=>{
+      if(editor.classList.contains('notes-empty')){
+        editor.textContent=''; editor.classList.remove('notes-empty');
+      }
+    });
+    editor.addEventListener('blur', ()=>{
+      if(editor.textContent.trim()===''){
+        editor.textContent='Write your notes here…'; editor.classList.add('notes-empty');
+      }
+    });
+
+    // Botones básicos (execCommand)
+card.querySelectorAll('.notes-tool').forEach(btn => {
+  if (btn.closest('.notes-format')) return; // saltar botón de formato
+  
+  const cmd = btn.dataset.cmd;
+  
+  if (cmd === 'insertOrderedList') {
+    // ✅ Botón lista numerada con lógica personalizada
+    btn.addEventListener('click', (e) => {
+      e.preventDefault(); 
+      e.stopPropagation();
+      editor.focus();
+      
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return;
+      
+      const range = sel.getRangeAt(0);
+      const node = range.startContainer.nodeType === 1
+        ? range.startContainer
+        : range.startContainer.parentElement;
+      
+      // Verificar si estamos dentro de una lista
+      const currentOL = node?.closest?.('ol');
+      const currentUL = node?.closest?.('ul');
+      const currentLI = node?.closest?.('li');
+      
+      if (currentOL) {
+        // Ya estamos en lista numerada
+        if (sel.isCollapsed && currentLI) {
+          // Crear nuevo item en la lista existente
+          const newLI = document.createElement('li');
+          newLI.innerHTML = '<br>';
+          
+          // Insertar después del li actual
+          if (currentLI.nextSibling) {
+            currentOL.insertBefore(newLI, currentLI.nextSibling);
+          } else {
+            currentOL.appendChild(newLI);
+          }
+          
+          // Posicionar cursor en el nuevo li
+          const newRange = document.createRange();
+          newRange.setStart(newLI, 0);
+          newRange.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(newRange);
+        } else {
+          // Convertir de vuelta a texto normal
+          document.execCommand('insertOrderedList');
+        }
+        return;
+      }
+      
+      if (currentUL) {
+        // Convertir de lista con bullets a lista numerada
+        const parentUL = currentUL;
+        const newOL = document.createElement('ol');
+        
+        // Copiar todos los li de ul a ol
+        while (parentUL.firstChild) {
+          newOL.appendChild(parentUL.firstChild);
+        }
+        
+        // Reemplazar ul con ol
+        parentUL.parentNode.replaceChild(newOL, parentUL);
+        
+        // Mantener la selección
+        if (currentLI && newOL.contains(currentLI)) {
+          const newRange = document.createRange();
+          newRange.setStart(currentLI, 0);
+          newRange.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(newRange);
+        }
+        return;
+      }
+      
+      // No estamos en ninguna lista - crear nueva lista numerada
+      if (sel.isCollapsed) {
+        // Cursor sin selección - crear lista nueva
+        const ol = document.createElement('ol');
+        const li = document.createElement('li');
+        li.innerHTML = '<br>';
+        ol.appendChild(li);
+        
+        range.deleteContents();
+        range.insertNode(ol);
+        
+        // Posicionar cursor dentro del li
+        const newRange = document.createRange();
+        newRange.setStart(li, 0);
+        newRange.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+      } else {
+        // Hay texto seleccionado - convertir a lista numerada
+        const selectedContent = range.extractContents();
+        const ol = document.createElement('ol');
+        const li = document.createElement('li');
+        li.appendChild(selectedContent);
+        ol.appendChild(li);
+        
+        range.insertNode(ol);
+        
+        // Seleccionar el contenido dentro del li
+        const newRange = document.createRange();
+        newRange.selectNodeContents(li);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+      }
+    });
+  } else {
+    // ✅ Botones normales (bold, italic, etc.)
+    btn.addEventListener('click', () => {
+      const val = btn.dataset.value || null;
+      document.execCommand(cmd, false, val);
+      editor.focus();
+    });
+  }
+});
+
+
+    // —— Menú de formato (Normal / H2 / H3 / H4)
+    const fmtToggle = card.querySelector('.notes-format-toggle');
+    const fmtMenu   = card.querySelector('.notes-menu[data-menu="format"]');
+
+    function closeAllMenus(){
+      document.querySelectorAll('.notes-menu.open').forEach(m=>m.classList.remove('open'));
+    }
+    fmtToggle.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const isOpen = fmtMenu.classList.contains('open');
+      closeAllMenus();
+      if (!isOpen) fmtMenu.classList.add('open');
+    });
+    fmtMenu.querySelectorAll('.notes-menu-item').forEach(it=>{
+      it.addEventListener('click', ()=>{
+        const tag = (it.dataset.format || 'p').toUpperCase(); // P/H2/H3/H4
+        document.execCommand('formatBlock', false, tag === 'P' ? 'P' : tag);
+        closeAllMenus();
+        editor.focus();
+      });
+    });
+    document.addEventListener('click', closeAllMenus);
+
+    // ===== Contador de caracteres (0/1000) =====
+    const LIMIT = 1000;
+    const counterEl = card.querySelector('#notes-counter');
+    const plainLen = () => (editor.textContent || '').trim().length;
+
+    const updateCounter = () => {
+      const len = plainLen();
+      counterEl.textContent = `${len}/${LIMIT}`;
+      counterEl.classList.toggle('is-over', len > LIMIT);
+    };
+    editor.addEventListener('input', updateCounter);
+    editor.addEventListener('keyup', updateCounter);
+    updateCounter();
+
+    return card;
+  }
+
+  async function openNotesFor(detailsEl){
+    // Cierra cualquier panel abierto
+    document.querySelectorAll('.notes-card').forEach(c=>c.remove());
+
+    // Montaje: en el footer si existe, arriba de los botones
+    const footer = detailsEl.querySelector(':scope > .collapse-controls');
+    const mount  = footer || detailsEl;
+    const card   = ensureNotesCard(mount);
+
+    if (footer) {
+      let col = footer.querySelector('.notes-col-wrapper');
+      if (!col) {
+        col = document.createElement('div');
+        col.className = 'notes-col-wrapper flex flex-col w-full';
+        const rest = document.createElement('div');
+        rest.className = 'collapse-row flex items-center justify-between mt-2';
+        while (footer.firstChild) rest.appendChild(footer.firstChild);
+        col.appendChild(card);
+        col.appendChild(rest);
+        footer.appendChild(col);
+      } else {
+        col.insertBefore(card, col.firstChild);
+      }
+    }
+
+    const editor = card.querySelector('.notes-editor');
+
+    const uid = firebase.auth().currentUser?.uid || null;
+    const canPersist = !!(uid && db);
+
+    // Carga Firestore
+   const noteId = window.noteDocIdFromDetails(detailsEl);
+   
+    let docRef = null;
+
+    if (canPersist){
+      docRef = db.collection('users').doc(uid).collection('notes').doc(noteId);
+      try{
+        const snap = await docRef.get();
+        if (snap.exists && snap.data()?.content){
+          editor.innerHTML = DOMPurify.sanitize(snap.data().content);
+          editor.classList.remove('notes-empty');
+        } else {
+          editor.textContent = 'Write your notes here…';
+          editor.classList.add('notes-empty');
+        }
+      }catch(e){ console.error('Firestore read error', e); }
+    } else {
+      card.querySelector('.notes-title').textContent = 'Notes (local)';
+      card.querySelector('[data-act="save"]').title = 'Inicia sesión para guardar en la nube';
+    }
+
+    // Recalcular contador tras la carga
+    const counterEl = card.querySelector('#notes-counter');
+    if (counterEl) {
+      const len = (editor.textContent || '').trim().length;
+      const LIMIT = 1000;
+      counterEl.textContent = `${len}/${LIMIT}`;
+      counterEl.classList.toggle('is-over', len > LIMIT);
+    }
+
+// Acciones
+card.querySelector('[data-act="save"]').onclick = async ()=>{
+  const html = editor.classList.contains('notes-empty') ? '' :
+    DOMPurify.sanitize(editor.innerHTML, {
+      ALLOWED_TAGS:[
+        'b','strong','i','em','u',
+        'ul','ol','li',
+        'p','br','blockquote','span','a',
+        'h2','h3','h4' // ← añadido
+      ],
+      ALLOWED_ATTR:['href','target','rel','style']
+    });
+
+  if (!canPersist){
+    alert('Inicia sesión para guardar tus notas en la nube.');
+    return;
+  }
+      try{
+        await docRef.set({
+          content: html,
+          ctx: window.__CURRENT_SUBCAT_CTX__ || {},
+          sectionTitle: (detailsEl.querySelector('summary span')?.textContent?.trim() ||
+                        detailsEl.querySelector('summary')?.textContent?.trim() || ''),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge:true });
+
+          paintNotesIndicator(detailsEl, !window.isEmptyHtml(html));        
+
+
+
+        const btn = card.querySelector('[data-act="save"]');
+        const old = btn.textContent; btn.textContent = 'Saved ✓';
+        setTimeout(() => {
+  btn.textContent = old;
+  card.remove(); // 👈 Esta línea oculta el editor
+}, 800);
+      }catch(e){
+        console.error('Firestore write error', e);
+        alert('No se pudo guardar la nota.');
+      }
+    };
+
+    card.querySelector('[data-act="cancel"]').onclick = ()=> card.remove();
+  }
+
+  // Delegación global: abre panel al pulsar .notes-btn
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.notes-btn');
+    if (!btn) return;
+    const details = btn.closest('details');
+    if (!details) return;
+    openNotesFor(details);
+  });
+
+  // Badges teal si ya hay notas guardadas (opcional)
+  window.applyNotesBadgesInPage = async function(){
+    if(!db) return;
+    const uid = firebase.auth().currentUser?.uid; if(!uid) return;
+    const ctx = window.__CURRENT_SUBCAT_CTX__ || {};
+    const prefix = [slugify(ctx.supracategoriaId), slugify(ctx.categoriaId), slugify(ctx.subcategoriaId)]
+      .filter(Boolean).join('__');
+    const qs = await db.collection('users').doc(uid).collection('notes')
+      .where(firebase.firestore.FieldPath.documentId(), '>=', prefix + '__')
+      .where(firebase.firestore.FieldPath.documentId(), '<',  prefix + '___').get();
+    const have = new Set(qs.docs.map(d=>d.id));
+    document.querySelectorAll('#subcategoria-body details').forEach(d=>{
+      const id = makeNoteId(d);
+      const btn = d.querySelector('.notes-btn'); if(!btn) return;
+      btn.classList.toggle('text-transparent', have.has(id));
+    });
+  };
+
+  // Helper de prueba
+  window.debugNotes = () => console.log('notes-btns encontrados:', document.querySelectorAll('.notes-btn').length);
+})();
+
+
+(function ensureNotesStyles(){
+    if (document.getElementById('notes-typography')) return;
+    const css = `
+      .notes-card .notes-editor{ line-height:1.65; }
+      .notes-card .notes-editor p,
+      .notes-card .notes-editor li{ font-size:1.06rem; }        /* Normal un poco más grande */
+      .notes-card .notes-editor h2{ font-size:1.45rem; font-weight:800; margin:.9rem 0 .45rem; }
+      .notes-card .notes-editor h3{ font-size:1.28rem; font-weight:750; margin:.8rem 0 .4rem; }
+      .notes-card .notes-editor h4{ font-size:1.16rem; font-weight:700; margin:.7rem 0 .35rem; }
+      .notes-card .notes-editor ul,
+      .notes-card .notes-editor ol{ padding-left:1.25rem; margin:.4rem 0 .6rem; }
+      .notes-card .notes-editor blockquote{ border-left:3px solid #e5e7eb; padding-left:.75rem; margin:.75rem 0; font-style:italic; }
+      .notes-card .notes-editor b,
+      .notes-card .notes-editor strong{ font-weight:800; }
+    `;
+    const s = document.createElement('style');
+    s.id = 'notes-typography';
+    s.textContent = css;
+    document.head.appendChild(s);
+  })();
+
+  
+
+
+
+
+
+
+
+
+</script>
+
+
+
+
+<!-- === flotante resaltar (nuevo árbol + multiline) === -->
 <script>
 (function(){
   // === Config / refs ===
   const CONTENT_ID     = 'subcategoria-body';
   const SCROLL_HOST_ID = 'main-content';
   const POP_ID         = 'hl-popover';
+
+  // Firestore (usa la misma instancia global que Notes)
+  const hasFirestore = !!(window.firebase && firebase.firestore);
+  const db = hasFirestore ? (window.db || firebase.firestore()) : null;
+
+  // slugify (reutiliza global si existe)
+  const slugify = (window.slugify) ? window.slugify : (s => String(s||'')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^\p{L}\p{N}]+/gu,'-')
+    .replace(/^-+|-+$/g,'')
+    .slice(0,80)
+  );
+
+  // === Estado de ámbito ===
+  let STATE = { sup:null, cat:null, sub:null };
+  const BODY = () => document.getElementById(CONTENT_ID);
+  const authed = () => !!(hasFirestore && firebase.auth().currentUser);
+  const uid    = () => firebase.auth().currentUser?.uid;
+
+  // Nuevo: ID estable del "contenido" (todo el body de la subcategoría)
+  function contentId(){
+    const ctx = window.__CURRENT_SUBCAT_CTX__ || {};
+    return [slugify(ctx.supracategoriaId), slugify(ctx.categoriaId), slugify(ctx.subcategoriaId), 'body']
+      .filter(Boolean).join('__');
+  }
+  // Nuevo: colección donde viven los highlights de ese contenido
+  function highlightsCollRef(){
+    if (!db || !authed()) return null;
+    return db.collection('users').doc(uid())
+             .collection('notes').doc(contentId())
+             .collection('highlights');
+  }
 
   // Popover único
   let pop = document.getElementById(POP_ID);
@@ -7091,20 +8192,12 @@ function placeSwitch(){
   let popHovered = false;
   let hideTO = null;
 
-  // === Estado de persistencia/ámbito ===
-  let STATE = { sup:null, cat:null, sub:null };
-  const BODY = () => document.getElementById(CONTENT_ID);
-  const authed = () => !!firebase.auth().currentUser;
-  const uid    = () => firebase.auth().currentUser?.uid;
-  const cKey   = () => [STATE.sup, STATE.cat, STATE.sub].join('/');
-
-  // === Reglas para no permitir selección en títulos/controles ===
+  // === Reglas donde NO debe aparecer el popover
   const FORBIDDEN_SEL = `
     summary,
     .collapse-controls, .collapse-controls *,
     .media-thumb, .media-thumb *,
     .thumb-caption, .thumb-caption *,
-    /* zonas fuera del contenido donde NO debe salir el popover */
     #subcat-header, #subcat-header *,
     .highlighting-bar, .highlighting-bar *,
     #font-menu, #font-menu *,
@@ -7121,7 +8214,7 @@ function placeSwitch(){
     return false;
   }
 
-  // ⬇️ NUEVO: la selección debe empezar y terminar dentro de #subcategoria-body
+  // La selección debe iniciar y terminar dentro del contenido
   function selectionInsideContentStrict(){
     const s = window.getSelection();
     if (!s || s.rangeCount === 0 || s.isCollapsed) return false;
@@ -7150,25 +8243,21 @@ function placeSwitch(){
     const on = JSON.parse(localStorage.getItem('hl:on') || 'false');
     if (!on) return hidePopover();
 
-    // Selección válida (100% dentro del content y no prohibida)
     const s = window.getSelection();
     if (s && s.rangeCount && !s.isCollapsed && selectionInsideContentStrict() && !selectionIntersectsForbidden()) {
       const r = selRect(); if (!r) return hidePopover();
       positionPopoverAtRect(r);
       return;
     }
-    // Hover sobre .my-hl
     if (hoverHL && content.contains(hoverHL)) {
       const r = hoverHL.getBoundingClientRect();
       if (r && (r.width || r.height)) { positionPopoverAtRect(r); return; }
     }
-    // Mantener si el mouse está sobre el popup
     if (popHovered && pop.style.display !== 'none') return;
     hidePopover();
   }
   function hidePopover(){ clearTimeout(hideTO); pop.style.display = 'none'; pop.dataset.target = ''; }
 
-  // Cierra si la selección no está dentro del content
   document.addEventListener('mouseup', () => {
     setTimeout(() => {
       if (!selectionInsideContentStrict()) { hidePopover(); return; }
@@ -7185,23 +8274,6 @@ function placeSwitch(){
     const s = window.getSelection();
     if (!(s && s.rangeCount && !s.isCollapsed) && !hoverHL) hidePopover();
   });
-
-  // Hover sobre highlight
-  content?.addEventListener('mousemove', (e) => {
-    const s = window.getSelection();
-    if (s && s.rangeCount && !s.isCollapsed) return;
-    const targetHL = (e.target.closest && e.target.closest('.my-hl')) || null;
-    if (targetHL) {
-      hoverHL = targetHL;
-      lastHoverHL = targetHL;
-      clearTimeout(hideTO);
-      showPopover();
-    } else {
-      hoverHL = null;
-      clearTimeout(hideTO);
-      hideTO = setTimeout(() => { if (!popHovered) hidePopover(); }, 220);
-    }
-  }, { passive:true });
 
   // === Utilidades DOM ===
   function splitText(node, offset){
@@ -7230,35 +8302,58 @@ function placeSwitch(){
     function firstText(node){ const t = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, { acceptNode(){ return NodeFilter.FILTER_ACCEPT; } }); return t.nextNode(); }
     function lastText(node){ const t = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, { acceptNode(){ return NodeFilter.FILTER_ACCEPT; } }); let last=null, cur; while((cur=t.nextNode())) last=cur; return last; }
   }
-  function normalizeRangeToText(range, root){
-    let { startContainer, startOffset, endContainer, endOffset } = range;
-    if (startContainer.nodeType !== Node.TEXT_NODE) {
-      ({ node: startContainer, offset: startOffset } = descendToText(startContainer, startOffset, root, false));
-    }
-    if (endContainer.nodeType !== Node.TEXT_NODE) {
+function normalizeRangeToText(range, root){
+  let { startContainer, startOffset, endContainer, endOffset } = range;
+
+  // --- FIX: si el fin está exactamente al inicio del siguiente nodo/elemento, retrocede al texto previo ---
+  if (endContainer) {
+    if (endContainer.nodeType === Node.TEXT_NODE && endOffset === 0){
+      const prev = prevTextIn(root, endContainer);
+      if (prev) { endContainer = prev; endOffset = prev.nodeValue.length; }
+    } else if (endContainer.nodeType !== Node.TEXT_NODE && endOffset === 0){
+      const prev = prevTextIn(root, endContainer);
+      if (prev) { endContainer = prev; endOffset = prev.nodeValue.length; }
+      else {
+        ({ node: endContainer, offset: endOffset } = descendToText(endContainer, endOffset, root, true));
+      }
+    } else if (endContainer.nodeType !== Node.TEXT_NODE){
       ({ node: endContainer, offset: endOffset } = descendToText(endContainer, endOffset, root, true));
     }
-    const test = document.createRange();
-    try { test.setStart(startContainer, startOffset); test.setEnd(endContainer, endOffset); } catch {}
-    if (test.collapsed && (startContainer !== endContainer || endOffset < startOffset)) {
-      [startContainer, endContainer] = [endContainer, startContainer];
-      [startOffset,   endOffset]     = [endOffset,   startOffset];
-    }
-    if (startContainer === endContainer && startContainer.nodeType === 3) {
-      let node = startContainer;
-      if (endOffset < node.nodeValue.length) splitText(node, endOffset);
-      if (startOffset > 0) node = splitText(node, startOffset);
-      return { startText: node, endText: node };
-    }
-    if (startContainer.nodeType === 3) {
-      const right = splitText(startContainer, startOffset);
-      if (right) startContainer = right;
-    }
-    if (endContainer.nodeType === 3) {
-      if (endOffset < endContainer.nodeValue.length) splitText(endContainer, endOffset);
-    }
-    return { startText: startContainer, endText: endContainer };
   }
+
+  // Normaliza inicio a nodo de texto
+  if (startContainer && startContainer.nodeType !== Node.TEXT_NODE){
+    ({ node: startContainer, offset: startOffset } = descendToText(startContainer, startOffset, root, false));
+  }
+
+  // Asegura el orden start <= end
+  const test = document.createRange();
+  try { test.setStart(startContainer, startOffset); test.setEnd(endContainer, endOffset); } catch {}
+  if (test.collapsed && (startContainer !== endContainer || endOffset < startOffset)) {
+    [startContainer, endContainer] = [endContainer, startContainer];
+    [startOffset,   endOffset]     = [endOffset,   startOffset];
+  }
+
+  // Caso mismo nodo
+  if (startContainer === endContainer && startContainer?.nodeType === 3) {
+    if (endOffset < startContainer.nodeValue.length) splitText(startContainer, endOffset);
+    if (startOffset > 0) startContainer = splitText(startContainer, startOffset);
+    return { startText: startContainer, endText: startContainer };
+  }
+
+  // Divide según offsets
+  if (startContainer?.nodeType === 3) {
+    const right = splitText(startContainer, startOffset);
+    if (right) startContainer = right;
+  }
+  if (endContainer?.nodeType === 3) {
+    if (endOffset < endContainer.nodeValue.length) splitText(endContainer, endOffset);
+  }
+
+  return { startText: startContainer, endText: endContainer };
+}
+
+
   function collectTextsBetween(root, startText, endText){
     const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode(){ return NodeFilter.FILTER_ACCEPT; } });
     const nodes = [];
@@ -7286,7 +8381,7 @@ function placeSwitch(){
     }
   }
 
-  // === TextQuoteSelector ===
+  // === TextQuoteSelector helpers ===
   function scanTextNodes(root){
     const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
       acceptNode(n){ return n.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT; }
@@ -7299,15 +8394,12 @@ function placeSwitch(){
     return {full, nodes};
   }
 
-  // --- FIX de límites ---
   function offsetsToRange(root, start, end, map){
     const rng = document.createRange();
 
-    // start: x.start <= start < x.end
+    // start
     let s = null;
-    for (const x of map.nodes) {
-      if (start >= x.start && start < x.end) { s = x; break; }
-    }
+    for (const x of map.nodes) if (start >= x.start && start < x.end) { s = x; break; }
     if (!s) {
       for (let i = 0; i < map.nodes.length; i++){
         const x = map.nodes[i];
@@ -7316,11 +8408,9 @@ function placeSwitch(){
       if (!s) s = map.nodes[map.nodes.length - 1];
     }
 
-    // end exclusivo: x.start < end <= x.end
+    // end (exclusivo)
     let e = null;
-    for (const x of map.nodes) {
-      if (end > x.start && end <= x.end) { e = x; break; }
-    }
+    for (const x of map.nodes) if (end > x.start && end <= x.end) { e = x; break; }
     if (!e) {
       for (let i = 0; i < map.nodes.length; i++){
         const x = map.nodes[i];
@@ -7340,12 +8430,10 @@ function placeSwitch(){
     return rng;
   }
 
-  // --- Normalización selector ---
   function normalizeSelectorText(s){
     return (s || '').replace(/\u00A0/g,' ').replace(/[\r\n\u2028\u2029]+/g,'');
   }
 
-  // === aplanado (flat) ===
   function buildFlat(full){
     const flatChars = [];
     const flat2raw  = [];
@@ -7361,7 +8449,6 @@ function placeSwitch(){
     return { flat: flatChars.join(''), flat2raw, raw2flat };
   }
 
-  // helper: (nodo,offset) -> offset global en 'full' sin tocar el DOM
   function toGlobalOffset(root, container, offset, map, fromEnd){
     const r = (container && container.nodeType === Node.TEXT_NODE)
       ? { node: container, offset }
@@ -7371,7 +8458,6 @@ function placeSwitch(){
     return rec.start + Math.max(0, Math.min(r.offset, r.node.nodeValue.length));
   }
 
-  // === findQuoteRange (usa at/len si existen y valida) ===
   function findQuoteRange(root, sel){
     const map  = scanTextNodes(root);
     const full = map.full;
@@ -7386,7 +8472,6 @@ function placeSwitch(){
       if (needle && sliceNow === needle) {
         return offsetsToRange(root, start, end, map);
       }
-      // si no coincide, reanclar por contexto…
     }
 
     const needle = norm(sel.exact || '');
@@ -7434,7 +8519,6 @@ function placeSwitch(){
     return offsetsToRange(root, rawStart, rawEnd, map);
   }
 
-  // === quoteFromRange (guarda at/len crudos) ===
   function quoteFromRange(range){
     const map   = scanTextNodes(BODY());
     const gStart = toGlobalOffset(content, range.startContainer, range.startOffset, map, false);
@@ -7458,9 +8542,9 @@ function placeSwitch(){
     };
   }
 
-  // hash estable para gid
+  // hash estable para gid (incluye contentId)
   function makeGID(sel){
-    const s = cKey() + '|' + JSON.stringify(sel);
+    const s = contentId() + '|' + JSON.stringify(sel);
     let h=0; for(let i=0;i<s.length;i++){ h=((h<<5)-h)+s.charCodeAt(i); h|=0; }
     return 'hl-' + Math.abs(h);
   }
@@ -7468,30 +8552,40 @@ function placeSwitch(){
   // === Acciones: aplicar / borrar (DOM + Firestore) ===
   async function persistSave(gid, selector){
     if (!authed()) return;
+    const coll = highlightsCollRef(); if (!coll) return;
     try {
-      await db.collection('users').doc(uid())
-        .collection('highlights').doc(gid).set({
-          contentKey: cKey(),
-          selector,
-          color: null,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge:true });
+      await coll.doc(gid).set({
+        selector,
+        color: null,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge:true });
     } catch(e){ console.error('saveHL', e); }
   }
   async function persistDelete(gid){
     if (!authed()) return;
-    try { await db.collection('users').doc(uid()).collection('highlights').doc(gid).delete(); }
+    const coll = highlightsCollRef(); if (!coll) return;
+    try { await coll.doc(gid).delete(); }
     catch(e){ console.error('delHL', e); }
   }
 
+  // helpers de bloque (se mantienen por si los usas en el futuro)
+  function isBlock(el){
+    if (!el || el.nodeType !== 1) return false;
+    const t = el.tagName;
+    if (/^(P|DIV|LI|H[1-6]|SECTION|ARTICLE|DD|DT)$/.test(t)) return true;
+    const cs = getComputedStyle(el);
+    return cs.display === 'block' || cs.display === 'list-item';
+  }
+
+  // ⭐️ Aplica highlight a la selección ACTUAL (ahora sin “clamp” a un solo bloque)
   function highlightSelection(){
     const s = window.getSelection();
     if (!s || s.rangeCount === 0 || s.isCollapsed || !isInside(s.anchorNode)) { hidePopover(); return; }
     if (selectionIntersectsForbidden()) { hidePopover(); return; }
 
-    const range = s.getRangeAt(0);
+    const range = s.getRangeAt(0).cloneRange(); // ← rango tal cual, puede cruzar líneas/bloques
 
-    // 1) Construir selector (at/len exactos)
+    // 1) Construir selector con at/len exactos (multibloque OK)
     const sel = quoteFromRange(range);
     if (!sel.exact.trim()) { hidePopover(); return; }
     const gid = makeGID(sel);
@@ -7499,11 +8593,10 @@ function placeSwitch(){
     // 2) Normalizar y envolver
     const { startText, endText } = normalizeRangeToText(range, content);
     if (!startText || !endText || startText.nodeType !== 3 || endText.nodeType !== 3) { hidePopover(); return; }
-
     const texts = collectTextsBetween(content, startText, endText);
     texts.forEach(n => wrapTextNode(n, gid));
 
-    // limpiar selección
+    // limpiar selección, fusionar y persistir
     s.removeAllRanges();
     const after = document.createRange();
     after.setStartAfter(endText);
@@ -7512,8 +8605,6 @@ function placeSwitch(){
 
     mergeAdjacent(content);
     hidePopover();
-
-    // persistir
     persistSave(gid, sel);
   }
 
@@ -7570,14 +8661,13 @@ function placeSwitch(){
     hidePopover();
   }
 
-  // === Rehidratación desde Firestore ===
+  // === Rehidratación desde Firestore (nuevo árbol) ===
   async function restoreAll(){
     if (!authed() || !STATE.sup) return;
     try {
-      const snap = await db.collection('users').doc(uid())
-        .collection('highlights')
-        .where('contentKey','==', cKey())
-        .get();
+      const coll = highlightsCollRef(); if (!coll) return;
+
+      const snap = await coll.get();
       snap.forEach(doc => {
         const { selector, color } = doc.data() || {};
         const rng = findQuoteRange(BODY(), selector);
@@ -7607,199 +8697,28 @@ function placeSwitch(){
     restoreAll();
   });
 
+  // Hover para mostrar popover
+  content?.addEventListener('mousemove', (e) => {
+    const s = window.getSelection();
+    if (s && s.rangeCount && !s.isCollapsed) return;
+    const targetHL = (e.target.closest && e.target.closest('.my-hl')) || null;
+    if (targetHL) {
+      hoverHL = targetHL;
+      lastHoverHL = targetHL;
+      clearTimeout(hideTO);
+      showPopover();
+    } else {
+      hoverHL = null;
+      clearTimeout(hideTO);
+      hideTO = setTimeout(() => { if (!popHovered) hidePopover(); }, 220);
+    }
+  }, { passive:true });
+
 })();
 </script>
 
-<!-- === Otro === -->
-
-<script>
-(function () {
-  const input   = document.getElementById('global-search');
-  const popover = document.getElementById('search-results');
-  const box     = document.getElementById('searchbox');
-
-  
-
-  if (!input || !popover || !window.db) return;
-
-  // Util: quitar acentos y bajar a minúsculas (búsqueda insensible a tildes)
-  const norm = s => (s || '')
-    .toString()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase().trim();
-
-  // Pequeño índice en memoria con todas las subcategorías
-  // Estructura: { label, subcategoriaId, categoriaId, supracategoriaId }
-  let INDEX = [];
-  let ready = false;
-
-  // Construye índice la primera vez que el usuario está logueado
-  firebase.auth().onAuthStateChanged(async (user) => {
-    if (!user || ready) return;
-    try {
-      // Busca en TODAS las colecciones 'subcategorias' (collection group)
-      const snap = await db.collectionGroup('subcategorias').get();
-INDEX = snap.docs.map(d => {
-  const data = d.data() || {};
-  const subId = d.id;
-
-  // Ruta: supracategorias/{S}/categorias/{C}/subcategorias/{subId}
-  const catDoc = d.ref.parent.parent;
-  const supDoc = catDoc && catDoc.parent && catDoc.parent.parent;
-  const catId  = catDoc ? catDoc.id : '';
-  const supId  = supDoc ? supDoc.id : '';
-
-  const label = data.denominacion || data.nombre || subId;
-
-  // ←— NUEVO: normaliza keywords (array de strings)
-  const kws = Array.isArray(data.keywords) ? data.keywords.filter(Boolean) : [];
-  const kwNorm = kws.map(k => norm(k));
-
-  // Puedes agregar otros campos al “haystack” si quieres (p. ej. descripcion)
-  const haystack = norm(
-    [label, ...(kws || []), data.descripcion || ''].join(' ')
-  );
-
-  return {
-    label,
-    labelNorm: norm(label),
-    keywords: kws,
-    kwNorm,               // keywords normalizados
-    haystack,             // todo junto para búsquedas
-    subcategoriaId: subId,
-    categoriaId: catId,
-    supracategoriaId: supId
-  };
-});
-ready = true;
-    } catch (e) {
-      console.error('No se pudo construir el índice de búsqueda:', e);
-    }
-  });
-
-  // Render de resultados
-  function render(items) {
-  if (!items.length) {
-    popover.innerHTML = '<div class="px-3 py-2 text-slate-500">Sin resultados</div>';
-    popover.classList.remove('hidden');
-    return;
-  }
-
-  const qTokens = norm(input.value).split(/\s+/).filter(Boolean);
-
-  popover.innerHTML = items.slice(0, 12).map(it => {
-    // keyword destacado (el primero que coincida)
-    const hit = (it.keywords || []).find((kw, i) => {
-      const n = it.kwNorm?.[i] || norm(kw);
-      return qTokens.some(t => n.includes(t));
-    });
-    const badge = hit
-      ? `<span class="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">${hit}</span>`
-      : '';
-
-    return `
-      <button type="button"
-              class="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2"
-              data-sup="${it.supracategoriaId}"
-              data-cat="${it.categoriaId}"
-              data-sub="${it.subcategoriaId}">
-        <i class="fas fa-search text-slate-400"></i>
-        <span class="text-slate-800">${it.label}</span>
-        ${badge}
-      </button>
-    `;
-  }).join('');
-
-  popover.classList.remove('hidden');
-}
-
-  // Filtrar en memoria
-  let last = '';
-  
 
 
-  function matchItem(item, qn) {
-  // AND por tokens: "endo aureus" debe estar todo
-  const tokens = qn.split(/\s+/).filter(Boolean);
-  if (!tokens.length) return false;
-
-  // buscamos en el “haystack” (label + keywords + descripcion)
-  return tokens.every(t => item.haystack.includes(t));
-}
-  
-  function searchNow(q) {
-  const qn = norm(q);
-  if (!ready || !qn) { popover.classList.add('hidden'); return; }
-  if (qn === last) return;
-  last = qn;
-
-  const res = INDEX.filter(it => matchItem(it, qn));
-  render(res);
-}
-
-  // Debounce suave
-  let t;
-  input.addEventListener('input', () => {
-    clearTimeout(t);
-    t = setTimeout(() => searchNow(input.value), 120);
-  });
-
-  // Enter = ir al primer resultado
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      const first = popover.querySelector('button[data-sub]');
-      if (first) first.click();
-    } else if (e.key === 'Escape') {
-      popover.classList.add('hidden');
-    }
-  });
-
-  // Click en resultado -> abre la subcategoría con tu función existente
-  // 1) Abrir contenido SOLO con clic real en un resultado
-popover.addEventListener('mousedown', (e) => {
-  const btn = e.target.closest('button[data-sub]');
-  if (!btn) return;                   // no es un item
-  // (mousedown no se dispara con Enter)
-
-  const { sup, cat, sub } = btn.dataset;
-
-  popover.classList.add('hidden');    // cierra lista
-  input.blur();                       // opcional: quitar foco del input
-  showSubcategoriaContent(sub, cat, sup);
-});
-
-// 2) Con Enter: ocultar lista, NO abrir contenido
-function hideOnEnter(e) {
-  if (e.key === 'Enter') {
-    e.preventDefault();               // evita click sintético del teclado
-    e.stopPropagation();
-    popover.classList.add('hidden');  // solo ocultar
-    // input.blur();                  // si quieres mantener foco, no hagas blur
-  }
-}
-
-// Enter desde el input de búsqueda:
-input.addEventListener('keydown', hideOnEnter);
-
-// (opcional) Enter cuando el foco está dentro del popover:
-popover.addEventListener('keydown', hideOnEnter);
-
-
-  // Cerrar si clic fuera
-  document.addEventListener('click', (e) => {
-    if (!box.contains(e.target)) popover.classList.add('hidden');
-  });
-
-  // Atajo ⌘+K / Ctrl+K para enfocar
-  document.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-      e.preventDefault();
-      input.focus();
-      input.select();
-    }
-  });
-})();
-</script>
 
 <!-- === Resultados + preguntas reales por keywords (con fallback texto) === -->
 
@@ -7950,6 +8869,9 @@ function renderEmptyState(kind = 'results') {
 
 
 
+
+
+<!-- === Preguntas === -->
 
 
 <script>
@@ -10234,7 +11156,7 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 </script>
 
-
+/* ==== Vaciar buscador al cambiar de segmento ==== */
 <script>
 /* ==== Vaciar buscador al cambiar de segmento ==== */
 (function () {
@@ -10274,6 +11196,226 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+<!-- === Aprendido === -->
+
+
+<script>
+  // Marca o desmarca un tema como aprendido para el usuario actual
+  async function setLearned(topicId, on = true) {
+    const uid = firebase.auth().currentUser.uid;
+    const ref = db.doc(`users/${uid}/learned/${topicId}`);
+    return on
+      ? ref.set({ learned: true, ts: firebase.firestore.FieldValue.serverTimestamp() })
+      : ref.delete();
+  }
+
+  // Devuelve true si el tema ya está aprendido por ese usuario
+  async function isLearned(topicId) {
+    const uid = firebase.auth().currentUser.uid;
+    return (await db.doc(`users/${uid}/learned/${topicId}`).get()).exists;
+  }
+</script>
+
+
+
+
+
+<!-- === Otro === -->
+
+<script>
+(function () {
+  const input   = document.getElementById('global-search');
+  const popover = document.getElementById('search-results');
+  const box     = document.getElementById('searchbox');
+
+  
+
+  if (!input || !popover || !window.db) return;
+
+  // Util: quitar acentos y bajar a minúsculas (búsqueda insensible a tildes)
+  const norm = s => (s || '')
+    .toString()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().trim();
+
+  // Pequeño índice en memoria con todas las subcategorías
+  // Estructura: { label, subcategoriaId, categoriaId, supracategoriaId }
+  let INDEX = [];
+  let ready = false;
+
+  // Construye índice la primera vez que el usuario está logueado
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (!user || ready) return;
+    try {
+      // Busca en TODAS las colecciones 'subcategorias' (collection group)
+      const snap = await db.collectionGroup('subcategorias').get();
+INDEX = snap.docs.map(d => {
+  const data = d.data() || {};
+  const subId = d.id;
+
+  // Ruta: supracategorias/{S}/categorias/{C}/subcategorias/{subId}
+  const catDoc = d.ref.parent.parent;
+  const supDoc = catDoc && catDoc.parent && catDoc.parent.parent;
+  const catId  = catDoc ? catDoc.id : '';
+  const supId  = supDoc ? supDoc.id : '';
+
+  const label = data.denominacion || data.nombre || subId;
+
+  // ←— NUEVO: normaliza keywords (array de strings)
+  const kws = Array.isArray(data.keywords) ? data.keywords.filter(Boolean) : [];
+  const kwNorm = kws.map(k => norm(k));
+
+  // Puedes agregar otros campos al “haystack” si quieres (p. ej. descripcion)
+  const haystack = norm(
+    [label, ...(kws || []), data.descripcion || ''].join(' ')
+  );
+
+  return {
+    label,
+    labelNorm: norm(label),
+    keywords: kws,
+    kwNorm,               // keywords normalizados
+    haystack,             // todo junto para búsquedas
+    subcategoriaId: subId,
+    categoriaId: catId,
+    supracategoriaId: supId
+  };
+});
+ready = true;
+    } catch (e) {
+      console.error('No se pudo construir el índice de búsqueda:', e);
+    }
+  });
+
+  // Render de resultados
+  function render(items) {
+  if (!items.length) {
+    popover.innerHTML = '<div class="px-3 py-2 text-slate-500">Sin resultados</div>';
+    popover.classList.remove('hidden');
+    return;
+  }
+
+  const qTokens = norm(input.value).split(/\s+/).filter(Boolean);
+
+  popover.innerHTML = items.slice(0, 12).map(it => {
+    // keyword destacado (el primero que coincida)
+    const hit = (it.keywords || []).find((kw, i) => {
+      const n = it.kwNorm?.[i] || norm(kw);
+      return qTokens.some(t => n.includes(t));
+    });
+    const badge = hit
+      ? `<span class="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">${hit}</span>`
+      : '';
+
+    return `
+      <button type="button"
+              class="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2"
+              data-sup="${it.supracategoriaId}"
+              data-cat="${it.categoriaId}"
+              data-sub="${it.subcategoriaId}">
+        <i class="fas fa-search text-slate-400"></i>
+        <span class="text-slate-800">${it.label}</span>
+        ${badge}
+      </button>
+    `;
+  }).join('');
+
+  popover.classList.remove('hidden');
+}
+
+  // Filtrar en memoria
+  let last = '';
+  
+
+
+  function matchItem(item, qn) {
+  // AND por tokens: "endo aureus" debe estar todo
+  const tokens = qn.split(/\s+/).filter(Boolean);
+  if (!tokens.length) return false;
+
+  // buscamos en el “haystack” (label + keywords + descripcion)
+  return tokens.every(t => item.haystack.includes(t));
+}
+  
+  function searchNow(q) {
+  const qn = norm(q);
+  if (!ready || !qn) { popover.classList.add('hidden'); return; }
+  if (qn === last) return;
+  last = qn;
+
+  const res = INDEX.filter(it => matchItem(it, qn));
+  render(res);
+}
+
+  // Debounce suave
+  let t;
+  input.addEventListener('input', () => {
+    clearTimeout(t);
+    t = setTimeout(() => searchNow(input.value), 120);
+  });
+
+  // Enter = ir al primer resultado
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const first = popover.querySelector('button[data-sub]');
+      if (first) first.click();
+    } else if (e.key === 'Escape') {
+      popover.classList.add('hidden');
+    }
+  });
+
+  // Click en resultado -> abre la subcategoría con tu función existente
+  // 1) Abrir contenido SOLO con clic real en un resultado
+popover.addEventListener('mousedown', (e) => {
+  const btn = e.target.closest('button[data-sub]');
+  if (!btn) return;                   // no es un item
+  // (mousedown no se dispara con Enter)
+
+  const { sup, cat, sub } = btn.dataset;
+
+  popover.classList.add('hidden');    // cierra lista
+  input.blur();                       // opcional: quitar foco del input
+  showSubcategoriaContent(sub, cat, sup);
+});
+
+// 2) Con Enter: ocultar lista, NO abrir contenido
+function hideOnEnter(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();               // evita click sintético del teclado
+    e.stopPropagation();
+    popover.classList.add('hidden');  // solo ocultar
+    // input.blur();                  // si quieres mantener foco, no hagas blur
+  }
+}
+
+// Enter desde el input de búsqueda:
+input.addEventListener('keydown', hideOnEnter);
+
+// (opcional) Enter cuando el foco está dentro del popover:
+popover.addEventListener('keydown', hideOnEnter);
+
+
+  // Cerrar si clic fuera
+  document.addEventListener('click', (e) => {
+    if (!box.contains(e.target)) popover.classList.add('hidden');
+  });
+
+  // Atajo ⌘+K / Ctrl+K para enfocar
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      input.focus();
+      input.select();
+    }
+  });
+})();
+</script>
+
+
+
+
+
+
 
 
 <button id="mobile-split-switch" type="button">
@@ -10284,11 +11426,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
-
-
 </body>
 
 </html>
 
-//26 septiembre madrugada madrugada
+//6 octubre amanecida amanecida
