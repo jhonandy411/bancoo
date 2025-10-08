@@ -463,6 +463,48 @@ body.split-view-active .dashboard-container{
   transition: width 0.0s ease;
 }
 
+/* === FIX barra colapsada en móviles/táctiles === */
+html { -webkit-text-size-adjust: 100%; }
+
+@media (hover: none), (pointer: coarse) {
+  #sidebar.collapsed {
+    width: var(--sb-collapsed) !important;
+    min-width: var(--sb-collapsed) !important;
+    max-width: var(--sb-collapsed) !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  #sidebar.collapsed:hover {
+    width: var(--sb-collapsed) !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+  #sidebar.collapsed .sidebar-group span { display: none !important; }
+  #sidebar.collapsed .sidebar-group a,
+  #sidebar.collapsed .sidebar-group button {
+    justify-content: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    height: 40px !important;
+    line-height: 40px !important;
+  }
+  #sidebar.collapsed .sidebar-group i:not(.fa-chevron-down) {
+    margin: 0 !important;
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 18px !important;
+    flex: 0 0 20px !important;
+  }
+  #sidebar.collapsed .sidebar-group .fa-chevron-down { display: none !important; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  #sidebar.collapsed:hover {
+    width: calc(var(--sb-collapsed) + var(--subcat-width));
+    /* conserva tus estilos existentes aquí */
+  }
+}
+
 /* 2) Mostrar sólo iconos cuando está colapsada */
 #sidebar.collapsed .sidebar-group span { display: none; }
 #sidebar.collapsed .sidebar-group button i:not(.fa-chevron-down),
@@ -11457,4 +11499,4 @@ popover.addEventListener('keydown', hideOnEnter);
 
 </html>
 
-//7 de octubre amanecida
+//8 de octubre tarde
