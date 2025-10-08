@@ -1683,6 +1683,13 @@ details[open] > summary {
   justify-content:center;
 }
 
+  /* Enable custom touch panning on mobile (Chrome/Safari) */
+  #video-area,
+  #modal-image{
+    touch-action: none;
+    -ms-touch-action: none; /* legacy */
+  }
+
 /* Imagen a ancho/alto del área visible, respetando proporción y centrada */
 #modal-image{
   width: 100% !important;
@@ -1690,6 +1697,7 @@ details[open] > summary {
   object-fit: contain !important;
   display: block;
   margin: 0 auto;
+  will-change: transform;
 }
 
 /* Iframe iguala comportamiento de altura (centra por el flex del contenedor) */
@@ -2761,35 +2769,6 @@ blockquote {
   --sb-collapsed: 40px;
   --subcat-width: 180px;
   --bars-w: calc(var(--sb-collapsed) + var(--subcat-width));
-}
-
-/* ==== MOBILE: pan suave de imágenes en viewer (drag nativo) ==== */
-@media (max-width: 639.98px){
-  /* Quita el bloqueo de eventos táctiles del modal en split */
-  #video-modal.split-view{ 
-    pointer-events: auto !important; 
-  }
-
-  /* Permite desplazamiento nativo (pan) dentro del área de visualización */
-  #video-area,
-  #video-modal .w-3\/4.relative{
-    overflow: auto !important;                 /* en vez de hidden */
-    -webkit-overflow-scrolling: touch;         /* scroll más suave en iOS/Android */
-  }
-
-  /* La imagen deja de ser absoluta para que el pan sea nativo */
-  #modal-image{
-    position: static !important;               /* anula position:absolute */
-    max-width: none !important;                /* permite exceder el contenedor cuando hay zoom */
-    max-height: none !important;
-    touch-action: pan-x pan-y;                 /* habilita gestos de arrastre nativos */
-  }
-}
-
-/* Habilita pan nativo por defecto (seguro también fuera de móvil) */
-#video-area, 
-#modal-image{
-  touch-action: pan-x pan-y;                   /* evita que el navegador bloquee el gesto */
 }
 
 /* ====== OVERLAY BASE ====== */
@@ -11187,7 +11166,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- === Vaciar buscador al cambiar de segmento === -->
 <script>
-/* ==== Vaciar buscador al cambiar de segmento ==== */
 (function () {
   const input   = document.getElementById('global-search');
   const results = document.getElementById('search-results');
@@ -11437,6 +11415,26 @@ popover.addEventListener('keydown', hideOnEnter);
       input.select();
     }
   });
+})();
+</script>
+
+
+<!-- === touchimagen === -->
+
+<script>
+(function () {
+  var img = document.getElementById('modal-image');
+  var area = document.getElementById('video-area');
+
+  if (area) area.style.touchAction = 'none';
+  if (img) {
+    img.style.touchAction = 'none';
+    img.style.willChange = 'transform'; // micro-mejora de rendimiento
+    // Evita que Chrome intente scroll durante el arrastre
+    img.addEventListener('touchmove', function (e) {
+      e.preventDefault();
+    }, { passive: false });
+  }
 })();
 </script>
 
