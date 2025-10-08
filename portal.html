@@ -2763,6 +2763,35 @@ blockquote {
   --bars-w: calc(var(--sb-collapsed) + var(--subcat-width));
 }
 
+/* ==== MOBILE: pan suave de imágenes en viewer (drag nativo) ==== */
+@media (max-width: 639.98px){
+  /* Quita el bloqueo de eventos táctiles del modal en split */
+  #video-modal.split-view{ 
+    pointer-events: auto !important; 
+  }
+
+  /* Permite desplazamiento nativo (pan) dentro del área de visualización */
+  #video-area,
+  #video-modal .w-3\/4.relative{
+    overflow: auto !important;                 /* en vez de hidden */
+    -webkit-overflow-scrolling: touch;         /* scroll más suave en iOS/Android */
+  }
+
+  /* La imagen deja de ser absoluta para que el pan sea nativo */
+  #modal-image{
+    position: static !important;               /* anula position:absolute */
+    max-width: none !important;                /* permite exceder el contenedor cuando hay zoom */
+    max-height: none !important;
+    touch-action: pan-x pan-y;                 /* habilita gestos de arrastre nativos */
+  }
+}
+
+/* Habilita pan nativo por defecto (seguro también fuera de móvil) */
+#video-area, 
+#modal-image{
+  touch-action: pan-x pan-y;                   /* evita que el navegador bloquee el gesto */
+}
+
 /* ====== OVERLAY BASE ====== */
 #mobile-overlay{ display:none; }
 #mobile-overlay.show{
@@ -11156,7 +11185,7 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 </script>
 
-/* ==== Vaciar buscador al cambiar de segmento ==== */
+<!-- === Vaciar buscador al cambiar de segmento === -->
 <script>
 /* ==== Vaciar buscador al cambiar de segmento ==== */
 (function () {
@@ -11430,4 +11459,4 @@ popover.addEventListener('keydown', hideOnEnter);
 
 </html>
 
-//6 octubre amanecida amanecida
+//7 de octubre amanecida
