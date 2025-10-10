@@ -11,6 +11,24 @@
   <style>
 
 
+/* FORZAR tamaño base de 12px en TODA la app */
+html {
+  font-size: 12px !important; /* ← Base = 12px en lugar de 16px */
+  -webkit-text-size-adjust: none !important; /* Desactiva auto-scaling */
+  -moz-text-size-adjust: none !important;
+  -ms-text-size-adjust: none !important;
+  text-size-adjust: none !important;
+}
+
+body {
+  font-size: 12px !important; /* Refuerza en body */
+  line-height: 1.5;
+}
+
+/* Ahora 1rem = 12px (en lugar de 16px) */
+
+
+
 @font-face {
   font-family:Lato-Light;
   font-weight:300;
