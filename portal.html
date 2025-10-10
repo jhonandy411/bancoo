@@ -463,48 +463,6 @@ body.split-view-active .dashboard-container{
   transition: width 0.0s ease;
 }
 
-/* === FIX barra colapsada en móviles/táctiles === */
-html { -webkit-text-size-adjust: 100%; }
-
-@media (hover: none), (pointer: coarse) {
-  #sidebar.collapsed {
-    width: var(--sb-collapsed) !important;
-    min-width: var(--sb-collapsed) !important;
-    max-width: var(--sb-collapsed) !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-  #sidebar.collapsed:hover {
-    width: var(--sb-collapsed) !important;
-    box-shadow: none !important;
-    background: transparent !important;
-  }
-  #sidebar.collapsed .sidebar-group span { display: none !important; }
-  #sidebar.collapsed .sidebar-group a,
-  #sidebar.collapsed .sidebar-group button {
-    justify-content: center !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    height: 40px !important;
-    line-height: 40px !important;
-  }
-  #sidebar.collapsed .sidebar-group i:not(.fa-chevron-down) {
-    margin: 0 !important;
-    width: 20px !important;
-    height: 20px !important;
-    font-size: 18px !important;
-    flex: 0 0 20px !important;
-  }
-  #sidebar.collapsed .sidebar-group .fa-chevron-down { display: none !important; }
-}
-
-@media (hover: hover) and (pointer: fine) {
-  #sidebar.collapsed:hover {
-    width: calc(var(--sb-collapsed) + var(--subcat-width));
-    /* conserva tus estilos existentes aquí */
-  }
-}
-
 /* 2) Mostrar sólo iconos cuando está colapsada */
 #sidebar.collapsed .sidebar-group span { display: none; }
 #sidebar.collapsed .sidebar-group button i:not(.fa-chevron-down),
@@ -3421,6 +3379,60 @@ body.bars-hidden #sidebar,
   display: list-item;     /* por si algún reset puso display:block */
   margin: .2rem 0;
 }
+
+
+
+/* === FIX: colapsado — centrar íconos y evitar corrimiento por scrollbar === */
+
+/* 1) Oculta el scrollbar en colapsado para que no robe ancho visual */
+#sidebar.collapsed{
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;        /* Firefox */
+  -ms-overflow-style: none !important;     /* IE/Edge legacy */
+}
+#sidebar.collapsed::-webkit-scrollbar{     /* Chrome/Safari */
+  width: 0 !important; height: 0 !important;
+}
+
+/* Al pasar el mouse (overlay desplegado) vuelve a permitir scroll */
+#sidebar.collapsed:hover{
+  overflow-y: auto !important;
+}
+
+/* 2) En colapsado, cada item es un “botón” cuadrado centrado */
+#sidebar.collapsed .sidebar-item,
+#sidebar.collapsed .sidebar-group a,
+#sidebar.collapsed .sidebar-group button{
+  width: var(--sb-collapsed) !important;   /* 40px exactos */
+  min-width: var(--sb-collapsed) !important;
+  max-width: var(--sb-collapsed) !important;
+  height: 40px !important;
+  padding: 0 !important;
+  justify-content: center !important;      /* centro horizontal */
+  align-items: center !important;          /* centro vertical */
+  text-align: center !important;
+}
+
+/* 3) Ícono sin márgenes residuales y caja consistente */
+#sidebar.collapsed .sidebar-group i:not(.fa-chevron-down){
+  margin: 0 !important;
+  display: inline-block !important;
+  width: 20px; height: 20px;
+  line-height: 20px;
+  text-align: center;
+}
+
+/* 4) Normaliza subitems (evita 22/32px) en colapsado */
+#sidebar.collapsed div[id^="accordion-"] a.sidebar-item{
+  height: 40px !important;
+  line-height: 40px !important;
+}
+
+/* 5) Asegura que el chevron no empuje nada en colapsado */
+#sidebar.collapsed .sidebar-group button .fa-chevron-down{
+  display: none !important;
+}
+
 
 
 
