@@ -312,46 +312,6 @@ html, body {
   display: none !important;
 }
 
-/* === OVERRIDES: cuando el colapsado se despliega (hover) o está en estado .open === */
-#sidebar.collapsed:hover,
-#sidebar.open { 
-  overflow-y: auto !important; /* vuelve a permitir scroll */
-}
-
-/* Items a ancho completo al desplegar */
-#sidebar.collapsed:hover .sidebar-item,
-#sidebar.collapsed:hover .sidebar-group a,
-#sidebar.collapsed:hover .sidebar-group button,
-#sidebar.open .sidebar-item,
-#sidebar.open .sidebar-group a,
-#sidebar.open .sidebar-group button{
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  height: 40px !important;                /* mantiene altura uniforme */
-  padding-left: 12px !important;           /* sangría normal */
-  padding-right: 12px !important;
-  justify-content: flex-start !important;  /* icono + texto a la izq. */
-  align-items: center !important;
-  text-align: left !important;
-}
-
-/* Iconos: recuperan margen a la derecha y tamaño automático al desplegar */
-#sidebar.collapsed:hover .sidebar-group i:not(.fa-chevron-down),
-#sidebar.open .sidebar-group i:not(.fa-chevron-down){
-  margin: 0 .5rem 0 0 !important;  /* espacio icono–texto */
-  width: auto !important;          /* no forzar 20×20 en estado desplegado */
-  height: auto !important;
-  line-height: normal !important;
-}
-
-/* Subitems: alto 32px cuando está desplegado (como tu diseño base) */
-#sidebar.collapsed:hover div[id^="accordion-"] a.sidebar-item,
-#sidebar.open div[id^="accordion-"] a.sidebar-item{
-  height: 32px !important;
-  line-height: 32px !important;
-}
-
 
 
 
@@ -3419,11 +3379,6 @@ body.bars-hidden #sidebar,
   display: list-item;     /* por si algún reset puso display:block */
   margin: .2rem 0;
 }
-
-
-
-
-
 
 
 
@@ -11502,4 +11457,4 @@ popover.addEventListener('keydown', hideOnEnter);
 
 </html>
 
-//8 de octubre tarde
+//10 octubre
