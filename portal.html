@@ -150,7 +150,8 @@ html, body {
   width: calc(var(--sb-collapsed) + var(--subcat-width));
   /* … */
 }
-#sidebar.collapsed:hover {
+#sidebar.collapsed:hover,
+#sidebar.collapsed.hover-expanded {
   position: absolute; /* Sale del flujo y flota sobre el resto */
   top: 0;
   left: 0;
@@ -489,34 +490,58 @@ body.split-view-active .dashboard-container{
   justify-content: center;
 }
 
-/* 3) En hover, “desplegar” provisionalmente la sidebar completa */
- #sidebar.collapsed:hover {
-   width: calc(var(--sb-collapsed) + var(--subcat-width));           /* ancho del overlay */
-   background: #fff !important;   
-   padding-left: 0;          /* ← sin gutter izquierdo */
-   padding-right: 0;         /* ← sin gutter derecho */
-   box-shadow: 2px 0 8px rgba(0,0,0,0.1);
-   background: rgba(255,255,255,0.95);
- }
+/* 3) En hover o expansión temporal, “desplegar” provisionalmente la sidebar completa */
+#sidebar.collapsed:hover,
+#sidebar.collapsed.hover-expanded {
+  width: calc(var(--sb-collapsed) + var(--subcat-width));           /* ancho del overlay */
+  background: rgba(255,255,255,0.95) !important;
+  padding-left: 0;          /* ← sin gutter izquierdo */
+  padding-right: 0;         /* ← sin gutter derecho */
+  box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+}
 
-/* 4) Al desplegar en hover, mostrar textos y submenús */
-#sidebar.collapsed:hover .sidebar-group span {
+/* 4) Al desplegar, mostrar textos y submenús */
+#sidebar.collapsed:hover .sidebar-group span,
+#sidebar.collapsed.hover-expanded .sidebar-group span {
   display: inline;         /* reaparecen los labels */
 }
 
-#sidebar.collapsed:hover .sidebar-group button.accordion-open i.fa-chevron-down {
+#sidebar.collapsed:hover .sidebar-group button.accordion-open i.fa-chevron-down,
+#sidebar.collapsed.hover-expanded .sidebar-group button.accordion-open i.fa-chevron-down {
   color: inherit;
 }
 
 #sidebar.collapsed:hover .sidebar-group a,
-#sidebar.collapsed:hover .sidebar-group button {
+#sidebar.collapsed:hover .sidebar-group button,
+#sidebar.collapsed.hover-expanded .sidebar-group a,
+#sidebar.collapsed.hover-expanded .sidebar-group button {
   justify-content: flex-start; /* Alínea a la izquierda */
   padding-left: 12px;
   padding-right: 12px;
 }
 
-#sidebar.collapsed:hover .sidebar-group i {
+#sidebar.collapsed:hover .sidebar-group i,
+#sidebar.collapsed.hover-expanded .sidebar-group i {
   margin: 0; /* Quita el margin auto del ícono para que se alinee bien con el texto */
+}
+
+/* Mostrar la flecha cuando la barra se expande temporalmente */
+#sidebar.collapsed:hover .sidebar-group button .fa-chevron-down,
+#sidebar.collapsed.hover-expanded .sidebar-group button .fa-chevron-down {
+  display: inline-block !important;
+}
+
+/* Separación extra entre texto y flecha cuando el menú está desplegado */
+#sidebar.collapsed:hover .sidebar-group button.sidebar-item {
+  justify-content: space-between;
+}
+#sidebar.collapsed.hover-expanded .sidebar-group button.sidebar-item {
+  justify-content: space-between;
+}
+#sidebar.collapsed:hover .sidebar-group button.sidebar-item i.fa-chevron-down,
+#sidebar.collapsed.hover-expanded .sidebar-group button.sidebar-item i.fa-chevron-down {
+  margin-left: auto;
+  margin-right: 6px;
 }
 
 
@@ -529,12 +554,14 @@ body.split-view-active .dashboard-container{
 /* ———————————————— */
 
 /* Si hay un segundo sidebar, lo desplazamos también para que no empuje el main */
-#sidebar.collapsed:hover ~ #subcategoria-sidebar {
+#sidebar.collapsed:hover ~ #subcategoria-sidebar,
+#sidebar.collapsed.hover-expanded ~ #subcategoria-sidebar {
   left: 40px;
 }
 
 /* El main siempre a 60px de la izquierda y ancho = 100% − 60px */
-#sidebar.collapsed:hover ~ #main-content {
+#sidebar.collapsed:hover ~ #main-content,
+#sidebar.collapsed.hover-expanded ~ #main-content {
   margin-left: var(--sb-collapsed) !important;
 }
 
@@ -1158,19 +1185,19 @@ details[open] > .collapse-controls {
 /* Resetea el fondo de los summary cuando el details está cerrado */
 #subcategoria-body details:not([open]) > summary {
   background-color: transparent;
-  min-height: 30px;
-  padding: .2rem .4rem;   /* antes 1rem 1.5rem */
+  min-height: calc(30px * var(--content-spacing-scale));
+  padding-top: calc(.25rem * var(--content-spacing-scale));
+  padding-bottom: calc(.25rem * var(--content-spacing-scale));
   line-height: .5; 
   padding-left: 1.5rem !important;
-    padding-right: 1.5rem !important;
-
-  
+  padding-right: 1.5rem !important;
 }
 
 #subcategoria-body details[open] > summary {
-  padding: .75rem 1.25rem;
+  padding-top: calc(.75rem * var(--content-spacing-scale));
+  padding-bottom: calc(.7rem * var(--content-spacing-scale));
   padding-left: 1.5rem !important;
-      padding-right: 1.5rem !important;
+  padding-right: 1.5rem !important;
 
 }
 
@@ -1221,7 +1248,10 @@ details[open] > summary {
 
 /* —— Escala solo del CONTENIDO —— */
 /* Variable con el porcentaje de fuente del contenido */
-#subcategoria-content { --content-font-scale: 100%; }
+#subcategoria-content {
+  --content-font-scale: 100%;
+  --content-spacing-scale: 1;
+}
 
 /* Aplico la escala SOLO a texto típico del contenido */
 #subcategoria-content p,
@@ -1530,7 +1560,9 @@ details[open] > summary {
 
 /* Si en colapsado+hover también quieres esa misma sangría: */
 #sidebar.collapsed:hover .sidebar-group > a.sidebar-item,
-#sidebar.collapsed:hover .sidebar-group > button.sidebar-item{
+#sidebar.collapsed:hover .sidebar-group > button.sidebar-item,
+#sidebar.collapsed.hover-expanded .sidebar-group > a.sidebar-item,
+#sidebar.collapsed.hover-expanded .sidebar-group > button.sidebar-item{
   padding-left: var(--sb-left-pad) !important;
 }
 
@@ -2448,7 +2480,8 @@ body.bars-hidden #sb-switch i{
 }
 
 /* Pequeña protección para que no tape el hover de tu sidebar colapsada */
-#sidebar.collapsed:hover + #subcategoria-sidebar ~ #sb-switch{
+#sidebar.collapsed:hover + #subcategoria-sidebar ~ #sb-switch,
+#sidebar.collapsed.hover-expanded + #subcategoria-sidebar ~ #sb-switch{
   pointer-events: none;
 }
 
@@ -2712,16 +2745,6 @@ blockquote {
 
 /* Mostrar el contenido del grupo que esté abierto (o el grupo bajo el puntero)
    incluso si el panel tiene la clase .hidden */
-#sidebar.collapsed:hover .sidebar-group button.accordion-open + div[id^="accordion-"],
-#sidebar.collapsed:hover .sidebar-group:hover > div[id^="accordion-"],
-#sidebar.collapsed:hover .sidebar-group button.accordion-open + div[id^="accordion-"].hidden {
-  display: block !important;
-}
-
-
-
-
-
 #articles-panel > div {
   margin-right: 2rem !important;  /* separación propia de cada panel */
 }
@@ -2772,6 +2795,122 @@ blockquote {
 #searchbox { position: relative; z-index: 255; }
 /* el dropdown */
 #search-results { position: absolute; z-index: 260; }
+#search-results.history-mode,
+#search-results.results-mode {
+  padding: 0;
+  background: linear-gradient(180deg, #f5f8fb 0%, #e8eef5 100%);
+  border: 1px solid #ccd6e3;
+  border-radius: 12px;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+}
+#search-results.history-mode .history-container,
+#search-results.results-mode .history-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  font-family: 'Lato', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+#search-results.history-mode .history-header,
+#search-results.results-mode .history-header {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4a6684;
+}
+#search-results.history-mode .history-list,
+#search-results.results-mode .history-list {
+  background: #ffffff;
+  border: 1px solid #dfe6f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+#search-results.history-mode .history-item,
+#search-results.results-mode .history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #1f2933;
+  background: #ffffff;
+  transition: background-color 0.2s ease;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+#search-results .history-item.is-active {
+  background: #e3e9f3;
+}
+#search-results .history-item.is-active .history-icon {
+  color: #2f4c6b;
+}
+#search-results.history-mode .history-item.history-empty,
+#search-results.results-mode .history-item.history-empty {
+  cursor: default;
+  color: #64748b;
+  pointer-events: none;
+}
+#search-results.history-mode .history-item + .history-item,
+#search-results.results-mode .history-item + .history-item {
+  border-top: 1px solid #edf1f7;
+}
+#search-results.history-mode .history-item:hover,
+#search-results.results-mode .history-item:hover {
+  background: #f1f5f9;
+}
+#search-results.history-mode .history-item.history-empty:hover,
+#search-results.results-mode .history-item.history-empty:hover {
+  background: #ffffff;
+}
+#search-results.history-mode .history-icon,
+#search-results.results-mode .history-icon {
+  font-size: 12px;
+  color: #6b7f99;
+}
+#search-results.history-mode .history-footer,
+#search-results.results-mode .history-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 10px;
+  color: #5b6c7c;
+  padding: 0 2px 4px 2px;
+}
+#search-results.history-mode .history-footer span,
+#search-results.results-mode .history-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+#search-results.history-mode .history-shortcut,
+#search-results.results-mode .history-shortcut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #eef3f8;
+  border: 1px solid #d6dde7;
+  font-weight: 600;
+  color: #25364c;
+}
+
+#search-results.history-mode .history-badge,
+#search-results.results-mode .history-badge {
+  margin-left: auto;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  background: #eef3f8;
+  border: 1px solid #d6dde7;
+  font-weight: 600;
+  color: #425a78;
+}
 
 
 
@@ -2947,27 +3086,34 @@ body.bars-hidden #mobile-overlay.show{ left: 0; }
 
   /* ===== Hover: la barra principal flota SOBRE el TOC ===== */
   body.split-view-active.mobile-solo.show-left  #sidebar.collapsed:hover,
-  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover{
+  body.split-view-active.mobile-solo.show-left  #sidebar.collapsed.hover-expanded,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed.hover-expanded{
     position: fixed !important; top: 3rem !important; bottom: 0 !important; left: 0 !important;
     width: calc(var(--sb-collapsed) + var(--subcat-width)) !important;
     z-index: 140 !important; background: #fff !important;
     box-shadow: 2px 0 12px rgba(0,0,0,.14);
   }
   body.split-view-active.mobile-solo.show-left  #sidebar.collapsed:hover ~ #subcategoria-sidebar,
-  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover ~ #subcategoria-sidebar{
+  body.split-view-active.mobile-solo.show-left  #sidebar.collapsed.hover-expanded ~ #subcategoria-sidebar,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover ~ #subcategoria-sidebar,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed.hover-expanded ~ #subcategoria-sidebar{
     left: var(--sb-collapsed) !important;
     z-index: 120 !important;
     pointer-events: none;
   }
 
   /* FIX: en show-right, mostrar textos al expandir la barra principal */
-  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover{
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed.hover-expanded{
     width: calc(var(--sb-collapsed) + var(--subcat-width)) !important;
   }
-  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover .sidebar-group span{
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover .sidebar-group span,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed.hover-expanded .sidebar-group span{
     display: inline !important;
   }
-  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover .sidebar-group i{
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover .sidebar-group i,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed.hover-expanded .sidebar-group i{
     margin: 0 !important; justify-content: flex-start !important;
   }
   body.split-view-active.mobile-solo.show-right #sidebar.open .sidebar-group span{
@@ -3515,8 +3661,8 @@ body.bars-hidden #sidebar,
   </div>
 
 <!-- Buscador centrado -->
-<div class="flex-1 flex justify-center">
-  <div class="flex items-center gap-1 w-full max-w-[980px] min-w-0">
+<div class="flex-1 flex justify-center mr-3">
+    <div class="flex items-center gap-1 w-full max-w-[980px] min-w-0">
 
     <!-- Selector idioma con dropdown -->
     <div class="relative ml-2" id="lang-dropdown">
@@ -3541,16 +3687,33 @@ body.bars-hidden #sidebar,
            class="relative flex items-center gap-2 bg-[#EEF3F7] rounded-md px-2 h-7
                   flex-1 basis-0 min-w-0">
   <!-- Icono lupa -->
-  <svg xmlns="http://www.w3.org/2000/svg"
-       class="w-4 h-4 text-slate-500 ml-1 shrink-0" ...>...</svg>
+<!-- Icono lupa -->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+     class="w-4 h-4 text-slate-500 ml-1 shrink-0">
+  <path stroke-linecap="round" stroke-linejoin="round"
+        d="m21 21-4.35-4.35m1.1-5.4a7.25 7.25 0 1 1-14.5 0 7.25 7.25 0 0 1 14.5 0Z"/>
+</svg>
 
   <!-- Input (con ellipsis) -->
 <input id="global-search" type="text" placeholder="Ask a medical question" autocomplete="off"
                class="flex-1 min-w-0 bg-transparent border-0 focus:outline-none focus:ring-0
                       placeholder-slate-400 text-[12px] leading-6 truncate" />
 
-  <!-- Hint: que no se deforme y se oculte en pantallas chicas -->
-  <span class="pr-1 text-slate-500 text-sm font-medium shrink-0 max-sm:hidden">⌘+K</span>
+
+
+
+<!-- Hint o botón clear -->
+<span id="search-hint"
+      class="pr-1 text-slate-500 text-sm font-medium shrink-0 max-sm:hidden">⌘+K</span>
+
+<button id="search-clear"
+        class="hidden text-slate-500 hover:text-slate-700 shrink-0 focus:outline-none">
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+  </svg>
+</button>
+
 
   <!-- Resultados -->
   <div id="search-results"
@@ -3864,35 +4027,28 @@ body.bars-hidden #sidebar,
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
   
   <!-- Izquierda: 2/3 -->
-  <div class="col-span-2 bg-white rounded-lg shadow overflow-hidden">
-  <!-- Encabezado -->
-  <div class="px-4 py-2 border-b border-gray-200">
-    <h2 class="text-sm font-semibold text-slate-800">Recently viewed articles</h2>
-  </div>
+  <div id="recent-articles-card" class="col-span-2 bg-white rounded-lg shadow overflow-hidden">
+    <div class="px-4 py-2 border-b border-gray-200">
+      <h2 class="text-sm font-semibold text-slate-800">Recently viewed articles</h2>
+    </div>
 
-  <!-- Si la lista está vacía -->
-  <div class="flex items-center justify-between px-4 py-6 text-sm text-slate-500">
-    <span>Your recently viewed articles will appear here.</span>
-    <!-- Reemplaza tu botón por este (solo añade el onclick) -->
-<button class="border border-gray-300 text-slate-700 rounded px-3 py-1 text-sm hover:bg-gray-50"
-        onclick="goToLibraryArticles()">
-  Go to library
-</button>
-  </div>
+    <div id="recent-articles-loading" class="flex items-center justify-center px-4 py-6 text-sm text-slate-500 gap-3">
+      <img src="https://i.gifer.com/ZZ5H.gif" alt="Loading" class="w-8 h-8">
+      <span>Loading your recently viewed articles…</span>
+    </div>
 
-  <!-- Si la lista tiene items -->
-  <!--
-  <ul class="divide-y divide-gray-200 text-sm text-slate-700">
-    <li class="flex items-center">
-      <div class="w-12 flex items-center justify-center border-r border-gray-200 py-2">
-        <img src="./assets/iconopanel3b.png" alt="icon" class="w-3 h-5 opacity-80">
-      </div>
-      <div class="flex-1 pl-4 py-2">Practical skills and procedures</div>
-    </li>
-    <!-- más <li> -->
-  </ul>
-  
-</div>
+    <div id="recent-articles-empty" class="hidden flex items-center justify-between px-4 py-6 text-sm text-slate-500">
+      <span>Your recently viewed articles will appear here.</span>
+      <button class="border border-gray-300 text-slate-700 rounded px-3 py-1 text-sm hover:bg-gray-50"
+              onclick="goToLibraryArticles()">
+        Go to library
+      </button>
+    </div>
+
+    <ul id="recent-articles-list" class="hidden divide-y divide-gray-200 text-sm text-slate-700">
+      <!-- items injected via JS -->
+    </ul>
+  </div>
 
   <!-- Derecha: 1/3 -->
   <div class="bg-white rounded-lg shadow border text-center p-4">
@@ -4502,6 +4658,21 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   if (!doc.exists) return;
   const data = doc.data();
 
+  const displayTitle =
+    data?.titulo ||
+    data?.title ||
+    data?.nombre ||
+    data?.denominacion ||
+    data?.label ||
+    subcategoriaId;
+
+  window.recordRecentArticle?.({
+    supracategoriaId,
+    categoriaId,
+    subcategoriaId,
+    title: displayTitle
+  });
+
   // — Poner título —
 
   // — Construir contenido en el main —
@@ -4613,7 +4784,7 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   <nav id="breadcrumbs" class="hidden -mx-20 bg-white border-b z-20 relative">
     <div class="mx-20 px-6 py-2 flex items-center gap-1.5 text-slate-600 text-xs leading-tight">
       <a id="bc-topic" href="#" class="hover:text-slate-800">—</a>
-      <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>
+      <i id="bc-sep" class="fas fa-chevron-right text-[10px] text-slate-400"></i>
       <span id="bc-section" class="text-slate-800 font-medium">—</span>
     </div>
   </nav>
@@ -4682,6 +4853,7 @@ function updateResetVisual() {
 
 function applyContentFont() {
   contentRoot.style.setProperty('--content-font-scale', fontPct + '%');
+  contentRoot.style.setProperty('--content-spacing-scale', String(fontPct / 100));
   updateResetVisual();
 }
 
@@ -4945,6 +5117,8 @@ sortedDefs.forEach(([key, bloque]) => {
 
   const section = document.createElement("details");
   section.className = "group";
+  section.dataset.level = 'h2';
+  section.dataset.title = title;
     // ID estable para notas de este H2
   section.dataset.noteId = `${supracategoriaId}/${categoriaId}/${subcategoriaId}/h2:${key}`;
    section.innerHTML = `
@@ -5045,6 +5219,9 @@ if (bloque.children && typeof bloque.children === 'object') {
 
     const child = document.createElement('details');
     child.className = 'group';
+    child.dataset.level = 'h3';
+    child.dataset.title = makeTitle(ck);
+    child.dataset.parentTitle = title;
     // ID estable para notas de este H3
 child.dataset.noteId = `${supracategoriaId}/${categoriaId}/${subcategoriaId}/h3:${ck}`;
     child.innerHTML = `
@@ -5138,29 +5315,68 @@ const io = new IntersectionObserver(
   { root: content, threshold: 0 }
 );
 updateStickyHeight();
+io.observe(sentinel);
 
 
 // ——— Breadcrumb dinámico (tema > sección visible) ———
 const bcTopic   = subcatHeader.querySelector('#bc-topic');
 const bcSection = subcatHeader.querySelector('#bc-section');
-// Tema = título de la subcategoría
-bcTopic.textContent = (data.nombre || subcategoriaId);
+const bcSep     = subcatHeader.querySelector('#bc-sep');
+const baseTopic = (data.nombre || subcategoriaId);
+// Tema base = título de la subcategoría
+bcTopic.textContent = baseTopic;
+if (bcSection) {
+  bcSection.textContent = '';
+  bcSection.classList.add('hidden');
+}
+bcSep?.classList.add('hidden');
 bcTopic.addEventListener('click', (e) => {
   e.preventDefault();
   content.scrollTo({ top: 0, behavior: 'smooth' });
 });
 // Sección actual según el summary más alto visible
 const summaries = Array.from(wrapper.querySelectorAll('#subcategoria-body details > summary'));
+function cleanSummaryText(summaryEl) {
+  if (!summaryEl) return '';
+  const raw = summaryEl.querySelector('span')?.textContent || summaryEl.textContent || '';
+  return raw.replace(/^⤷\s*/,'').replace(/\s+/g,' ').trim();
+}
 function updateBreadcrumbSection() {
-  if (!summaries.length) return;
+  if (!summaries.length) {
+    bcTopic.textContent = baseTopic;
+    if (bcSection) {
+      bcSection.textContent = '';
+      bcSection.classList.add('hidden');
+    }
+    bcSep?.classList.add('hidden');
+    return;
+  }
   const offset = subcatHeader.classList.contains('is-stuck') ? subcatHeader.offsetHeight : 0;
   const containerTop = content.getBoundingClientRect().top + offset + 1;
   let current = summaries[0];
   for (const s of summaries) {
     if (s.getBoundingClientRect().top <= containerTop) current = s; else break;
   }
-  const txt = (current.querySelector('span')?.textContent || current.textContent).trim();
-  bcSection.textContent = txt;
+  const detailsEl = current.closest('details');
+  const level = detailsEl?.dataset.level || 'h2';
+  if (level === 'h3') {
+    const primary = detailsEl.dataset.parentTitle || baseTopic;
+    const secondary = detailsEl.dataset.title || cleanSummaryText(current);
+    bcTopic.textContent = primary;
+    if (bcSection) {
+      bcSection.textContent = secondary;
+      bcSection.classList.remove('hidden');
+    }
+    bcSep?.classList.remove('hidden');
+  } else {
+    const primary = detailsEl?.dataset.title || cleanSummaryText(current) || baseTopic;
+    bcTopic.textContent = primary;
+    if (bcSection) {
+      bcSection.textContent = '';
+      bcSection.classList.add('hidden');
+    }
+    bcSep?.classList.add('hidden');
+  }
 }
 // también al abrir/cerrar secciones
 summaries.forEach(s => s.addEventListener('click', () => setTimeout(updateBreadcrumbSection, 0)));
@@ -5764,8 +5980,11 @@ function toggleAccordion(id) {
   const group   = btn?.closest('.sidebar-group');
   const icon    = btn?.querySelector('.fa-chevron-down');
 
-  // Si la barra está colapsada: NO abrir acordeón. Solo dejar el ícono activo.
-  if (sidebar.classList.contains('collapsed')) {
+  const isCollapsed     = sidebar.classList.contains('collapsed');
+  const isHoverExpanded = sidebar.classList.contains('hover-expanded');
+
+  // Si la barra está colapsada y no está expandida temporalmente: no abrir acordeón.
+  if (isCollapsed && !isHoverExpanded) {
     closeAllAccordions();
     acc?.classList.add('hidden');
     btn?.classList.remove('accordion-open');
@@ -6310,6 +6529,58 @@ async function cargarSupracategorias() {
 
 
 
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Permite expandir temporalmente la barra colapsada fuera de Home.
+  const sidebar = document.getElementById('sidebar');
+  const main    = document.getElementById('main-content');
+  if (!sidebar || !main) return;
+
+  let storedMainStyles = null;
+
+  const storeMainStyles = () => {
+    if (storedMainStyles) return;
+    storedMainStyles = {
+      marginLeft: main.style.marginLeft,
+      width: main.style.width,
+      paddingLeft: main.style.paddingLeft
+    };
+  };
+
+  const restoreMainStyles = () => {
+    if (!storedMainStyles) return;
+    main.style.marginLeft  = storedMainStyles.marginLeft;
+    main.style.width       = storedMainStyles.width;
+    main.style.paddingLeft = storedMainStyles.paddingLeft;
+    storedMainStyles = null;
+  };
+
+  sidebar.addEventListener('mouseenter', () => {
+    if (!sidebar.classList.contains('collapsed')) return;
+    if (sidebar.classList.contains('force-hidden')) return;
+    const homeContent = document.getElementById('home-content');
+    if (homeContent && !homeContent.classList.contains('hidden')) return;
+    if (sidebar.classList.contains('hover-expanded')) return;
+
+    storeMainStyles();
+    sidebar.classList.add('hover-expanded');
+    main.style.marginLeft  = '';
+    main.style.width       = '100%';
+    main.style.paddingLeft = '64px';
+  });
+
+  sidebar.addEventListener('mouseleave', () => {
+    if (!sidebar.classList.contains('hover-expanded')) return;
+    sidebar.classList.remove('hover-expanded');
+    if (!sidebar.classList.contains('collapsed')) {
+      storedMainStyles = null;
+      return;
+    }
+    restoreMainStyles();
+  });
+});
+</script>
 
 <script>
 document.getElementById("sidebar").addEventListener("mouseleave", () => {
@@ -7591,6 +7862,17 @@ function placeSwitch(){
     sub:   window.showSubcategoriaContent
   };
 
+  let lastView = 'home';
+  let lastViewBeforeSubcat = null;
+  const setView = (view) => {
+    if (view === 'subcat') {
+      lastViewBeforeSubcat = lastView;
+    } else {
+      lastViewBeforeSubcat = null;
+    }
+    lastView = view;
+  };
+
   // Guardar / Restaurar estado de la barra principal
   let sbPrev = null;
   const saveSB = () => {
@@ -7616,23 +7898,33 @@ function placeSwitch(){
   const push = (view, extra={}) => history.pushState({ view, ...extra }, '', '');
 
   // Wrappers con historial y restauración de barra
-  window.showHome     = () => { restoreSB(); fn.home(); push('home'); };
-  window.showArticles = () => { restoreSB(); fn.lib();  push('library'); };
+  window.showHome     = () => { restoreSB(); fn.home(); setView('home'); push('home'); };
+  window.showArticles = () => { restoreSB(); fn.lib();  setView('library'); push('library'); };
 
   // FIX: asegurar que el panel-2 se muestre tras cargar categorías
   window.showSecondPanel = async (el, sup) => {
+    setView('library');
     await fn.p2(el, sup);
     requestAnimationFrame(() => document.getElementById('panel-2')?.classList.remove('hidden'));
     push('library', { sup });
   };
 
   window.showThirdPanel = async (el, cat) => {
+    setView('library');
     await fn.p3(el, cat);
     const sup = document.querySelector('#articles-panel > div:first-child li.is-selected span')?.textContent?.trim();
     push('library', { sup, cat });
   };
 
-  window.showSubcategoriaContent = async (...args) => { saveSB(); return fn.sub(...args); };
+  window.showSubcategoriaContent = async (...args) => {
+    saveSB();
+    const homeEl = document.getElementById('home-content');
+    if (homeEl && !homeEl.classList.contains('hidden')) {
+      lastView = 'home';
+    }
+    setView('subcat');
+    return fn.sub(...args);
+  };
 
   // Restaurar EXACTAMENTE los 3 paneles como estaban (sin pushState)
   let restoring = false;
@@ -7660,18 +7952,30 @@ function placeSwitch(){
 
   // Back/forward: bloquear el listener original + restaurar sin duplicar
   window.addEventListener('popstate', (e) => {
+    const subcatEl = document.getElementById('subcategoria-content');
+    const inSubcat = subcatEl && !subcatEl.classList.contains('hidden');
+    if (inSubcat && lastView === 'subcat' && lastViewBeforeSubcat === 'home') {
+      e.stopImmediatePropagation?.();
+      restoreSB();
+      setView('home');
+      return fn.home(); // sin push
+    }
     const s = e.state;
     if (s?.view === 'home') {
       e.stopImmediatePropagation?.();
       restoreSB();
+      setView('home');
       return fn.home(); // sin push
     }
     if (s?.view === 'library') {
       e.stopImmediatePropagation?.();
+      setView('library');
       return window.restoreLibraryFromState(s);
     }
     e.stopImmediatePropagation?.();
-    restoreSB(); fn.lib(); // fallback sin push
+    restoreSB();
+    setView('library');
+    fn.lib(); // fallback sin push
   }, true);
 })();
 </script>
@@ -10298,6 +10602,12 @@ await renderQs();
 
     // Mostrar resultados
     document.getElementById('search-page')?.classList.remove('hidden');
+
+    const term = input.value.trim();
+    if (term && typeof window.saveSearchTermForHistory === 'function') {
+      window.saveSearchTermForHistory(term);
+    }
+
     showSearchPage(input.value);
 
     // Quitar foco
@@ -11120,8 +11430,11 @@ document.addEventListener('keydown', (ev) => {
     );
     if (!tocItem) return;
 
-    // Oculta barras laterales usando la clase que ya manejan tus CSS
-    document.body.classList.add('bars-hidden');
+    // Oculta barras laterales solo en móvil; en desktop se mantiene fijo
+    const isMobile = window.matchMedia('(max-width: 639.98px)').matches;
+    if (isMobile) {
+      document.body.classList.add('bars-hidden');
+    }
 
     // Quita el velo gris si estuviera activo
     const overlay = document.getElementById('mobile-overlay');
@@ -11244,6 +11557,171 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+<!-- === recently === -->
+
+
+<script>
+(function(){
+  const hasFirestore = !!(window.firebase && firebase.firestore);
+  const db = hasFirestore ? (window.db || firebase.firestore()) : null;
+  const COLLECTION = 'recentArticles';
+  const RECENT_LIMIT = 10;
+
+  const currentUid = () => firebase.auth().currentUser?.uid || null;
+
+  const recentColl = (uid) => {
+    if (!db || !uid) return null;
+    return db.collection('users').doc(uid).collection(COLLECTION);
+  };
+
+  window.recordRecentArticle = async function(meta = {}) {
+    const uid = currentUid();
+    const coll = recentColl(uid);
+    if (!uid || !coll) return;
+
+    const { supracategoriaId, categoriaId, subcategoriaId, title } = meta;
+    if (!supracategoriaId || !categoriaId || !subcategoriaId) return;
+
+    const docId = [supracategoriaId, categoriaId, subcategoriaId].filter(Boolean).join('__');
+    const payload = {
+      supracategoriaId,
+      categoriaId,
+      subcategoriaId,
+      title: title || subcategoriaId,
+      viewedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    try {
+      await coll.doc(docId).set(payload, { merge: true });
+
+      const snap = await coll.orderBy('viewedAt', 'desc').get();
+      const excess = snap.docs.slice(RECENT_LIMIT);
+      excess.forEach(d => d.ref.delete().catch(()=>{}));
+    } catch (err) {
+      console.error('recentArticles write error', err);
+    }
+  };
+
+  let unsubscribe = null;
+  let listEl = null;
+  let emptyEl = null;
+  let loadingEl = null;
+
+  function ensureRefs() {
+    if (listEl && emptyEl && loadingEl) return true;
+    listEl = document.getElementById('recent-articles-list');
+    emptyEl = document.getElementById('recent-articles-empty');
+    loadingEl = document.getElementById('recent-articles-loading');
+    return !!(listEl && emptyEl && loadingEl);
+  }
+
+  const escapeHtml = (str) => String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+  const escapeAttr = (str) => String(str ?? '').replace(/"/g, '&quot;');
+
+  function setLoading(isLoading) {
+    if (!ensureRefs()) return;
+    loadingEl.classList.toggle('hidden', !isLoading);
+  }
+
+  function renderList(items) {
+    if (!ensureRefs()) return;
+    setLoading(false);
+    const hasItems = items.length > 0;
+    emptyEl.classList.toggle('hidden', hasItems);
+    listEl.classList.toggle('hidden', !hasItems);
+
+    if (!hasItems) {
+      listEl.innerHTML = '';
+      return;
+    }
+
+    listEl.innerHTML = items.map(item => {
+      const title = escapeHtml(item.title || item.subcategoriaId || 'Article');
+      const sup = escapeAttr(item.supracategoriaId);
+      const cat = escapeAttr(item.categoriaId);
+      const sub = escapeAttr(item.subcategoriaId);
+      return `
+        <li>
+          <button type="button"
+                  class="w-full flex items-stretch text-left hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 transition"
+                  data-recent-article
+                  data-sup="${sup}"
+                  data-cat="${cat}"
+                  data-sub="${sub}">
+            <span class="w-12 flex items-center justify-center border-r border-gray-200 py-2">
+              <img src="./assets/iconopanel3b.png" alt="" class="w-3 h-5 opacity-80">
+            </span>
+            <span class="flex-1 pl-4 py-2 text-slate-700">${title}</span>
+          </button>
+        </li>
+      `;
+    }).join('');
+  }
+
+  function detachListener() {
+    if (unsubscribe) {
+      unsubscribe();
+      unsubscribe = null;
+    }
+  }
+
+  function attachListener(uid) {
+    const coll = recentColl(uid);
+    if (!coll) {
+      renderList([]);
+      setLoading(false);
+      return;
+    }
+
+    detachListener();
+    setLoading(true);
+    unsubscribe = coll
+      .orderBy('viewedAt', 'desc')
+      .limit(RECENT_LIMIT)
+      .onSnapshot(
+        snap => {
+          const items = snap.docs
+            .map(doc => ({ id: doc.id, ...(doc.data() || {}) }))
+            .filter(it => it.supracategoriaId && it.categoriaId && it.subcategoriaId);
+          renderList(items);
+        },
+        err => {
+          console.error('recentArticles listen error', err);
+          renderList([]);
+        }
+      );
+  }
+
+  firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+      attachListener(user.uid);
+    } else {
+      detachListener();
+      renderList([]);
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('[data-recent-article]');
+    if (!trigger) return;
+    const { sup, cat, sub } = trigger.dataset;
+    if (!sup || !cat || !sub) return;
+    if (typeof window.showSubcategoriaContent === 'function') {
+      window.showSubcategoriaContent(sub, cat, sup);
+    }
+  });
+})();
+</script>
+
+
+
+
 
 <!-- === Otro === -->
 
@@ -11256,12 +11734,181 @@ document.addEventListener('DOMContentLoaded', () => {
   
 
   if (!input || !popover || !window.db) return;
+  const db = window.db || firebase.firestore();
 
   // Util: quitar acentos y bajar a minúsculas (búsqueda insensible a tildes)
   const norm = s => (s || '')
     .toString()
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLowerCase().trim();
+
+  const HISTORY_LIMIT = 9;
+  let cachedHistory = null;
+  let activeIndex = -1;
+  let typedValue = input.value || '';
+
+  const getPopoverItems = () => Array.from(popover.querySelectorAll('.history-item'))
+    .filter(btn => !btn.classList.contains('history-empty'));
+
+  const getItemValue = (btn) => btn?.dataset.historyTerm
+    || btn?.querySelector('span')?.textContent?.trim()
+    || '';
+
+  function setActiveItem(index) {
+    const items = getPopoverItems();
+    items.forEach((btn, i) => btn.classList.toggle('is-active', i === index));
+    if (index >= 0 && index < items.length) {
+      activeIndex = index;
+      items[index].scrollIntoView({ block: 'nearest' });
+      const value = getItemValue(items[index]);
+      if (value) {
+        input.value = value;
+        input.setSelectionRange(value.length, value.length);
+      }
+    } else {
+      activeIndex = -1;
+      input.value = typedValue;
+      input.setSelectionRange(input.value.length, input.value.length);
+    }
+  }
+
+  const getActiveItem = () => {
+    const items = getPopoverItems();
+    return activeIndex >= 0 && activeIndex < items.length ? items[activeIndex] : null;
+  };
+
+  function moveActive(delta) {
+    const items = getPopoverItems();
+    if (!items.length) return;
+    let next = activeIndex + delta;
+    if (next < 0) next = items.length - 1;
+    if (next >= items.length) next = 0;
+    setActiveItem(next);
+  }
+  function setPopoverMode(mode) {
+    const isHistory = mode === 'history';
+    const isResults = mode === 'results';
+    popover.classList.toggle('history-mode', isHistory);
+    popover.classList.toggle('results-mode', isResults);
+    if (isHistory || isResults) {
+      popover.style.maxHeight = 'none';
+      popover.style.overflowY = 'visible';
+    } else {
+      popover.style.maxHeight = '';
+      popover.style.overflowY = '';
+    }
+    setActiveItem(-1);
+  }
+
+  const escapeHtml = (str) => String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+  const escapeAttr = (str) => String(str ?? '').replace(/"/g, '&quot;');
+
+  const currentUid = () => firebase.auth().currentUser?.uid || null;
+
+  const historyDoc = () => {
+    const uid = currentUid();
+    return uid && db ? db.collection('users').doc(uid) : null;
+  };
+
+  async function fetchSearchHistory(force = false) {
+    if (!force && Array.isArray(cachedHistory)) return cachedHistory;
+    const ref = historyDoc();
+    if (!ref) return [];
+    try {
+      const snap = await ref.get();
+      const raw = snap.exists ? snap.data()?.searchHistory || [] : [];
+      const list = Array.isArray(raw) ? raw.filter(Boolean).slice(0, HISTORY_LIMIT) : [];
+      cachedHistory = list;
+      return list;
+    } catch (err) {
+      console.error('No se pudo leer el historial de búsqueda:', err);
+      return [];
+    }
+  }
+
+  async function saveSearchTerm(term) {
+    const query = (term || '').trim();
+    if (!query) return;
+    const ref = historyDoc();
+    if (!ref) return;
+    try {
+      const snap = await ref.get();
+      const raw = snap.exists ? snap.data()?.searchHistory || [] : [];
+      const existing = Array.isArray(raw) ? raw.filter(Boolean) : [];
+      const updated = [query, ...existing.filter(item => item !== query)].slice(0, HISTORY_LIMIT);
+      cachedHistory = updated;
+      await ref.set({ searchHistory: updated }, { merge: true });
+    } catch (err) {
+      console.error('No se pudo guardar el historial de búsqueda:', err);
+    }
+  }
+
+  function shortcutsFooter() {
+    return `
+      <div class="history-footer">
+        <span><span class="history-shortcut">⌘+K</span> Open</span>
+        <span><span class="history-shortcut">↑↓</span> Navigate suggestions</span>
+        <span><span class="history-shortcut">Space</span> Use suggestion</span>
+        <span><span class="history-shortcut">Enter</span> Submit</span>
+      </div>
+    `;
+  }
+
+  function renderHistoryPopover(items) {
+    const listMarkup = items.length
+      ? items.map(term => {
+          const safeValue = escapeAttr(term);
+          const safeLabel = escapeHtml(term);
+          return `
+            <button type="button"
+                    class="history-item"
+                    data-history-term="${safeValue}">
+              <i class="fas fa-search history-icon"></i>
+              <span>${safeLabel}</span>
+            </button>
+          `;
+        }).join('')
+      : '<div class="history-item history-empty">No search history yet.</div>';
+
+    return `
+      <div class="history-container">
+        <div class="history-header">Search History</div>
+        <div class="history-list">
+          ${listMarkup}
+        </div>
+        ${shortcutsFooter()}
+      </div>
+    `;
+  }
+
+  function handleHistorySelection(term) {
+    const query = (term || '').trim();
+    if (!query) return;
+    saveSearchTerm(query);
+    input.value = query;
+    input.focus();
+    cachedHistory = (cachedHistory || []).filter(Boolean);
+    last = '';
+    searchNow(query);
+    const evt = new Event('input', { bubbles: true });
+    input.dispatchEvent(evt);
+  }
+
+  window.showSearchHistoryPopover = async function () {
+    if (typeof t !== 'undefined') clearTimeout(t);
+    const history = await fetchSearchHistory(true);
+    setPopoverMode('history');
+    popover.innerHTML = renderHistoryPopover(history);
+    popover.classList.remove('hidden');
+  };
+
+  window.saveSearchTermForHistory = saveSearchTerm;
 
   // Pequeño índice en memoria con todas las subcategorías
   // Estructura: { label, subcategoriaId, categoriaId, supracategoriaId }
@@ -11270,6 +11917,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Construye índice la primera vez que el usuario está logueado
   firebase.auth().onAuthStateChanged(async (user) => {
+    cachedHistory = null;
     if (!user || ready) return;
     try {
       // Busca en TODAS las colecciones 'subcategorias' (collection group)
@@ -11314,39 +11962,57 @@ ready = true;
 
   // Render de resultados
   function render(items) {
-  if (!items.length) {
-    popover.innerHTML = '<div class="px-3 py-2 text-slate-500">Sin resultados</div>';
+    setPopoverMode('results');
+
+    const qTokens = norm(input.value).split(/\s+/).filter(Boolean);
+    const listMarkup = items.slice(0, 12).map(it => {
+      const hit = (it.keywords || []).find((kw, i) => {
+        const n = it.kwNorm?.[i] || norm(kw);
+        return qTokens.some(t => n.includes(t));
+      });
+      const badge = hit ? `<span class="history-badge">${hit}</span>` : '';
+
+      return `
+        <button type="button"
+                class="history-item"
+                data-sup="${it.supracategoriaId}"
+                data-cat="${it.categoriaId}"
+                data-sub="${it.subcategoriaId}">
+          <i class="fas fa-search history-icon"></i>
+          <span class="flex-1 text-slate-800">${it.label}</span>
+          ${badge}
+        </button>
+      `;
+    }).join('');
+
+    const content = items.length
+      ? listMarkup
+      : '<div class="history-item history-empty">No search results. Please try another query.</div>';
+
+    popover.innerHTML = `
+      <div class="history-container">
+        <div class="history-header">Search Results</div>
+        <div class="history-list">
+          ${content}
+        </div>
+        ${shortcutsFooter()}
+      </div>
+    `;
+
     popover.classList.remove('hidden');
-    return;
   }
 
-  const qTokens = norm(input.value).split(/\s+/).filter(Boolean);
-
-  popover.innerHTML = items.slice(0, 12).map(it => {
-    // keyword destacado (el primero que coincida)
-    const hit = (it.keywords || []).find((kw, i) => {
-      const n = it.kwNorm?.[i] || norm(kw);
-      return qTokens.some(t => n.includes(t));
-    });
-    const badge = hit
-      ? `<span class="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">${hit}</span>`
-      : '';
-
-    return `
-      <button type="button"
-              class="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center gap-2"
-              data-sup="${it.supracategoriaId}"
-              data-cat="${it.categoriaId}"
-              data-sub="${it.subcategoriaId}">
-        <i class="fas fa-search text-slate-400"></i>
-        <span class="text-slate-800">${it.label}</span>
-        ${badge}
-      </button>
-    `;
-  }).join('');
-
-  popover.classList.remove('hidden');
-}
+  function handleResultSelection(btn) {
+    if (!btn) return;
+    const { sup, cat, sub } = btn.dataset;
+    const query = input.value.trim();
+    if (query) saveSearchTerm(query);
+    popover.classList.add('hidden');
+    input.blur();
+    if (typeof showSubcategoriaContent === 'function') {
+      showSubcategoriaContent(sub, cat, sup);
+    }
+  }
 
   // Filtrar en memoria
   let last = '';
@@ -11376,14 +12042,67 @@ ready = true;
   let t;
   input.addEventListener('input', () => {
     clearTimeout(t);
+    typedValue = input.value;
+    if (input.value.trim() === '') {
+      if (typeof window.showSearchHistoryPopover === 'function') {
+        window.showSearchHistoryPopover();
+      }
+      return;
+    }
     t = setTimeout(() => searchNow(input.value), 120);
+  });
+
+
+  input.addEventListener('focus', () => {
+    if (input.value.trim() === '') {
+      if (typeof window.showSearchHistoryPopover === 'function') {
+        window.showSearchHistoryPopover();
+      }
+    } else {
+      clearTimeout(t);
+      last = '';
+      searchNow(input.value);
+    }
   });
 
   // Enter = ir al primer resultado
   input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !popover.classList.contains('hidden')) {
+      e.preventDefault();
+      const items = getPopoverItems();
+      if (!items.length) return;
+      if (activeIndex === -1) typedValue = input.value;
+      if (e.key === 'ArrowDown') {
+        if (activeIndex === -1) {
+          setActiveItem(0);
+        } else if (activeIndex === items.length - 1) {
+          setActiveItem(-1);
+        } else {
+          moveActive(1);
+        }
+      } else {
+        if (activeIndex === -1) {
+          setActiveItem(items.length - 1);
+        } else if (activeIndex === 0) {
+          setActiveItem(-1);
+        } else {
+          moveActive(-1);
+        }
+      }
+    } else if (e.key === 'Enter') {
+      const active = getActiveItem();
+      if (active) {
+        e.preventDefault();
+        active.click();
+        return;
+      }
       const first = popover.querySelector('button[data-sub]');
-      if (first) first.click();
+      if (first) {
+        first.click();
+      } else {
+        const query = input.value.trim();
+        if (query) saveSearchTerm(query);
+      }
     } else if (e.key === 'Escape') {
       popover.classList.add('hidden');
     }
@@ -11395,12 +12114,21 @@ popover.addEventListener('mousedown', (e) => {
   const btn = e.target.closest('button[data-sub]');
   if (!btn) return;                   // no es un item
   // (mousedown no se dispara con Enter)
+  handleResultSelection(btn);
+});
 
-  const { sup, cat, sub } = btn.dataset;
+popover.addEventListener('click', (e) => {
+  const historyBtn = e.target.closest('[data-history-term]');
+  if (historyBtn) {
+    e.preventDefault();
+    handleHistorySelection(historyBtn.dataset.historyTerm);
+    return;
+  }
 
-  popover.classList.add('hidden');    // cierra lista
-  input.blur();                       // opcional: quitar foco del input
-  showSubcategoriaContent(sub, cat, sup);
+  if (e.detail === 0) {
+    const btn = e.target.closest('button[data-sub]');
+    if (btn) handleResultSelection(btn);
+  }
 });
 
 // 2) Con Enter: ocultar lista, NO abrir contenido
@@ -11430,7 +12158,8 @@ popover.addEventListener('keydown', hideOnEnter);
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
       input.focus();
-      input.select();
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
     }
   });
 })();
@@ -11456,6 +12185,34 @@ popover.addEventListener('keydown', hideOnEnter);
 })();
 </script>
 
+<!-- === icono cerrar en buscador === -->
+
+<script>
+  const searchInput = document.getElementById('global-search');
+  const hint = document.getElementById('search-hint');
+  const clearBtn = document.getElementById('search-clear');
+
+  searchInput.addEventListener('input', () => {
+    if (searchInput.value.trim() !== '') {
+      hint.classList.add('hidden');
+      clearBtn.classList.remove('hidden');
+    } else {
+      clearBtn.classList.add('hidden');
+      hint.classList.remove('hidden');
+    }
+  });
+
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    clearBtn.classList.add('hidden');
+    hint.classList.remove('hidden');
+    searchInput.focus();
+    if (typeof window.showSearchHistoryPopover === 'function') {
+      window.showSearchHistoryPopover();
+    }
+  });
+</script>
+
 
 
 
@@ -11475,4 +12232,4 @@ popover.addEventListener('keydown', hideOnEnter);
 
 </html>
 
-//10 octubre
+//15 octubre amanecidaaaa
