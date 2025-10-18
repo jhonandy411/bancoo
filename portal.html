@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -116,6 +118,21 @@ html, body {
 
 .highlighting-bar {
   font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial;
+}
+
+
+
+/* === HL close: igual a fav-actions === */
+#subcat-header.is-stuck .highlighting-bar .hl-right{ padding-right: 1rem; } /* alinea en X */
+#subcat-header.is-stuck .highlighting-bar .hl-close{
+  display: inline-flex !important;
+  width: 1.5rem; height: 1.5rem;           /* caja como fav */
+  align-items: center; justify-content: center;
+  color: #475569 !important;               /* color como fav */
+}
+#subcat-header.is-stuck .highlighting-bar .hl-close i{
+  font-size: 1rem;                          /* tamaño de icono como fav */
+  line-height: 1;
 }
 
 
@@ -1212,7 +1229,7 @@ details[open] > summary {
   background-color: rgb(247, 248, 249);
 }
 
-#main-content:has(#subcategoria-content:not(.hidden)) {
+body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden)) {
   background-color: #ffffff !important;
 }
 
@@ -1230,12 +1247,13 @@ details[open] > summary {
   color: #475569;
 }
 .hl-btn:hover{ color:#111827; } /* hover sutil */
-.hl-sep{
-  width:1px;
-  height:18px;
-  background:#e5e7eb;          /* gray-200 */
+/* Separadores solo cuando la barra está sticky */
+.hl-sep {
+  width: 1px;
+  height: 18px;
+  background: #e5e7eb;   /* gray-200 */
   margin: 0 .75rem;
-  display:inline-block;
+  display: inline-block; /* ← antes estaba en none */
 }
 
 /* Menú de fuentes “AA” */
@@ -1285,6 +1303,68 @@ details[open] > summary {
   border-bottom-width: .5px !important;
 }
 
+/* Distribución 3 columnas: izq / centro / der */
+.highlighting-bar{display:flex;align-items:center;}
+.highlighting-bar .hl-left{flex:0 0 auto;display:flex;align-items:center;gap:.25rem;}
+.highlighting-bar .hl-center{flex:0 1 auto;display:flex;justify-content:center;margin:0 auto;}
+.highlighting-bar .hl-right{flex:0 0 auto;margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:.5rem;}
+
+#subcat-header.is-stuck .highlighting-bar .hl-right,
+#subcat-header.is-stuck .highlighting-bar .bookmark-toggle,
+
+#subcat-header.is-stuck .highlighting-bar .hl-close {
+  
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  gap: 0 !important;
+}
+
+#subcat-header.is-stuck .highlighting-bar .hl-sep {
+  margin: 0 .75rem !important; /* igual que topbar */
+}
+
+/* Back solo cuando está pegada (segunda captura) */
+.highlighting-bar .fav-back{margin-left:1rem;display:none;}
+#subcat-header.is-stuck .highlighting-bar .fav-back{display:inline-flex!important;}
+
+#subcat-header.is-stuck .highlighting-bar .fav-back{
+  position: relative; /* permite posicionar el pseudo-elemento correctamente */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 3rem;            /* misma altura que la barra */
+  min-height: 3rem;       /* asegura centrado vertical */
+}
+#subcat-header.is-stuck .highlighting-bar .fav-back::after{
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 18px;                /* mismo alto que .hl-sep */
+  background: #e5e7eb;         /* gray-200 */
+  margin-left: .75rem;         /* separación a la derecha del botón */
+  margin-right: .75rem;        /* mantiene el mismo gap que otros separadores */
+}
+
+/* Bookmark y Cerrar solo en barra pegada */
+.highlighting-bar .bookmark-toggle,
+.highlighting-bar .hl-close{display:none;}
+#subcat-header.is-stuck .highlighting-bar .bookmark-toggle,
+#subcat-header.is-stuck .highlighting-bar .hl-close{display:inline-flex!important;}
+
+
+#topbar {
+  height: 3rem !important;
+  box-sizing: border-box;
+}
+.highlighting-bar {
+  height: 3rem !important;
+  min-height: 3rem !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  box-sizing: border-box;
+}
 
 /* Base para items (enlaces y botones) */
 #sidebar .sidebar-item{
@@ -1383,6 +1463,77 @@ details[open] > summary {
   transform: rotate(180deg);
   color: #6b7280;                      /* gray-600 */
 }
+
+.toggle-icons{display:flex;align-items:center;gap:.35rem;}
+/* Acciones a la derecha en MY HIGHLIGHTING */
+.highlighting-bar .toggle-icons{margin-left:auto;display:flex;gap:.5rem;justify-content:flex-end;}
+/* Espaciador flexible entre título e iconos */
+.highlighting-bar .hl-center{flex:1 1 0;display:flex;align-items:center;justify-content:flex-start;margin:0;}
+.bookmark-toggle{display:none;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:9999px;color:#94a3b8;cursor:pointer;transition:color .2s ease;}
+.bookmark-toggle:hover{color:#1e293b;}
+.bookmark-toggle:focus-visible{outline:2px solid #38bdf8;outline-offset:2px;}
+[data-bookmarked="true"] .bookmark-toggle{color:#0f172a;}
+[data-bookmarked="true"]>.toggle-icons>.bookmark-toggle,
+.accordion-open .bookmark-toggle,
+details[open] summary .bookmark-toggle,
+details[data-bookmarked="true"] summary .bookmark-toggle{display:inline-flex;}
+#sidebar .bookmark-toggle{display:none!important;}
+
+body.favorites-split #main-content{
+  display:flex;
+  gap:0;
+  align-items:stretch;
+  overflow:hidden;
+  padding:0 !important;
+  margin:0 !important;
+  background:#e9eff6 !important;
+  box-sizing:border-box;
+  flex:1 1 auto;
+}
+/* En favoritos: si la barra MY HIGHLIGHTING está sticky, oculta la topbar del split derecho */
+body.favorites-split:has(#subcat-header.is-stuck) #fav-topbar { display: none !important; }
+body.favorites-split #favorites-view{
+  display:block;
+  width:320px;
+  flex-shrink:0;
+  padding:1.75rem;
+  background:#e9eff6;
+  border-right:1px solid #d5dbe5;
+  box-sizing:border-box;
+  margin:0 !important;
+}
+body.favorites-split #subcategoria-content{
+  flex:1;
+  display:block !important;
+  padding:0 2.5rem 2.5rem !important;
+  margin:0 !important;
+  background:#fff;
+}
+body.favorites-split #subcat-header{margin-bottom:1.5rem;}
+body.favorites-split #subcategoria-sidebar{display:none!important;}
+body.favorites-split #subcat-header .highlighting-bar{margin-left:0!important;margin-right:0!important;padding-left:0!important;padding-right:0!important;}
+body.favorites-split #favorites-view,
+body.favorites-split #subcategoria-content{height:100%;overflow-y:auto;}
+body.favorites-split .dashboard-container{
+  background:#e9eff6;
+  gap:0;
+  width:100%;
+}
+body.favorites-split #sidebar{border-right:1px solid #d5dbe5;}
+body.favorites-split #sb-switch{background:#e9eff6;border-color:#d5dbe5;}
+body.favorites-split #user-section,
+body.favorites-split{background:#e9eff6;}
+#favorites-view{display:none;}
+#favorites-view:not(.hidden){display:block;}
+body.favorites-split #favorites-view.hidden{display:none;}
+#favorites-list{display:flex;flex-direction:column;gap:.75rem;}
+.favorite-item{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.9rem 1rem;border:1px solid #e2e8f0;border-radius:.75rem;background:#fff;transition:box-shadow .2s ease,border-color .2s ease,background .2s ease;text-align:left;}
+.favorite-item:hover{box-shadow:0 8px 20px rgba(15,23,42,.08);border-color:#cbd5f5;}
+.favorite-item--active{border-color:#3b82f6;background:#eff6ff;}
+.favorite-item__meta{font-size:.75rem;line-height:1rem;color:#64748b;}
+.favorite-empty{padding:2.5rem;border:1px dashed #cbd5f5;border-radius:.75rem;background:#f8fafc;text-align:center;color:#64748b;}
+.favorite-highlight{animation:favoritePulse 1.2s ease forwards;}
+@keyframes favoritePulse{0%{box-shadow:0 0 0 0 rgba(59,130,246,.35);}100%{box-shadow:0 0 0 16px rgba(59,130,246,0);}}
 
 /* Bloque activo */
 #sidebar .sidebar-group.segment-active {
@@ -2586,6 +2737,44 @@ body.bars-hidden #sb-switch { display: none !important; }
   border-color:#22c55e !important;     /* igual que la explicación */
 }
 
+/* Barra fija SOLO en split derecho (favoritos/guardados) */
+/* Barra fija SOLO en split derecho (favoritos/guardados) */
+body.favorites-split #subcategoria-content{
+  position: relative;
+  padding-top: 0 !important;     /* la barra real ocupa su alto */
+}
+/* anula cualquier pseudo-barra previa */
+body.favorites-split #subcategoria-content::before{ content: none !important; }
+
+/* barra real con el look de la captura */
+.fav-topbar{ display: none; }     /* oculta por defecto */
+body.favorites-split .fav-topbar{
+  position: sticky;
+  top: 0;                         /* pegada al borde superior del split */
+  height: 3rem;
+  display: flex;                  /* visible solo en favorites-split */
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 .75rem;
+  background: linear-gradient(to bottom,#f8fafc,#ffffff);
+  border-bottom: 1px solid #e5e7eb;
+  z-index: 20;
+}
+
+/* íconos y separador como en la captura */
+.fav-topbar .fav-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:1.5rem; height:1.5rem; border-radius:9999px; border:0; background:transparent;
+}
+.fav-topbar .fav-btn i{ font-size:1rem; color:#475569; }           /* slate-600 */
+.fav-topbar .fav-actions{ display:inline-flex; align-items:center; gap:.75rem; }
+.fav-topbar .fav-actions i{ font-size:1.05rem; color:#475569; }     /* slate-600 */
+.fav-topbar .fav-sep{ width:1px; height:18px; background:#e5e7eb; display:inline-block; }
+
+
+
+
+
 /* Verde más claro (para la explicación) */
 .explicacion-box > div {
   border-color:#22c55e !important;   /* green-500 */
@@ -3544,6 +3733,66 @@ body.bars-hidden #sidebar,
   margin: .2rem 0;
 }
 
+/* Separadores personalizados para sticky bar: fav y close */
+#subcat-header.is-stuck .highlighting-bar .fav-btn.fav{ position: relative; }
+#subcat-header.is-stuck .highlighting-bar .fav-btn.fav::after{
+  content: "";
+  display: inline-block;
+  width: 1px; height: 18px;
+  background: #e5e7eb;           /* mismo tono que .hl-sep */
+  margin-left: .75rem;            /* aire a la derecha del botón */
+}
+
+#subcat-header.is-stuck .highlighting-bar .hl-close{ position: relative; }
+#subcat-header.is-stuck .highlighting-bar .hl-close::before{
+  content: "";
+  display: inline-block;
+  width: 1px; height: 18px;
+  background: #e5e7eb;           /* separador a la izquierda de la X */
+  margin-right: .75rem;           /* aire antes de la línea */
+}
+
+
+
+/* Línea divisoria que acompaña al botón X */
+.highlighting-bar .hl-close::before {
+  content: "";
+  width: 1px;
+  height: 18px;
+  background: #e5e7eb;
+  margin: 0 .75rem;
+  display: none; /* por defecto oculta */
+}
+
+/* Oculta por defecto */
+.highlighting-bar .hl-sep.sticky-only {
+  display: none;
+}
+
+/* Cuando la barra está sticky, mostrar */
+#subcat-header.is-stuck .highlighting-bar .hl-sep.sticky-only {
+  display: inline-block;
+}
+
+/* Ocultar también el separador izquierdo de la X fuera de favoritos */
+body:not(.favorites-split) #subcat-header .hl-sep.sticky-only {
+  display: none !important;
+}
+
+
+/* Fuera de favoritos: spacing más compacto aunque esté sticky */
+body:not(.favorites-split) #subcat-header .highlighting-bar .hl-right {
+  gap: .35rem !important;
+}
+body:not(.favorites-split) #subcat-header .highlighting-bar .hl-sep {
+  margin: 0 .5rem !important;
+}
+
+
+body.favorites-split #subcat-header {
+  z-index: 10 !important;
+}
+
 
 
 
@@ -3727,7 +3976,7 @@ body.bars-hidden #sidebar,
 
    <!-- Derecha -->
   <div class="flex items-center space-x-4 shrink-0">
-    <button class="text-gray-600 hover:text-black max-sm:hidden">
+    <button id="favorites-trigger" class="text-gray-600 hover:text-black max-sm:hidden" title="Open favorites">
       <i class="far fa-bookmark text-lg"></i>
     </button>
     <div id="user-initial" class="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center font-semibold cursor-pointer">M</div>
@@ -3856,12 +4105,17 @@ body.bars-hidden #sidebar,
 <!-- Clinical resources (botón + acordeón) -->
 <div class="sidebar-group" id="group-clinical">
   <button onclick="toggleAccordion('clinical')"
-          class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded">
+          class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded"
+          data-bookmark-key="clinical"
+          data-bookmarked="false">
     <div class="flex items-center">
       <img src="./assets/ccc2.png" data-icon="ccc" class="w-4.3 h-5 shrink-0 sidebar-icon" />
       <span class="ml-2">Clinical resources</span>
     </div>
-    <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
+    <span class="toggle-icons">
+      <span class="bookmark-toggle" data-label="Clinical resources" role="button" tabindex="0" aria-pressed="false"><i class="far fa-bookmark text-xs"></i></span>
+      <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
+    </span>
   </button>
 
   <div id="accordion-clinical" class="ml-8 mt-1 space-y-1 hidden">
@@ -3882,12 +4136,17 @@ body.bars-hidden #sidebar,
 
       <div class="sidebar-group" id="group-exams">
   <button onclick="toggleAccordion('exams')"
-          class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded">
+          class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded"
+          data-bookmark-key="exams"
+          data-bookmarked="false">
     <div class="flex items-center">
       <img src="./assets/ddd2.png" data-icon="ddd" class="w-4.3 h-5  shrink-0 sidebar-icon" />
       <span class="ml-2">Exams & CME</span>
     </div>
-    <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
+    <span class="toggle-icons">
+      <span class="bookmark-toggle" data-label="Exams &amp; CME" role="button" tabindex="0" aria-pressed="false"><i class="far fa-bookmark text-xs"></i></span>
+      <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
+    </span>
   </button>
 
   <div id="accordion-exams" class="ml-8 mt-1 space-y-1 hidden">
@@ -3902,12 +4161,17 @@ body.bars-hidden #sidebar,
 
       <div class="sidebar-group" id="group-library">
   <button onclick="toggleAccordion('library')"
-          class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded">
+          class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded"
+          data-bookmark-key="library"
+          data-bookmarked="false">
     <div class="flex items-center">
      <img src="./assets/eee2.png" data-icon="eee" class="w-4.3 h-5  shrink-0 sidebar-icon" />
       <span class="ml-2">Library</span>
     </div>
-    <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
+    <span class="toggle-icons">
+      <span class="bookmark-toggle" data-label="Library" role="button" tabindex="0" aria-pressed="false"><i class="far fa-bookmark text-xs"></i></span>
+      <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
+    </span>
   </button>
 
   <div id="accordion-library" class="ml-8 mt-1 space-y-1 hidden">
@@ -3919,12 +4183,17 @@ body.bars-hidden #sidebar,
 
       <div class="sidebar-group" id="group-account">
   <button onclick="toggleAccordion('account')"
-          class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded">
+          class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded"
+          data-bookmark-key="account"
+          data-bookmarked="false">
     <div class="flex items-center">
       <img src="./assets/fff2.png" data-icon="fff" class="w-4.3 h-5  shrink-0 sidebar-icon" />
       <span class="ml-2">Account & settings</span>
     </div>
-    <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
+    <span class="toggle-icons">
+      <span class="bookmark-toggle" data-label="Account &amp; settings" role="button" tabindex="0" aria-pressed="false"><i class="far fa-bookmark text-xs"></i></span>
+      <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
+    </span>
   </button>
 
   <div id="accordion-account" class="ml-8 mt-1 space-y-1 hidden">
@@ -3941,12 +4210,17 @@ body.bars-hidden #sidebar,
 
       <div class="sidebar-group" id="group-help">
   <button onclick="toggleAccordion('help')"
-          class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded">
+          class="sidebar-item w-full flex items-center justify-between px-3 py-2 rounded"
+          data-bookmark-key="help"
+          data-bookmarked="false">
     <div class="flex items-center">
       <img src="./assets/ggg2.png" data-icon="ggg" class="w-4.3 h-5  shrink-0 sidebar-icon" />
       <span class="ml-2">Help & privacy</span>
     </div>
-    <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
+    <span class="toggle-icons">
+      <span class="bookmark-toggle" data-label="Help &amp; privacy" role="button" tabindex="0" aria-pressed="false"><i class="far fa-bookmark text-xs"></i></span>
+      <i class="fas fa-chevron-down text-xs transition-transform duration-200"></i>
+    </span>
   </button>
 
   <div id="accordion-help" class="ml-8 mt-1 space-y-1 hidden">
@@ -4069,7 +4343,42 @@ body.bars-hidden #sidebar,
 
 
 
+<div id="favorites-view" class="hidden pt-6">
+  <div class="flex flex-col gap-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-xs uppercase tracking-wide text-slate-500 font-semibold">Collections</p>
+        <h2 class="text-2xl font-bold text-slate-800">Favorites</h2>
+        <p class="text-sm text-slate-500 mt-1">Quick access to the sections you saved for later.</p>
+      </div>
+    </div>
+
+    <div id="favorites-empty" class="favorite-empty hidden">
+      Save sections using the bookmark icon to build your personal collection.
+    </div>
+
+    <div id="favorites-list" class="hidden"></div>
+  </div>
+</div>
+
+
 <div id="subcategoria-content" class="hidden !px-0 sm:!px-1 md:!px-2 pt-10 mt-6">
+  <!-- Topbar fija para split derecho (favoritos/guardados) -->
+<div id="fav-topbar" class="fav-topbar" aria-hidden="true">
+<button class="fav-btn fav-back" type="button" title="Back">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 26 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+    <!-- Línea vertical más a la izquierda -->
+    <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 6v12" />
+    <!-- Flecha separada -->
+    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12H6m0 0l6 6m-6-6l6-6" />
+  </svg>
+</button>
+
+  <div class="fav-actions">
+
+    <i class="fa-solid fa-xmark" title="Close"></i>
+  </div>
+</div>
   <h2 id="subcategoria-title" class="text-2xl font-bold mb-4"></h2>
   <div id="subcategoria-body" class="space-y-6"></div>
 </div>
@@ -4416,7 +4725,7 @@ window.restoreLibraryFromState = async function(s) {
 <!-- === Simple View Manager (oculta todo y muestra sólo la vista pedida) === -->
 <script>
   // Vistas principales de tu app
-  const VIEW_IDS = ['home-content','articles-panel','search-page','subcategoria-content'];
+  const VIEW_IDS = ['home-content','articles-panel','search-page','favorites-view','subcategoria-content'];
 
   function hideAllViews(){
     VIEW_IDS.forEach(id => document.getElementById(id)?.classList.add('hidden'));
@@ -4452,6 +4761,9 @@ function hardCloseModal(){
     hardCloseModal(); // ← asegura estado limpio SIEMPRE
     hideAllViews();
     document.getElementById(id)?.classList.remove('hidden');
+    if (id !== 'favorites-view') {
+      document.body.classList.remove('favorites-split');
+    }
     // confort: sube al top del contenedor scrolleable
 
     const mc = document.getElementById('main-content');
@@ -4470,11 +4782,8 @@ function hardCloseModal(){
   window.showSubcat   = () => showView('subcategoria-content');
 
   // Botón "Go to library" ya existente en Home
-  window.goToLibraryArticles = () => showArticles();
+window.goToLibraryArticles = () => showArticles();
 </script>
-
-
-
 <script>
   let currentActivePanel2Item = null; // Para mantener el elemento seleccionado en el panel 2
   let currentActivePanel3Item = null; // Para mantener el elemento seleccionado en el panel 3
@@ -4621,7 +4930,9 @@ function markSelected(el) {
   el.closest('li').classList.add('is-selected');
 }
 
-async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategoriaId) {
+async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategoriaId, opts = {}) {
+  const options = typeof opts === 'object' && opts !== null ? opts : {};
+  const skipShowView = !!options.skipShowView;
   // — Cambiar de vista de forma centralizada —
   // Oculta la TOC desde el inicio para evitar el "flash"
   setCurrentSubcatCtx({ supracategoriaId, categoriaId, subcategoriaId });
@@ -4639,9 +4950,11 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     document.body.classList.add('bars-hidden');
   }
 
-
-
-  showSubcat();
+  if (skipShowView) {
+    document.getElementById('subcategoria-content')?.classList.remove('hidden');
+  } else {
+    showSubcat();
+  }
 
   // — Referencias al DOM —
   const contentSection = document.getElementById("subcategoria-content");
@@ -4665,6 +4978,8 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     data?.denominacion ||
     data?.label ||
     subcategoriaId;
+
+  setCurrentSubcatCtx({ supracategoriaId, categoriaId, subcategoriaId, title: displayTitle });
 
   window.recordRecentArticle?.({
     supracategoriaId,
@@ -4716,8 +5031,16 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
 
 <!-- solo este bloque irá dentro de #subcat-header -->
 <div id="subcat-header">
-  <div class="highlighting-bar -mx-20 border-y border-gray-200 bg-white z-30 relative overflow-visible">
-    <div class="mx-20 px-6 py-1 flex items-center justify-between overflow-visible">
+  <div class="highlighting-bar border-y border-gray-200 bg-white z-30 relative overflow-visible">
+<button class="fav-btn fav-back" type="button" title="Back">
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 26 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+    <!-- Línea vertical más a la izquierda -->
+    <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 6v12" />
+    <!-- Flecha separada -->
+    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12H6m0 0l6 6m-6-6l6-6" />
+  </svg>
+</button>
+    <div class="pl-6 pr-4 py-1 flex items-center w-full overflow-visible">
       <!-- Izquierda -->
       <div id="highlight-toggle" class="flex items-center cursor-pointer select-none">
         <i id="highlight-icon" class="fas fa-highlighter text-slate-600 text-sm mr-0 sm:mr-1.5"></i>
@@ -4726,8 +5049,10 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
         </span>
       </div>
 
+      <div class="hl-spacer flex-1"></div>
+
       <!-- Derecha -->
-      <div class="flex items-center text-slate-600 space-x-1.5 relative overflow-visible">
+      <div class="hl-right flex items-center text-slate-600 space-x-1.5 relative overflow-visible ml-auto">
         <button class="hl-btn" aria-label="Bookmark">
           <i class="far fa-bookmark text-sm"></i>
         </button>
@@ -4744,7 +5069,7 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
         <button id="font-btn" class="hl-btn font-semibold tracking-wide text-xs">AA</button>
 
        <!-- Menú de zoom sobrepuestos -->
-<div id="font-menu"
+       <div id="font-menu"
      class="font-menu hidden absolute right-0 top-full mt-1 z-50 inline-block rounded-l bg-white shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
   <div class="grid grid-cols-[auto_auto_auto] items-center gap-2 px-3 py-2 whitespace-nowrap">
     <!-- − -->
@@ -4775,14 +5100,19 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
             rounded-xl border border-gray-200 bg-white
             shadow-[0_8px_30px_rgba(0,0,0,0.12)] z-50">
 </div>
+
+
         </div>
+<!-- Después ✅ -->
+<span class="hl-sep sticky-only"></span>
+  <button class="hl-btn hl-close" data-favonly="true"><i class="fa-solid fa-xmark"></i></button>
       </div>
     </div>
   </div>
 
   <!-- Breadcrumbs debajo en la pila -->
-  <nav id="breadcrumbs" class="hidden -mx-20 bg-white border-b z-20 relative">
-    <div class="mx-20 px-6 py-2 flex items-center gap-1.5 text-slate-600 text-xs leading-tight">
+  <nav id="breadcrumbs" class="hidden bg-white border-b z-20 relative">
+    <div class="px-6 py-2 flex items-center gap-1.5 text-slate-600 text-xs leading-tight">
       <a id="bc-topic" href="#" class="hover:text-slate-800">—</a>
       <i id="bc-sep" class="fas fa-chevron-right text-[10px] text-slate-400"></i>
       <span id="bc-section" class="text-slate-800 font-medium">—</span>
@@ -5040,6 +5370,11 @@ function renderClaveBlock(bloque){
 
 // Convierte claves como "special_surface_epithelia" -> "Special Surface Epithelia"
 const makeTitle = (k) => k.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase());
+const bookmarkToggleMarkup = (label = 'item') => {
+  const safe = String(label ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  return `<span class="bookmark-toggle" data-label="${safe}"
+          role="button" tabindex="0" aria-pressed="false"><i class="far fa-bookmark text-xs"></i></span>`;
+};
 
 // Renderiza hijos (subsubtítulos) ordenados por "orden"
 // Renderiza hijos (subsubtítulos) con look de "título" + prefijo ⤷
@@ -5052,16 +5387,19 @@ function renderChildren(children) {
   return `
     <div class="divide-y divide-gray-200 -mx-6">
       ${childEntries.map(([ck, ch]) => `
-        <details class="group subhead">
+        <details class="group subhead" data-bookmark-key="sub:${ck}" data-bookmarked="false">
           <summary class="px-6 py-2 group-open:py-3 flex items-center justify-between hover:bg-slate-50 transition-colors">
             <span class="text-xs md:text-sm leading-5">
               <span aria-hidden="true" class="mr-2 text-slate-400">⤷</span>${makeTitle(ck)}
             </span>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="2"
-                 class="h-4 w-4 text-gray-500 transition-transform group-open:rotate-180" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-            </svg>
+            <span class="toggle-icons">
+              ${bookmarkToggleMarkup(makeTitle(ck))}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2"
+                   class="h-4 w-4 text-gray-500 transition-transform group-open:rotate-180" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </span>
           </summary>
 
           <div class="px-6 py-4 text-gray-700 space-y-3">
@@ -5119,6 +5457,12 @@ sortedDefs.forEach(([key, bloque]) => {
   section.className = "group";
   section.dataset.level = 'h2';
   section.dataset.title = title;
+  section.dataset.bookmarkKey = `h2:${key}`;
+  section.dataset.bookmarked = 'false';
+  section.dataset.supracategoriaId = supracategoriaId;
+  section.dataset.categoriaId = categoriaId;
+  section.dataset.subcategoriaId = subcategoriaId;
+  section.dataset.subcategoriaTitle = displayTitle;
     // ID estable para notas de este H2
   section.dataset.noteId = `${supracategoriaId}/${categoriaId}/${subcategoriaId}/h2:${key}`;
    section.innerHTML = `
@@ -5126,10 +5470,13 @@ sortedDefs.forEach(([key, bloque]) => {
     <span class="text-xs md:text-sm leading-5 transition-[font-size] duration-150 group-open:!text-[16px] group-open:leading-[22px]">
       ${title}
     </span>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-         class="h-4 w-4 text-gray-500 transition-transform group-open:rotate-180" aria-hidden="true">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-    </svg>
+    <span class="toggle-icons">
+      ${bookmarkToggleMarkup(title)}
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           class="h-4 w-4 text-gray-500 transition-transform group-open:rotate-180" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+      </svg>
+    </span>
   </summary>
 
   <div class="px-6 py-4 text-gray-700 space-y-4">
@@ -5191,17 +5538,7 @@ ${bloque.texto ? `<div class="texto-lista">${renderMD(bloque.texto)}</div>` : ``
 
   `;
 
-
-
-
-
-
-
-
-
-
-
-
+  initializeBookmarkControls(section);
   wrapper.appendChild(section);
 
 
@@ -5222,6 +5559,12 @@ if (bloque.children && typeof bloque.children === 'object') {
     child.dataset.level = 'h3';
     child.dataset.title = makeTitle(ck);
     child.dataset.parentTitle = title;
+    child.dataset.bookmarkKey = `h3:${ck}`;
+    child.dataset.bookmarked = 'false';
+    child.dataset.supracategoriaId = supracategoriaId;
+    child.dataset.categoriaId = categoriaId;
+    child.dataset.subcategoriaId = subcategoriaId;
+    child.dataset.subcategoriaTitle = displayTitle;
     // ID estable para notas de este H3
 child.dataset.noteId = `${supracategoriaId}/${categoriaId}/${subcategoriaId}/h3:${ck}`;
     child.innerHTML = `
@@ -5229,10 +5572,13 @@ child.dataset.noteId = `${supracategoriaId}/${categoriaId}/${subcategoriaId}/h3:
         <span class="text-xs md:text-sm leading-5">
           <span class="mr-2 text-slate-400">⤷</span>${makeTitle(ck)}
         </span>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             class="h-4 w-4 text-gray-500 transition-transform group-open:rotate-180" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-        </svg>
+        <span class="toggle-icons">
+          ${bookmarkToggleMarkup(makeTitle(ck))}
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               class="h-4 w-4 text-gray-500 transition-transform group-open:rotate-180" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </span>
       </summary>
 
       <div class="px-6 py-4 text-gray-700 space-y-4">
@@ -5269,11 +5615,12 @@ child.dataset.noteId = `${supracategoriaId}/${categoriaId}/${subcategoriaId}/h3:
    <button type="button" class="flex items-center space-x-1 notes-btn relative">
 <span class="absolute -left-3 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full notes-indicator"></span>
        <i class="fas fa-pen"></i>
-       <span>NOTES</span>
-   </button>          <button class="flex items-center space-x-1"><i class="fas fa-comment-dots"></i><span>FEEDBACK</span></button>
+      <span>NOTES</span>
+  </button>          <button class="flex items-center space-x-1"><i class="fas fa-comment-dots"></i><span>FEEDBACK</span></button>
         </div>
       </div>
     `;
+    initializeBookmarkControls(child);
     wrapper.appendChild(child);
   });
 }
@@ -5351,30 +5698,44 @@ function updateBreadcrumbSection() {
     bcSep?.classList.add('hidden');
     return;
   }
-  const offset = subcatHeader.classList.contains('is-stuck') ? subcatHeader.offsetHeight : 0;
-  const containerTop = content.getBoundingClientRect().top + offset + 1;
-  let current = summaries[0];
-  for (const s of summaries) {
-    if (s.getBoundingClientRect().top <= containerTop) current = s; else break;
-  }
-  const detailsEl = current.closest('details');
-  const level = detailsEl?.dataset.level || 'h2';
-  if (level === 'h3') {
-    const primary = detailsEl.dataset.parentTitle || baseTopic;
-    const secondary = detailsEl.dataset.title || cleanSummaryText(current);
-    bcTopic.textContent = primary;
-    if (bcSection) {
-      bcSection.textContent = secondary;
-      bcSection.classList.remove('hidden');
+
+  const offset = STICKY_H || (subcatHeader.classList.contains('is-stuck') ? subcatHeader.offsetHeight : 0);
+  const scrollTop = content.scrollTop + offset + 1;
+  const containerTop = content.getBoundingClientRect().top;
+
+  const pickSummary = () => {
+    let current = summaries[0];
+    for (const s of summaries) {
+      const top = s.getBoundingClientRect().top - containerTop + content.scrollTop;
+      if (top <= scrollTop) current = s; else break;
     }
+    return current;
+  };
+
+  const current = pickSummary();
+  const detailsEl = current?.closest('details');
+  const level = detailsEl?.dataset.level || 'h2';
+
+  bcTopic.textContent = baseTopic;
+
+  if (!bcSection) return;
+
+  let subtitle = '';
+  if (level === 'h3') {
+    const parent = detailsEl?.dataset.parentTitle || cleanSummaryText(current) || baseTopic;
+    const child  = detailsEl?.dataset.title || cleanSummaryText(current);
+    subtitle = child ? `${parent} > ${child}` : parent;
+  } else {
+    subtitle = detailsEl?.dataset.title || cleanSummaryText(current) || '';
+  }
+
+  if (subtitle) {
+    bcSection.textContent = subtitle;
+    bcSection.classList.remove('hidden');
     bcSep?.classList.remove('hidden');
   } else {
-    const primary = detailsEl?.dataset.title || cleanSummaryText(current) || baseTopic;
-    bcTopic.textContent = primary;
-    if (bcSection) {
-      bcSection.textContent = '';
-      bcSection.classList.add('hidden');
-    }
+    bcSection.textContent = '';
+    bcSection.classList.add('hidden');
     bcSep?.classList.add('hidden');
   }
 }
@@ -5500,7 +5861,8 @@ subWrap.innerHTML = tocHTML;
   
     // Muestra la TOC SOLO cuando el contenido ya está pintado (NO en móvil)
   requestAnimationFrame(() => requestAnimationFrame(() => {
-    if (window.matchMedia('(min-width: 640px)').matches) {
+    const isDesktop = window.matchMedia('(min-width: 640px)').matches;
+    if (isDesktop && !document.body.classList.contains('favorites-split')) {
       subSidebar.classList.remove('hidden');
     }
   }));
@@ -5783,8 +6145,10 @@ window.dispatchEvent(new CustomEvent('subcat:rendered', {
   }
 }));
 
-  // — Opcional: colapsar la sidebar principal si lo necesitas —
-  toggleSidebarCollapse(true);
+  // En modo favoritos la barra debe permanecer expandida.
+  if (!document.body.classList.contains('favorites-split')) {
+    toggleSidebarCollapse(true);
+  }
   applyNotesBadgesInPage();  // pinta el botón NOTES en teal si ya hay nota guardada
   
 
@@ -5853,7 +6217,17 @@ if (!window.__POPSTATE_WIRED__) {
 
 
 
+// === CSS para ocultar botones fav-back y close fuera de favoritos ===
 </script>
+<style>
+/* Ocultar botones fav-back y close (y sus separadores adyacentes) fuera de favoritos */
+body:not(.favorites-split) #subcat-header .fav-btn[data-favonly="true"],
+body:not(.favorites-split) #subcat-header .hl-btn.hl-close[data-favonly="true"],
+body:not(.favorites-split) #subcat-header .fav-btn[data-favonly="true"] + .hl-sep,
+body:not(.favorites-split) #subcat-header .hl-btn.hl-close[data-favonly="true"] ~ .hl-sep {
+  display: none !important;
+}
+</style>
 
 
 <script>
@@ -6023,6 +6397,385 @@ function toggleAccordion(id) {
   }
 }
 
+const BOOKMARK_HOST = '[data-bookmark-key]';
+const cssEscape = (window.CSS && window.CSS.escape) ? window.CSS.escape : (value) =>
+  String(value).replace(/[^a-zA-Z0-9_\-]/g, (m) => `\\${m}`);
+
+function updateBookmarkVisual(btn, active) {
+  btn.setAttribute('aria-pressed', active);
+  const icon = btn.querySelector('i');
+  if (icon) {
+    icon.classList.toggle('fas', active);
+    icon.classList.toggle('far', !active);
+  }
+}
+
+function buildFavoritePayload(host) {
+  if (!host) return null;
+  const key = host.dataset.bookmarkKey;
+  if (!key) return null;
+
+  const rawLabel =
+    host.dataset.title ||
+    host.dataset.label ||
+    host.dataset.bookmarkLabel ||
+    host.querySelector('summary span')?.textContent ||
+    host.textContent;
+
+  const label = (rawLabel || key).replace(/\s+/g, ' ').trim();
+  const level = host.dataset.level || null;
+  const type = level ? 'segment' : 'item';
+
+  const ctx = window.__CURRENT_SUBCAT_CTX__ || {};
+  const payload = {
+    key,
+    label,
+    type: level ? 'segment' : 'item',
+    level,
+    parentTitle: host.dataset.parentTitle || null,
+    supracategoriaId: host.dataset.supracategoriaId || ctx.supracategoriaId || null,
+    categoriaId: host.dataset.categoriaId || ctx.categoriaId || null,
+    subcategoriaId: host.dataset.subcategoriaId || ctx.subcategoriaId || null,
+    subcategoriaTitle: host.dataset.subcategoriaTitle || ctx.title || null,
+    noteId: host.dataset.noteId || null
+  };
+
+  if (payload.type !== 'segment') return null;
+  if (!payload.supracategoriaId || !payload.categoriaId || !payload.subcategoriaId) return null;
+
+  return payload;
+}
+
+const favoritesManager = (() => {
+  const store = new Map();
+  const listeners = new Set();
+  let unsubscribe = null;
+
+  const dbInstance = () => window.db || (firebase?.firestore ? firebase.firestore() : null);
+  const currentUid = () => firebase?.auth ? firebase.auth().currentUser?.uid || null : null;
+  const collectionRef = () => {
+    const uid = currentUid();
+    const db = dbInstance();
+    return uid && db ? db.collection('users').doc(uid).collection('favorites') : null;
+  };
+
+  const applyDom = (key, active) => {
+    if (!key) return;
+    const selector = `[data-bookmark-key="${cssEscape(key)}"]`;
+    document.querySelectorAll(selector).forEach(host => {
+      host.dataset.bookmarked = active ? 'true' : 'false';
+      host.querySelectorAll('.bookmark-toggle').forEach(btn => updateBookmarkVisual(btn, active));
+    });
+  };
+
+  const getList = () =>
+    Array.from(store.values()).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+
+  const notify = () => {
+    const list = getList();
+    listeners.forEach(fn => {
+      try { fn(list); } catch (err) { console.error('favorites listener error', err); }
+    });
+  };
+
+  const resetDom = () => {
+    document.querySelectorAll(BOOKMARK_HOST).forEach(host => {
+      host.dataset.bookmarked = 'false';
+      host.querySelectorAll('.bookmark-toggle').forEach(btn => updateBookmarkVisual(btn, false));
+    });
+  };
+
+  const stop = () => {
+    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    if (store.size) {
+      store.forEach((_, key) => applyDom(key, false));
+    }
+    store.clear();
+    notify();
+  };
+
+  const start = () => {
+    const ref = collectionRef();
+    if (!ref) return;
+    unsubscribe = ref.onSnapshot(snapshot => {
+      let changed = false;
+      snapshot.docChanges().forEach(change => {
+        const id = change.doc.id;
+        if (change.type === 'removed') {
+          store.delete(id);
+          applyDom(id, false);
+          changed = true;
+        } else {
+          const data = change.doc.data() || {};
+          const ts = data.updatedAt && data.updatedAt.toMillis ? data.updatedAt.toMillis() : Date.now();
+          store.set(id, { key: id, ...data, updatedAt: ts });
+          applyDom(id, true);
+          changed = true;
+        }
+      });
+      if (changed) notify();
+    }, err => console.error('favorites snapshot error', err));
+  };
+
+  if (firebase?.auth) {
+    firebase.auth().onAuthStateChanged(user => {
+      stop();
+      if (user) start();
+      else resetDom();
+    });
+  }
+
+  return {
+    has: key => store.has(key),
+    getList,
+    subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
+    async set(host, active) {
+      const key = host.dataset.bookmarkKey;
+      if (!key) return;
+      const ref = collectionRef();
+      if (!ref) throw new Error('auth-required');
+
+      if (active) {
+        const payload = buildFavoritePayload(host);
+        if (!payload) throw new Error('unsupported');
+        const docRef = ref.doc(key);
+        const snap = await docRef.get();
+        const now = firebase.firestore.FieldValue.serverTimestamp();
+        const data = {
+          bookmarkKey: key,
+          label: payload.label,
+          type: payload.type,
+          level: payload.level || null,
+          parentTitle: payload.parentTitle || null,
+          supracategoriaId: payload.supracategoriaId || null,
+          categoriaId: payload.categoriaId || null,
+          subcategoriaId: payload.subcategoriaId || null,
+          subcategoriaTitle: payload.subcategoriaTitle || null,
+          noteId: payload.noteId || null,
+          updatedAt: now
+        };
+        if (!snap.exists) data.createdAt = now;
+        await docRef.set(data, { merge: true });
+      } else {
+        await ref.doc(key).delete();
+      }
+    }
+  };
+})();
+
+function initializeBookmarkControls(root = document) {
+  root.querySelectorAll('.bookmark-toggle').forEach(btn => {
+    const host = btn.closest(BOOKMARK_HOST);
+    if (!host) return;
+    const key = host.dataset.bookmarkKey;
+    const active = key ? favoritesManager.has(key) || host.dataset.bookmarked === 'true' : host.dataset.bookmarked === 'true';
+    host.dataset.bookmarked = active ? 'true' : 'false';
+    updateBookmarkVisual(btn, active);
+    if (btn.dataset.label) btn.setAttribute('aria-label', `Guardar ${btn.dataset.label}`);
+  });
+}
+
+async function toggleBookmark(btn, evt) {
+  if (evt) { evt.preventDefault(); evt.stopPropagation(); }
+  const host = btn.closest(BOOKMARK_HOST);
+  if (!host) return;
+  const prev = host.dataset.bookmarked === 'true';
+  const next = !prev;
+  host.dataset.bookmarked = next ? 'true' : 'false';
+  updateBookmarkVisual(btn, next);
+  try {
+    await favoritesManager.set(host, next);
+  } catch (err) {
+    host.dataset.bookmarked = prev ? 'true' : 'false';
+    updateBookmarkVisual(btn, prev);
+    if (err && err.message === 'auth-required') {
+      console.warn('You need to be logged in to save favorites.');
+    } else if (err && err.message === 'unsupported') {
+      console.warn('This element cannot be saved as a favorite yet.');
+    } else {
+      console.error('Bookmark toggle failed', err);
+    }
+  }
+}
+
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.bookmark-toggle');
+  if (btn) toggleBookmark(btn, e);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const btn = e.target.closest('.bookmark-toggle');
+  if (btn) toggleBookmark(btn, e);
+});
+
+if (typeof window !== 'undefined') window.initializeBookmarkControls = initializeBookmarkControls;
+initializeBookmarkControls();
+
+(function setupFavoritesUI(){
+  const favoritesTriggerBtn = document.getElementById('favorites-trigger');
+  const favoritesListEl = document.getElementById('favorites-list');
+  const favoritesEmptyEl = document.getElementById('favorites-empty');
+  let currentFavoriteKey = null;
+
+  const escapeHTML = (value) =>
+    String(value ?? '').replace(/&/g,'&amp;')
+                       .replace(/</g,'&lt;')
+                       .replace(/>/g,'&gt;')
+                       .replace(/"/g,'&quot;');
+
+  function renderFavoritesList(list) {
+    if (!favoritesListEl) return;
+    const segments = (list || []).filter(item => item.type === 'segment');
+    if (!segments.length) {
+      favoritesListEl.innerHTML = '';
+      favoritesListEl.classList.add('hidden');
+      favoritesEmptyEl?.classList.remove('hidden');
+      currentFavoriteKey = null;
+      return;
+    }
+    favoritesEmptyEl?.classList.add('hidden');
+    favoritesListEl.classList.remove('hidden');
+    favoritesListEl.innerHTML = segments.map(item => `
+      <button class="favorite-item ${item.bookmarkKey === currentFavoriteKey ? 'favorite-item--active' : ''}"
+              data-fav-key="${escapeHTML(item.bookmarkKey)}"
+              data-sup="${escapeHTML(item.supracategoriaId || '')}"
+              data-cat="${escapeHTML(item.categoriaId || '')}"
+              data-sub="${escapeHTML(item.subcategoriaId || '')}">
+        <span>
+          <span class="block text-sm font-semibold text-slate-800">${escapeHTML(item.label)}</span>
+          <span class="favorite-item__meta">${escapeHTML(item.subcategoriaTitle || '')}</span>
+        </span>
+        <i class="far fa-bookmark text-slate-400 text-sm"></i>
+      </button>
+    `).join('');
+  }
+
+  function setActiveFavorite(key) {
+    currentFavoriteKey = key || null;
+    document.querySelectorAll('.favorite-item').forEach(btn => {
+      btn.classList.toggle('favorite-item--active', btn.dataset.favKey === currentFavoriteKey);
+    });
+  }
+
+  function highlightFavoriteSegment(key) {
+    if (!key) return;
+    const selector = `[data-bookmark-key="${cssEscape(key)}"]`;
+    document.querySelectorAll('#subcategoria-content .favorite-highlight')
+      .forEach(el => el.classList.remove('favorite-highlight'));
+    const host = document.querySelector(`#subcategoria-content ${selector}`);
+    if (!host) return;
+    if (host.tagName === 'DETAILS') {
+      host.open = true;
+      const parentH2 = host.closest('details[data-level="h2"]');
+      if (parentH2 && parentH2 !== host) parentH2.open = true;
+    }
+    host.classList.add('favorite-highlight');
+    host.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+    setTimeout(() => host.classList.remove('favorite-highlight'), 1400);
+  }
+
+  async function openFavoriteDetail({ sup, cat, sub, key }) {
+    if (!sup || !cat || !sub || !key) return;
+    document.body.classList.add('favorites-split');
+    document.getElementById('favorites-view')?.classList.remove('hidden');
+    document.body.classList.remove('bars-hidden');
+    const mainSidebar = document.getElementById('sidebar');
+    const tocSidebar = document.getElementById('subcategoria-sidebar');
+    const mainContent = document.getElementById('main-content');
+    mainSidebar?.classList.remove('force-hidden','collapsed');
+    mainSidebar?.classList.add('open');
+    tocSidebar?.classList.add('hidden');
+    if (mainContent) {
+      mainContent.style.marginLeft = '0px';
+      mainContent.style.paddingLeft = '0px';
+      mainContent.style.width = '100%';
+    }
+    const content = document.getElementById('subcategoria-content');
+    content?.classList.remove('hidden');
+    try {
+      await showSubcategoriaContent(sub, cat, sup, { skipShowView: true });
+      if (typeof toggleSidebarCollapse === 'function') toggleSidebarCollapse(false);
+      mainSidebar?.classList.remove('collapsed');
+      mainSidebar?.classList.add('open');
+      setActiveFavorite(key);
+      highlightFavoriteSegment(key);
+    } catch (err) {
+      console.error('Unable to open favorite segment', err);
+    }
+  }
+
+  function openFavoritesView() {
+    showView('favorites-view');
+    document.body.classList.remove('favorites-split');
+    document.getElementById('subcategoria-content')?.classList.add('hidden');
+
+    document.body.classList.remove('bars-hidden');
+    const mainSidebar = document.getElementById('sidebar');
+    const tocSidebar = document.getElementById('subcategoria-sidebar');
+    const mainContent = document.getElementById('main-content');
+    mainSidebar?.classList.remove('force-hidden','collapsed');
+    mainSidebar?.classList.add('open');
+    tocSidebar?.classList.add('hidden');
+    if (mainContent) {
+      mainContent.style.marginLeft = '';
+      mainContent.style.width = '';
+      mainContent.style.paddingLeft = '';
+    }
+    renderFavoritesList(favoritesManager.getList());
+  }
+
+  favoritesManager.subscribe(renderFavoritesList);
+  renderFavoritesList(favoritesManager.getList());
+
+  favoritesListEl?.addEventListener('click', (event) => {
+    const button = event.target.closest('.favorite-item');
+    if (!button) return;
+    openFavoriteDetail({
+      sup: button.dataset.sup,
+      cat: button.dataset.cat,
+      sub: button.dataset.sub,
+      key: button.dataset.favKey
+    });
+  });
+
+  favoritesTriggerBtn?.addEventListener('click', () => {
+    openFavoritesView();
+  });
+
+  function closeFavoritesSplit() {
+    if (!document.body.classList.contains('favorites-split')) return;
+    document.body.classList.remove('favorites-split', 'bars-hidden');
+    document.getElementById('favorites-view')?.classList.add('hidden');
+    document.getElementById('subcategoria-content')?.classList.remove('hidden');
+    const mainSidebar = document.getElementById('sidebar');
+    mainSidebar?.classList.remove('force-hidden','open');
+    mainSidebar?.classList.add('collapsed');
+    const mainContent = document.getElementById('main-content');
+    if (mainContent) {
+      mainContent.style.marginLeft = '';
+      mainContent.style.paddingLeft = '';
+      mainContent.style.width = '';
+    }
+    const tocSidebar = document.getElementById('subcategoria-sidebar');
+    if (window.matchMedia('(min-width: 640px)').matches) {
+      tocSidebar?.classList.remove('hidden');
+    }
+  }
+
+  document.addEventListener('click', (event) => {
+    if (event.target.closest('.fav-btn.fav-back')) {
+      closeFavoritesSplit();
+      return;
+    }
+    if (event.target.closest('#subcat-header .hl-btn.hl-close') ||
+        event.target.closest('#fav-topbar .fa-xmark')) {
+      openFavoritesView();
+    }
+  });
+
+  window.showFavorites = openFavoritesView;
+})();
 
 // Función para establecer el enlace o botón activo (marcado con active-link)
 function setActiveLink(element) {
@@ -6320,9 +7073,15 @@ function toggleSidebarCollapse(force = null) {
     sidebar.classList.add("collapsed");
 
     // Ajustes de layout (si los usás)
-    mainContent.style.marginLeft = "0px";
-    mainContent.style.width      = "calc(100% - 64px)";
-    mainContent.style.paddingLeft = ""; // limpia el padding del expand
+    if (document.body.classList.contains('favorites-split')) {
+      mainContent.style.marginLeft = "0px";
+      mainContent.style.width      = "100%";
+      mainContent.style.paddingLeft = "0px";
+    } else {
+      mainContent.style.marginLeft = "0px";
+      mainContent.style.width      = "calc(100% - 64px)";
+      mainContent.style.paddingLeft = ""; // limpia el padding del expand
+    }
 
     // Cierra acordeones y limpia selección
     closeAllAccordions();
@@ -6333,9 +7092,15 @@ function toggleSidebarCollapse(force = null) {
     sidebar.classList.remove("collapsed");
 
     // (Opcional) restablecer margenes/paddings que tocaste al colapsar
-    mainContent.style.marginLeft  = "";
-    mainContent.style.width       = "100%";
-    mainContent.style.paddingLeft = "64px";
+    if (document.body.classList.contains('favorites-split')) {
+      mainContent.style.marginLeft  = "0px";
+      mainContent.style.width       = "100%";
+      mainContent.style.paddingLeft = "0px";
+    } else {
+      mainContent.style.marginLeft  = "";
+      mainContent.style.width       = "100%";
+      mainContent.style.paddingLeft = "64px";
+    }
 
     // Primero cerramos todo…
     closeAllAccordions();
@@ -6420,16 +7185,25 @@ document.addEventListener('DOMContentLoaded', () => {
       // Subcategoría: principal colapsada + TOC visible, o ambas ocultas
       const isHidden = body.classList.contains('bars-hidden')
                     || sb.classList.contains('force-hidden')
-                    || (toc && toc.classList.contains('hidden'));
+                    || (!body.classList.contains('favorites-split') && toc && toc.classList.contains('hidden'));
 
       if (isHidden) {
         body.classList.remove('bars-hidden');
-        sb.classList.remove('force-hidden','open');
-        sb.classList.add('collapsed');     // aquí sí, colapsada
+        sb.classList.remove('force-hidden');
+        if (body.classList.contains('favorites-split')) {
+          sb.classList.remove('collapsed');
+          sb.classList.add('open');
+        } else {
+          sb.classList.remove('open');
+          sb.classList.add('collapsed');     // aquí sí, colapsada
+        }
         if (toc) toc.classList.remove('hidden');
       } else {
         body.classList.add('bars-hidden');
         sb.classList.add('force-hidden');
+        if (body.classList.contains('favorites-split')) {
+          sb.classList.remove('open','collapsed');
+        }
         if (toc) toc.classList.add('hidden');
       }
       return;
@@ -7917,12 +8691,16 @@ function placeSwitch(){
   };
 
   window.showSubcategoriaContent = async (...args) => {
-    saveSB();
-    const homeEl = document.getElementById('home-content');
-    if (homeEl && !homeEl.classList.contains('hidden')) {
-      lastView = 'home';
+    const maybeOpts = args[3] && typeof args[3] === 'object' ? args[3] : {};
+    const skipShowView = !!maybeOpts.skipShowView;
+    if (!skipShowView) {
+      saveSB();
+      const homeEl = document.getElementById('home-content');
+      if (homeEl && !homeEl.classList.contains('hidden')) {
+        lastView = 'home';
+      }
+      setView('subcat');
     }
-    setView('subcat');
     return fn.sub(...args);
   };
 
@@ -9427,11 +10205,14 @@ function renderQuestionsBlock(data){
     <div class="mt-2 hidden group-has-[input:checked]:block">
       <div id="qs-list" class="divide-y divide-slate-200">
         ${data.suggestions.length
-          ? data.suggestions.slice(0,3).map(q=>`
-              <details class="group">
+          ? data.suggestions.slice(0,3).map((q, idx)=>`
+              <details class="group" data-bookmark-key="qs:${idx}" data-bookmarked="false">
                 <summary class="flex items-center justify-between cursor-pointer list-none py-2 pl-0">
                   <span class="text-slate-700 text-sm">${q}</span>
-                  <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                  <span class="toggle-icons">
+                    ${bookmarkToggleMarkup(q)}
+                    <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                  </span>
                 </summary>
               </details>`).join('')
           : `<div class="p-2 text-xs text-gray-600">No matching questions.</div>`}
@@ -9649,11 +10430,14 @@ function renderOverview(data){
       <div class="mt-2 hidden group-has-[input:checked]:block">
         <div id="qs-list" class="divide-y divide-slate-200">
           ${data.suggestions.length
-            ? data.suggestions.slice(0,3).map(q=>`
-                <details class="group">
+            ? data.suggestions.slice(0,3).map((q, idx)=>`
+                <details class="group" data-bookmark-key="qs:${idx}" data-bookmarked="false">
                   <summary class="flex items-center justify-between cursor-pointer list-none py-2 pl-0">
                     <span class="text-slate-700 text-sm">${q}</span>
-                    <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                    <span class="toggle-icons">
+                      ${bookmarkToggleMarkup(q)}
+                      <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                    </span>
                   </summary>
                 </details>`).join('')
             : `<div class="p-2 text-xs text-gray-600">No matching questions.</div>`}
@@ -10882,9 +11666,10 @@ async function renderSuggestionsConOpciones(list, data, shown) {
   const items = data.suggestions.slice(0, shown);
   const infoMap = await getOpcionesParaItems(items);
 
-  list.innerHTML = items.map(item => {
+  list.innerHTML = items.map((item, idx) => {
     const texto = typeof item === 'string' ? item : (item.text || item.q || '');
     const sid   = typeof item === 'object' ? (item.id || item.qid || null) : null;
+    const bookmarkKey = sid ? `sugg:${sid}` : `sugg:${idx}`;
 
     const keyTxt = `__TXT__${String(texto).trim()}`;
     const meta   = sid ? (infoMap.get(String(sid)) || {}) : (infoMap.get(keyTxt) || {});
@@ -10906,13 +11691,16 @@ async function renderSuggestionsConOpciones(list, data, shown) {
       : `<li class="text-xs text-slate-400 px-3 py-2">Sin opciones registradas</li>`;
 
     return `
-  <details class="group">
+  <details class="group" data-bookmark-key="${bookmarkKey}" data-bookmarked="false">
     <summary class="flex items-center justify-between cursor-pointer list-none py-2 pl-0">
       <span class="text-slate-700 text-sm">${esc(texto)}</span>
-      <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+      <span class="toggle-icons">
+        ${bookmarkToggleMarkup(texto)}
+        <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+      </span>
     </summary>
 
-    <div class="pl-4 pr-2 pb-2 overflow-hidden">
+  <div class="pl-4 pr-2 pb-2 overflow-hidden">
       <div class="expando" style="max-height:0; opacity:0; transition:max-height 250ms ease, opacity 200ms ease;">
                 <ul class="opt-list list-none p-0 m-0"
             data-qkey="${esc(texto)}"
@@ -10931,6 +11719,7 @@ async function renderSuggestionsConOpciones(list, data, shown) {
   </details>`;
   }).join('');
 
+  initializeBookmarkControls(list);
     reapplyStrikes(list);
   list.querySelectorAll('.opt-list').forEach(ul=>{
    const key = ul.dataset.qkey || '';
@@ -12043,7 +12832,7 @@ ready = true;
   input.addEventListener('input', () => {
     clearTimeout(t);
     typedValue = input.value;
-    if (input.value.trim() === '') {
+    if (document.activeElement === input && input.value.trim() === '') {
       if (typeof window.showSearchHistoryPopover === 'function') {
         window.showSearchHistoryPopover();
       }
@@ -12054,7 +12843,7 @@ ready = true;
 
 
   input.addEventListener('focus', () => {
-    if (input.value.trim() === '') {
+    if (document.activeElement === input && input.value.trim() === '') {
       if (typeof window.showSearchHistoryPopover === 'function') {
         window.showSearchHistoryPopover();
       }
@@ -12220,6 +13009,7 @@ popover.addEventListener('keydown', hideOnEnter);
 
 
 
+
 <button id="mobile-split-switch" type="button">
   <i class="fas fa-arrow-left"></i><span>SWITCH VIEW</span>
 </button>
@@ -12232,4 +13022,4 @@ popover.addEventListener('keydown', hideOnEnter);
 
 </html>
 
-//15 octubre amanecidaaaa
+<!-- === 17eeeeeee octubre noche nochiiilaeeeeee === -->
