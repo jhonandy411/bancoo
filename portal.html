@@ -2630,6 +2630,9 @@ body.bars-hidden #sb-switch i{
   transform: rotate(180deg);             /* chevron hacia la derecha */
 }
 
+
+
+
 /* Pequeña protección para que no tape el hover de tu sidebar colapsada */
 #sidebar.collapsed:hover + #subcategoria-sidebar ~ #sb-switch,
 #sidebar.collapsed.hover-expanded + #subcategoria-sidebar ~ #sb-switch{
@@ -3131,6 +3134,29 @@ blockquote {
 /* Estados especiales del overlay */
 .toc-hidden #mobile-overlay.show{ left: var(--sb-collapsed); }
 body.bars-hidden #mobile-overlay.show{ left: 0; }
+
+/* Qbank modal: respeta el ancho ocupado por las barras laterales */
+#qbank-session {
+  --qbank-offset-left: var(--bars-w);
+  --qbank-gap: 0px;
+  left: calc(var(--qbank-offset-left) + var(--qbank-gap));
+}
+body.toc-hidden #qbank-session {
+  --qbank-offset-left: var(--sb-collapsed);
+}
+body.bars-hidden #qbank-session,
+body.force-bars-hidden #qbank-session {
+  --qbank-offset-left: 0px;
+}
+@media (min-width: 640px) {
+  #qbank-session { --qbank-gap: 1rem; }
+}
+@media (min-width: 1280px) {
+  #qbank-session { --qbank-gap: 3rem; }
+}
+@media (max-width: 639.98px) {
+  #qbank-session { --qbank-offset-left: 0px; --qbank-gap: 0px; }
+}
 
 
 /* ===================== <640px ===================== */
@@ -3799,6 +3825,11 @@ body.favorites-split #subcat-header {
 
 
 
+
+
+
+
+
   
   
   </style>
@@ -4236,6 +4267,13 @@ body.favorites-split #subcat-header {
         <!-- Segunda sidebar para subcategorías -->
     <aside id="subcategoria-sidebar" class="hidden bg-white border-r border-gray-200 h-full overflow-y-auto">
       <div id="subcategoria-sidebar-content" class="p-4"></div>
+      <div id="qbank-sidebar" class="hidden h-full flex flex-col bg-slate-50/60">
+        <div class="px-4 py-3 border-b border-slate-200">
+          <p class="text-[11px] uppercase tracking-wide text-slate-500 font-semibold">Questions based on</p>
+          <h3 id="qbank-sidebar-title" class="text-sm font-semibold text-slate-700 leading-tight truncate">—</h3>
+        </div>
+        <nav id="qbank-sidebar-list" class="flex-1 overflow-y-auto divide-y divide-slate-200"></nav>
+      </div>
     </aside>
 
 
@@ -4252,7 +4290,7 @@ body.favorites-split #subcat-header {
     <div class="bg-white rounded-lg shadow-sm articles-panel-column px-4 py-0">
       <ul class="text-sm divide-y divide-gray-200">
 <li>
-  <a href="#" onclick="showSecondPanel(this, 'Basic sciences')" class="articles-panel-list-item">
+  <a href="#" onclick="showSecondPanel(event, this, 'Basic sciences')" class="articles-panel-list-item">
     <span class="ap-icon ap2" aria-hidden="true"></span><span>Basic sciences</span>
   </a>
 </li>
@@ -4266,7 +4304,7 @@ body.favorites-split #subcat-header {
     <div class="bg-white rounded-lg shadow-sm articles-panel-column px-4 py-0">
       <ul class="text-sm divide-y divide-gray-200">
 <li>
-  <a href="#" onclick="showThirdPanel(this, 'By discipline')" class="articles-panel-list-item">
+  <a href="#" onclick="showThirdPanel(event, this, 'By discipline')" class="articles-panel-list-item">
     <span class="ap-icon ap2" aria-hidden="true"></span><span>By discipline</span>
   </a>
 </li>
@@ -4365,7 +4403,7 @@ body.favorites-split #subcat-header {
 <div id="subcategoria-content" class="hidden !px-0 sm:!px-1 md:!px-2 pt-10 mt-6">
   <!-- Topbar fija para split derecho (favoritos/guardados) -->
 <div id="fav-topbar" class="fav-topbar" aria-hidden="true">
-<button class="fav-btn fav-back" type="button" title="Back">
+<button class="fav-btn fav-back" type="button" title="Back" data-favonly="true">
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 26 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
     <!-- Línea vertical más a la izquierda -->
     <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 6v12" />
@@ -4653,72 +4691,6 @@ function updateStickyHeight() {
   STICKY_H = hdr ? (hdr.getBoundingClientRect().height || 0) : 0;
 }
 
-
-
-/* === Library (Articles) view — history/state helpers === */
-// Single source of truth for current Library selection and horizontal scroll
-window.__LIB_CTX__ = { sup: null, cat: null, scrollLeft: 0 };
-
-window.setLibraryState = function(partial) {
-  window.__LIB_CTX__ = Object.assign({}, window.__LIB_CTX__, partial || {});
-};
-
-window.getLibraryState = function() {
-  return window.__LIB_CTX__;
-};
-
-// Snapshot current Library state into History so Back/Forward can restore it
-window.snapshotLibraryAndPush = function() {
-  try {
-    const art = document.getElementById('articles-panel');
-    const snap = {
-      view: 'library',
-      sup: window.__LIB_CTX__.sup || null,
-      cat: window.__LIB_CTX__.cat || null,
-      scrollLeft: (art && typeof art.scrollLeft === 'number') ? art.scrollLeft : 0
-    };
-    if (history.state && history.state.view === 'library') {
-      history.replaceState(snap, '', '');
-    } else {
-      history.pushState(snap, '', '');
-    }
-  } catch {}
-};
-
-// Rebuild the three-column Library view (P1/P2/P3) from a saved state
-window.restoreLibraryFromState = async function(s) {
-  // Ensure the Library view is shown and data is present
-  showArticles();
-  await cargarSupracategorias();
-
-  // Select the supracategory in Panel 1 (by id used in onclick)
-  const p1a = Array.from(document.querySelectorAll('#articles-panel > div:first-child a.articles-panel-list-item'))
-    .find(a => (a.getAttribute('onclick') || '').includes(`'${s.sup}'`));
-  if (p1a) {
-    document.querySelectorAll('#articles-panel > div:first-child li').forEach(li => li.classList.remove('is-selected'));
-    p1a.closest('li')?.classList.add('is-selected');
-  }
-
-  // Build Panel 2 for the selected supracategory
-  await showSecondPanel(p1a || null, s.sup);
-
-  // If a category was saved, select it and build Panel 3
-  if (s.cat) {
-    const p2a = Array.from(document.querySelectorAll('#panel-2 a.articles-panel-list-item'))
-      .find(a => (a.getAttribute('onclick') || '').includes(`'${s.cat}'`));
-    if (p2a) {
-      await showThirdPanel(p2a, s.cat);
-    }
-  }
-
-  // Restore horizontal scroll position
-  const art = document.getElementById('articles-panel');
-  if (art) art.scrollLeft = s.scrollLeft || 0;
-
-  // Sync live context
-  setLibraryState({ sup: s.sup || null, cat: s.cat || null, scrollLeft: s.scrollLeft || 0 });
-};
-
 </script>
 
 
@@ -4754,9 +4726,35 @@ function hardCloseModal(){
   document.getElementById('video-main-panel')?.classList.remove('hidden');
 }
 
+  const VIEW_HISTORY_MAP = {
+    'home-content': '#home',
+    'articles-panel': '#library',
+    'favorites-view': '#favorites',
+    'favorites-split': '#favorites/split',
+    'subcategoria-content': '#subcategoria',
+    'qbank-session': '#subcategoria/qbank'
+  };
 
-  
-  
+  function pushViewState(viewId, { replace = false, state = {} } = {}) {
+    const routeHash = VIEW_HISTORY_MAP[viewId];
+    if (!routeHash || typeof history === 'undefined' || !history.pushState) return;
+    const method = replace ? 'replaceState' : 'pushState';
+    try {
+      history[method]({ viewId, ...state }, '', routeHash);
+    } catch (_) {
+      // Ignora silenciosamente fallos del History API
+    }
+  }
+
+  function resolveViewIdFromHash(hash) {
+    if (!hash) return null;
+    const normalized = hash.startsWith('#') ? hash : `#${hash}`;
+    for (const [viewId, routeHash] of Object.entries(VIEW_HISTORY_MAP)) {
+      if (routeHash === normalized) return viewId;
+    }
+    return null;
+  }
+
   function showView(id){
     hardCloseModal(); // ← asegura estado limpio SIEMPRE
     hideAllViews();
@@ -4767,7 +4765,14 @@ function hardCloseModal(){
     // confort: sube al top del contenedor scrolleable
 
     const mc = document.getElementById('main-content');
-  mc.classList.toggle('subcat-active', id === 'subcategoria-content');
+    mc.classList.toggle('subcat-active', id === 'subcategoria-content');
+
+    if (id !== 'subcategoria-content') {
+      const qbankBridge = window.__SUBCAT_QBANK__;
+      if (qbankBridge?.isOpen?.()) {
+        qbankBridge.close({ skipHistory: true });
+      }
+    }
 
 
 
@@ -4775,11 +4780,235 @@ function hardCloseModal(){
     document.getElementById('main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  window.__ARTICLES_LAST_SELECTION__ = window.__ARTICLES_LAST_SELECTION__ || null;
+  window.__ARTICLES_RESTORE_PENDING__ = window.__ARTICLES_RESTORE_PENDING__ || false;
+
+  async function restoreArticlesPanelsFromLastSelection() {
+    if (!window.__ARTICLES_RESTORE_PENDING__) return;
+    const state = window.__ARTICLES_LAST_SELECTION__;
+    if (!state) {
+      window.__ARTICLES_RESTORE_PENDING__ = false;
+      return;
+    }
+
+    try {
+      const panel1 = document.querySelector('#articles-panel > div:first-child ul');
+      if (!panel1) return;
+
+      const supLi = panel1.querySelector(`li[data-supra="${state.supracategoriaId}"]`);
+      if (!supLi) return;
+      panel1.querySelectorAll('li').forEach(li => li.classList.remove('is-selected'));
+      supLi.classList.add('is-selected');
+
+      const supAnchor = supLi.querySelector('a');
+      if (!supAnchor) return;
+
+      await showSecondPanel?.(null, supAnchor, state.supracategoriaId);
+
+      const panel2 = document.getElementById('panel-2');
+      if (!panel2) return;
+
+      const catLi = panel2.querySelector(`li[data-cat="${state.categoriaId}"]`);
+      if (!catLi) return;
+      panel2.querySelectorAll('li').forEach(li => li.classList.remove('is-selected'));
+      catLi.classList.add('is-selected');
+
+      const catAnchor = catLi.querySelector('a');
+      if (!catAnchor) return;
+
+      await showThirdPanel?.(null, catAnchor, state.categoriaId);
+
+      const panel3 = document.getElementById('panel-3');
+      if (panel3) {
+        const subLi = panel3.querySelector(`li[data-sub="${state.subcategoriaId}"]`);
+        if (subLi) {
+          const subAnchor = subLi.querySelector('a');
+          if (typeof markSelected === 'function' && subAnchor) {
+            markSelected(subAnchor);
+          } else {
+            panel3.querySelectorAll('li').forEach(li => li.classList.remove('is-selected'));
+            subLi.classList.add('is-selected');
+          }
+        }
+      }
+    } catch (err) {
+      console.error('restoreArticlesPanels error:', err);
+    } finally {
+      window.__ARTICLES_RESTORE_PENDING__ = false;
+    }
+  }
+
   // Helpers públicos para usar en tus onClick
-  window.showHome     = () => showView('home-content');
-  window.showArticles = () => showView('articles-panel');
+  window.showHome     = (options = {}) => {
+    if (!options.skipHistory) pushViewState('home-content', { replace: options.replaceHistory });
+    showView('home-content');
+  };
+  window.showArticles = async (options = {}) => {
+    if (!options.skipHistory) pushViewState('articles-panel', { replace: options.replaceHistory });
+    showView('articles-panel');
+
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('main-content');
+    const articlesLink = document.getElementById('lib-articles');
+
+    document.body.classList.remove('bars-hidden');
+    sidebar?.classList.remove('force-hidden', 'hover-expanded');
+
+    if (sidebar) {
+      sidebar.classList.remove('collapsed');
+      sidebar.classList.add('open');
+    }
+
+    if (mainContent && !document.body.classList.contains('favorites-split')) {
+      mainContent.style.marginLeft = '';
+      mainContent.style.width = '100%';
+      mainContent.style.paddingLeft = '64px';
+    }
+
+    if (articlesLink) {
+      try {
+        setActiveLink(articlesLink);
+      } catch (err) {
+        console.error('setActiveLink failed for Articles', err);
+      }
+    }
+
+    if (typeof cargarSupracategorias === 'function') {
+      try {
+        await cargarSupracategorias();
+      } catch (err) {
+        console.error('cargarSupracategorias failed inside showArticles', err);
+      }
+    }
+
+    if (!options.skipRestore) {
+      await restoreArticlesPanelsFromLastSelection();
+    }
+  };
   window.showSearch   = () => showView('search-page');
-  window.showSubcat   = () => showView('subcategoria-content');
+  window.showSubcat   = (options = {}) => {
+    if (!options.skipHistory) pushViewState('subcategoria-content', { replace: options.replaceHistory });
+    showView('subcategoria-content');
+    const ensureTocVisible = window.__SUBCAT_QBANK__?.ensureTocVisible;
+    if (typeof ensureTocVisible === 'function') {
+      ensureTocVisible();
+    }
+  };
+
+  window.addEventListener('popstate', async (event) => {
+    const modal = document.getElementById('video-modal');
+    const subcatContent = document.getElementById('subcategoria-content');
+    const splitActive =
+      document.body.classList.contains('split-view-active') &&
+      modal &&
+      !modal.classList.contains('hidden') &&
+      subcatContent &&
+      !subcatContent.classList.contains('hidden');
+
+    if (splitActive) {
+      try {
+        if (typeof exitSplitIfAny === 'function') {
+          await exitSplitIfAny();
+        }
+      } catch (err) {
+        console.error('exitSplitIfAny failed while handling popstate', err);
+        modal.classList.remove('split-view');
+        document.body.classList.remove('split-view-active');
+      }
+      if (subcatContent) {
+        subcatContent.classList.remove('hidden');
+      }
+      const tocSidebar = document.getElementById('subcategoria-sidebar');
+      tocSidebar?.classList.remove('hidden');
+      document.body.classList.remove('bars-hidden');
+      const mainSidebar = document.getElementById('sidebar');
+      mainSidebar?.classList.remove('force-hidden');
+      pushViewState('subcategoria-content', { replace: true });
+      return;
+    }
+
+    const viewId = event.state?.viewId || resolveViewIdFromHash(location.hash) || 'home-content';
+    if (viewId === 'qbank-session') {
+      window.showSubcat({ skipHistory: true });
+      window.__SUBCAT_QBANK__?.open({ skipHistory: true });
+      return;
+    }
+
+    const qbankBridge = window.__SUBCAT_QBANK__;
+    if (qbankBridge?.isOpen()) {
+      qbankBridge.close({ skipHistory: true });
+    }
+    if (viewId === 'articles-panel') {
+      window.showArticles({ skipHistory: true });
+      return;
+    }
+    if (viewId === 'favorites-split') {
+      const { sup, cat, sub, favoriteKey } = event.state || {};
+      if (sup && cat && sub && favoriteKey) {
+        openFavoriteDetail({ sup, cat, sub, key: favoriteKey, skipHistory: true });
+      } else if (typeof window.showFavorites === 'function') {
+        window.showFavorites({ skipHistory: true });
+      } else {
+        showView('favorites-view');
+      }
+      return;
+    }
+    if (viewId === 'favorites-view') {
+      if (typeof window.showFavorites === 'function') {
+        window.showFavorites({ skipHistory: true });
+      } else {
+        showView('favorites-view');
+      }
+      return;
+    }
+    if (viewId === 'subcategoria-content') {
+      window.showSubcat({ skipHistory: true });
+      return;
+    }
+    window.showHome({ skipHistory: true });
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const initialView = resolveViewIdFromHash(location.hash);
+    if (initialView === 'articles-panel') {
+      window.showArticles({ replaceHistory: true });
+      return;
+    }
+    if (initialView === 'favorites-split') {
+      const state = history.state || {};
+      if (state.sup && state.cat && state.sub && state.favoriteKey) {
+        openFavoriteDetail({
+          sup: state.sup,
+          cat: state.cat,
+          sub: state.sub,
+          key: state.favoriteKey,
+          skipHistory: true
+        });
+      } else {
+        window.showFavorites({ replaceHistory: true });
+      }
+      return;
+    }
+    if (initialView === 'favorites-view') {
+      if (typeof window.showFavorites === 'function') {
+        window.showFavorites({ replaceHistory: true });
+      } else {
+        pushViewState('favorites-view', { replace: true });
+        showView('favorites-view');
+      }
+      return;
+    }
+    if (initialView === 'qbank-session') {
+      window.showSubcat({ replaceHistory: true });
+      window.__SUBCAT_QBANK__?.open({ skipHistory: true });
+      return;
+    }
+    if (initialView === 'subcategoria-content') {
+      window.showSubcat({ replaceHistory: true });
+      return;
+    }
+    window.showHome({ skipHistory: true });
+  });
 
   // Botón "Go to library" ya existente en Home
 window.goToLibraryArticles = () => showArticles();
@@ -4788,8 +5017,12 @@ window.goToLibraryArticles = () => showArticles();
   let currentActivePanel2Item = null; // Para mantener el elemento seleccionado en el panel 2
   let currentActivePanel3Item = null; // Para mantener el elemento seleccionado en el panel 3
 
-  async function showSecondPanel(clickedElement, supracategoriaId) {
-    showArticles(); // ← oculta previos y muestra #articles-panel
+async function showSecondPanel(evt, clickedElement, supracategoriaId) {
+  evt?.preventDefault();
+  const articlesPanel = document.getElementById("articles-panel");
+  if (articlesPanel?.classList.contains("hidden")) {
+    showArticles({ skipRestore: true });
+  }
   const panel2 = document.getElementById("panel-2");
   const panel3 = document.getElementById("panel-3");
   const secondPanelTitle = document.getElementById("second-panel-title");
@@ -4823,8 +5056,10 @@ clickedElement.closest('li').classList.add('is-selected');
 const nombreCategoria = doc.id; // usa el ID del documento como nombre visible
 
     const li = document.createElement("li");
+    li.dataset.cat = doc.id;
+    li.dataset.supra = supracategoriaId;
     li.innerHTML = `
-  <a href="#" onclick="showThirdPanel(this, '${doc.id}')" class="articles-panel-list-item">
+  <a href="#" onclick="showThirdPanel(event, this, '${doc.id}')" class="articles-panel-list-item" data-cat="${doc.id}" data-supra="${supracategoriaId}">
     <span class="ap-icon ap2" aria-hidden="true"></span><span>${nombreCategoria}</span>
   </a>`;
     panel2List.appendChild(li);
@@ -4842,12 +5077,10 @@ const nombreCategoria = doc.id; // usa el ID del documento como nombre visible
   scrollPanelIntoView(panel2);
 
 
-  // Persist Library selection (Panel 1 opened) in History
-  setLibraryState({ sup: supracategoriaId, cat: null });
-  snapshotLibraryAndPush();
 }
 
-async function showThirdPanel(clickedElement, categoriaId) {
+async function showThirdPanel(evt, clickedElement, categoriaId) {
+  evt?.preventDefault();
   const panel3 = document.getElementById("panel-3");
   const thirdPanelTitle = document.getElementById("third-panel-title");
 
@@ -4864,9 +5097,12 @@ async function showThirdPanel(clickedElement, categoriaId) {
   panel3List.innerHTML = "";
 
   // supracategoría seleccionada desde panel 1
-  const supracategoriaId = document
-    .querySelector('#articles-panel > div:first-child li.is-selected span')
-    ?.textContent;
+  const selectedSupraLi = document
+    .querySelector('#articles-panel > div:first-child li.is-selected');
+  const supracategoriaId =
+    selectedSupraLi?.dataset.supra ||
+    selectedSupraLi?.querySelector('[data-supra]')?.getAttribute('data-supra') ||
+    selectedSupraLi?.querySelector('span')?.textContent;
   if (!supracategoriaId) { console.error("No se encontró la supracategoría seleccionada"); return; }
 
   // traer subcategorías (ordenadas)
@@ -4887,9 +5123,11 @@ async function showThirdPanel(clickedElement, categoriaId) {
 
     const li = document.createElement("li");
     li.dataset.sub = doc.id;
+    li.dataset.cat = categoriaId;
+    li.dataset.supra = supracategoriaId;
     li.innerHTML = `
-      <a href="#" class="articles-panel-list-item"
-         onclick="markSelected(this); showSubcategoriaContent('${doc.id}','${categoriaId}','${supracategoriaId}')">
+      <a href="#" class="articles-panel-list-item" data-sub="${doc.id}" data-cat="${categoriaId}" data-supra="${supracategoriaId}"
+         onclick="event.preventDefault(); markSelected(this); showSubcategoriaContent('${doc.id}','${categoriaId}','${supracategoriaId}')">
         <span class="ap-icon ap3" aria-hidden="true"></span>
         <span>${nombre}</span>
       </a>`;
@@ -4913,11 +5151,7 @@ currentActivePanel3Item = null;
 
   scrollPanelIntoView(panel3);
 
-
-
   // Persist Library selection (Panel 2 -> Panel 3) in History
-  setLibraryState({ cat: categoriaId });
-  snapshotLibraryAndPush();
 }
 
 
@@ -4936,6 +5170,8 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   // — Cambiar de vista de forma centralizada —
   // Oculta la TOC desde el inicio para evitar el "flash"
   setCurrentSubcatCtx({ supracategoriaId, categoriaId, subcategoriaId });
+  window.__ARTICLES_LAST_SELECTION__ = { supracategoriaId, categoriaId, subcategoriaId };
+  window.__ARTICLES_RESTORE_PENDING__ = true;
   const tocEl = document.getElementById('subcategoria-sidebar');
   tocEl?.classList.add('hidden');
 
@@ -4954,6 +5190,14 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     document.getElementById('subcategoria-content')?.classList.remove('hidden');
   } else {
     showSubcat();
+  }
+  // Garantizar que Home quede oculto (evita estilos/resets ligados a esa vista)
+  document.getElementById('home-content')?.classList.add('hidden');
+
+  // Si la sidebar principal quedó en modo hover-expanded, forzar su restauración
+  const mainSidebar = document.getElementById('sidebar');
+  if (mainSidebar?.classList.contains('hover-expanded')) {
+    mainSidebar.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false }));
   }
 
   // — Referencias al DOM —
@@ -5005,7 +5249,9 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
       ${data.nombre || subcategoriaId}
     </h1>
 
-    <button class="flex items-center justify-center bg-gray-100 text-[#546E7A] text-[8px] font-semibold uppercase rounded-sm space-x-1"
+    <button id="qbank-session-btn"
+            type="button"
+            class="flex items-center justify-center bg-gray-100 text-[#546E7A] text-[8px] font-semibold uppercase rounded-sm space-x-1 transition-colors hover:bg-gray-200"
             style="width:95px; height:18px;">
       <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M6 4l8 6-8 6V4z"/></svg>
       <span>Qbank Session</span>
@@ -5032,7 +5278,7 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
 <!-- solo este bloque irá dentro de #subcat-header -->
 <div id="subcat-header">
   <div class="highlighting-bar border-y border-gray-200 bg-white z-30 relative overflow-visible">
-<button class="fav-btn fav-back" type="button" title="Back">
+<button class="fav-btn fav-back" type="button" title="Back" data-favonly="true">
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 26 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
     <!-- Línea vertical más a la izquierda -->
     <path stroke-linecap="round" stroke-linejoin="round" d="M2.5 6v12" />
@@ -5123,6 +5369,661 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   // Convertir el string a nodos y añadir al wrapper
   const headerNode = document.createRange().createContextualFragment(headerHtml);
   wrapper.appendChild(headerNode);
+
+  const escHTML = typeof window.__escHTML === 'function'
+    ? window.__escHTML
+    : (s) => String(s ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+  wrapper.classList.add('relative', 'overflow-visible');
+
+  const qbankSessionEl = document.createElement('div');
+  qbankSessionEl.id = 'qbank-session';
+  qbankSessionEl.className = 'hidden fixed top-0 right-0 bottom-0 sm:top-4 sm:right-4 sm:bottom-4 xl:top-12 xl:right-12 xl:bottom-12 bg-white shadow-2xl border border-slate-200 rounded-none sm:rounded-2xl flex flex-col overflow-hidden z-[52]';
+  qbankSessionEl.setAttribute('role', 'dialog');
+  qbankSessionEl.setAttribute('aria-modal', 'true');
+  qbankSessionEl.innerHTML = `
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Qbank Session</p>
+        <h2 class="text-lg font-semibold text-slate-800 leading-tight">${escHTML(displayTitle)}</h2>
+        <p class="text-[11px] text-slate-500 mt-0.5">Questions based on “${escHTML(displayTitle)}”</p>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="text-right text-[11px] text-slate-500">
+          <div id="qbank-session-timer">Session 00:00</div>
+        </div>
+        <button type="button" data-qbank="close"
+          class="w-9 h-9 rounded-full flex items-center justify-center border border-slate-200 text-slate-500 hover:text-slate-700 hover:border-slate-300 transition">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+    </div>
+    <div class="flex flex-1 overflow-hidden bg-white">
+      <aside class="w-64 md:w-72 border-r border-slate-200 bg-slate-50/60 flex flex-col sm:hidden">
+        <div class="px-4 py-3 border-b border-slate-200">
+          <p class="text-[11px] uppercase tracking-wide text-slate-500 font-semibold">Questions based on</p>
+          <h3 class="text-sm font-semibold text-slate-700 leading-tight truncate">${escHTML(displayTitle)}</h3>
+        </div>
+        <nav id="qbank-question-list" class="flex-1 overflow-y-auto divide-y divide-slate-200"></nav>
+      </aside>
+      <main class="flex-1 min-h-0 flex flex-col overflow-hidden">
+        <div id="qbank-loader" class="flex-1 flex items-center justify-center text-sm text-slate-500">Loading questions…</div>
+        <div id="qbank-empty" class="hidden flex-1 items-center justify-center text-sm text-slate-500 px-6 text-center">
+          No questions available for this topic yet.
+        </div>
+        <div id="qbank-content" class="hidden flex-1 min-h-0 flex flex-col overflow-hidden">
+          <div class="flex-1 min-h-0 overflow-hidden px-6 pt-6 pb-0">
+            <article class="h-full flex flex-col bg-white border border-slate-200 rounded-2xl shadow-xl">
+              <div class="flex-1 min-h-0 overflow-y-auto px-8 py-6 space-y-6">
+                <header class="flex flex-wrap items-start justify-between gap-4">
+                  <div class="space-y-1">
+                    <p class="text-xs uppercase tracking-wide text-slate-500 font-semibold" id="qbank-progress">Question 1 of 1</p>
+                    <div id="qbank-question-text" class="text-[15px] leading-relaxed text-slate-800"></div>
+                  </div>
+                  <div id="qbank-tags" class="flex flex-wrap gap-2 justify-end"></div>
+                </header>
+                <section id="qbank-options" class="space-y-3"></section>
+                <div class="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-200">
+                  <button id="qbank-show-answer" type="button" class="text-sm font-medium text-slate-700 flex items-center gap-2 hover:text-sky-600 transition">
+                    <span class="inline-flex items-center justify-center w-5 h-5 border border-slate-400 rounded-sm text-[10px] font-semibold">?</span>
+                    Show answer
+                  </button>
+                  <button id="qbank-reset-question" type="button" class="text-xs text-slate-500 hover:text-slate-700 underline">Reset question</button>
+                </div>
+                <div id="qbank-explanation" class="hidden border border-slate-200 bg-slate-50 rounded-lg px-5 py-4 space-y-3"></div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </main>
+    </div>
+    <div id="qbank-controls" class="hidden border-t border-slate-200 px-6 py-4 bg-white flex items-center justify-between">
+      <button id="qbank-prev" type="button" class="px-4 py-2 text-sm font-medium text-slate-600 border border-slate-300 rounded-md hover:bg-slate-100 transition">&#8592; Previous</button>
+      <div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">
+        <span id="qbank-position">1 / 1</span>
+      </div>
+      <button id="qbank-next" type="button" class="px-4 py-2 text-sm font-semibold text-white bg-sky-600 rounded-md hover:bg-sky-700 transition">Next &#8594;</button>
+    </div>
+  `;
+
+  wrapper.appendChild(qbankSessionEl);
+
+  const qbankEls = {
+    container: qbankSessionEl,
+    loader: qbankSessionEl.querySelector('#qbank-loader'),
+    empty: qbankSessionEl.querySelector('#qbank-empty'),
+    content: qbankSessionEl.querySelector('#qbank-content'),
+    list: qbankSessionEl.querySelector('#qbank-question-list'),
+    progress: qbankSessionEl.querySelector('#qbank-progress'),
+    question: qbankSessionEl.querySelector('#qbank-question-text'),
+    tags: qbankSessionEl.querySelector('#qbank-tags'),
+    options: qbankSessionEl.querySelector('#qbank-options'),
+    showAnswer: qbankSessionEl.querySelector('#qbank-show-answer'),
+    resetQuestion: qbankSessionEl.querySelector('#qbank-reset-question'),
+    explanation: qbankSessionEl.querySelector('#qbank-explanation'),
+    prevBtn: qbankSessionEl.querySelector('#qbank-prev'),
+    nextBtn: qbankSessionEl.querySelector('#qbank-next'),
+    position: qbankSessionEl.querySelector('#qbank-position'),
+    closeBtn: qbankSessionEl.querySelector('[data-qbank="close"]'),
+    timer: qbankSessionEl.querySelector('#qbank-session-timer'),
+    sidebar: document.getElementById('qbank-sidebar'),
+    sidebarList: document.getElementById('qbank-sidebar-list'),
+    sidebarTitle: document.getElementById('qbank-sidebar-title'),
+    controls: qbankSessionEl.querySelector('#qbank-controls'),
+    tocSidebar: document.getElementById('subcategoria-sidebar'),
+    tocContent: document.getElementById('subcategoria-sidebar-content')
+  };
+
+  if (qbankEls.sidebarTitle) {
+    qbankEls.sidebarTitle.textContent = displayTitle || '—';
+  }
+  if (qbankEls.sidebar) {
+    qbankEls.sidebar.setAttribute('aria-hidden', 'true');
+  }
+
+  const qbankState = {
+    loading: false,
+    loaded: false,
+    questions: [],
+    answers: [],
+    currentIndex: 0,
+    timerId: null,
+    startedAt: null,
+    sidebarSnapshot: null,
+    historyPushed: false
+  };
+
+  function ensureAnswerState(idx) {
+    if (!qbankState.answers[idx]) {
+      qbankState.answers[idx] = { selected: null, revealed: false, status: 'pending' };
+    }
+    return qbankState.answers[idx];
+  }
+
+  const difficultyLabels = {
+    1: 'Easy',
+    2: 'Medium',
+    3: 'Hard'
+  };
+
+  const renderRich = (content) => {
+    const trimmed = String(content ?? '').trim();
+    if (!trimmed) return '';
+    if (typeof renderMD_ART === 'function') return renderMD_ART(trimmed);
+    return escHTML(trimmed);
+  };
+
+  function normaliseQuestion(docId, data = {}) {
+    const getText = (src = {}) => src.pregunta || src.titulo || src.title || src.enunciado || src.texto || src.explicacion || '';
+    const text = String(getText(data)).trim();
+    const opciones = data.opciones;
+    let options = [];
+    if (Array.isArray(opciones)) {
+      options = opciones.map(opt => {
+        if (typeof opt === 'string') return opt;
+        if (opt && typeof opt === 'object') return opt.texto || opt.text || opt.label || '';
+        return '';
+      });
+    } else if (opciones && typeof opciones === 'object') {
+      options = Object.keys(opciones)
+        .sort((a, b) => Number(a) - Number(b))
+        .map(key => {
+          const val = opciones[key];
+          if (typeof val === 'string') return val;
+          if (val && typeof val === 'object') return val.texto || val.text || val.label || '';
+          return '';
+        });
+    }
+    options = options.filter(opt => String(opt).trim().length);
+    if (!text || !options.length) return null;
+
+    let correct = data.corr ?? data.correcta ?? data.correctIndex ?? data.respuestaCorrecta ?? null;
+    if (typeof correct === 'string') {
+      const parsed = Number(correct);
+      correct = Number.isNaN(parsed) ? null : parsed;
+    }
+    if (typeof correct !== 'number') correct = null;
+
+    const explanation = data.explicacion || data.explicaciondetallada || data.explicaciondetalle || data.explanation || '';
+    const explanationImage = data.explicacionimagen || data.explicacionImagen || data.explanationImage || '';
+
+    let order = data.orden ?? data.order ?? data.index ?? null;
+    if (typeof order !== 'number') {
+      const numericId = Number(data.id ?? docId);
+      order = Number.isFinite(numericId) ? numericId : 0;
+    }
+
+    return {
+      id: data.id || docId,
+      order,
+      text,
+      options,
+      correct,
+      explanation,
+      explanationImage,
+      difficulty: data.dif ?? data.dificultad ?? null,
+      rent: data.rent ?? null,
+      type: data.tipo ?? null,
+      keywords: Array.isArray(data.keywords) ? data.keywords : [],
+      meta: data
+    };
+  }
+
+  async function loadQbankQuestions() {
+    if (!window.db) {
+      qbankState.loading = false;
+      qbankState.loaded = true;
+      qbankState.questions = [];
+      renderQbank();
+      return;
+    }
+    qbankState.loading = true;
+    renderQbank();
+    try {
+      const snap = await db
+        .collection('supracategorias').doc(supracategoriaId)
+        .collection('categorias').doc(categoriaId)
+        .collection('subcategorias').doc(subcategoriaId)
+        .collection('preguntas')
+        .get();
+      const questions = [];
+      snap.forEach(doc => {
+        const normalised = normaliseQuestion(doc.id, doc.data() || {});
+        if (normalised) questions.push(normalised);
+      });
+      questions.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      qbankState.questions = questions;
+      qbankState.answers = questions.map(() => ({ selected: null, revealed: false, status: 'pending' }));
+      qbankState.currentIndex = 0;
+      qbankState.loaded = true;
+    } catch (err) {
+      console.error('[Qbank] Failed to load questions', err);
+      qbankState.error = err;
+      qbankState.questions = [];
+      qbankState.loaded = true;
+    } finally {
+      qbankState.loading = false;
+      renderQbank();
+    }
+  }
+
+  function formatDuration(ms = 0) {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+
+  function startQbankTimer() {
+    qbankState.startedAt = Date.now();
+    if (qbankState.timerId) clearInterval(qbankState.timerId);
+    const update = () => {
+      if (!qbankEls.timer) return;
+      const elapsed = Date.now() - (qbankState.startedAt || Date.now());
+      qbankEls.timer.textContent = `Session ${formatDuration(elapsed)}`;
+    };
+    update();
+    qbankState.timerId = setInterval(update, 1000);
+  }
+
+  function stopQbankTimer() {
+    if (qbankState.timerId) clearInterval(qbankState.timerId);
+    qbankState.timerId = null;
+  }
+
+  function statusLabel(answer) {
+    if (!answer) return { label: 'Not answered', cls: 'text-slate-400' };
+    if (answer.revealed) {
+      if (answer.status === 'correct') return { label: 'Correct', cls: 'text-emerald-600' };
+      if (answer.status === 'incorrect') return { label: 'Incorrect', cls: 'text-rose-500' };
+      return { label: 'Reviewed', cls: 'text-sky-600' };
+    }
+    if (answer.selected !== null && answer.selected !== undefined) {
+      return { label: 'Selected', cls: 'text-sky-600' };
+    }
+    return { label: 'Not answered', cls: 'text-slate-400' };
+  }
+
+  function truncate(text, length = 70) {
+    const str = String(text || '').replace(/\s+/g, ' ').trim();
+    if (str.length <= length) return str;
+    return `${str.slice(0, length - 1)}…`;
+  }
+
+  function ensureTocSidebarVisible() {
+    if (qbankEls.tocContent) {
+      qbankEls.tocContent.classList.remove('hidden');
+    }
+    const canShowSidebar = typeof window.matchMedia === 'function'
+      ? window.matchMedia('(min-width: 640px)').matches
+      : true;
+    if (
+      canShowSidebar &&
+      qbankEls.tocSidebar &&
+      !document.body.classList.contains('favorites-split')
+    ) {
+      qbankEls.tocSidebar.classList.remove('hidden');
+    }
+  }
+
+  function toggleQbankSidebar(active, opts = {}) {
+    const { forceShowToc = false } = opts;
+    const sidebar = qbankEls.sidebar;
+    const tocContent = qbankEls.tocContent;
+    if (!sidebar || !tocContent) return;
+
+    if (active) {
+      qbankState.sidebarSnapshot = {
+        tocHidden: tocContent.classList.contains('hidden'),
+        tocSidebarHidden: qbankEls.tocSidebar?.classList.contains('hidden') ?? null
+      };
+      tocContent.classList.add('hidden');
+      sidebar.classList.remove('hidden');
+      sidebar.setAttribute('aria-hidden', 'false');
+      const canShowTocSidebar = typeof window.matchMedia === 'function'
+        ? window.matchMedia('(min-width: 640px)').matches
+        : true;
+      if (canShowTocSidebar) {
+        qbankEls.tocSidebar?.classList.remove('hidden');
+      }
+    } else {
+      sidebar.classList.add('hidden');
+      sidebar.setAttribute('aria-hidden', 'true');
+      const snapshot = qbankState.sidebarSnapshot;
+      const qbankVisible = qbankEls.container && !qbankEls.container.classList.contains('hidden');
+
+      if (snapshot) {
+        if (!snapshot.tocHidden) {
+          tocContent.classList.remove('hidden');
+        } else {
+          tocContent.classList.add('hidden');
+        }
+        if (qbankEls.tocSidebar) {
+          if (snapshot.tocSidebarHidden === true) {
+            qbankEls.tocSidebar.classList.add('hidden');
+          } else if (snapshot.tocSidebarHidden === false) {
+            qbankEls.tocSidebar.classList.remove('hidden');
+          }
+        }
+      }
+
+      if (forceShowToc || !qbankVisible) {
+        ensureTocSidebarVisible();
+      }
+      qbankState.sidebarSnapshot = null;
+    }
+  }
+
+  function renderQbankSidebar() {
+    const total = qbankState.questions.length;
+    const html = qbankState.questions.map((q, idx) => {
+      const answer = qbankState.answers[idx];
+      const status = statusLabel(answer);
+      const isActive = idx === qbankState.currentIndex;
+      const baseClasses = [
+        'w-full text-left px-4 py-3 transition flex flex-col gap-1 text-[13px]',
+        isActive ? 'bg-white' : 'bg-transparent hover:bg-white'
+      ].join(' ');
+      const progress = `${idx + 1}/${total}`;
+      return `
+        <button type="button" class="${baseClasses}" data-q-index="${idx}">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-medium text-slate-700 truncate">${idx + 1}. ${escHTML(truncate(q.text, 48))}</span>
+            <span class="text-[10px] font-semibold uppercase ${status.cls}">${status.label}</span>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-slate-500">
+            <span>${progress}</span>
+            ${q.type ? `<span class="uppercase">${escHTML(String(q.type))}</span>` : ''}
+          </div>
+        </button>
+      `;
+    }).join('');
+    const navHtml = html || `<div class="px-4 py-3 text-[12px] text-slate-500">No questions yet.</div>`;
+    if (qbankEls.list) {
+      qbankEls.list.innerHTML = navHtml;
+    }
+    if (qbankEls.sidebarList) {
+      qbankEls.sidebarList.innerHTML = navHtml;
+    }
+  }
+
+  function updateNavButtons() {
+    if (!qbankEls.prevBtn || !qbankEls.nextBtn) return;
+    const atFirst = qbankState.currentIndex <= 0;
+    const atLast = qbankState.currentIndex >= qbankState.questions.length - 1;
+    qbankEls.prevBtn.disabled = atFirst;
+    qbankEls.nextBtn.disabled = atLast;
+    qbankEls.prevBtn.classList.toggle('opacity-40', atFirst);
+    qbankEls.prevBtn.classList.toggle('cursor-not-allowed', atFirst);
+    qbankEls.nextBtn.classList.toggle('opacity-40', atLast);
+    qbankEls.nextBtn.classList.toggle('cursor-not-allowed', atLast);
+  }
+
+  function renderQbankExplanation(question, answer) {
+    if (!qbankEls.explanation) return;
+    if (!answer.revealed) {
+      qbankEls.explanation.classList.add('hidden');
+      qbankEls.explanation.innerHTML = '';
+      return;
+    }
+    const correctLetter = question.correct != null ? String.fromCharCode(65 + question.correct) : '—';
+    const blocks = [];
+    if (question.explanation) {
+      blocks.push(`<div class="text-sm text-slate-700 leading-relaxed space-y-2">${renderRich(question.explanation)}</div>`);
+    }
+    if (question.explanationImage) {
+      blocks.push(`<img src="${escHTML(question.explanationImage)}" alt="Explanation image" class="rounded-md border border-slate-200 max-h-64 object-contain">`);
+    }
+    if (!blocks.length) {
+      blocks.push('<p class="text-sm text-slate-500">No additional explanation available.</p>');
+    }
+    qbankEls.explanation.innerHTML = `
+      <div class="flex items-center justify-between gap-3">
+        <h3 class="text-sm font-semibold text-slate-700">Explanation</h3>
+        <span class="text-xs font-semibold text-emerald-600">Correct answer: ${escHTML(correctLetter)}</span>
+      </div>
+      ${blocks.join('')}
+    `;
+    qbankEls.explanation.classList.remove('hidden');
+  }
+
+  function renderQbankOptions(question, answer) {
+    if (!qbankEls.options) return;
+    qbankEls.options.innerHTML = question.options.map((opt, idx) => {
+      const isSelected = answer.selected === idx;
+      const isCorrect = question.correct === idx;
+      const letters = String.fromCharCode(65 + idx);
+      const baseClasses = ['qbank-option w-full text-left border border-slate-200 rounded-xl px-5 py-3 flex items-center gap-4 transition-all'];
+      let badgeClasses = 'flex items-center justify-center w-8 h-8 rounded-full border border-slate-300 text-sm font-semibold text-slate-600 bg-white';
+      let statusIcon = '';
+
+      if (answer.revealed) {
+        if (isCorrect) {
+          baseClasses.push('border-emerald-400 bg-emerald-50 ring-1 ring-emerald-300');
+          badgeClasses = 'flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold bg-emerald-500 text-white';
+          statusIcon = '<i class="fa-solid fa-check text-emerald-600 text-sm ml-auto"></i>';
+        } else if (isSelected) {
+          baseClasses.push('border-rose-300 bg-rose-50 ring-1 ring-rose-200');
+          badgeClasses = 'flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold bg-rose-500 text-white';
+          statusIcon = '<i class="fa-solid fa-xmark text-rose-500 text-sm ml-auto"></i>';
+        } else {
+          baseClasses.push('opacity-80');
+        }
+      } else if (isSelected) {
+        baseClasses.push('border-sky-400 bg-sky-50 ring-1 ring-sky-200');
+        badgeClasses = 'flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold bg-sky-600 text-white';
+      } else {
+        baseClasses.push('hover:border-slate-300 hover:bg-slate-50');
+      }
+
+      return `
+        <button type="button" class="${baseClasses.join(' ')}" data-option-index="${idx}">
+          <span class="${badgeClasses}">${letters}</span>
+          <div class="flex-1 text-sm text-slate-700 leading-relaxed">${renderRich(opt)}</div>
+          ${statusIcon}
+        </button>
+      `;
+    }).join('');
+  }
+
+  function renderQbankTags(question) {
+    if (!qbankEls.tags) return;
+    const items = [];
+    if (question.difficulty != null) {
+      const label = difficultyLabels[question.difficulty] || `Difficulty ${question.difficulty}`;
+      items.push(`<span class="inline-flex items-center px-2 py-1 rounded-full bg-amber-50 text-amber-700 text-[11px] font-medium">${escHTML(label)}</span>`);
+    }
+    if (question.type) {
+      items.push(`<span class="inline-flex items-center px-2 py-1 rounded-full bg-sky-50 text-sky-700 text-[11px] font-medium">${escHTML(String(question.type))}</span>`);
+    }
+    if (question.rent != null) {
+      items.push(`<span class="inline-flex items-center px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-medium">Rent: ${escHTML(String(question.rent))}</span>`);
+    }
+    if (question.keywords?.length) {
+      question.keywords.slice(0, 3).forEach(keyword => {
+        items.push(`<span class="inline-flex items-center px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-medium">${escHTML(keyword)}</span>`);
+      });
+    }
+    qbankEls.tags.innerHTML = items.join('');
+  }
+
+  function renderQbankQuestion() {
+    const question = qbankState.questions[qbankState.currentIndex];
+    if (!question) return;
+    const answer = ensureAnswerState(qbankState.currentIndex);
+    if (qbankEls.progress) {
+      qbankEls.progress.textContent = `Question ${qbankState.currentIndex + 1} of ${qbankState.questions.length}`;
+    }
+    if (qbankEls.position) {
+      qbankEls.position.textContent = `${qbankState.currentIndex + 1} / ${qbankState.questions.length}`;
+    }
+    if (qbankEls.question) {
+      qbankEls.question.innerHTML = renderRich(question.text);
+    }
+    if (qbankEls.showAnswer) {
+      qbankEls.showAnswer.disabled = !!answer.revealed;
+      qbankEls.showAnswer.classList.toggle('opacity-50', !!answer.revealed);
+      qbankEls.showAnswer.classList.toggle('cursor-not-allowed', !!answer.revealed);
+    }
+    renderQbankTags(question);
+    renderQbankOptions(question, answer);
+    renderQbankExplanation(question, answer);
+    updateNavButtons();
+    renderQbankSidebar();
+  }
+
+  function renderQbank() {
+    if (!qbankEls.loader || !qbankEls.content || !qbankEls.empty) return;
+    if (qbankState.loading) {
+      qbankEls.loader.classList.remove('hidden');
+      qbankEls.content.classList.add('hidden');
+      qbankEls.empty.classList.add('hidden');
+      qbankEls.controls?.classList.add('hidden');
+      return;
+    }
+    qbankEls.loader.classList.add('hidden');
+    if (!qbankState.questions.length) {
+      if (qbankState.error) {
+        qbankEls.empty.textContent = 'There was a problem loading the questions. Please try again later.';
+      }
+      qbankEls.empty.classList.remove('hidden');
+      qbankEls.content.classList.add('hidden');
+      qbankEls.controls?.classList.add('hidden');
+      return;
+    }
+    qbankEls.empty.classList.add('hidden');
+    qbankEls.content.classList.remove('hidden');
+    qbankEls.controls?.classList.remove('hidden');
+    renderQbankQuestion();
+  }
+
+  const handleEscape = (evt) => {
+    if (evt.key === 'Escape') {
+      closeQbankSession();
+    }
+  };
+
+  function closeQbankSession(options = {}) {
+    const opts = options instanceof Event ? {} : (options || {});
+    if (options instanceof Event) {
+      options.preventDefault?.();
+    }
+    const { skipHistory = false } = opts;
+    if (!skipHistory && qbankState.historyPushed) {
+      pushViewState('subcategoria-content', { replace: true });
+    }
+    qbankState.historyPushed = false;
+    qbankEls.container?.classList.add('hidden');
+    qbankEls.container?.setAttribute('aria-hidden', 'true');
+    qbankEls.controls?.classList.add('hidden');
+    toggleQbankSidebar(false);
+    stopQbankTimer();
+    document.removeEventListener('keydown', handleEscape);
+  }
+
+  async function openQbankSession(options = {}) {
+    const opts = options instanceof Event ? {} : (options || {});
+    if (options instanceof Event) {
+      options.preventDefault?.();
+    }
+    const { skipHistory = false } = opts;
+    if (!skipHistory && !qbankState.historyPushed) {
+      pushViewState('qbank-session');
+      qbankState.historyPushed = true;
+    }
+    if (skipHistory) {
+      qbankState.historyPushed = true;
+    }
+    qbankEls.container?.classList.remove('hidden');
+    qbankEls.container?.setAttribute('aria-hidden', 'false');
+    toggleQbankSidebar(true);
+    startQbankTimer();
+    document.addEventListener('keydown', handleEscape);
+    if (!qbankState.loaded && !qbankState.loading) {
+      await loadQbankQuestions();
+    } else {
+      renderQbank();
+    }
+  }
+
+  const handleQbankNavClick = (event) => {
+    const button = event.target.closest('button[data-q-index]');
+    if (!button) return;
+    const idx = Number(button.dataset.qIndex);
+    if (Number.isNaN(idx)) return;
+    qbankState.currentIndex = Math.max(0, Math.min(idx, qbankState.questions.length - 1));
+    renderQbank();
+  };
+
+  qbankEls.list?.addEventListener('click', handleQbankNavClick);
+  qbankEls.sidebarList?.addEventListener('click', handleQbankNavClick);
+
+  qbankEls.options?.addEventListener('click', (event) => {
+    const targetBtn = event.target.closest('button[data-option-index]');
+    if (!targetBtn) return;
+    const idx = Number(targetBtn.dataset.optionIndex);
+    if (Number.isNaN(idx)) return;
+    const answer = ensureAnswerState(qbankState.currentIndex);
+    answer.selected = idx;
+    if (answer.revealed) {
+      const question = qbankState.questions[qbankState.currentIndex];
+      answer.status = question.correct === idx ? 'correct' : 'incorrect';
+    }
+    renderQbankQuestion();
+  });
+
+  qbankEls.showAnswer?.addEventListener('click', () => {
+    const question = qbankState.questions[qbankState.currentIndex];
+    if (!question) return;
+    const answer = ensureAnswerState(qbankState.currentIndex);
+    answer.revealed = true;
+    if (typeof question.correct === 'number') {
+      answer.status = answer.selected === question.correct ? 'correct' : 'incorrect';
+    } else {
+      answer.status = 'reviewed';
+    }
+    renderQbankQuestion();
+  });
+
+  qbankEls.resetQuestion?.addEventListener('click', () => {
+    qbankState.answers[qbankState.currentIndex] = { selected: null, revealed: false, status: 'pending' };
+    renderQbankQuestion();
+  });
+
+  qbankEls.prevBtn?.addEventListener('click', () => {
+    if (qbankState.currentIndex <= 0) return;
+    qbankState.currentIndex -= 1;
+    renderQbankQuestion();
+  });
+
+  qbankEls.nextBtn?.addEventListener('click', () => {
+    if (qbankState.currentIndex >= qbankState.questions.length - 1) return;
+    qbankState.currentIndex += 1;
+    renderQbankQuestion();
+  });
+
+  qbankEls.closeBtn?.addEventListener('click', closeQbankSession);
+
+  const qbankBtn = wrapper.querySelector('#qbank-session-btn');
+  qbankBtn?.addEventListener('click', (event) => {
+    event.preventDefault();
+    openQbankSession();
+  });
+
+  window.__SUBCAT_QBANK__ = {
+    open: (opts) => openQbankSession(opts),
+    close: (opts) => closeQbankSession(opts),
+    isOpen: () => !!(qbankEls.container && !qbankEls.container.classList.contains('hidden')),
+    ensureTocVisible: () => {
+      const qbankVisible = !!(qbankEls.container && !qbankEls.container.classList.contains('hidden'));
+      if (!qbankVisible) {
+        toggleQbankSidebar(false, { forceShowToc: true });
+      }
+    }
+  };
 
 // ---- My Highlighting: toggle + persistencia ----
 const subcatHeaderEl = wrapper.querySelector('#subcat-header');
@@ -5867,6 +6768,10 @@ subWrap.innerHTML = tocHTML;
     }
   }));
 
+  if (!qbankEls.container || qbankEls.container.classList.contains('hidden')) {
+    toggleQbankSidebar(false, { forceShowToc: true });
+  }
+
 // —— FIX: lock de selección TOC durante scroll programático ——
 let tocLockIdx = -1;
 let tocLockTimer = null;
@@ -6167,46 +7072,6 @@ cb.addEventListener('change', async (e) => {
   }
 
   // ← al final de showSubcategoriaContent(...)
-
-
-  try {
-
-
-    snapshotLibraryAndPush();
-  history.pushState(
-    { view: 'subcat',
-      sub: subcategoriaId,
-      cat: categoriaId,
-      sup: supracategoriaId
-    },
-    '',
-    '' // opcional: '#sub=' + subcategoriaId
-  );
-} catch {}
-
-
-
-// Habilita “Atrás/Adelante” del navegador
-if (!window.__POPSTATE_WIRED__) {
-  window.__POPSTATE_WIRED__ = true;
-
-  window.addEventListener('popstate', async (e) => {
-    const s = e.state;
-    if (s && s.view === 'subcat') {
-      // Navegar entre subcategorías con Atrás/Adelante
-      await showSubcategoriaContent(s.sub, s.cat, s.sup);
-    } else if (s && s.view === 'library') {
-      // ← Volver a los 3 paneles tal como estaban, y reabrir barra
-      await restoreLibraryFromState(s);
-    } else {
-      // Fallback sensato
-      toggleSidebarCollapse(false);
-      showArticles();
-    }
-  });
-}
-
-
 }
 
 
@@ -6675,8 +7540,19 @@ initializeBookmarkControls();
     setTimeout(() => host.classList.remove('favorite-highlight'), 1400);
   }
 
-  async function openFavoriteDetail({ sup, cat, sub, key }) {
+  async function openFavoriteDetail({ sup, cat, sub, key, skipHistory = false }) {
     if (!sup || !cat || !sub || !key) return;
+
+    if (!skipHistory) {
+      pushViewState('favorites-split', {
+        state: { sup, cat, sub, favoriteKey: key }
+      });
+    }
+
+    if (typeof clearSidebarSelection === 'function') {
+      clearSidebarSelection();
+    }
+
     document.body.classList.add('favorites-split');
     document.getElementById('favorites-view')?.classList.remove('hidden');
     document.body.classList.remove('bars-hidden');
@@ -6705,10 +7581,15 @@ initializeBookmarkControls();
     }
   }
 
-  function openFavoritesView() {
+  function openFavoritesView(options = {}) {
+    if (!options.skipHistory) pushViewState('favorites-view', { replace: options.replaceHistory });
     showView('favorites-view');
     document.body.classList.remove('favorites-split');
     document.getElementById('subcategoria-content')?.classList.add('hidden');
+
+    if (typeof clearSidebarSelection === 'function') {
+      clearSidebarSelection();
+    }
 
     document.body.classList.remove('bars-hidden');
     const mainSidebar = document.getElementById('sidebar');
@@ -6745,22 +7626,30 @@ initializeBookmarkControls();
 
   function closeFavoritesSplit() {
     if (!document.body.classList.contains('favorites-split')) return;
-    document.body.classList.remove('favorites-split', 'bars-hidden');
-    document.getElementById('favorites-view')?.classList.add('hidden');
-    document.getElementById('subcategoria-content')?.classList.remove('hidden');
+
+    document.body.classList.remove('favorites-split');
+    document.body.classList.remove('bars-hidden');
+
+    const favoritesView = document.getElementById('favorites-view');
+    const subcatContent = document.getElementById('subcategoria-content');
+    favoritesView?.classList.remove('hidden');
+    subcatContent?.classList.add('hidden');
+
     const mainSidebar = document.getElementById('sidebar');
-    mainSidebar?.classList.remove('force-hidden','open');
-    mainSidebar?.classList.add('collapsed');
+    mainSidebar?.classList.remove('force-hidden', 'collapsed');
+    mainSidebar?.classList.add('open');
+
     const mainContent = document.getElementById('main-content');
     if (mainContent) {
       mainContent.style.marginLeft = '';
       mainContent.style.paddingLeft = '';
       mainContent.style.width = '';
     }
+
     const tocSidebar = document.getElementById('subcategoria-sidebar');
-    if (window.matchMedia('(min-width: 640px)').matches) {
-      tocSidebar?.classList.remove('hidden');
-    }
+    tocSidebar?.classList.add('hidden');
+
+    pushViewState('favorites-view', { replace: true });
   }
 
   document.addEventListener('click', (event) => {
@@ -6849,6 +7738,15 @@ function setActiveLink(element) {
 
     
   }
+}
+
+function clearSidebarSelection() {
+  document.querySelectorAll('#sidebar .sidebar-item').forEach(item => {
+    item.classList.remove('is-active', 'active-link');
+  });
+  document.querySelectorAll('#sidebar .sidebar-group').forEach(group => {
+    group.classList.remove('segment-active');
+  });
 }
 
 
@@ -7230,12 +8128,34 @@ document.addEventListener('DOMContentLoaded', () => {
   
 
   const _showView = window.showView;
-  window.showHome = () => {
+  window.showHome = (options = {}) => {
     body.classList.remove('bars-hidden');
     sb.classList.remove('force-hidden','collapsed');
     sb.classList.add('open');           
     toc && toc.classList.add('hidden'); 
+    // Asegura que "Home" quede marcado como activo en la barra principal
+    const homeLink = document.querySelector('#group-home .sidebar-item');
+    if (homeLink) {
+      document.querySelectorAll('div[id^="accordion-"]').forEach(acc => {
+        acc.classList.add('hidden');
+        const btn = acc.previousElementSibling;
+        btn?.classList.remove('accordion-open');
+        btn?.querySelector('.fa-chevron-down')?.classList.remove('rotate-180');
+      });
+      document.querySelectorAll('#sidebar .sidebar-group').forEach(group => {
+        group.classList.remove('segment-active', 'hover-open');
+      });
+      document.querySelectorAll('#sidebar a, #sidebar button').forEach(item => {
+        if (item !== homeLink) {
+          item.classList.remove('active-link', 'is-active');
+        }
+      });
+      homeLink.classList.add('active-link');
+    }
     _showView('home-content');
+    if (!options.skipHistory) {
+      pushViewState('home-content', { replace: options.replaceHistory });
+    }
   };
 });
 
@@ -7252,10 +8172,12 @@ const db = firebase.firestore();
 
 // ✅ Variable para evitar múltiples cargas simultáneas
 let isLoadingSupracategorias = false;
+let hasLoadedSupracategorias = false;
 
-async function cargarSupracategorias() {
+async function cargarSupracategorias(force = false) {
   // ⛔ Evitar ejecuciones simultáneas
   if (isLoadingSupracategorias) return;
+  if (hasLoadedSupracategorias && !force) return;
   isLoadingSupracategorias = true;
   
   try {
@@ -7273,11 +8195,14 @@ async function cargarSupracategorias() {
     snapshot.forEach(doc => {
       const nombre = doc.data().nombre;
       const li = document.createElement("li");
-      li.innerHTML = `<a href="#" onclick="showSecondPanel(this, '${doc.id}')" class="articles-panel-list-item"><i class="ap-icon ap2"></i><span>${nombre}</span></a>`;
+      li.dataset.supra = doc.id;
+      li.innerHTML = `<a href="#" onclick="showSecondPanel(event, this, '${doc.id}')" class="articles-panel-list-item"><i class="ap-icon ap2"></i><span>${nombre}</span></a>`;
+      li.querySelector('a')?.setAttribute('data-supra', doc.id);
       fragment.appendChild(li);
     });
     
     panel1.appendChild(fragment);
+    hasLoadedSupracategorias = true;
   } finally {
     isLoadingSupracategorias = false;
   }
@@ -7291,9 +8216,21 @@ async function cargarSupracategorias() {
   // Reemplazar cualquier listener existente clonando el elemento
   const newLink = articlesLink.cloneNode(true);
   articlesLink.replaceWith(newLink);
+
+  // Elimina manejadores inline para evitar ejecuciones duplicadas
+  newLink.removeAttribute('onclick');
   
   // Agregar el listener una sola vez
-  newLink.addEventListener('click', cargarSupracategorias);
+  newLink.addEventListener('click', async (event) => {
+    event.preventDefault();                 // evita el salto de hash
+    setActiveLink(newLink);                 // reusa la lógica visual ya existente
+    showArticles();                         // muestra la vista de Library
+    try {
+      await cargarSupracategorias();        // carga los datos remotos
+    } catch (err) {
+      console.error('Error al cargar supracategorías:', err);
+    }
+  });
 })();
 
 </script>
@@ -8617,146 +9554,6 @@ function placeSwitch(){
 
 
 <!-- === Retroceder === -->
-
-<script>
-/* Library history + restore sidebar + FIX first→second panel (compact, idempotent) */
-(function () {
-  // Evita navegación en <a href="#"> dentro del sidebar y los 3 paneles
-  document.addEventListener('click', e => {
-    const a = e.target.closest('a[href="#"]');
-    if (a && (a.closest('#sidebar') || a.closest('#articles-panel'))) e.preventDefault();
-  });
-
-  // Cache originales
-  const fn = {
-    home:  window.showHome,
-    lib:   window.showArticles,
-    p2:    window.showSecondPanel,
-    p3:    window.showThirdPanel,
-    sub:   window.showSubcategoriaContent
-  };
-
-  let lastView = 'home';
-  let lastViewBeforeSubcat = null;
-  const setView = (view) => {
-    if (view === 'subcat') {
-      lastViewBeforeSubcat = lastView;
-    } else {
-      lastViewBeforeSubcat = null;
-    }
-    lastView = view;
-  };
-
-  // Guardar / Restaurar estado de la barra principal
-  let sbPrev = null;
-  const saveSB = () => {
-    const sb = document.getElementById('sidebar'), b = document.body;
-    if (!sb) return;
-    sbPrev = {
-      collapsed: sb.classList.contains('collapsed'),
-      forceHidden: sb.classList.contains('force-hidden'),
-      open: sb.classList.contains('open'),
-      barsHidden: b.classList.contains('bars-hidden')
-    };
-  };
-  const restoreSB = () => {
-    if (!sbPrev) return;
-    const sb = document.getElementById('sidebar'), b = document.body;
-    sb.classList.remove('collapsed','force-hidden','open');
-    if (sbPrev.forceHidden) sb.classList.add('force-hidden');
-    if (sbPrev.collapsed)   sb.classList.add('collapsed');
-    else if (sbPrev.open)   sb.classList.add('open');
-    b.classList.toggle('bars-hidden', !!sbPrev.barsHidden);
-  };
-
-  const push = (view, extra={}) => history.pushState({ view, ...extra }, '', '');
-
-  // Wrappers con historial y restauración de barra
-  window.showHome     = () => { restoreSB(); fn.home(); setView('home'); push('home'); };
-  window.showArticles = () => { restoreSB(); fn.lib();  setView('library'); push('library'); };
-
-  // FIX: asegurar que el panel-2 se muestre tras cargar categorías
-  window.showSecondPanel = async (el, sup) => {
-    setView('library');
-    await fn.p2(el, sup);
-    requestAnimationFrame(() => document.getElementById('panel-2')?.classList.remove('hidden'));
-    push('library', { sup });
-  };
-
-  window.showThirdPanel = async (el, cat) => {
-    setView('library');
-    await fn.p3(el, cat);
-    const sup = document.querySelector('#articles-panel > div:first-child li.is-selected span')?.textContent?.trim();
-    push('library', { sup, cat });
-  };
-
-  window.showSubcategoriaContent = async (...args) => {
-    const maybeOpts = args[3] && typeof args[3] === 'object' ? args[3] : {};
-    const skipShowView = !!maybeOpts.skipShowView;
-    if (!skipShowView) {
-      saveSB();
-      const homeEl = document.getElementById('home-content');
-      if (homeEl && !homeEl.classList.contains('hidden')) {
-        lastView = 'home';
-      }
-      setView('subcat');
-    }
-    return fn.sub(...args);
-  };
-
-  // Restaurar EXACTAMENTE los 3 paneles como estaban (sin pushState)
-  let restoring = false;
-  window.restoreLibraryFromState = async (s) => {
-    if (restoring) return;
-    restoring = true;
-    try {
-      restoreSB();
-      fn.lib(); // sin push
-      if (s?.sup) {
-        const a1 = [...document.querySelectorAll('#articles-panel > div:first-child li a')]
-          .find(a => a.textContent.trim() === s.sup);
-        if (a1) await fn.p2(a1, s.sup); // sin push
-        requestAnimationFrame(() => document.getElementById('panel-2')?.classList.remove('hidden'));
-      }
-      if (s?.cat) {
-        const a2 = [...document.querySelectorAll('#panel-2 a')]
-          .find(a => a.textContent.trim() === s.cat);
-        if (a2) await fn.p3(a2, s.cat); // sin push
-      }
-    } finally {
-      restoring = false;
-    }
-  };
-
-  // Back/forward: bloquear el listener original + restaurar sin duplicar
-  window.addEventListener('popstate', (e) => {
-    const subcatEl = document.getElementById('subcategoria-content');
-    const inSubcat = subcatEl && !subcatEl.classList.contains('hidden');
-    if (inSubcat && lastView === 'subcat' && lastViewBeforeSubcat === 'home') {
-      e.stopImmediatePropagation?.();
-      restoreSB();
-      setView('home');
-      return fn.home(); // sin push
-    }
-    const s = e.state;
-    if (s?.view === 'home') {
-      e.stopImmediatePropagation?.();
-      restoreSB();
-      setView('home');
-      return fn.home(); // sin push
-    }
-    if (s?.view === 'library') {
-      e.stopImmediatePropagation?.();
-      setView('library');
-      return window.restoreLibraryFromState(s);
-    }
-    e.stopImmediatePropagation?.();
-    restoreSB();
-    setView('library');
-    fn.lib(); // fallback sin push
-  }, true);
-})();
-</script>
 
 
 
@@ -13022,4 +13819,4 @@ popover.addEventListener('keydown', hideOnEnter);
 
 </html>
 
-<!-- === 17eeeeeee octubre noche nochiiilaeeeeee === -->
+<!-- === 27777octubre octubre noche nochiiilaeeeeee === -->
