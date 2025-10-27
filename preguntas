@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Preguntas</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#0f172a;
+      --card:#111827;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --accent:#60a5fa;
+      --ok:#22c55e;
+      --border:#1f2937;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: linear-gradient(180deg, var(--bg), #0a0f1a 60%);
+      color:var(--text);
+      line-height:1.55;
+    }
+    .wrap{
+      max-width: 980px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+    .topbar{
+      display:flex;align-items:center;gap:12px;
+      margin-bottom:18px;color:var(--muted);font-size:14px
+    }
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    .question{
+      padding:20px 22px;border-bottom:1px solid var(--border)
+    }
+    .question h2{
+      margin:0 0 6px 0;font-size:18px;font-weight:700;color:#fff
+    }
+    .question p{margin:8px 0}
+    .options{display:flex;flex-direction:column}
+    .opt{
+      display:flex;align-items:flex-start;gap:12px;
+      padding:14px 18px;border-top:1px solid var(--border);
+      background:var(--card);
+    }
+    .opt:hover{background:#0d1426}
+    .opt input{margin-top:3px}
+    .opt code{
+      display:inline-block;min-width:1.6rem;text-align:center;
+      border:1px solid var(--border);border-radius:8px;
+      padding:2px 6px;background:#0b1222;color:var(--muted);font-weight:700
+    }
+    .btns{
+      display:flex;justify-content:space-between;align-items:center;
+      gap:12px;padding:14px 18px;background:#0c1424;border-top:1px solid var(--border)
+    }
+    button{
+      background:var(--accent);border:0;color:#031024;font-weight:700;
+      padding:10px 14px;border-radius:12px;cursor:pointer
+    }
+    button:active{transform:translateY(1px)}
+    .muted{color:var(--muted);font-size:14px}
+    .answer{
+      display:none;padding:16px 18px;background:#0c1a12;border-top:1px solid #16341f
+    }
+    .answer.show{display:block}
+    .answer strong{color:var(--ok)}
+    .note{margin-top:6px;color:var(--muted);font-size:14px}
+    .source{
+      font-size:12px;color:#8ea0b7;margin-top:16px
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>CLINICIAN</span>
+      <span class="muted">/</span>
+      <span class="muted">Preguntas basadas en “General histology”</span>
+    </div>
+
+    <div class="panel" role="region" aria-labelledby="qtitle">
+      <div class="question">
+        <h2 id="qtitle">Clinical question</h2>
+        <p> A 31-year-old woman comes to the emergency department because of a 4-week history of worsening headache, nausea, and vomiting. The headache is worse at night. Fundoscopic examination shows swelling of the optic discs. A CT scan of the brain shows a heterogeneous, hyperintense, intraventricular mass. The patient undergoes surgical excision of the mass. Pathologic examination of the surgical specimen confirms that the tumor is of <em>neuronal origin</em>. The cells in this specimen are most likely to stain positive for which of the following immunohistochemical markers?</p>
+      </div>
+
+      <form class="options" id="opts">
+        <label class="opt"><input type="radio" name="ans" value="A"><code>A</code><span>S-100</span></label>
+        <label class="opt"><input type="radio" name="ans" value="B"><code>B</code><span>Desmin</span></label>
+        <label class="opt"><input type="radio" name="ans" value="C"><code>C</code><span>Synaptophysin</span></label>
+        <label class="opt"><input type="radio" name="ans" value="D"><code>D</code><span>Glial fibrillary acidic protein (GFAP)</span></label>
+        <label class="opt"><input type="radio" name="ans" value="E"><code>E</code><span>Cytokeratin</span></label>
+      </form>
+
+      <div class="btns">
+        <span class="muted">Selecciona una opción y luego “Mostrar respuesta”.</span>
+        <div>
+          <button id="reveal">Mostrar respuesta</button>
+        </div>
+      </div>
+
+      <div class="answer" id="answer">
+        <p><strong>Respuesta correcta: C — Synaptophysin.</strong></p>
+        <p>Es un marcador neuronal (vesículas presinápticas) positivo en tumores de origen <em>neuronal</em> como neurocitomas/gangliogliomas. <br/>
+        <span class="note">S-100 y GFAP suelen asociarse a estirpe glial; desmina a músculo; citoqueratinas a epitelio.</span></p>
+      </div>
+    </div>
+
+    <p class="source">Inspirado en una tarjeta de práctica de AMBOSS. Esta página es solo con fines educativos.</p>
+  </div>
+
+  <script>
+    const btn = document.getElementById('reveal');
+    const box = document.getElementById('answer');
+    btn.addEventListener('click', function (e){
+      e.preventDefault();
+      box.classList.add('show');
+      btn.setAttribute('disabled', 'disabled');
+      btn.textContent = 'Respuesta mostrada';
+    });
+  </script>
+</body>
+</html>
