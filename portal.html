@@ -1281,6 +1281,28 @@ body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden))
   font-size: var(--content-font-scale);
 }
 
+/* QBank: escala independiente */
+#qbank-content{
+  --qbank-font-scale: 100%;
+}
+
+/* Aplica la escala a pregunta, opciones y explicación en QBank (override fuerte)
+   IMPORTANTE: NO escalar de nuevo a los hijos (*) de la explicación
+   para evitar que se aplique el zoom dos veces dentro de Explanation. */
+#qbank-content .question-text,
+#qbank-content .option-row > .flex-1,
+#qbank-content .opt-text,
+#qbank-content .opt-footer,
+#qbank-content .explicacion,
+#qbank-content .explicacion-box,
+#qbank-content #qbank-explanation,
+#qbank-content p,
+#qbank-content li,
+#qbank-content .opt-reset {
+  font-size: var(--qbank-font-scale) !important;
+}
+
+/* Si las utilidades Tailwind (text-xs, text-sm, etc.) pisan el tamaño, hereda del padre escalado */
 
 
 
@@ -2785,8 +2807,12 @@ body.favorites-split .fav-topbar{
 }
 
 /* Texto de la opción: siempre negro (o casi) */
-.opt-text{ color:#111827 !important; font-size:10px; line-height:1.2; }
-
+/* Antes: .opt-text{ color:#111827 !important; font-size:10px; line-height:1.2; } */
+.opt-text{
+  color:#111827 !important;
+  font-size: var(--qbank-font-scale) !important;
+  line-height: 1.2;
+}
 
 
 
@@ -3851,6 +3877,14 @@ body.favorites-split #subcat-header {
   z-index: 10 !important;
 }
 
+/* Ocultar botones fav-back y close (y sus separadores adyacentes) fuera de favoritos */
+body:not(.favorites-split) #subcat-header .fav-btn[data-favonly="true"],
+body:not(.favorites-split) #subcat-header .hl-btn.hl-close[data-favonly="true"],
+body:not(.favorites-split) #subcat-header .fav-btn[data-favonly="true"] + .hl-sep,
+body:not(.favorites-split) #subcat-header .hl-btn.hl-close[data-favonly="true"] ~ .hl-sep {
+  display: none !important;
+}
+
 
 
 
@@ -4291,14 +4325,18 @@ body.favorites-split #subcat-header {
     <aside id="subcategoria-sidebar" class="hidden bg-white border-r border-gray-200 h-full overflow-y-auto">
       <div id="subcategoria-sidebar-content" class="p-4"></div>
       <div id="qbank-sidebar" class="hidden h-full flex flex-col bg-slate-50/60">
-        <div class="px-4 py-3 border-b border-slate-200">
-          <p class="text-[11px] uppercase tracking-wide text-slate-500 font-semibold">Questions based on</p>
-          <h3 id="qbank-sidebar-title" class="text-sm font-semibold text-slate-700 leading-tight truncate">—</h3>
-          <p id="qbank-sidebar-current" class="mt-2 text-xs font-semibold text-slate-500">0/0</p>
-          <div class="mt-2 h-0.5 bg-slate-200 relative overflow-hidden">
-            <div id="qbank-sidebar-progress-bar" class="absolute inset-y-0 left-0 bg-slate-600" style="width:0%;"></div>
-          </div>
-        </div>
+<div class="px-4 pt-3">
+  <p class="text-[11px] uppercase tracking-wide text-slate-500 font-semibold">Questions based on</p>
+  <h3 id="qbank-sidebar-title" class="text-sm font-semibold text-slate-700 leading-tight truncate">Generalidades</h3>
+  <p id="qbank-sidebar-current" class="mt-2 text-xs font-semibold text-slate-500">0/12</p>
+
+  <!-- bloque que estira la barra hasta los bordes -->
+  <div class="-mx-4 mt-2">
+    <div class="h-0.5 bg-slate-200 relative overflow-hidden">
+      <div id="qbank-sidebar-progress-bar" class="absolute inset-y-0 left-0 bg-slate-600" style="width:0%;"></div>
+    </div>
+  </div>
+</div>
         <nav id="qbank-sidebar-list" class="flex-1 overflow-y-auto divide-y divide-slate-200 bg-white"></nav>
         <div id="qbank-sidebar-footer" class="border-t border-slate-200 bg-white">
           <div class="px-4 py-3">
@@ -5021,6 +5059,8 @@ function hardCloseModal(){
     window.showHome({ skipHistory: true });
   });
 
+  
+  
   window.addEventListener('DOMContentLoaded', () => {
     const initialView = resolveViewIdFromHash(location.hash);
     if (initialView === 'articles-panel') {
@@ -5063,12 +5103,76 @@ function hardCloseModal(){
     window.showHome({ skipHistory: true });
   });
 
+  
+  
   // Botón "Go to library" ya existente en Home
 window.goToLibraryArticles = () => showArticles();
+</script>
+
+
+
+<script>
+(function(){
+  // Handle sticky back button in Favorites split to exit split and show full subcategoria content
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.fav-btn.fav-back[data-favonly="true"]');
+    if (!btn) return;
+    e.preventDefault();
+
+    // Get current subcategory context (prefer official getter if available)
+    let ctx = (typeof getCurrentSubcatCtx === 'function') ? getCurrentSubcatCtx() : (window.__CURRENT_SUBCAT_CTX__ || {});
+    const sup = ctx?.supracategoriaId;
+    const cat = ctx?.categoriaId;
+    const sub = ctx?.subcategoriaId;
+    
+
+    // Exit any split view if present (safe-guarded)
+    try { await (typeof exitSplitIfAny === 'function' ? exitSplitIfAny() : Promise.resolve()); } catch(_) {}
+
+    // Clear split-related states/classes
+    const modal = document.getElementById('video-modal');
+    if (modal) modal.classList.remove('split-view');
+    document.body.classList.remove('split-view-active', 'favorites-split');
+
+    // Ensure TOC/sidebar visible again on sm+ breakpoints
+    const tocSidebar = document.getElementById('subcategoria-sidebar');
+    if (tocSidebar) {
+      const canShowSidebar = (typeof window.matchMedia === 'function') ? window.matchMedia('(min-width: 640px)').matches : true;
+      if (canShowSidebar) tocSidebar.classList.remove('hidden');
+    }
+
+    // Navigate to the full subcategory content view
+    if (sup && cat && sub && typeof showSubcategoriaContent === 'function') {
+      await showSubcategoriaContent(sub, cat, sup, { skipShowView: false });
+    } else if (typeof showSubcat === 'function') {
+      showSubcat({ replaceHistory: true });
+    }
+
+    // Normalize URL/history to subcategoria view
+    if (typeof pushViewState === 'function') {
+history.back();
+
+    }
+  });
+
+
+
+})();
+
 </script>
 <script>
   let currentActivePanel2Item = null; // Para mantener el elemento seleccionado en el panel 2
   let currentActivePanel3Item = null; // Para mantener el elemento seleccionado en el panel 3
+
+function bookmarkToggleMarkup(label = 'item') {
+  const safe = String(label ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/"/g,'&quot;')
+    .replace(/</g,'&lt;');
+  return `<span class="bookmark-toggle" data-label="${safe}"
+          role="button" tabindex="0" aria-pressed="false"><i class="far fa-bookmark text-xs"></i></span>`;
+}
+if (typeof window !== 'undefined') window.bookmarkToggleMarkup = bookmarkToggleMarkup;
 
 async function showSecondPanel(evt, clickedElement, supracategoriaId) {
   evt?.preventDefault();
@@ -5442,8 +5546,8 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
       <div class="max-w-5xl mx-auto px-6 sm:px-10 py-10">
         <div class="bg-white border border-slate-200 rounded-2xl shadow-xl flex overflow-hidden">
           <aside class="hidden">
-            <div class="px-4 py-3 border-b border-slate-200">
-              <p class="text-[11px] uppercase tracking-wide text-slate-500 font-semibold">Questions based on</p>
+<div class="px-4 pt-3">
+                <p class="text-[11px] uppercase tracking-wide text-slate-500 font-semibold">Questions based on</p>
               <h3 class="text-sm font-semibold text-slate-700 leading-tight truncate">${escHTML(displayTitle)}</h3>
             </div>
             <nav id="qbank-question-list" class="flex-1 overflow-y-auto divide-y divide-slate-200"></nav>
@@ -5455,14 +5559,31 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
             </div>
             <div id="qbank-content" class="hidden flex-1 min-h-0 flex flex-col overflow-hidden">
               <div class="flex-1 min-h-0 overflow-y-auto px-8 py-8 space-y-6">
-                <header class="flex flex-wrap items-start justify-between gap-4">
+
+                
+                <!-- Nuevo encabezado con barra y botón AA -->
+<header class="relative flex items-center justify-end border-b border-gray-200 pb-1.5 pt-0 w-[calc(100%+4rem)] -mx-8 px-6 -translate-y-[4px]">
+  <div class="border-l border-gray-300 h-5 mr-3 translate-y-[1px]"></div>
+  <button id="qbank-font-btn" class="hl-btn font-semibold tracking-wide text-xs translate-y-[1px]">AA</button>
+  <!-- Menú de zoom QBank -->
+  <div id="qbank-font-menu" class="hidden absolute right-6 top-full mt-1 z-50 inline-block rounded-l bg-white shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+    <div class="grid grid-cols-[auto_auto_auto] items-center gap-2 px-3 py-2 whitespace-nowrap">
+      <button id="qbank-font-dec" aria-label="Disminuir" class="h-6 w-6 inline-flex items-center justify-center text-slate-600 text-l leading-none select-none">−</button>
+      <span id="qbank-font-reset" role="button" tabindex="0" class="justify-self-center text-slate-400 font-semibold cursor-pointer select-none leading-none transition-colors">AA</span>
+      <button id="qbank-font-inc" aria-label="Aumentar" class="h-6 w-6 inline-flex items-center justify-center text-slate-600 text-l leading-none select-none">+</button>
+    </div>
+  </div>
+</header>
+
+
+                <div class="flex flex-wrap items-start justify-between gap-4">
                   <div class="space-y-1">
-                    <p class="text-xs uppercase tracking-wide text-slate-500 font-semibold" id="qbank-progress">Question 1 of 1</p>
-                    <div id="qbank-question-text" class="text-[15px] leading-relaxed text-slate-800"></div>
+                    <!-- Eliminado: <p id="qbank-progress"> -->
+                    <div id="qbank-question-text" class="text-[12px] leading-relaxed text-slate-800"></div>
                   </div>
                   <div id="qbank-tags" class="flex flex-wrap gap-2 justify-end"></div>
-                </header>
-                <section id="qbank-options" class="qbank-option-container"></section>
+                </div>
+                <section id="qbank-options" class="qbank-option-container -mx-8"></section>
                 <div class="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-200">
                   <button id="qbank-show-answer" type="button" class="text-sm font-medium text-slate-700 flex items-center gap-2 hover:text-sky-600 transition">
                     <span class="inline-flex items-center justify-center w-5 h-5 border border-slate-400 rounded-sm text-[10px] font-semibold">?</span>
@@ -5559,6 +5680,72 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   };
 
   if (qbankEls.sidebarTitle) {
+// === QBank Font Size Controls (independientes del AA de subcategoría) ===
+(function(){
+  const btn   = qbankSessionEl.querySelector('#qbank-font-btn');
+  const menu  = qbankSessionEl.querySelector('#qbank-font-menu');
+  const inc   = qbankSessionEl.querySelector('#qbank-font-inc');
+  const dec   = qbankSessionEl.querySelector('#qbank-font-dec');
+  const reset = qbankSessionEl.querySelector('#qbank-font-reset');
+
+  if (!btn || !menu) return;
+
+  const LS_KEY = 'font:qbank:pct';
+  let pct = Number(localStorage.getItem(LS_KEY));
+  if (!Number.isFinite(pct) || pct < 80 || pct > 160) pct = 100;
+
+  function apply(){
+    // Aplica al contenedor completo del QBank
+    if (qbankEls.content) {
+      qbankEls.content.style.setProperty('--qbank-font-scale', pct + '%');
+    }
+  }
+
+  function clamp(x){ return Math.max(80, Math.min(160, x)); }
+
+    function openMenu(){
+      menu.classList.remove('hidden');
+      document.addEventListener('click', onOutside, { once:true });
+      document.addEventListener('keydown', onEsc, { once:true });
+    }
+    function closeMenu(){ menu.classList.add('hidden'); }
+    function onOutside(e){ if(!menu.contains(e.target) && e.target!==btn) closeMenu(); }
+    function onEsc(e){ if(e.key==='Escape') closeMenu(); }
+
+    btn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      menu.classList.contains('hidden') ? openMenu() : closeMenu();
+    });
+
+
+  inc?.addEventListener('click', (e)=>{ 
+    e.preventDefault(); 
+    pct = clamp(pct + 10); 
+    localStorage.setItem(LS_KEY, String(pct)); 
+    apply(); 
+  });
+  
+  dec?.addEventListener('click', (e)=>{ 
+    e.preventDefault(); 
+    pct = clamp(pct - 10); 
+    localStorage.setItem(LS_KEY, String(pct)); 
+    apply(); 
+  });
+  
+  reset?.addEventListener('click', (e)=>{ 
+    e.preventDefault(); 
+    pct = 100; 
+    localStorage.setItem(LS_KEY, String(pct)); 
+    apply(); 
+  });
+
+  apply(); // Aplica al iniciar
+})();
+
+
+
+
+
     qbankEls.sidebarTitle.textContent = displayTitle || '—';
   }
   if (qbankEls.sidebar) {
@@ -6060,18 +6247,28 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
 
   function renderQbankOptions(question, answer) {
     if (!qbankEls.options) return;
-    const groupClasses = 'qbank-option-group border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm';
+    // Modificado: elimina margen y padding lateral del grupo de opciones
+    const groupClasses = 'qbank-option-group border-y border-slate-200 rounded-none overflow-hidden bg-white shadow-sm m-0 px-0';
     const optionsMarkup = question.options.map((opt, idx) => {
       const isSelected = answer.selected === idx;
       const isCorrect = question.correct === idx;
       const letter = String.fromCharCode(65 + idx);
+      // Modificado: px-6 → px-0 para eliminar padding lateral
       const baseClasses = [
         'qbank-option w-full text-left flex items-center gap-4 px-6 py-4 text-sm leading-relaxed transition border-l-4 border-l-transparent',
         idx === 0 ? '' : 'border-t border-slate-200'
       ].filter(Boolean);
       let badgeClasses = 'flex items-center justify-center w-8 h-8 rounded-full border border-slate-300 text-[13px] font-semibold text-slate-600 bg-white';
-      let statusSymbol = '–';
-      let statusClasses = 'ml-auto text-slate-300 text-lg font-light';
+      // Nueva línea statusSymbol según instrucción:
+let statusSymbol = `
+<span 
+  onclick="event.stopPropagation(); 
+           const opt=this.closest('button[data-option-index]'); 
+           const txt=opt && opt.querySelector('div.flex-1'); 
+           if(txt){txt.classList.toggle('line-through');}" 
+  style="cursor:pointer;display:inline-block;width:1.6rem;text-align:center;font-size:1.5rem;color:#374151;">×
+</span>`;      
+let statusClasses = 'ml-auto text-slate-300 text-lg font-light';
 
       if (answer.revealed) {
         if (isCorrect) {
@@ -6631,11 +6828,6 @@ function renderClaveBlock(bloque){
 
 // Convierte claves como "special_surface_epithelia" -> "Special Surface Epithelia"
 const makeTitle = (k) => k.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase());
-const bookmarkToggleMarkup = (label = 'item') => {
-  const safe = String(label ?? '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
-  return `<span class="bookmark-toggle" data-label="${safe}"
-          role="button" tabindex="0" aria-pressed="false"><i class="far fa-bookmark text-xs"></i></span>`;
-};
 
 // Renderiza hijos (subsubtítulos) ordenados por "orden"
 // Renderiza hijos (subsubtítulos) con look de "título" + prefijo ⤷
@@ -7444,15 +7636,568 @@ cb.addEventListener('change', async (e) => {
 
 // === CSS para ocultar botones fav-back y close fuera de favoritos ===
 </script>
-<style>
-/* Ocultar botones fav-back y close (y sus separadores adyacentes) fuera de favoritos */
-body:not(.favorites-split) #subcat-header .fav-btn[data-favonly="true"],
-body:not(.favorites-split) #subcat-header .hl-btn.hl-close[data-favonly="true"],
-body:not(.favorites-split) #subcat-header .fav-btn[data-favonly="true"] + .hl-sep,
-body:not(.favorites-split) #subcat-header .hl-btn.hl-close[data-favonly="true"] ~ .hl-sep {
-  display: none !important;
+
+
+<!-- === Preguntaas === -->
+
+<script>
+// Renderiza preguntas mostrando opciones por ID
+// Utilidad: parte un array en chunks de N (Firestore "in" soporta hasta 10)
+// util
+
+
+
+const chunk = (arr, size = 10) => {
+  const out = []; for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+};
+
+
+// ↳ estado persistente de opciones tachadas (pregunta||opción)
+const markedOpts = new Set();
+const answersState = new Map(); // key: data-qkey (texto exacto de la pregunta o id estable)
+
+// busca opciones por id de DOC y, si no hay id, por texto exacto de "pregunta"
+
+
+
+async function getOpcionesParaItems(items){
+  const byKey = new Map();
+
+  const ids = [];
+  const texts = [];
+  for (const it of items){
+    if (typeof it === 'object' && (it.id || it.qid)) {
+      ids.push(String(it.id || it.qid));
+    } else {
+      const t = typeof it === 'string' ? it : (it?.text || it?.q || '');
+      texts.push(String(t).trim());
+    }
+  }
+
+  // 1) por ID
+  if (ids.length){
+    const fpId = firebase.firestore.FieldPath.documentId();
+    for (const g of chunk([...new Set(ids)], 10)){
+      const snap = await db.collectionGroup('preguntas').where(fpId, 'in', g).get();
+      snap.forEach(d => {
+        const data = d.data() || {};
+        byKey.set(d.id, {
+        opciones: Array.isArray(data.opciones) ? data.opciones : [],
+        corr: Number(data.corr ?? -1),
+        explicacion: data.explicacion || '',
+        explicacionimagen: data.explicacionimagen || ''
+      });
+      });
+    }
+  }
+
+  // 2) por TEXTO exacto
+  const uniqueTexts = [...new Set(texts.filter(Boolean))];
+  await Promise.all(uniqueTexts.map(async (t) => {
+    const qs = await db.collectionGroup('preguntas').where('pregunta', '==', t).limit(1).get();
+    if (!qs.empty){
+      const data = qs.docs[0].data() || {};
+      byKey.set(`__TXT__${t}`, {
+        opciones: Array.isArray(data.opciones) ? data.opciones : [],
+        corr: Number(data.corr ?? -1),
+        explicacion: data.explicacion || '',
+        explicacionimagen: data.explicacionimagen || ''
+        
+      });
+    }
+  }));
+
+  return byKey;
 }
-</style>
+function __escHTML(s){
+  return String(s ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+function renderCorrectExplanation(list){
+  if (!list) return;
+  const corr = Number(list.dataset.corr ?? -1);
+  const txt  = list.dataset.exp || '';
+  const img  = list.dataset.expimg || '';
+
+  const corrRow = list.querySelector(`.option-row[data-idx="${corr}"]`);
+  if (!corrRow) return;
+
+  // ⛔ evita duplicados
+  const li = corrRow.closest('li') || corrRow.parentElement;
+  if (!li) return;
+  if (li.querySelector(':scope > .explicacion-box')) return;
+
+
+  corrRow.classList.remove('rounded-md','ring-1','ring-green-500');
+corrRow.classList.add('border','border-green-500','bg-green-50','rounded-t-md','rounded-b-none');
+
+  // 🧩 Card de explicación (borde y fondo verdes, tipografía más grande)
+  const box = document.createElement('div');
+  box.className = [
+  'explicacion-box',
+  '-mt-px',        // une los bordes (sin separación)
+  'ml-0',          // alinea con el inicio del texto (px-3 + w-3 + gap-3 = 2.25rem)
+  'text-[10px]',
+  'leading-relaxed',
+  'text-slate-800'
+].join(' ');
+
+box.innerHTML = `
+  <div class="border border-green-500 rounded-md rounded-t-none bg-green-50 p-3 md:p-4">
+    ${txt ? `<div class="whitespace-pre-wrap">${__escHTML(txt)}</div>` : ''}
+    ${img ? `
+      <figure class="mt-3">
+        <img src="${__escHTML(img)}" alt="explicación" loading="lazy"
+             class="w-28 h-20 object-cover rounded-md border border-green-200">
+      </figure>` : ''}
+  </div>
+`;
+
+  // ⬇️ Insertar como hermano, justo debajo del row correcto
+  li.insertBefore(box, corrRow.nextSibling);
+}
+
+function applyAnswerState(list, st){
+  if (!list || !st) return;
+  const { locked, selected, corr } = st;
+  const allRows = list.querySelectorAll('.option-row');
+  const allBullets = list.querySelectorAll('.opt-bullet');
+
+  // baseline: todo rojo (err)
+allRows.forEach(r => r.classList.remove(
+  'bg-green-50','bg-green-100','bg-red-100',
+  'ring-1','ring-green-500','ring-red-500',
+  'border','border-green-500','border-red-500',
+  'rounded-b-none','rounded-t-md'
+));
+  allBullets.forEach(b => {
+    b.classList.remove('ok','ok-solid','err','err-solid');
+    b.classList.add('err');
+  });
+
+  const selRow = list.querySelector(`.option-row[data-idx="${selected}"]`);
+  const selBullet = selRow?.querySelector('.opt-bullet');
+  const corrRow = list.querySelector(`.option-row[data-idx="${corr}"]`);
+  const corrBullet = corrRow?.querySelector('.opt-bullet');
+
+  if (selected === corr) {
+    selRow?.classList.add('correct');
+    selBullet?.classList.remove('err');
+    selBullet?.classList.add('ok-solid');
+  } else {
+    selRow?.classList.add('bg-red-100','ring-1','ring-red-500');
+    selBullet?.classList.remove('err');
+    selBullet?.classList.add('err-solid');
+    if (corrRow){
+      corrRow.classList.add('correct');
+      corrBullet?.classList.remove('err');
+      corrBullet?.classList.add('ok');
+    }
+  }
+
+
+    // 🔄 restaurar iconos bloqueados
+  const allIcons = list.querySelectorAll('.opt-x i');
+  allIcons.forEach(icon => { icon.className = 'fas fa-minus text-slate-400'; });
+  const corrIcon = list.querySelector(`.option-row[data-idx="${corr}"] .opt-x i`);
+  if (corrIcon) corrIcon.className = 'fas fa-check text-green-600';
+
+  if (locked){
+    list.dataset.locked = '1';
+    list.classList.add('locked');
+    list.querySelectorAll('.opt-x').forEach(b=>{
+      b.setAttribute('aria-disabled','true');
+
+    renderCorrectExplanation(list);
+    enableReset(list, true);
+
+    });
+    
+  }
+  
+  // 🚫 al estar bloqueado, deshabilitar los botones de tachar
+  if (locked){
+    
+  }
+
+
+
+
+}
+
+function reapplyStrikes(root){
+  // Vuelve a tachar las opciones que el usuario marcó con la X
+  root.querySelectorAll('.opt-list').forEach(list=>{
+    const qText = list.dataset.qkey || '';
+    list.querySelectorAll('.option-row .opt-text').forEach(optEl=>{
+      const key = `${qText}||${optEl.textContent?.trim() || ''}`;
+      if (markedOpts.has(key)) optEl.classList.add('striked');
+    });
+  });
+}
+
+
+function enableReset(list, on){
+  const btn = list.closest('.expando')?.querySelector('.opt-reset');
+  if(!btn) return;
+  btn.disabled = !on;
+  btn.classList.toggle('enabled', !!on);
+}
+
+// util: borra clases que empiecen por un prefijo (p.ej. bg-green-)
+function removeClassesByPrefix(el, prefix){
+  el.classList.forEach(c => { if (c.startsWith(prefix)) el.classList.remove(c); });
+}
+
+function resetQuestion(list){
+  if(!list) return;
+
+  // 1) eliminar explicación si existe
+  list.querySelectorAll(':scope > li > .explicacion-box').forEach(el=>el.remove());
+
+  // 2) desbloquear
+  list.dataset.locked = '0';
+  list.classList.remove('locked');
+
+  // 3) limpiar filas y bullets (incluye bg-green-50 que quedaba)
+  list.querySelectorAll('.option-row').forEach(row=>{
+    row.classList.remove(
+      'correct','bg-red-100','ring-1','ring-green-500','ring-red-500',
+      'border','border-green-500','rounded-t-md','rounded-b-none'
+    );
+    removeClassesByPrefix(row, 'bg-green-');   // <- quita bg-green-50/100/200/etc
+  });
+  list.querySelectorAll('.opt-bullet').forEach(b=>{
+    b.classList.remove('ok','ok-solid','err','err-solid');
+  });
+
+  // 4) restaurar iconos y tachados
+  list.querySelectorAll('.opt-x').forEach(b=>{
+    b.removeAttribute('aria-disabled');
+    const i = b.querySelector('i'); if(i) i.className = 'fas fa-times';
+  });
+
+  const qText = list.dataset.qkey || '';
+  list.querySelectorAll('.opt-text').forEach(opt=>{
+    const key = `${qText}||${(opt.textContent||'').trim()}`;
+    opt.classList.remove('striked'); markedOpts.delete(key);
+  });
+
+  // 5) olvidar estado y desactivar botón
+  answersState.delete(qText);
+  enableReset(list, false);
+}
+
+
+// NUEVO render con soporte id/texto
+async function renderSuggestionsConOpciones(list, data, shown) {
+  const letters = i => String.fromCharCode(65 + i);
+  const esc = s => String(s ?? '')
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+  const items = data.suggestions.slice(0, shown);
+  const infoMap = await getOpcionesParaItems(items);
+
+  list.innerHTML = items.map((item, idx) => {
+    const texto = typeof item === 'string' ? item : (item.text || item.q || '');
+    const sid   = typeof item === 'object' ? (item.id || item.qid || null) : null;
+    const bookmarkKey = sid ? `sugg:${sid}` : `sugg:${idx}`;
+
+    const keyTxt = `__TXT__${String(texto).trim()}`;
+    const meta   = sid ? (infoMap.get(String(sid)) || {}) : (infoMap.get(keyTxt) || {});
+    const opciones = Array.isArray(meta.opciones) ? meta.opciones : [];
+    const corr = Number(meta.corr ?? -1);
+
+    const opcionesHtml = opciones.length
+      ? opciones.map((op, i) => `
+          <li>
+            <div class="option-row flex items-center gap-3 px-3 py-1 rounded-md cursor-pointer hover:bg-slate-50"
+                 data-idx="${i}">
+              <span class="opt-bullet w-3 font-semibold text-slate-500">${letters(i)}</span>
+              <span class="opt-text grow text-[10px] text-slate-800">${esc(op)}</span>
+              <button type="button" class="opt-x ml-2 text-slate-400 hover:text-slate-600" aria-label="Tachar opción">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </li>`).join('')
+      : `<li class="text-xs text-slate-400 px-3 py-2">Sin opciones registradas</li>`;
+
+    return `
+  <details class="group" data-bookmark-key="${bookmarkKey}" data-bookmarked="false">
+    <summary class="flex items-center justify-between cursor-pointer list-none py-2 pl-0">
+      <span class="text-slate-700 text-sm">${esc(texto)}</span>
+      <span class="toggle-icons">
+        ${bookmarkToggleMarkup(texto)}
+        <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+      </span>
+    </summary>
+
+  <div class="pl-4 pr-2 pb-2 overflow-hidden">
+      <div class="expando" style="max-height:0; opacity:0; transition:max-height 250ms ease, opacity 200ms ease;">
+                <ul class="opt-list list-none p-0 m-0"
+            data-qkey="${esc(texto)}"
+            data-corr="${corr}"
+            data-locked="0"
+            data-exp="${esc(meta.explicacion || '')}"
+            data-expimg="${esc(meta.explicacionimagen || '')}">
+          ${opcionesHtml}
+               </ul>
+        <div class="opt-footer">
+          <div class="opt-divider"></div>
+          <button type="button" class="opt-reset" disabled>Reset question</button>
+        </div>
+      </div>
+    </div>
+  </details>`;
+  }).join('');
+
+  initializeBookmarkControls(list);
+    reapplyStrikes(list);
+  list.querySelectorAll('.opt-list').forEach(ul=>{
+   const key = ul.dataset.qkey || '';
+    const st = answersState.get(key);
+    if (st) applyAnswerState(ul, st);
+  });
+
+
+
+
+
+
+
+}
+
+
+function _openPanel(panel) {
+  // desde colapsado → expandido
+  panel.style.willChange = 'max-height, opacity';
+  panel.style.opacity = '1';
+  panel.style.maxHeight = panel.scrollHeight + 'px';
+
+  const onEnd = () => {
+    panel.style.maxHeight = 'none'; // permite altura auto tras expandir
+    panel.style.willChange = '';
+    panel.removeEventListener('transitionend', onEnd);
+  };
+  panel.addEventListener('transitionend', onEnd);
+}
+
+function _closePanel(panel) {
+  // desde expandido → colapsado
+  panel.style.willChange = 'max-height, opacity';
+  // fijar altura actual para poder animar hacia 0
+  panel.style.maxHeight = panel.scrollHeight + 'px';
+  // forzar reflow para que el cambio a 0 anime
+  void panel.offsetHeight;
+  panel.style.opacity = '0';
+  panel.style.maxHeight = '0px';
+
+  const onEnd = () => {
+    panel.style.willChange = '';
+    panel.removeEventListener('transitionend', onEnd);
+  };
+  panel.addEventListener('transitionend', onEnd);
+}
+
+function wireExpandoAnimations(root) {
+  root.querySelectorAll('details').forEach(det => {
+    const panel = det.querySelector('.expando');
+    if (!panel) return;
+
+    // Estado inicial (si se restaura abierto)
+    if (det.open) {
+      panel.style.maxHeight = 'none';
+      panel.style.opacity = '1';
+    } else {
+      panel.style.maxHeight = '0px';
+      panel.style.opacity = '0';
+    }
+
+    det.addEventListener('toggle', () => {
+      if (det.open) _openPanel(panel);
+      else _closePanel(panel);
+    });
+  });
+}
+
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.opt-x');
+  if (!btn) return;
+
+
+
+    // ⛔ si la lista está bloqueada, no permitir tachar
+  const listLocked = btn.closest('.opt-list')?.dataset.locked === '1';
+  if (listLocked) return;
+  // ⛔ si el icono ya no es "X", no permitir tachar
+  const iconEl = btn.querySelector('i');
+  if (iconEl && !iconEl.classList.contains('fa-times')) return;
+
+  const row   = btn.closest('.option-row');
+  const optEl = row?.querySelector('.opt-text');
+  const qText = btn.closest('details')?.querySelector('summary span')?.textContent?.trim() || '';
+  const key   = `${qText}||${optEl?.textContent?.trim() || ''}`;
+
+  if (!optEl) return;
+
+  if (markedOpts.has(key)) {
+    markedOpts.delete(key);
+    optEl.classList.remove('striked');
+  } else {
+    markedOpts.add(key);
+    optEl.classList.add('striked');
+  }
+});
+
+document.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.opt-reset');
+  if(!btn) return;
+  const list = btn.closest('.expando')?.querySelector('.opt-list');
+  if(!list) return;
+  resetQuestion(list);
+});
+
+
+document.addEventListener('click', (e) => {
+  const row = e.target.closest('.option-row');
+  if (!row) return;
+  if (e.target.closest('.opt-x')) return; // ignora clicks en la X
+
+  const list = row.closest('.opt-list');
+  if (!list) return;
+
+
+  if (String(list.dataset.locked) === '1') return;
+
+  const corr = Number(list.dataset.corr ?? -1);
+  const idx  = Number(row.dataset.idx ?? -1);
+
+  // reset estilos de contenedor (ya lo hacías)
+  list.querySelectorAll('.option-row').forEach(r=>{
+  r.classList.remove('bg-green-100','ring-1','ring-green-500','bg-red-100','ring-red-500');
+  removeClassesByPrefix(r, 'bg-green-');   // <- por si acaso
+});
+
+  // 🔁 reset de TODOS los bullets y deja como baseline "err" (rojo contorno/letra)
+  const allBullets = list.querySelectorAll('.opt-bullet');
+  allBullets.forEach(b=>{
+    b.classList.remove('ok','ok-solid','err','err-solid');
+    b.classList.add('err'); // todos en rojo contorno/letra por defecto
+  });
+
+  const selectedBullet = row.querySelector('.opt-bullet');
+  const corrRow = list.querySelector(`.option-row[data-idx="${corr}"]`);
+  const corrBullet = corrRow?.querySelector('.opt-bullet');
+
+  if (idx === corr) {
+    // ✅ seleccionó la correcta
+    row.classList.add('correct','rounded-t-md','rounded-b-none');
+    selectedBullet?.classList.remove('err');
+    selectedBullet?.classList.add('ok-solid');   // círculo verde sólido, letra blanca
+    // las demás ya quedaron con borde/letra rojos (err)
+  } else {
+    // ❌ seleccionó incorrecta
+    row.classList.add('bg-red-100','ring-1','ring-red-500');
+    selectedBullet?.classList.remove('err');
+    selectedBullet?.classList.add('err-solid');  // círculo rojo sólido, letra blanca
+
+    if (corrRow) {
+      corrRow.classList.add('correct');
+      if (corrBullet){
+        corrBullet.classList.remove('err');
+        corrBullet.classList.add('ok');          // correcto: contorno/letra verdes (bg transparente)
+      }
+    }
+    // el resto permanece con borde/letra rojos (err)
+  }
+
+  list.dataset.locked = '1';
+  list.classList.add('locked');
+
+  
+
+  const qKey = list.dataset.qkey || '';
+  answersState.set(qKey, { locked: 1, selected: idx, corr });
+
+    // 🔄 cambiar iconos de X → "-" y marcar ✔ en la correcta
+  list.querySelectorAll('.opt-x i').forEach(icon=>{
+    icon.className = 'fas fa-minus text-slate-400'; // todos se vuelven "−"
+  });
+  if (corrRow){
+    const corrIcon = corrRow.querySelector('.opt-x i');
+    if (corrIcon){
+      corrIcon.className = 'fas fa-check text-green-600'; // solo la correcta se convierte en check
+    }
+  }
+
+
+    list.querySelectorAll('.opt-x').forEach(b=>{
+    b.setAttribute('aria-disabled', 'true');
+  });
+
+
+  renderCorrectExplanation(list);
+
+  enableReset(list, true);
+
+
+
+
+  
+
+
+});
+
+
+
+
+
+</script>
+
+
+<!-- === define tamaño de texto content y bank === -->
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const subRoot = document.querySelector('#subcategoria-content');
+  const qbRoot  = document.querySelector('#qbank-content');
+
+  let subScale = parseInt(localStorage.getItem('fontScaleSubcat') || '100', 10);
+  let qbScale  = parseInt(localStorage.getItem('fontScaleQbank')  || '100', 10);
+
+  function applySub(){ if (subRoot) subRoot.style.setProperty('--content-font-scale', subScale + '%'); }
+  function applyQb(){  if (qbRoot)  qbRoot.style.setProperty('--qbank-font-scale',   qbScale  + '%'); }
+
+  applySub();
+  applyQb();
+
+  // Funciona con #font-btn (único) o con ids separados (#font-btn-subcat / #font-btn-qbank)
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('#font-btn, #font-btn-subcat, #font-btn-qbank');
+    if (!btn) return;
+
+    const inQbank = !!btn.closest('#qbank-content'); // ¿el AA clickeado está dentro de QBank?
+
+    if (inQbank) {
+      e.preventDefault();
+      qbScale = qbScale >= 140 ? 80 : (qbScale + 10);          // ciclo 80–140%
+      localStorage.setItem('fontScaleQbank', qbScale);
+      applyQb();
+    } else {
+      e.preventDefault();
+      subScale = subScale >= 140 ? 80 : (subScale + 10);
+      localStorage.setItem('fontScaleSubcat', subScale);
+      applySub();
+    }
+  });
+});
+</script>
+
+
 
 
 <script>
@@ -12561,524 +13306,17 @@ await renderQs();
 
 
 
-<script>
-// Renderiza preguntas mostrando opciones por ID
-// Utilidad: parte un array en chunks de N (Firestore "in" soporta hasta 10)
-// util
 
 
 
-const chunk = (arr, size = 10) => {
-  const out = []; for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-  return out;
-};
 
 
-// ↳ estado persistente de opciones tachadas (pregunta||opción)
-const markedOpts = new Set();
-const answersState = new Map(); // key: data-qkey (texto exacto de la pregunta o id estable)
 
-// busca opciones por id de DOC y, si no hay id, por texto exacto de "pregunta"
 
 
 
-async function getOpcionesParaItems(items){
-  const byKey = new Map();
 
-  const ids = [];
-  const texts = [];
-  for (const it of items){
-    if (typeof it === 'object' && (it.id || it.qid)) {
-      ids.push(String(it.id || it.qid));
-    } else {
-      const t = typeof it === 'string' ? it : (it?.text || it?.q || '');
-      texts.push(String(t).trim());
-    }
-  }
 
-  // 1) por ID
-  if (ids.length){
-    const fpId = firebase.firestore.FieldPath.documentId();
-    for (const g of chunk([...new Set(ids)], 10)){
-      const snap = await db.collectionGroup('preguntas').where(fpId, 'in', g).get();
-      snap.forEach(d => {
-        const data = d.data() || {};
-        byKey.set(d.id, {
-        opciones: Array.isArray(data.opciones) ? data.opciones : [],
-        corr: Number(data.corr ?? -1),
-        explicacion: data.explicacion || '',
-        explicacionimagen: data.explicacionimagen || ''
-      });
-      });
-    }
-  }
-
-  // 2) por TEXTO exacto
-  const uniqueTexts = [...new Set(texts.filter(Boolean))];
-  await Promise.all(uniqueTexts.map(async (t) => {
-    const qs = await db.collectionGroup('preguntas').where('pregunta', '==', t).limit(1).get();
-    if (!qs.empty){
-      const data = qs.docs[0].data() || {};
-      byKey.set(`__TXT__${t}`, {
-        opciones: Array.isArray(data.opciones) ? data.opciones : [],
-        corr: Number(data.corr ?? -1),
-        explicacion: data.explicacion || '',
-        explicacionimagen: data.explicacionimagen || ''
-        
-      });
-    }
-  }));
-
-  return byKey;
-}
-function __escHTML(s){
-  return String(s ?? "")
-    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
-}
-
-function renderCorrectExplanation(list){
-  if (!list) return;
-  const corr = Number(list.dataset.corr ?? -1);
-  const txt  = list.dataset.exp || '';
-  const img  = list.dataset.expimg || '';
-
-  const corrRow = list.querySelector(`.option-row[data-idx="${corr}"]`);
-  if (!corrRow) return;
-
-  // ⛔ evita duplicados
-  const li = corrRow.closest('li') || corrRow.parentElement;
-  if (!li) return;
-  if (li.querySelector(':scope > .explicacion-box')) return;
-
-
-  corrRow.classList.remove('rounded-md','ring-1','ring-green-500');
-corrRow.classList.add('border','border-green-500','bg-green-50','rounded-t-md','rounded-b-none');
-
-  // 🧩 Card de explicación (borde y fondo verdes, tipografía más grande)
-  const box = document.createElement('div');
-  box.className = [
-  'explicacion-box',
-  '-mt-px',        // une los bordes (sin separación)
-  'ml-0',          // alinea con el inicio del texto (px-3 + w-3 + gap-3 = 2.25rem)
-  'text-[10px]',
-  'leading-relaxed',
-  'text-slate-800'
-].join(' ');
-
-box.innerHTML = `
-  <div class="border border-green-500 rounded-md rounded-t-none bg-green-50 p-3 md:p-4">
-    ${txt ? `<div class="whitespace-pre-wrap">${__escHTML(txt)}</div>` : ''}
-    ${img ? `
-      <figure class="mt-3">
-        <img src="${__escHTML(img)}" alt="explicación" loading="lazy"
-             class="w-28 h-20 object-cover rounded-md border border-green-200">
-      </figure>` : ''}
-  </div>
-`;
-
-  // ⬇️ Insertar como hermano, justo debajo del row correcto
-  li.insertBefore(box, corrRow.nextSibling);
-}
-
-function applyAnswerState(list, st){
-  if (!list || !st) return;
-  const { locked, selected, corr } = st;
-  const allRows = list.querySelectorAll('.option-row');
-  const allBullets = list.querySelectorAll('.opt-bullet');
-
-  // baseline: todo rojo (err)
-allRows.forEach(r => r.classList.remove(
-  'bg-green-50','bg-green-100','bg-red-100',
-  'ring-1','ring-green-500','ring-red-500',
-  'border','border-green-500','border-red-500',
-  'rounded-b-none','rounded-t-md'
-));
-  allBullets.forEach(b => {
-    b.classList.remove('ok','ok-solid','err','err-solid');
-    b.classList.add('err');
-  });
-
-  const selRow = list.querySelector(`.option-row[data-idx="${selected}"]`);
-  const selBullet = selRow?.querySelector('.opt-bullet');
-  const corrRow = list.querySelector(`.option-row[data-idx="${corr}"]`);
-  const corrBullet = corrRow?.querySelector('.opt-bullet');
-
-  if (selected === corr) {
-    selRow?.classList.add('correct');
-    selBullet?.classList.remove('err');
-    selBullet?.classList.add('ok-solid');
-  } else {
-    selRow?.classList.add('bg-red-100','ring-1','ring-red-500');
-    selBullet?.classList.remove('err');
-    selBullet?.classList.add('err-solid');
-    if (corrRow){
-      corrRow.classList.add('correct');
-      corrBullet?.classList.remove('err');
-      corrBullet?.classList.add('ok');
-    }
-  }
-
-
-    // 🔄 restaurar iconos bloqueados
-  const allIcons = list.querySelectorAll('.opt-x i');
-  allIcons.forEach(icon => { icon.className = 'fas fa-minus text-slate-400'; });
-  const corrIcon = list.querySelector(`.option-row[data-idx="${corr}"] .opt-x i`);
-  if (corrIcon) corrIcon.className = 'fas fa-check text-green-600';
-
-  if (locked){
-    list.dataset.locked = '1';
-    list.classList.add('locked');
-    list.querySelectorAll('.opt-x').forEach(b=>{
-      b.setAttribute('aria-disabled','true');
-
-    renderCorrectExplanation(list);
-    enableReset(list, true);
-
-    });
-    
-  }
-  
-  // 🚫 al estar bloqueado, deshabilitar los botones de tachar
-  if (locked){
-    
-  }
-
-
-
-
-}
-
-function reapplyStrikes(root){
-  // Vuelve a tachar las opciones que el usuario marcó con la X
-  root.querySelectorAll('.opt-list').forEach(list=>{
-    const qText = list.dataset.qkey || '';
-    list.querySelectorAll('.option-row .opt-text').forEach(optEl=>{
-      const key = `${qText}||${optEl.textContent?.trim() || ''}`;
-      if (markedOpts.has(key)) optEl.classList.add('striked');
-    });
-  });
-}
-
-
-function enableReset(list, on){
-  const btn = list.closest('.expando')?.querySelector('.opt-reset');
-  if(!btn) return;
-  btn.disabled = !on;
-  btn.classList.toggle('enabled', !!on);
-}
-
-// util: borra clases que empiecen por un prefijo (p.ej. bg-green-)
-function removeClassesByPrefix(el, prefix){
-  el.classList.forEach(c => { if (c.startsWith(prefix)) el.classList.remove(c); });
-}
-
-function resetQuestion(list){
-  if(!list) return;
-
-  // 1) eliminar explicación si existe
-  list.querySelectorAll(':scope > li > .explicacion-box').forEach(el=>el.remove());
-
-  // 2) desbloquear
-  list.dataset.locked = '0';
-  list.classList.remove('locked');
-
-  // 3) limpiar filas y bullets (incluye bg-green-50 que quedaba)
-  list.querySelectorAll('.option-row').forEach(row=>{
-    row.classList.remove(
-      'correct','bg-red-100','ring-1','ring-green-500','ring-red-500',
-      'border','border-green-500','rounded-t-md','rounded-b-none'
-    );
-    removeClassesByPrefix(row, 'bg-green-');   // <- quita bg-green-50/100/200/etc
-  });
-  list.querySelectorAll('.opt-bullet').forEach(b=>{
-    b.classList.remove('ok','ok-solid','err','err-solid');
-  });
-
-  // 4) restaurar iconos y tachados
-  list.querySelectorAll('.opt-x').forEach(b=>{
-    b.removeAttribute('aria-disabled');
-    const i = b.querySelector('i'); if(i) i.className = 'fas fa-times';
-  });
-
-  const qText = list.dataset.qkey || '';
-  list.querySelectorAll('.opt-text').forEach(opt=>{
-    const key = `${qText}||${(opt.textContent||'').trim()}`;
-    opt.classList.remove('striked'); markedOpts.delete(key);
-  });
-
-  // 5) olvidar estado y desactivar botón
-  answersState.delete(qText);
-  enableReset(list, false);
-}
-
-
-// NUEVO render con soporte id/texto
-async function renderSuggestionsConOpciones(list, data, shown) {
-  const letters = i => String.fromCharCode(65 + i);
-  const esc = s => String(s ?? '')
-  .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-
-  const items = data.suggestions.slice(0, shown);
-  const infoMap = await getOpcionesParaItems(items);
-
-  list.innerHTML = items.map((item, idx) => {
-    const texto = typeof item === 'string' ? item : (item.text || item.q || '');
-    const sid   = typeof item === 'object' ? (item.id || item.qid || null) : null;
-    const bookmarkKey = sid ? `sugg:${sid}` : `sugg:${idx}`;
-
-    const keyTxt = `__TXT__${String(texto).trim()}`;
-    const meta   = sid ? (infoMap.get(String(sid)) || {}) : (infoMap.get(keyTxt) || {});
-    const opciones = Array.isArray(meta.opciones) ? meta.opciones : [];
-    const corr = Number(meta.corr ?? -1);
-
-    const opcionesHtml = opciones.length
-      ? opciones.map((op, i) => `
-          <li>
-            <div class="option-row flex items-center gap-3 px-3 py-1 rounded-md cursor-pointer hover:bg-slate-50"
-                 data-idx="${i}">
-              <span class="opt-bullet w-3 font-semibold text-slate-500">${letters(i)}</span>
-              <span class="opt-text grow text-[10px] text-slate-800">${esc(op)}</span>
-              <button type="button" class="opt-x ml-2 text-slate-400 hover:text-slate-600" aria-label="Tachar opción">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-          </li>`).join('')
-      : `<li class="text-xs text-slate-400 px-3 py-2">Sin opciones registradas</li>`;
-
-    return `
-  <details class="group" data-bookmark-key="${bookmarkKey}" data-bookmarked="false">
-    <summary class="flex items-center justify-between cursor-pointer list-none py-2 pl-0">
-      <span class="text-slate-700 text-sm">${esc(texto)}</span>
-      <span class="toggle-icons">
-        ${bookmarkToggleMarkup(texto)}
-        <i class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
-      </span>
-    </summary>
-
-  <div class="pl-4 pr-2 pb-2 overflow-hidden">
-      <div class="expando" style="max-height:0; opacity:0; transition:max-height 250ms ease, opacity 200ms ease;">
-                <ul class="opt-list list-none p-0 m-0"
-            data-qkey="${esc(texto)}"
-            data-corr="${corr}"
-            data-locked="0"
-            data-exp="${esc(meta.explicacion || '')}"
-            data-expimg="${esc(meta.explicacionimagen || '')}">
-          ${opcionesHtml}
-               </ul>
-        <div class="opt-footer">
-          <div class="opt-divider"></div>
-          <button type="button" class="opt-reset" disabled>Reset question</button>
-        </div>
-      </div>
-    </div>
-  </details>`;
-  }).join('');
-
-  initializeBookmarkControls(list);
-    reapplyStrikes(list);
-  list.querySelectorAll('.opt-list').forEach(ul=>{
-   const key = ul.dataset.qkey || '';
-    const st = answersState.get(key);
-    if (st) applyAnswerState(ul, st);
-  });
-
-
-
-
-
-
-
-}
-
-
-function _openPanel(panel) {
-  // desde colapsado → expandido
-  panel.style.willChange = 'max-height, opacity';
-  panel.style.opacity = '1';
-  panel.style.maxHeight = panel.scrollHeight + 'px';
-
-  const onEnd = () => {
-    panel.style.maxHeight = 'none'; // permite altura auto tras expandir
-    panel.style.willChange = '';
-    panel.removeEventListener('transitionend', onEnd);
-  };
-  panel.addEventListener('transitionend', onEnd);
-}
-
-function _closePanel(panel) {
-  // desde expandido → colapsado
-  panel.style.willChange = 'max-height, opacity';
-  // fijar altura actual para poder animar hacia 0
-  panel.style.maxHeight = panel.scrollHeight + 'px';
-  // forzar reflow para que el cambio a 0 anime
-  void panel.offsetHeight;
-  panel.style.opacity = '0';
-  panel.style.maxHeight = '0px';
-
-  const onEnd = () => {
-    panel.style.willChange = '';
-    panel.removeEventListener('transitionend', onEnd);
-  };
-  panel.addEventListener('transitionend', onEnd);
-}
-
-function wireExpandoAnimations(root) {
-  root.querySelectorAll('details').forEach(det => {
-    const panel = det.querySelector('.expando');
-    if (!panel) return;
-
-    // Estado inicial (si se restaura abierto)
-    if (det.open) {
-      panel.style.maxHeight = 'none';
-      panel.style.opacity = '1';
-    } else {
-      panel.style.maxHeight = '0px';
-      panel.style.opacity = '0';
-    }
-
-    det.addEventListener('toggle', () => {
-      if (det.open) _openPanel(panel);
-      else _closePanel(panel);
-    });
-  });
-}
-
-
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.opt-x');
-  if (!btn) return;
-
-
-
-    // ⛔ si la lista está bloqueada, no permitir tachar
-  const listLocked = btn.closest('.opt-list')?.dataset.locked === '1';
-  if (listLocked) return;
-  // ⛔ si el icono ya no es "X", no permitir tachar
-  const iconEl = btn.querySelector('i');
-  if (iconEl && !iconEl.classList.contains('fa-times')) return;
-
-  const row   = btn.closest('.option-row');
-  const optEl = row?.querySelector('.opt-text');
-  const qText = btn.closest('details')?.querySelector('summary span')?.textContent?.trim() || '';
-  const key   = `${qText}||${optEl?.textContent?.trim() || ''}`;
-
-  if (!optEl) return;
-
-  if (markedOpts.has(key)) {
-    markedOpts.delete(key);
-    optEl.classList.remove('striked');
-  } else {
-    markedOpts.add(key);
-    optEl.classList.add('striked');
-  }
-});
-
-document.addEventListener('click', (e)=>{
-  const btn = e.target.closest('.opt-reset');
-  if(!btn) return;
-  const list = btn.closest('.expando')?.querySelector('.opt-list');
-  if(!list) return;
-  resetQuestion(list);
-});
-
-
-document.addEventListener('click', (e) => {
-  const row = e.target.closest('.option-row');
-  if (!row) return;
-  if (e.target.closest('.opt-x')) return; // ignora clicks en la X
-
-  const list = row.closest('.opt-list');
-  if (!list) return;
-
-
-  if (String(list.dataset.locked) === '1') return;
-
-  const corr = Number(list.dataset.corr ?? -1);
-  const idx  = Number(row.dataset.idx ?? -1);
-
-  // reset estilos de contenedor (ya lo hacías)
-  list.querySelectorAll('.option-row').forEach(r=>{
-  r.classList.remove('bg-green-100','ring-1','ring-green-500','bg-red-100','ring-red-500');
-  removeClassesByPrefix(r, 'bg-green-');   // <- por si acaso
-});
-
-  // 🔁 reset de TODOS los bullets y deja como baseline "err" (rojo contorno/letra)
-  const allBullets = list.querySelectorAll('.opt-bullet');
-  allBullets.forEach(b=>{
-    b.classList.remove('ok','ok-solid','err','err-solid');
-    b.classList.add('err'); // todos en rojo contorno/letra por defecto
-  });
-
-  const selectedBullet = row.querySelector('.opt-bullet');
-  const corrRow = list.querySelector(`.option-row[data-idx="${corr}"]`);
-  const corrBullet = corrRow?.querySelector('.opt-bullet');
-
-  if (idx === corr) {
-    // ✅ seleccionó la correcta
-    row.classList.add('correct','rounded-t-md','rounded-b-none');
-    selectedBullet?.classList.remove('err');
-    selectedBullet?.classList.add('ok-solid');   // círculo verde sólido, letra blanca
-    // las demás ya quedaron con borde/letra rojos (err)
-  } else {
-    // ❌ seleccionó incorrecta
-    row.classList.add('bg-red-100','ring-1','ring-red-500');
-    selectedBullet?.classList.remove('err');
-    selectedBullet?.classList.add('err-solid');  // círculo rojo sólido, letra blanca
-
-    if (corrRow) {
-      corrRow.classList.add('correct');
-      if (corrBullet){
-        corrBullet.classList.remove('err');
-        corrBullet.classList.add('ok');          // correcto: contorno/letra verdes (bg transparente)
-      }
-    }
-    // el resto permanece con borde/letra rojos (err)
-  }
-
-  list.dataset.locked = '1';
-  list.classList.add('locked');
-
-  
-
-  const qKey = list.dataset.qkey || '';
-  answersState.set(qKey, { locked: 1, selected: idx, corr });
-
-    // 🔄 cambiar iconos de X → "-" y marcar ✔ en la correcta
-  list.querySelectorAll('.opt-x i').forEach(icon=>{
-    icon.className = 'fas fa-minus text-slate-400'; // todos se vuelven "−"
-  });
-  if (corrRow){
-    const corrIcon = corrRow.querySelector('.opt-x i');
-    if (corrIcon){
-      corrIcon.className = 'fas fa-check text-green-600'; // solo la correcta se convierte en check
-    }
-  }
-
-
-    list.querySelectorAll('.opt-x').forEach(b=>{
-    b.setAttribute('aria-disabled', 'true');
-  });
-
-
-  renderCorrectExplanation(list);
-
-  enableReset(list, true);
-
-
-
-
-  
-
-
-});
-
-
-
-
-
-</script>
 
 <script>
 /* --- util --- */
@@ -14167,6 +14405,7 @@ popover.addEventListener('keydown', hideOnEnter);
 
 
 
+
 <button id="mobile-split-switch" type="button">
   <i class="fas fa-arrow-left"></i><span>SWITCH VIEW</span>
 </button>
@@ -14179,4 +14418,4 @@ popover.addEventListener('keydown', hideOnEnter);
 
 </html>
 
-<!-- === 49octubre octubre noche nochiiilaeeeeee === -->
+<!-- === 80octubre octubre noche nochiiilaeeeeee === -->
