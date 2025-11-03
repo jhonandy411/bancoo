@@ -3162,12 +3162,15 @@ blockquote {
 body.bars-hidden #mobile-overlay.show{ left: 0; }
 
 /* Qbank modal: respeta el ancho ocupado por las barras laterales */
-#qbank-session {
-  --qbank-offset-left: var(--bars-w);
+body.qbank-open #qbank-session{
+  --qbank-offset-left: var(--bars-w);   /* barra principal + TOC visibles */
   --qbank-gap: 0px;
-  left: 0;
-  padding-left: calc(var(--qbank-offset-left) + var(--qbank-gap));
 }
+
+
+
+
+
 body.toc-hidden #qbank-session {
   --qbank-offset-left: var(--sb-collapsed);
 }
@@ -4339,27 +4342,36 @@ body:not(.favorites-split) #subcat-header .hl-btn.hl-close[data-favonly="true"] 
 </div>
         <nav id="qbank-sidebar-list" class="flex-1 overflow-y-auto divide-y divide-slate-200 bg-white"></nav>
         <div id="qbank-sidebar-footer" class="border-t border-slate-200 bg-white">
-          <div class="px-4 py-3">
-            <div class="flex items-center gap-4 text-slate-800">
-              <i class="fa-solid fa-stopwatch text-slate-500 text-lg"></i>
-              <div class="flex items-stretch gap-5 flex-1">
-                <div class="text-center flex flex-col items-center justify-center">
-                  <p id="qbank-sidebar-session" class="text-sm font-semibold text-slate-900 leading-tight">0h 00m</p>
-                  <p class="text-[9px] font-semibold uppercase tracking-wide text-slate-500 mt-1">Session</p>
-                </div>
-                <div class="flex items-stretch gap-3 flex-1">
-                  <div class="text-center flex flex-col items-center justify-center flex-shrink-0">
-                    <p id="qbank-sidebar-question" class="text-sm font-semibold text-slate-900 leading-tight">00:00</p>
-                    <p class="text-[9px] font-semibold uppercase tracking-wide text-slate-500 mt-1">Question</p>
-                  </div>
-                  <span class="self-stretch w-px bg-slate-200"></span>
-                  <button id="qbank-sidebar-pause" type="button" class="ml-auto inline-flex items-center justify-center text-slate-500 hover:text-slate-700 transition">
-                    <i class="fa-solid fa-pause text-sm"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+<div class="px-4 py-3">
+  <div class="flex items-center justify-between text-slate-800">
+    <!-- Icono principal -->
+    <i class="fa-solid fa-stopwatch text-slate-500 text-lg"></i>
+
+    <!-- Bloque de tiempos -->
+    <div class="flex flex-1 items-center justify-around">
+      <div class="text-center flex flex-col items-center justify-center">
+        <p id="qbank-sidebar-session" class="text-sm font-semibold text-slate-900 leading-tight">0h 00m</p>
+        <p class="text-[9px] font-semibold uppercase tracking-wide text-slate-500 mt-1">Session</p>
+      </div>
+      <div class="text-center flex flex-col items-center justify-center">
+        <p id="qbank-sidebar-question" class="text-sm font-semibold text-slate-900 leading-tight">00:00</p>
+        <p class="text-[9px] font-semibold uppercase tracking-wide text-slate-500 mt-1">Question</p>
+      </div>
+    </div>
+
+    <!-- Línea divisoria y botón pause -->
+    <div class="flex items-center gap-3 pl-4">
+      <span class="self-stretch w-px bg-slate-200"></span>
+      <button
+        id="qbank-sidebar-pause"
+        type="button"
+        class="inline-flex items-center justify-center px-3 py-1.5 text-slate-500 hover:text-slate-700 transition"
+      >
+        <i class="fa-solid fa-pause text-sm"></i>
+      </button>
+    </div>
+  </div>
+</div>
           <button id="qbank-sidebar-exit" type="button" class="w-full border-t border-slate-200 px-4 py-3 text-[12px] font-semibold uppercase tracking-wide text-slate-600 hover:bg-slate-50 transition">
             Exit session
           </button>
@@ -5543,11 +5555,11 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   qbankSessionEl.setAttribute('aria-modal', 'true');
   qbankSessionEl.innerHTML = `
     <div class="flex-1 overflow-auto">
-      <div class="max-w-5xl mx-auto px-6 sm:px-10 py-10">
+      <div class="max-w-7xl mx-auto px-6 sm:px-10 py-10">
         <div class="bg-white border border-slate-200 rounded-2xl shadow-xl flex overflow-hidden">
           <aside class="hidden">
-<div class="px-4 pt-3">
-                <p class="text-[11px] uppercase tracking-wide text-slate-500 font-semibold">Questions based on</p>
+            <div class="px-4 pt-3">
+              <p class="text-[11px] uppercase tracking-wide text-slate-500 font-semibold">Questions based on</p>
               <h3 class="text-sm font-semibold text-slate-700 leading-tight truncate">${escHTML(displayTitle)}</h3>
             </div>
             <nav id="qbank-question-list" class="flex-1 overflow-y-auto divide-y divide-slate-200"></nav>
@@ -5560,7 +5572,6 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
             <div id="qbank-content" class="hidden flex-1 min-h-0 flex flex-col overflow-hidden">
               <div class="flex-1 min-h-0 overflow-y-auto px-8 py-8 space-y-6">
 
-                
                 <!-- Nuevo encabezado con barra y botón AA -->
 <header class="relative flex items-center justify-end border-b border-gray-200 pb-1.5 pt-0 w-[calc(100%+4rem)] -mx-8 px-6 -translate-y-[4px]">
   <div class="border-l border-gray-300 h-5 mr-3 translate-y-[1px]"></div>
@@ -5575,41 +5586,177 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   </div>
 </header>
 
-
+                <!-- Reemplazado: bloque de pregunta, tags, opciones -->
                 <div class="flex flex-wrap items-start justify-between gap-4">
-                  <div class="space-y-1">
-                    <!-- Eliminado: <p id="qbank-progress"> -->
+                  <div class="space-y-1 flex-1 min-w-0">
                     <div id="qbank-question-text" class="text-[12px] leading-relaxed text-slate-800"></div>
                   </div>
-                  <div id="qbank-tags" class="flex flex-wrap gap-2 justify-end"></div>
                 </div>
-                <section id="qbank-options" class="qbank-option-container -mx-8"></section>
-                <div class="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-200">
-                  <button id="qbank-show-answer" type="button" class="text-sm font-medium text-slate-700 flex items-center gap-2 hover:text-sky-600 transition">
-                    <span class="inline-flex items-center justify-center w-5 h-5 border border-slate-400 rounded-sm text-[10px] font-semibold">?</span>
-                    Show answer
-                  </button>
-                  <button id="qbank-reset-question" type="button" class="text-xs text-slate-500 hover:text-slate-700 underline">Reset question</button>
-                </div>
+<div id="qbank-tags" class="flex flex-wrap gap-2 justify-end rounded-[1px]"></div>
+                <!-- Barra tipo KEY INFO / ADD NOTES -->
+                <div id="qbank-action-bar"
+     class="flex flex-wrap items-center justify-between text-[13px] font-medium text-slate-600 pt-2 pb-3 gap-y-3">
+  
+  <!-- Grupo izquierdo -->
+  <div class="flex items-center space-x-8">
+    <button type="button" class="flex items-center gap-2 text-slate-600 hover:text-slate-800">
+      <i class="fa-solid fa-bars text-[14px]"></i>
+      <span class="uppercase tracking-wide text-[11px] font-semibold text-slate-700">Key info</span>
+    </button>
+
+    <button type="button" class="flex items-center gap-2 text-slate-600 hover:text-slate-800">
+      <span class="inline-flex items-center justify-center w-5 h-5 rounded-full border border-slate-600 text-[11px] font-bold text-slate-700">?</span>
+      <span class="uppercase tracking-wide text-[11px] font-semibold text-slate-700">Attending tip</span>
+    </button>
+
+    <button id="btn-labs" type="button" class="flex items-center gap-2 text-slate-600 hover:text-slate-800">
+      <i class="fa-regular fa-clipboard text-[14px]"></i>
+      <span class="uppercase tracking-wide text-[11px] font-semibold text-slate-700">Labs</span>
+    </button>
+  </div>
+
+<!-- Grupo derecho -->
+<div class="flex items-center space-x-8" id="toolbar-acciones">
+
+  <!-- Grupo de botones ocultables -->
+  <div id="btn-group-optional" class="flex items-center space-x-8">
+
+    <!-- ADD NOTE -->
+    <button id="btn-addnote" type="button" class="flex items-center gap-2 text-slate-600 hover:text-slate-800">
+      <i class="fa-solid fa-pen-to-square text-[14px]"></i>
+      <span class="uppercase tracking-wide text-[11px] font-semibold text-slate-700">Add note</span>
+    </button>
+
+    <!-- NOTESMARK -->
+    <button id="btn-mark" type="button" class="flex items-center gap-2 text-slate-600 hover:text-slate-800">
+      <i class="fa-solid fa-highlighter text-[14px]"></i>
+      <span class="uppercase tracking-wide text-[11px] font-semibold text-slate-700">Mark</span>
+    </button>
+
+    <!-- GET ANKI CARD -->
+    <button id="btn-anki" type="button" class="flex items-center gap-2 text-slate-600 hover:text-slate-800">
+      <i class="fa-solid fa-layer-group text-[14px]"></i>
+      <span class="uppercase tracking-wide text-[11px] font-semibold text-slate-700">Get anki card</span>
+    </button>
+  </div>
+
+
+  <!-- Menú de 3 puntos -->
+  <div id="btn-menu-wrapper" class="relative">
+    <button id="btn-menu"
+      class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-slate-100 text-slate-600">
+      <i class="fa-solid fa-ellipsis-v text-[15px]"></i>
+    </button>
+
+    <!-- Dropdown flotante -->
+    <div id="btn-menu-panel"
+      class="hidden absolute right-0 top-full mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-[0_20px_40px_rgba(15,23,42,0.2)] text-slate-700">
+
+
+      <button id="menu-addnote"
+  class="optional-menu-item w-full flex items-center gap-2 text-left text-[11px] font-semibold text-slate-700 px-3 py-2 hover:bg-slate-100">
+  <i class="fa-solid fa-pen-to-square text-[13px] text-slate-600"></i>
+  <span>ADD NOTE</span>
+</button>
+
+<button id="menu-mark"
+  class="optional-menu-item w-full flex items-center gap-2 text-left text-[11px] font-semibold text-slate-700 px-3 py-2 hover:bg-slate-100">
+  <i class="fa-solid fa-highlighter text-[13px] text-slate-600"></i>
+  <span>MARK</span>
+</button>
+
+<button id="menu-anki"
+  class="optional-menu-item w-full flex items-center gap-2 text-left text-[11px] font-semibold text-slate-700 px-3 py-2 hover:bg-slate-100">
+  <i class="fa-solid fa-layer-group text-[13px] text-slate-600"></i>
+  <span>GET ANKI CARD</span>
+</button>
+
+<ul class="text-[14px] font-semibold leading-tight">
+  <!-- SAVE -->
+  <li class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer">
+    <i class="fa-regular fa-square-plus text-[16px] text-slate-700"></i>
+    <span class="uppercase tracking-wide text-[13px] font-semibold text-slate-700">SAVE</span>
+  </li>
+
+  <!-- SHARE -->
+  <li class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer">
+    <i class="fa-solid fa-arrow-up-from-bracket text-[16px] text-slate-700"></i>
+    <span class="uppercase tracking-wide text-[13px] font-semibold text-slate-700">SHARE</span>
+  </li>
+
+  <!-- GIVE FEEDBACK (único con línea separadora) -->
+  <li class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer border-t border-slate-200">
+    <i class="fa-regular fa-comment text-[16px] text-slate-700"></i>
+    <span class="uppercase tracking-wide text-[13px] font-semibold text-slate-700">GIVE FEEDBACK</span>
+  </li>
+</ul>
+    </div>
+  </div>
+</div>
+</div>
+
+                <section id="qbank-options" class="qbank-option-container -mx-8 !mt-0 !pt-0"></section>
+                
+
               </div>
               <div id="qbank-explanation" class="hidden border border-slate-200 bg-slate-50 rounded-lg mx-8 mb-8 px-5 py-4 space-y-3"></div>
             </div>
           </main>
         </div>
+
+
+
+
+        
+<div class="flex flex-wrap items-center justify-between px-8 py-3 border-t border-slate-200 text-[13px] font-medium text-slate-600">
+  <div class="flex items-center gap-4">
+    <button id="qbank-show-answer" type="button" class="flex items-center gap-2 text-slate-500 hover:text-slate-700 disabled:text-slate-400 disabled:opacity-60 transition font-semibold">
+      <span class="inline-flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" class="w-4 h-4">
+          <g stroke="currentColor" stroke-width="2">
+            <path d="M4 2a1 1 0 0 0-1 1v3.222L1.5 7.817a.2.2 0 0 0 0 .366L3 9.778V13a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" d="m12 6-4.125 4L6 8.182"></path>
+          </g>
+        </svg>
+      </span>
+      Show answer
+    </button>
+  </div>
+
+  <div class="flex items-center gap-6">
+    <button id="qbank-reset-question" type="button" disabled class="flex items-center gap-2 text-slate-500 hover:text-slate-700 disabled:text-slate-400 disabled:opacity-60 transition font-semibold text-[13px]">
+      <span class="inline-flex items-center justify-center text-[10px] font-semibold">&#8634;</span>
+      <span>Reset question</span>
+    </button>
+
+    <button id="qbank-hide-stats" type="button" disabled class="flex items-center gap-2 text-slate-500 hover:text-slate-700 disabled:text-slate-400 disabled:opacity-60 transition font-semibold text-[13px]">
+      <span class="inline-flex items-center justify-center">
+        <i class="fa-regular fa-eye text-[13px]"></i>
+      </span>
+      <span>Hide stats</span>
+    </button>
+  </div>
+</div>
+
+
+
+        
       </div>
+
+
+      
     </div>
-    <div id="qbank-controls" class="hidden flex-none w-full bg-white border-t border-slate-200 shadow-[0_-6px_18px_rgba(15,23,42,0.08)]">
-      <div class="flex w-full h-14">
-        <button id="qbank-prev" type="button" class="flex-1 flex items-center gap-2 bg-white text-sm font-semibold text-slate-600 border-r border-slate-200 hover:bg-slate-100 transition uppercase tracking-wide px-6 justify-center">
+    <div class="flex w-full h-14">
+        <button id="qbank-prev" type="button" class="flex-1 flex items-center gap-2 bg-white text-sm font-semibold text-slate-600 border-r border-slate-200 hover:bg-slate-100 transition uppercase tracking-wide px-6 justify-center opacity-40 cursor-not-allowed" disabled="">
           <i class="fa-solid fa-chevron-left text-xs"></i>
           Previous
         </button>
-        <button id="qbank-next" type="button" class="flex-1 flex items-center justify-center gap-2 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 transition uppercase tracking-wide">
-          <span class="qbank-next-label">Next</span>
+        <button id="qbank-next" type="button" class="flex-1 flex items-center justify-center gap-2 text-sm font-semibold text-white transition uppercase tracking-wide bg-slate-500 hover:bg-slate-600">
+          <span class="qbank-next-label">Skip</span>
           <i class="fa-solid fa-chevron-right text-xs"></i>
         </button>
       </div>
-    </div>
+
   `;
 
   wrapper.appendChild(qbankSessionEl);
@@ -5619,26 +5766,41 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   pauseOverlay.className = 'hidden fixed inset-0 z-[2000]';
   pauseOverlay.setAttribute('aria-hidden', 'true');
   pauseOverlay.innerHTML = `
-    <div class="absolute inset-0 bg-slate-900/60"></div>
-    <div class="relative z-10 h-full flex items-center justify-center px-4">
-      <div class="relative max-w-xs w-full bg-white rounded-2xl shadow-2xl border border-slate-200 text-center px-6 py-8 space-y-4">
-        <button type="button" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600" data-qbank="pause-close">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-        <div class="flex justify-center">
-          <span class="inline-flex items-center justify-center w-16 h-16 bg-sky-50 text-sky-500 rounded-full border border-sky-100">
-            <i class="fa-solid fa-mug-hot text-2xl"></i>
-          </span>
-        </div>
-        <div class="space-y-1">
-          <p class="text-sm font-semibold text-slate-800">Your question session is paused.</p>
-          <p class="text-xs text-slate-500">Resume when you are ready.</p>
-        </div>
-        <button id="qbank-resume-btn" type="button" class="w-full py-2.5 text-sm font-semibold text-white bg-sky-600 rounded-lg hover:bg-sky-700 transition">
-          Resume
-        </button>
-      </div>
+<div class="absolute inset-0 bg-slate-900/60"></div>
+<div class="relative z-10 h-full flex items-center justify-center px-4">
+  <div class="relative max-w-xs w-full bg-white rounded-2xl shadow-2xl border border-slate-200 text-center px-6 py-8 space-y-4">
+    <button
+      type="button"
+      class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+      data-qbank="pause-close"
+    >
+      <i class="fa-solid fa-xmark text-lg"></i>
+    </button>
+
+    <div class="flex justify-center">
+      <img
+        src="./assets/cafe.png"
+        alt="Café"
+        class="w-24 h-24 object-contain"
+      />
     </div>
+
+    <div class="space-y-1">
+      <p class="text-sm font-semibold text-slate-800">
+        Your question session is paused.
+      </p>
+      <p class="text-xs text-slate-500">Resume when you are ready.</p>
+    </div>
+
+    <button
+      id="qbank-resume-btn"
+      type="button"
+      class="w-full py-2.5 text-sm font-semibold text-white bg-sky-600 rounded-lg hover:bg-sky-700 transition"
+    >
+      Resume
+    </button>
+  </div>
+</div>
   `;
   document.body.appendChild(pauseOverlay);
 
@@ -5654,6 +5816,7 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     options: qbankSessionEl.querySelector('#qbank-options'),
     showAnswer: qbankSessionEl.querySelector('#qbank-show-answer'),
     resetQuestion: qbankSessionEl.querySelector('#qbank-reset-question'),
+    hideStats: qbankSessionEl.querySelector('#qbank-hide-stats'),
     explanation: qbankSessionEl.querySelector('#qbank-explanation'),
     prevBtn: qbankSessionEl.querySelector('#qbank-prev'),
     nextBtn: qbankSessionEl.querySelector('#qbank-next'),
@@ -5678,6 +5841,107 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     tocSidebar: document.getElementById('subcategoria-sidebar'),
     tocContent: document.getElementById('subcategoria-sidebar-content')
   };
+
+  // Oculta botones opcionales cuando Labs está demasiado cerca de Add Note
+  (function () {
+    const labsBtn = qbankSessionEl.querySelector('#btn-labs');
+    const addNoteBtn = qbankSessionEl.querySelector('#btn-addnote');
+    const optionalGroup = qbankSessionEl.querySelector('#btn-group-optional');
+    const optionalMenuItems = qbankSessionEl.querySelectorAll('#btn-menu-panel .optional-menu-item');
+    const menuIcon = qbankSessionEl.querySelector('#btn-menu i');
+    const actionBar = qbankSessionEl.querySelector('#qbank-action-bar');
+    const GAP_THRESHOLD = 24; // px
+    
+
+    if (!labsBtn || !addNoteBtn || !optionalGroup || !menuIcon || !actionBar) return;
+
+    const updateToolbar = () => {
+      const wasHidden = optionalGroup.classList.contains('hidden');
+      if (wasHidden) optionalGroup.classList.remove('hidden');
+
+      const labsRect = labsBtn.getBoundingClientRect();
+      const addRect = addNoteBtn.getBoundingClientRect();
+      const gap = addRect.left - labsRect.right;
+
+      const shouldHide = !Number.isFinite(gap) || gap <= GAP_THRESHOLD;
+if (!shouldHide) {
+  // Hay espacio → mostramos los botones grandes en la barra
+  optionalGroup.classList.remove('hidden');
+
+  // Y ocultamos las versiones dentro del menú de 3 puntos
+  optionalMenuItems.forEach(btn => btn.classList.add('hidden'));
+
+  // Icono de menú: 3 puntos VERTICAL
+  menuIcon.classList.remove('fa-ellipsis-h');
+  menuIcon.classList.add('fa-ellipsis-v');
+} else {
+  // No hay espacio → ocultamos el grupo grande
+  optionalGroup.classList.add('hidden');
+
+  // Y mostramos las opciones dentro del menú de 3 puntos
+  optionalMenuItems.forEach(btn => btn.classList.remove('hidden'));
+
+  // Icono de menú: 3 puntos HORIZONTAL
+  menuIcon.classList.remove('fa-ellipsis-v');
+  menuIcon.classList.add('fa-ellipsis-h');
+}
+    };
+
+    if (typeof ResizeObserver === 'function') {
+      const ro = new ResizeObserver(updateToolbar);
+      ro.observe(actionBar);
+    }
+    window.addEventListener('resize', updateToolbar);
+    // Ajusta después de que se monte el contenido
+    requestAnimationFrame(updateToolbar);
+
+    // === Dropdown del botón de 3 puntos (SAVE / SHARE / GIVE FEEDBACK) ===
+    const menuBtn    = qbankSessionEl.querySelector('#btn-menu');
+    const menuPanel  = qbankSessionEl.querySelector('#btn-menu-panel');
+
+    if (menuBtn && menuPanel) {
+      function closeDropdown() {
+        menuPanel.classList.add('hidden');
+        document.removeEventListener('click', onOutside);
+        document.removeEventListener('keydown', onEsc);
+      }
+
+      function onOutside(e) {
+        const wrapper = qbankSessionEl.querySelector('#btn-menu-wrapper');
+        if (!wrapper) return closeDropdown();
+        if (!wrapper.contains(e.target)) {
+          closeDropdown();
+        }
+      }
+
+      function onEsc(e) {
+        if (e.key === 'Escape') {
+          closeDropdown();
+        }
+      }
+
+      menuBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const isHidden = menuPanel.classList.contains('hidden');
+        if (isHidden) {
+          menuPanel.classList.remove('hidden');
+          // listeners globales una vez abierto
+          requestAnimationFrame(() => {
+            document.addEventListener('click', onOutside);
+            document.addEventListener('keydown', onEsc);
+          });
+        } else {
+          closeDropdown();
+        }
+      });
+    }
+  })();
+
+
+
+
+
 
   if (qbankEls.sidebarTitle) {
 // === QBank Font Size Controls (independientes del AA de subcategoría) ===
@@ -5755,8 +6019,12 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   const qbankState = {
     loading: false,
     loaded: false,
+    loadingPromise: null,
+    allQuestions: [],
     questions: [],
     answers: [],
+    questionLimit: null,
+    lastSelectedLimit: null,
     currentIndex: 0,
     timerId: null,
     startedAt: null,
@@ -5768,6 +6036,287 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     sidebarSnapshot: null,
     historyPushed: false
   };
+
+  function injectQbankSetupStyles() {
+    if (document.getElementById('qbank-setup-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'qbank-setup-styles';
+    style.textContent = `
+body.qbank-setup-open { overflow: hidden; }
+#qbank-setup-modal { font-family: inherit; }
+#qbank-setup-modal .qbank-setup-card { box-shadow: 0 32px 80px rgba(15,23,42,0.35); }
+#qbank-setup-modal input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(to right, #047A88 0%, #047A88 0%, #E0E6EB 0%, #E0E6EB 100%);
+  outline: none;
+}
+#qbank-setup-modal input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 3px solid #047A88;
+  box-shadow: 0 4px 10px rgba(4,122,136,0.35);
+}
+#qbank-setup-modal input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 3px solid #047A88;
+  box-shadow: 0 4px 10px rgba(4,122,136,0.35);
+}
+#qbank-setup-modal .qbank-checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1px solid #CBD5E1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFFFFF;
+  color: #FFFFFF;
+  font-size: 11px;
+}
+#qbank-setup-modal .qbank-checkbox--on {
+  background: #047A88;
+  border-color: #047A88;
+}
+#qbank-setup-modal .qbank-setup-input {
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  padding: 6px 0;
+  text-align: center;
+}
+#qbank-setup-modal button {
+  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+    `;
+    document.head.appendChild(style);
+  }
+
+  const qbankSetupModalState = {
+    root: null,
+    slider: null,
+    input: null,
+    totalLabel: null,
+    start: null,
+    close: null,
+    backdrop: null,
+    topic: null,
+    keyHandler: null,
+    current: 1,
+    totalCount: 1
+  };
+
+  function applyQuestionLimit(limit) {
+    const all = Array.isArray(qbankState.allQuestions) ? qbankState.allQuestions : [];
+    const total = all.length;
+    const numeric = Number.isFinite(limit) ? Math.floor(limit) : null;
+    if (!total) {
+      qbankState.questionLimit = 0;
+      qbankState.questions = [];
+      qbankState.answers = [];
+      qbankState.currentIndex = 0;
+      return;
+    }
+    let useLimit = numeric;
+    if (!useLimit || useLimit <= 0) {
+      useLimit = total;
+    }
+    useLimit = Math.max(1, Math.min(useLimit, total));
+    qbankState.questionLimit = useLimit;
+    qbankState.questions = all.slice(0, useLimit);
+    qbankState.answers = qbankState.questions.map(() => ({ selected: null, revealed: false, status: 'pending' }));
+    qbankState.currentIndex = 0;
+  }
+
+  function ensureQbankSetupModal() {
+    if (qbankSetupModalState.root) return qbankSetupModalState;
+    injectQbankSetupStyles();
+    let root = document.getElementById('qbank-setup-modal');
+    if (!root) {
+      const statusItems = [
+        { label: 'Not yet answered', color: '#047A88', checked: true },
+        { label: 'Answered correctly using hints', color: '#F97316', checked: false },
+        { label: 'Answered incorrectly', color: '#EF4444', checked: false },
+        { label: 'Answered correctly', color: '#2563EB', checked: false }
+      ];
+      const statusMarkup = statusItems.map((item) => `
+        <div class="flex items-center gap-3 text-[13px] text-slate-600">
+          <span class="qbank-checkbox ${item.checked ? 'qbank-checkbox--on' : ''}">
+            ${item.checked ? `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 16 16"><path d="M4.5 8.5l2.5 2.5L11.5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>` : ''}
+          </span>
+          <span class="inline-flex items-center gap-2">
+            <span class="inline-flex w-2.5 h-2.5 rounded-full" style="background:${item.color};"></span>
+            ${item.label}
+          </span>
+        </div>
+      `).join('');
+      root = document.createElement('div');
+      root.id = 'qbank-setup-modal';
+      root.className = 'hidden fixed inset-0 z-[60]';
+      root.innerHTML = `
+        <div data-role="backdrop" class="absolute inset-0 bg-slate-900/55"></div>
+        <div class="absolute inset-0 flex items-center justify-center px-4">
+          <div class="qbank-setup-card relative w-full max-w-[420px] rounded-[20px] bg-white p-6">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h2 class="text-[18px] leading-[24px] font-semibold text-slate-900">Create Question Session Based On</h2>
+                <p data-role="topic" class="mt-1 text-[16px] leading-[22px] font-semibold text-[#047A88]"></p>
+              </div>
+              <button type="button" data-role="close" class="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4L4 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </button>
+            </div>
+
+            <div class="mt-5">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500">Status</p>
+              <div class="mt-3 space-y-3">
+                ${statusMarkup}
+              </div>
+            </div>
+
+            <div class="mt-6 space-y-3">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500">Question Count</p>
+              <div class="flex items-center gap-3">
+                <div class="flex-1">
+                  <input data-role="slider" type="range" min="1" max="1" value="1">
+                </div>
+                <div class="flex items-center gap-2 text-[13px] text-slate-600">
+                  <input data-role="input" type="number" min="1" max="1" value="1" class="qbank-setup-input w-[64px] text-[13px] font-semibold text-slate-700">
+                  <span class="text-slate-400 text-[13px]">/<span data-role="total">1</span></span>
+                </div>
+                <button type="button" class="flex items-center gap-1 rounded-md px-3 py-2 text-[12px] font-semibold text-slate-500 hover:text-slate-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M1.333 1h13.334a1 1 0 0 1 .832 1.555l-4.706 6.748V15a1 1 0 0 1-1.351.936l-4-1.5a1 1 0 0 1-.65-.936V9.303L.503 2.555A1 1 0 0 1 1.333 1Z"></path></svg>
+                  Refine
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-7">
+              <button data-role="start" type="button" class="w-full rounded-md bg-[#047A88] py-3 text-[14px] font-semibold text-white hover:bg-[#026873] disabled:cursor-not-allowed disabled:opacity-50">Start</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(root);
+    }
+    qbankSetupModalState.root = root;
+    qbankSetupModalState.slider = root.querySelector('[data-role="slider"]');
+    qbankSetupModalState.input = root.querySelector('[data-role="input"]');
+    qbankSetupModalState.totalLabel = root.querySelector('[data-role="total"]');
+    qbankSetupModalState.start = root.querySelector('[data-role="start"]');
+    qbankSetupModalState.close = root.querySelector('[data-role="close"]');
+    qbankSetupModalState.topic = root.querySelector('[data-role="topic"]');
+    qbankSetupModalState.backdrop = root.querySelector('[data-role="backdrop"]');
+
+    const syncValue = (value) => updateQbankSetupCount(Number(value));
+    qbankSetupModalState.slider?.addEventListener('input', (event) => syncValue(event.target.value));
+    qbankSetupModalState.input?.addEventListener('input', (event) => syncValue(event.target.value));
+    qbankSetupModalState.close?.addEventListener('click', hideQbankSetupModal);
+    qbankSetupModalState.backdrop?.addEventListener('click', hideQbankSetupModal);
+    qbankSetupModalState.start?.addEventListener('click', () => {
+      if (!qbankSetupModalState.totalCount) return;
+      qbankState.lastSelectedLimit = qbankSetupModalState.current;
+      hideQbankSetupModal();
+      openQbankSession({ limit: qbankSetupModalState.current });
+    });
+    return qbankSetupModalState;
+  }
+
+  function hideQbankSetupModal() {
+    if (!qbankSetupModalState.root) return;
+    qbankSetupModalState.root.classList.add('hidden');
+    document.body.classList.remove('qbank-setup-open');
+    if (qbankSetupModalState.keyHandler) {
+      document.removeEventListener('keydown', qbankSetupModalState.keyHandler);
+      qbankSetupModalState.keyHandler = null;
+    }
+  }
+
+  function updateQbankSetupSliderBackground() {
+    if (!qbankSetupModalState.slider) return;
+    const total = qbankSetupModalState.totalCount || 0;
+    if (!total) {
+      qbankSetupModalState.slider.style.background = 'linear-gradient(to right, #E0E6EB 0%, #E0E6EB 100%)';
+      return;
+    }
+    const pct = Math.max(0, Math.min(100, (qbankSetupModalState.current / total) * 100));
+    qbankSetupModalState.slider.style.background = `linear-gradient(to right, #047A88 0%, #047A88 ${pct}%, #E0E6EB ${pct}%, #E0E6EB 100%)`;
+  }
+
+  function updateQbankSetupCount(value) {
+    ensureQbankSetupModal();
+    if (!qbankSetupModalState.totalCount) {
+      qbankSetupModalState.current = 0;
+      if (qbankSetupModalState.slider) qbankSetupModalState.slider.value = '0';
+      if (qbankSetupModalState.input) qbankSetupModalState.input.value = '';
+      updateQbankSetupSliderBackground();
+      return;
+    }
+    let next = Number.isFinite(value) ? Math.floor(value) : qbankSetupModalState.totalCount;
+    if (next < 1) next = 1;
+    if (next > qbankSetupModalState.totalCount) next = qbankSetupModalState.totalCount;
+    qbankSetupModalState.current = next;
+    if (qbankSetupModalState.slider) qbankSetupModalState.slider.value = String(next);
+    if (qbankSetupModalState.input) qbankSetupModalState.input.value = String(next);
+    updateQbankSetupSliderBackground();
+  }
+
+  function showQbankSetupModal({ total = 0, initial = 0, topic = '' } = {}) {
+    const modal = ensureQbankSetupModal();
+    modal.totalCount = Math.max(0, Number(total) || 0);
+    modal.topic.textContent = topic || '';
+    if (modal.totalLabel) {
+      modal.totalLabel.textContent = String(modal.totalCount);
+    }
+    const max = modal.totalCount || 1;
+    if (modal.slider) {
+      modal.slider.max = String(max);
+      modal.slider.min = modal.totalCount ? '1' : '0';
+      modal.slider.disabled = modal.totalCount === 0;
+    }
+    if (modal.input) {
+      modal.input.max = String(max);
+      modal.input.min = modal.totalCount ? '1' : '0';
+      modal.input.disabled = modal.totalCount === 0;
+    }
+    if (modal.start) {
+      modal.start.disabled = modal.totalCount === 0;
+    }
+    const base = modal.totalCount === 0
+      ? 0
+      : Math.max(1, Math.min(Number(initial) || modal.totalCount, modal.totalCount));
+    updateQbankSetupCount(base);
+    if (!modal.totalCount && modal.input) {
+      modal.input.value = '';
+    }
+    updateQbankSetupSliderBackground();
+    modal.root.classList.remove('hidden');
+    document.body.classList.add('qbank-setup-open');
+    modal.keyHandler = (evt) => {
+      if (evt.key === 'Escape') {
+        hideQbankSetupModal();
+      }
+    };
+    document.addEventListener('keydown', modal.keyHandler);
+  }
+
+  async function waitForQbankLoading() {
+    if (qbankState.loadingPromise) {
+      try {
+        await qbankState.loadingPromise;
+      } catch (err) {
+        console.error('[Qbank] loading failed', err);
+      }
+    }
+  }
 
   function toggleSubcatMask(active) {
     document.body.classList.toggle('qbank-open', active);
@@ -5868,45 +6417,65 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     };
   }
 
-  async function loadQbankQuestions() {
+  async function loadQbankQuestions(limit = null, options = {}) {
+    const force = options && options.force;
+    if (!force && qbankState.loaded && !qbankState.loading) {
+      applyQuestionLimit(typeof limit === 'number' ? limit : qbankState.questionLimit);
+      return qbankState.allQuestions;
+    }
+    if (qbankState.loading && qbankState.loadingPromise) {
+      await waitForQbankLoading();
+      applyQuestionLimit(typeof limit === 'number' ? limit : qbankState.questionLimit);
+      return qbankState.allQuestions;
+    }
     if (!window.db) {
       qbankState.loading = false;
       qbankState.loaded = true;
-      qbankState.questions = [];
+      qbankState.allQuestions = [];
+      qbankState.error = null;
+      applyQuestionLimit(0);
       renderQbank();
-      return;
+      return qbankState.allQuestions;
     }
     qbankState.loading = true;
     renderQbank();
-    try {
-      const snap = await db
-        .collection('supracategorias').doc(supracategoriaId)
-        .collection('categorias').doc(categoriaId)
-        .collection('subcategorias').doc(subcategoriaId)
-        .collection('preguntas')
-        .get();
-      const questions = [];
-      snap.forEach(doc => {
-        const normalised = normaliseQuestion(doc.id, doc.data() || {});
-        if (normalised) questions.push(normalised);
-      });
-      questions.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-      qbankState.questions = questions;
-      qbankState.answers = questions.map(() => ({ selected: null, revealed: false, status: 'pending' }));
-      qbankState.currentIndex = 0;
-      qbankState.questionTimers = {};
-      qbankState.questionStartedAt = null;
-      qbankState.activeQuestionIndex = null;
-      qbankState.loaded = true;
-    } catch (err) {
-      console.error('[Qbank] Failed to load questions', err);
-      qbankState.error = err;
-      qbankState.questions = [];
-      qbankState.loaded = true;
-    } finally {
-      qbankState.loading = false;
-      renderQbank();
-    }
+    const promise = (async () => {
+      try {
+        const snap = await db
+          .collection('supracategorias').doc(supracategoriaId)
+          .collection('categorias').doc(categoriaId)
+          .collection('subcategorias').doc(subcategoriaId)
+          .collection('preguntas')
+          .get();
+        const questions = [];
+        snap.forEach(doc => {
+          const normalised = normaliseQuestion(doc.id, doc.data() || {});
+          if (normalised) questions.push(normalised);
+        });
+        questions.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        qbankState.allQuestions = questions;
+        qbankState.error = null;
+        qbankState.loaded = true;
+        applyQuestionLimit(typeof limit === 'number' ? limit : qbankState.questionLimit);
+        qbankState.questionTimers = {};
+        qbankState.questionStartedAt = null;
+        qbankState.activeQuestionIndex = null;
+      } catch (err) {
+        console.error('[Qbank] Failed to load questions', err);
+        qbankState.error = err;
+        qbankState.allQuestions = [];
+        qbankState.loaded = true;
+        applyQuestionLimit(0);
+      } finally {
+        qbankState.loading = false;
+        qbankState.loadingPromise = null;
+        renderQbank();
+      }
+      return qbankState.allQuestions;
+    })();
+    qbankState.loadingPromise = promise;
+    await promise;
+    return qbankState.allQuestions;
   }
 
   function formatDuration(ms = 0) {
@@ -6311,68 +6880,162 @@ let statusClasses = 'ml-auto text-slate-300 text-lg font-light';
     const items = [];
     if (question.difficulty != null) {
       const label = difficultyLabels[question.difficulty] || `Difficulty ${question.difficulty}`;
-      items.push(`<span class="inline-flex items-center px-2 py-1 rounded-full bg-amber-50 text-amber-700 text-[11px] font-medium">${escHTML(label)}</span>`);
+      items.push(`<span class="inline-flex items-center px-2 py-1 rounded-md bg-amber-50 text-amber-700 text-[11px] font-medium">${escHTML(label)}</span>`);
     }
     if (question.type) {
-      items.push(`<span class="inline-flex items-center px-2 py-1 rounded-full bg-sky-50 text-sky-700 text-[11px] font-medium">${escHTML(String(question.type))}</span>`);
+      items.push(`<span class="inline-flex items-center px-2 py-1 rounded-md bg-sky-50 text-sky-700 text-[11px] font-medium">${escHTML(String(question.type))}</span>`);
     }
     if (question.rent != null) {
-      items.push(`<span class="inline-flex items-center px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-medium">Rent: ${escHTML(String(question.rent))}</span>`);
+      items.push(`<span class="inline-flex items-center px-2 py-1 rounded-md bg-slate-100 text-slate-700 text-[11px] font-medium">Rent: ${escHTML(String(question.rent))}</span>`);
     }
     if (question.keywords?.length) {
       question.keywords.slice(0, 3).forEach(keyword => {
-        items.push(`<span class="inline-flex items-center px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-medium">${escHTML(keyword)}</span>`);
+        items.push(`<span class="inline-flex items-center px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-medium">${escHTML(keyword)}</span>`);
       });
     }
     qbankEls.tags.innerHTML = items.join('');
   }
 
+// Función helper para convertir URLs de Google Drive al formato correcto
+function getValidImageURL(url) {
+  if (!url) return '';
+  
+  // Detectar y convertir URLs de Google Drive
+  if (url.includes('drive.google.com')) {
+    const match = url.match(/[?&]id=([^&]+)/);
+    if (match && match[1]) {
+      const fileId = match[1];
+      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+    }
+  }
+  
+  return url;
+}
+
   function renderQbankQuestion() {
     const question = qbankState.questions[qbankState.currentIndex];
     if (!question) return;
+
     const answer = ensureAnswerState(qbankState.currentIndex);
+
+    // --- timers ---
     if (isQuestionComplete(answer)) {
       stopCurrentQuestionTimer();
-    } else if (qbankState.activeQuestionIndex !== qbankState.currentIndex || !qbankState.questionStartedAt) {
+    } else if (
+      qbankState.activeQuestionIndex !== qbankState.currentIndex ||
+      !qbankState.questionStartedAt
+    ) {
       startQuestionTimerForCurrent();
       updateTimerDisplays();
     } else {
       updateTimerDisplays();
     }
+
+    // "Question X of Y" (si existe en tu DOM)
     if (qbankEls.progress) {
-      qbankEls.progress.textContent = `Question ${qbankState.currentIndex + 1} of ${qbankState.questions.length}`;
+      qbankEls.progress.textContent =
+        `Question ${qbankState.currentIndex + 1} of ${qbankState.questions.length}`;
     }
     if (qbankEls.position) {
-      qbankEls.position.textContent = `${qbankState.currentIndex + 1} / ${qbankState.questions.length}`;
+      qbankEls.position.textContent =
+        `${qbankState.currentIndex + 1} / ${qbankState.questions.length}`;
     }
+
+    // --- render pregunta + imagen opcional ---
     if (qbankEls.question) {
-      qbankEls.question.innerHTML = renderRich(question.text);
+      // Convertir la URL si es de Google Drive
+      const imgURL = question.meta && question.meta.imagen
+        ? getValidImageURL(question.meta.imagen)
+        : '';
+
+      // armamos el bloque visual que irá dentro de #qbank-question-text
+const questionHTML = `
+  <div class="flex flex-col sm:flex-row sm:items-start sm:gap-4 text-slate-800">
+    ${
+      imgURL
+        ? `<div class="w-full flex justify-center mb-3
+                     sm:order-2 sm:mb-0 sm:ml-auto sm:flex sm:justify-end sm:max-w-[160px]">
+             <div class="relative inline-block max-w-full">
+               <img
+                 src="${imgURL}"
+                 alt="Question image"
+                 class="max-h-40 max-w-full rounded border border-slate-200 object-contain"
+                 onerror="this.style.display='none';"
+               />
+<div class="absolute right-2 bottom-2 bg-slate-800/80 text-white rounded-[4px] shadow-md p-1.5">
+  <button type="button" class="flex items-center justify-center leading-none">
+    <i class="fa-solid fa-up-right-and-down-left-from-center text-[12px] leading-none"></i>
+  </button>
+</div>
+             </div>
+           </div>`
+        : ``
     }
+    <div class="sm:order-1 flex-1 text-[12px] leading-relaxed">
+      ${renderRich(question.text)}
+    </div>
+  </div>
+`;
+
+      qbankEls.question.innerHTML = questionHTML;
+    }
+
+    // Estado de los botones inferiores:
+    // Regla:
+    // - Si "Show answer" está activo (no revelado todavía): Show Answer habilitado, Reset/Hide deshabilitados.
+    // - Si ya se reveló la respuesta: Show Answer deshabilitado, Reset/Hide habilitados.
+    const revealed = !!answer.revealed;
+
+    // Show answer
     if (qbankEls.showAnswer) {
-      qbankEls.showAnswer.disabled = !!answer.revealed;
-      qbankEls.showAnswer.classList.toggle('opacity-50', !!answer.revealed);
-      qbankEls.showAnswer.classList.toggle('cursor-not-allowed', !!answer.revealed);
+      qbankEls.showAnswer.disabled = revealed;
+      qbankEls.showAnswer.classList.toggle('opacity-50', revealed);
+      qbankEls.showAnswer.classList.toggle('cursor-not-allowed', revealed);
     }
+
+    // Reset question
+    if (qbankEls.resetQuestion) {
+      qbankEls.resetQuestion.disabled = !revealed;
+      qbankEls.resetQuestion.classList.toggle('opacity-50', !revealed);
+      qbankEls.resetQuestion.classList.toggle('cursor-not-allowed', !revealed);
+    }
+
+    // Hide stats
+    if (qbankEls.hideStats) {
+      qbankEls.hideStats.disabled = !revealed;
+      qbankEls.hideStats.classList.toggle('opacity-50', !revealed);
+      qbankEls.hideStats.classList.toggle('cursor-not-allowed', !revealed);
+    }
+
+    // botón Next / Skip + color
     if (qbankEls.nextBtn) {
-      const hasResponse = answer.revealed || (answer.selected !== null && answer.selected !== undefined);
+      const hasResponse =
+        answer.revealed ||
+        (answer.selected !== null && answer.selected !== undefined);
+
       const label = hasResponse ? 'Next' : 'Skip';
+
       if (qbankEls.nextLabel) {
         qbankEls.nextLabel.textContent = label;
       } else {
         qbankEls.nextBtn.textContent = label;
       }
+
       qbankEls.nextBtn.classList.toggle('bg-sky-600', hasResponse);
       qbankEls.nextBtn.classList.toggle('hover:bg-sky-700', hasResponse);
       qbankEls.nextBtn.classList.toggle('bg-slate-500', !hasResponse);
       qbankEls.nextBtn.classList.toggle('hover:bg-slate-600', !hasResponse);
     }
+
+    // resto de la UI
     renderQbankTags(question);
     renderQbankOptions(question, answer);
     renderQbankExplanation(question, answer);
     updateNavButtons();
     renderQbankSidebar();
   }
-
+  
+  
   function renderQbank() {
     if (!qbankEls.loader || !qbankEls.content || !qbankEls.empty) return;
     if (qbankState.loading) {
@@ -6437,7 +7100,12 @@ let statusClasses = 'ml-auto text-slate-300 text-lg font-light';
     if (options instanceof Event) {
       options.preventDefault?.();
     }
-    const { skipHistory = false } = opts;
+    const { skipHistory = false, limit = null } = opts;
+    if (Number.isFinite(limit)) {
+      const parsed = Math.floor(Number(limit));
+      qbankState.questionLimit = parsed > 0 ? parsed : null;
+      qbankState.lastSelectedLimit = parsed > 0 ? parsed : null;
+    }
     if (!skipHistory && !qbankState.historyPushed) {
       pushViewState('qbank-session');
       qbankState.historyPushed = true;
@@ -6458,11 +7126,8 @@ let statusClasses = 'ml-auto text-slate-300 text-lg font-light';
     hidePauseOverlay();
     startQbankTimer();
     document.addEventListener('keydown', handleEscape);
-    if (!qbankState.loaded && !qbankState.loading) {
-      await loadQbankQuestions();
-    } else {
-      renderQbank();
-    }
+    await loadQbankQuestions(qbankState.questionLimit);
+    renderQbank();
   }
 
   const handleQbankNavClick = (event) => {
@@ -6565,9 +7230,26 @@ let statusClasses = 'ml-auto text-slate-300 text-lg font-light';
   qbankEls.pauseClose?.addEventListener('click', handleResume);
 
   const qbankBtn = wrapper.querySelector('#qbank-session-btn');
-  qbankBtn?.addEventListener('click', (event) => {
+  qbankBtn?.addEventListener('click', async (event) => {
     event.preventDefault();
-    openQbankSession();
+    const modal = ensureQbankSetupModal();
+    modal.topic.textContent = displayTitle || '';
+    if (!qbankState.loaded && !qbankState.loading) {
+      await loadQbankQuestions(qbankState.questionLimit);
+    } else if (qbankState.loading) {
+      await waitForQbankLoading();
+    }
+    const totalQuestions = qbankState.allQuestions.length || qbankState.questions.length || 0;
+    const fallbackDefault = totalQuestions ? Math.min(12, totalQuestions) : 0;
+    const rememberedLimit = qbankState.lastSelectedLimit && qbankState.lastSelectedLimit > 0
+      ? Math.min(qbankState.lastSelectedLimit, totalQuestions || qbankState.lastSelectedLimit)
+      : null;
+    const preferredLimit = rememberedLimit != null ? rememberedLimit : fallbackDefault;
+    showQbankSetupModal({
+      total: totalQuestions,
+      initial: preferredLimit,
+      topic: displayTitle || ''
+    });
   });
 
   window.__SUBCAT_QBANK__ = {
@@ -7636,6 +8318,13 @@ cb.addEventListener('change', async (e) => {
 
 // === CSS para ocultar botones fav-back y close fuera de favoritos ===
 </script>
+
+
+
+
+
+
+
 
 
 <!-- === Preguntaas === -->
@@ -14418,4 +15107,4 @@ popover.addEventListener('keydown', hideOnEnter);
 
 </html>
 
-<!-- === 80octubre octubre noche nochiiilaeeeeee === -->
+<!-- === 101octubre octubre noche nochiiilaeeeeee === -->
