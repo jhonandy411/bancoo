@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Subir valores de laboratorio a Firestore (4 docs)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 24px; }
+    button { padding: 10px 16px; border-radius: 8px; border: 1px solid #0ea5e9; background: #0ea5e9; color: #fff; font-weight: 600; cursor: pointer; }
+    button:disabled { opacity:.6; cursor:not-allowed; }
+    pre { background:#0b1020; color:#e2e8f0; padding:12px; border-radius:8px; overflow:auto; max-height:50vh; }
+    .ok { color:#16a34a; } .err { color:#dc2626; } .muted{color:#64748b}
+    ul{line-height:1.5}
+  </style>
+</head>
+<body>
+  <h1>Subir valores de laboratorio a Firestore (documentos separados)</h1>
+  <p class="muted">Crea/actualiza <code>labs/serum</code>, <code>labs/blood</code>, <code>labs/cerebrospinal</code> y <code>labs/urine_bmi</code>.</p>
+  <button id="uploadBtn">Subir 4 documentos</button>
+  <ul id="status"></ul>
+
+  <details>
+    <summary>Ver JSON maestro</summary>
+    <pre id="jsonView"></pre>
+  </details>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+
+    // 👉 REEMPLAZAR
+    const firebaseConfig = {
+      apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+      authDomain: "bancomicina-62bfe.firebaseapp.com",
+      projectId: "bancomicina-62bfe",
+      storageBucket: "bancomicina-62bfe.appspot.com",
+      messagingSenderId: "737254665977",
+      appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    // ====== Utilidad: agrega metadatos de orden en cada objeto ======
+    function addOrderMetadata(node) {
+      if (node && typeof node === "object" && !Array.isArray(node)) {
+        const keys = Object.keys(node);
+        // Construimos un nuevo objeto con _order primero para dejar explícito el orden deseado
+        const out = { _order: keys };
+        for (const k of keys) {
+          out[k] = addOrderMetadata(node[k]);
+        }
+        return out;
+      }
+      return node;
+    }
+
+    // ========= DATOS =========
+    const master = {
+      "Serum": {
+
+        
+        "Serum": {
+  "Alanine aminotransferase (ALT)": { "ref": "10–40 U/L", "si": "10–40 U/L" },
+  "Aspartate aminotransferase (AST)": { "ref": "12–38 U/L", "si": "12–38 U/L" },
+  "Alkaline phosphatase": { "ref": "25–100 U/L", "si": "25–100 U/L" },
+  "Amylase": { "ref": "25–125 U/L", "si": "25–125 U/L" },
+
+  "Bilirubin": {
+    "Total": { "ref": "0.1–1.0 mg/dL", "si": "2–17 µmol/L" },
+    "Direct": { "ref": "0.0–0.3 mg/dL", "si": "0–5 µmol/L" }
+  },
+
+  "Calcium": { "ref": "8.4–10.2 mg/dL", "si": "2.1–2.6 mmol/L" }
+},
+
+
+        
+"Cholesterol": {
+  "Total": { 
+    "ref": "Normal: <200 mg/dL // High: >240 mg/dL", 
+    "si": "<5.2 mmol/L // >6.2 mmol/L" 
+  },
+  "HDL": { 
+    "ref": "40–60 mg/dL", 
+    "si": "1.0–1.6 mmol/L" 
+  },
+  "LDL": { 
+    "ref": "<160 mg/dL", 
+    "si": "<4.2 mmol/L" 
+  },
+  "Triglycerides": { 
+    "ref": "Normal: <150 mg/dL // Borderline: 151–199 mg/dL", 
+    "si": "<1.70 mmol/L // 1.71–2.25 mmol/L" 
+  },
+  "Cortisol": { 
+    "ref": "0800 h: 5–23 µg/dL // 1600 h: 3–15 µg/dL /// 2000 h: <50% of 0800 h", 
+    "si": "138–635 nmol/L // 82–413 nmol/L /// Fraction of 0800 h: <0.50" 
+  },
+  "Creatine kinase": {
+    "Male": { "ref": "25–90 U/L", "si": "25–90 U/L" },
+    "Female": { "ref": "10–70 U/L", "si": "10–70 U/L" }
+  },
+  "Creatinine": { 
+    "ref": "0.6–1.2 mg/dL", 
+    "si": "53–106 µmol/L" 
+  },
+  "Urea nitrogen": { 
+    "ref": "7–18 mg/dL", 
+    "si": "2.5–6.4 mmol/L" 
+  },
+  "Creatinine clearance": {
+    "Male": { "ref": "97–137 mL/min", "si": "97–137 mL/min" },
+    "Female": { "ref": "88–128 mL/min", "si": "88–128 mL/min" }
+  }
+},
+
+
+
+
+
+
+"Electrolytes, serum": {
+  "Sodium (Na+)": { "ref": "136–146 mEq/L", "si": "136–146 mmol/L" },
+  "Potassium (K+)": { "ref": "3.5–5.0 mEq/L", "si": "3.5–5.0 mmol/L" },
+  "Chloride (Cl−)": { "ref": "95–105 mEq/L", "si": "95–105 mmol/L" },
+  "Bicarbonate (HCO3−)": { "ref": "22–28 mEq/L", "si": "22–28 mmol/L" },
+  "Magnesium (Mg2+)": { "ref": "1.5–2.0 mg/dL", "si": "0.75–1.0 mmol/L" },
+
+  "Ferritin": {
+    "Male": { "ref": "20–250 ng/mL", "si": "20–250 µg/L" },
+    "Female": { "ref": "10–120 ng/mL", "si": "10–120 µg/L" }
+  },
+  "Follicle-stimulating hormone": {
+    "Male": { "ref": "4–25 mIU/mL", "si": "4–25 U/L" },
+    "Female premenopause": { "ref": "4–30 mIU/mL", "si": "4–30 U/L" },
+    "Female midcycle peak": { "ref": "10–90 mIU/mL", "si": "10–90 U/L" },
+    "Female postmenopause": { "ref": "40–250 mIU/mL", "si": "40–250 U/L" }
+  },
+  "Glucose": {
+    "Fasting": { "ref": "70–100 mg/dL", "si": "3.8–5.6 mmol/L" },
+    "Random, non-fasting": { "ref": "<140 mg/dL", "si": "<7.77 mmol/L" }
+  },
+  "Growth hormone - arginine stimulation": {
+    "Fasting": { "ref": "<5 ng/mL", "si": "<5 µg/L" },
+    "Provocative stimuli": { "ref": ">7 ng/mL", "si": ">7 µg/L" }
+  },
+  "Iron": {
+    "Male": { "ref": "65–175 µg/dL", "si": "11.6–31.3 µmol/L" },
+    "Female": { "ref": "50–170 µg/dL", "si": "9.0–30.4 µmol/L" }
+  },
+  "Total iron-binding capacity": { "ref": "250–400 µg/dL", "si": "44.8–71.6 µmol/L" },
+  "Transferrin": { "ref": "200–360 mg/dL", "si": "2.0–3.6 g/L" },
+  "Lactate dehydrogenase": { "ref": "45–200 U/L", "si": "45–200 U/L" },
+  "Lipase": { "ref": "13–60 U/L", "si": "13–60 U/L" },
+  "Luteinizing hormone": {
+    "Male": { "ref": "6–23 mIU/mL", "si": "6–23 U/L" },
+    "Female follicular phase": { "ref": "5–30 mIU/mL", "si": "5–30 IU/L" },
+    "Female midcycle": { "ref": "75–150 mIU/mL", "si": "75–150 IU/L" },
+    "Female postmenopause": { "ref": "30–200 mIU/mL", "si": "30–200 IU/L" }
+  },
+  "Osmolality": { "ref": "275–295 mOsmol/kg H2O", "si": "275–295 mOsmol/kg H2O" },
+  "Intact parathyroid hormone (PTH)": { "ref": "10–60 pg/mL", "si": "10–60 ng/L" },
+  "Phosphorus (inorganic)": { "ref": "3.0–4.5 mg/dL", "si": "1.0–1.5 mmol/L" },
+  "Prolactin (hPRL)": {
+    "Male": { "ref": "<17 ng/mL", "si": "<17 µg/L" },
+    "Female": { "ref": "<25 ng/mL", "si": "<25 µg/L" }
+  }
+},
+
+
+
+
+
+
+
+        "Proteins": {
+          "Total": { "ref": "6.0–7.8 g/dL", "si": "60–78 g/L" },
+          "Albumin": { "ref": "3.5–5.5 g/dL", "si": "35–55 g/L" },
+          "Globulin": { "ref": "2.3–3.5 g/dL", "si": "23–35 g/L" },
+                  "Troponin I": { "ref": "≤0.04 ng/mL", "si": "≤0.04 µg/L" },
+        "TSH": { "ref": "0.4–4.0 μU/mL", "si": "0.4–4.0 mIU/L" },
+        "Thyroidal iodine (123I) uptake": { "ref": "8%–30% of administered dose/24 h", "si": "0.08–0.30/24 h" },
+        "Thyroxine (T4)": { "ref": "5–12 µg/dL", "si": "64–155 nmol/L" },
+        "Free T4": { "ref": "0.9–1.7 ng/dL", "si": "12.0–21.9 pmol/L" },
+        "Triiodothyronine (T3) (RIA)": { "ref": "100–200 ng/dL", "si": "1.5–3.1 nmol/L" },
+        "Triiodothyronine (T3) resin uptake": { "ref": "25%–35%", "si": "0.25–0.35" },
+        "Uric acid": { "ref": "3.0–8.2 mg/dL", "si": "0.18–0.48 mmol/L" },
+        },
+
+        "Immunoglobulins": {
+          "IgA": { "ref": "76–390 mg/dL", "si": "0.76–3.90 g/L" },
+          "IgE": { "ref": "0–380 IU/mL", "si": "0–380 kIU/L" },
+          "IgG": { "ref": "650–1500 mg/dL", "si": "6.5–15.0 g/L" },
+          "IgM": { "ref": "50–300 mg/dL", "si": "0.5–3.0 g/L" }
+        },
+        "Gases, arterial blood (room air)": {
+          "pH": { "ref": "7.35–7.45", "si": "[H+] 36–44 nmol/L" },
+          "Pco2": { "ref": "33–45 mm Hg", "si": "4.4–5.9 kPa" },
+          "Po2": { "ref": "75–105 mm Hg", "si": "10.0–14.0 kPa" }
+        }
+      },
+
+
+
+
+
+      
+      "Cerebrospinal": {
+        "Cell count": { "ref": "0–5/mm³", "si": "0–5 × 10^6/L" },
+        "Chloride": { "ref": "118–132 mEq/L", "si": "118–132 mmol/L" },
+        "Gamma globulin": { "ref": "3%–12% total proteins", "si": "0.03–0.12" },
+        "Glucose": { "ref": "40–70 mg/dL", "si": "2.2–3.9 mmol/L" },
+        "Pressure": { "ref": "70–180 mm H₂O", "si": "70–180 mm H₂O" },
+        "Proteins, total": { "ref": "<40 mg/dL", "si": "<0.40 g/L" }
+      },
+      "Blood": {
+        "Erythrocyte count": {
+          "Male": { "ref": "4.3–5.9 million/mm³", "si": "4.3–5.9 × 10¹²/L" },
+          "Female": { "ref": "3.5–5.5 million/mm³", "si": "3.5–5.5 × 10¹²/L" }
+        },
+        "Erythrocyte sedimentation rate (Westergren)": {
+          "Male": { "ref": "0–15 mm/h", "si": "0–15 mm/h" },
+          "Female": { "ref": "0–20 mm/h", "si": "0–20 mm/h" }
+        },
+        "Hematocrit": {
+          "Male": { "ref": "41%–53%", "si": "0.41–0.53" },
+          "Female": { "ref": "36%–46%", "si": "0.36–0.46" }
+        },
+        "Hemoglobin, blood": {
+          "Male": { "ref": "13.5–17.5 g/dL", "si": "135–175 g/L" },
+          "Female": { "ref": "12.0–16.0 g/dL", "si": "120–160 g/L" }
+        },
+        "Hemoglobin A1c": { "ref": "≤6%", "si": "≤42 mmol/mol" },
+        "Hemoglobin, plasma": { "ref": "<4 mg/dL", "si": "<0.62 mmol/L" },
+        "Leukocyte count (WBC)": { "ref": "4500–11,000/mm³", "si": "4.5–11.0 × 10⁹/L" },
+        "Neutrophils, segmented": { "ref": "54%–62%", "si": "0.54–0.62" },
+        "Neutrophils, bands": { "ref": "3%–5%", "si": "0.03–0.05" },
+        "Eosinophils": { "ref": "1%–3%", "si": "0.01–0.03" },
+        "Basophils": { "ref": "0%–0.75%", "si": "0.00–0.0075" },
+        "Lymphocytes": { "ref": "25%–33%", "si": "0.25–0.33" },
+        "Monocytes": { "ref": "3%–7%", "si": "0.03–0.07" },
+        "CD4+ T-lymphocyte count": { "ref": ">500/mm³", "si": ">0.5 × 10⁹/L" },
+        "Platelet count": { "ref": "150,000–400,000/mm³", "si": "150–400 × 10⁹/L" },
+        "Reticulocyte count": { "ref": "0.5%–1.5%", "si": "0.005–0.015" },
+        "D-Dimer": { "ref": "≤250 ng/mL", "si": "≤1.4 nmol/L" },
+        "Partial thromboplastin time (PTT) (activated)": { "ref": "25–40 seconds", "si": "25–40 seconds" },
+        "Prothrombin time (PT)": { "ref": "11–15 seconds", "si": "11–15 seconds" },
+        "Mean corpuscular hemoglobin (MCH)": { "ref": "25–35 pg/cell", "si": "0.39–0.54 fmol/cell" },
+        "Mean corpuscular hemoglobin concentration (MCHC)": { "ref": "31%–36% Hb/cell", "si": "4.8–5.6 mmol Hb/L" },
+        "Mean corpuscular volume (MCV)": { "ref": "80–100 µm³", "si": "80–100 fL" },
+        "Volume": {
+          "Plasma": {
+            "Male": { "ref": "25–43 mL/kg", "si": "0.025–0.043 L/kg" },
+            "Female": { "ref": "28–45 mL/kg", "si": "0.028–0.045 L/kg" }
+          },
+          "Red cell": {
+            "Male": { "ref": "20–36 mL/kg", "si": "0.020–0.036 L/kg" },
+            "Female": { "ref": "19–31 mL/kg", "si": "0.019–0.031 L/kg" }
+          }
+        }
+      },
+      "Urine and BMI": {
+        "Urine": {
+          "Calcium": { "ref": "100–300 mg/24 h", "si": "2.5–7.5 mmol/24 h" },
+          "Creatinine clearance": {
+            "Male": { "ref": "97–137 mL/min", "si": "97–137 mL/min" },
+            "Female": { "ref": "88–128 mL/min", "si": "88–128 mL/min" }
+          },
+          "Osmolality": { "ref": "50–1200 mOsmol/kg H₂O", "si": "50–1200 mOsmol/kg H₂O" },
+          "Oxalate": { "ref": "8–40 µg/mL", "si": "90–445 µmol/L" },
+          "Proteins, total": { "ref": "<150 mg/24 h", "si": "<0.15 g/24 h" },
+          "17-Hydroxycorticosteroids": {
+            "Male": { "ref": "3.0–10.0 mg/24 h", "si": "8.2–27.6 µmol/24 h" },
+            "Female": { "ref": "2.0–8.0 mg/24 h", "si": "5.5–22.0 µmol/24 h" }
+          },
+          "17-Ketosteroids, total": {
+            "Male": { "ref": "8–20 mg/24 h", "si": "28–70 µmol/24 h" },
+            "Female": { "ref": "6–15 mg/24 h", "si": "21–52 µmol/24 h" }
+          }
+        },
+        "Body Mass Index (BMI)": { "Adult": { "ref": "19–25 kg/m²", "si": "" } }
+      }
+    };
+
+    // Mostrar el JSON maestro
+    jsonView.textContent = JSON.stringify(master, null, 2);
+
+    const statusEl = document.getElementById("status");
+    const btn = document.getElementById("uploadBtn");
+
+    function log(msg, cls=""){ 
+      const li=document.createElement("li"); li.textContent=msg; if(cls) li.className=cls; statusEl.appendChild(li);
+    }
+
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      statusEl.innerHTML = "";
+      log("Subiendo documentos…");
+
+      // Decorar payloads con orden explícito
+      const serumPayload = addOrderMetadata(master["Serum"]);
+      const bloodPayload = addOrderMetadata(master["Blood"]);
+      const csfPayload = addOrderMetadata(master["Cerebrospinal"]);
+      const urineBmiPayload = addOrderMetadata(master["Urine and BMI"]);
+
+      // Mapa docID -> payload (cada doc guarda su sección + _order + timestamp)
+      const docs = {
+        serum: { ...serumPayload, updatedAt: serverTimestamp() },
+        blood: { ...bloodPayload, updatedAt: serverTimestamp() },
+        cerebrospinal: { ...csfPayload, updatedAt: serverTimestamp() },
+        urine_bmi: { ...urineBmiPayload, updatedAt: serverTimestamp() },
+      };
+
+      try {
+        // Carga en paralelo
+        await Promise.all(Object.entries(docs).map(([id, data]) =>
+          setDoc(doc(db, "labs", id), data, { merge: true })
+            .then(() => log(`✅ Subido labs/${id}`, "ok"))
+        ));
+        log("Listo.", "ok");
+      } catch (e) {
+        console.error(e);
+        log("❌ Error: " + e.message, "err");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
