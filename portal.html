@@ -432,7 +432,7 @@ html, body {
   --sb-collapsed: 40px;      /* ya la tienes */
   --subcat-width: 210px;     /* ya la tienes */
   --split-left: 0px;         /* OFFSET desde la izquierda (calculado en JS) */
-  --split-w: 50vw;           /* ANCHO del panel derecho (calculado en JS) */
+  --qbank-header-offset: 3rem;
 }
 
 /* Split real, pegado al header de 3rem */
@@ -1402,6 +1402,10 @@ body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden))
   border-bottom: 1px solid #e2e8f0;
 }
 
+#qbank-session .labs-panel .labs-row td:first-child{
+  vertical-align: middle;
+}
+
 #qbank-session .labs-panel .labs-row td:nth-child(2),
 #qbank-session .labs-panel .labs-row td:nth-child(3){
   font-family: 'Lato', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -1419,6 +1423,7 @@ body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden))
 
 #qbank-session .labs-panel .labs-row th[colspan="3"]{
   border-right: 0;
+  text-align: left;
 }
 
 #qbank-session .labs-panel .labs-table th:last-child,
@@ -1512,8 +1517,10 @@ body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden))
 #qbank-session.labs-open .labs-panel{
   grid-column: 2;
   grid-row: 1 / span 2;
-  height: 100%;
   align-self: stretch;
+  margin-top: var(--qbank-header-offset);
+  height: calc(100vh - var(--qbank-header-offset));
+  max-height: calc(100vh - var(--qbank-header-offset));
 }
 
 #qbank-session.labs-open .labs-panel main{
@@ -1523,20 +1530,42 @@ body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden))
   background: #f8fafc;
 }
 
-@media (max-width: 1023px){
-  #qbank-session{
-    --labs-panel-width: 100vw;
-  }
+
+
+@media (max-width: 1299px){
   #qbank-session.labs-open{
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto auto;
+    display: flex !important;
+    flex-direction: column;
+    grid-template-columns: none;
+    grid-template-rows: none;
+  }
+  #qbank-session.labs-open > .qbank-main,
+  #qbank-session.labs-open > #qbank-nav{
+    display: none !important;
   }
   #qbank-session.labs-open .labs-panel{
-    grid-column: 1;
-    grid-row: 3;
     width: 100%;
     max-width: none;
-    box-shadow: 0 -12px 48px rgba(15, 23, 42, 0.18);
+    margin-top: 0;
+    min-height: 100vh;
+    height: auto;
+    max-height: none;
+    padding-bottom: 4.5rem;
+    border-left: 0;
+    border-top: 1px solid #e2e8f0;
+    box-shadow: none;
+  }
+  #qbank-session.labs-open .labs-panel main{
+    padding: 1.25rem 1.25rem 4rem;
+  }
+  #qbank-session.labs-open #qbank-labs-close{
+    width: 100%;
+    border-radius: 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 70;
   }
 }
 
@@ -3226,7 +3255,7 @@ blockquote {
 
 
 /* Solo en móvil y SOLO cuando #subcategoria-content está visible */
-@media (max-width: 639.98px){
+@media (max-width: 1299.98px){
   #main-content.subcat-active{
     padding-left: 0 !important;
     padding-right: 0 !important;
@@ -3241,7 +3270,7 @@ blockquote {
 
 /* Overlay móvil: solo se activa en < 640px */
 #mobile-overlay { display: none; }
-@media (max-width: 639.98px){
+@media (max-width: 1299.98px){
   #mobile-overlay.show {
     position: fixed;
     top: 3rem;   /* igual a la altura de tu header h-[3rem] */
@@ -3432,13 +3461,13 @@ body.bars-hidden #qbank-session,
 body.force-bars-hidden #qbank-session {
   --qbank-offset-left: 0px;
 }
-@media (min-width: 640px) {
+@media (min-width: 1300px) {
   #qbank-session { --qbank-gap: 1rem; }
 }
 @media (min-width: 1280px) {
   #qbank-session { --qbank-gap: 3rem; }
 }
-@media (max-width: 639.98px) {
+@media (max-width: 1299.98px) {
   #qbank-session { --qbank-offset-left: 0px; --qbank-gap: 0px; }
 }
 
@@ -3480,7 +3509,7 @@ body.qbank-open #qbank-session {
 
 
 /* ===================== <640px ===================== */
-@media (max-width: 639.98px){
+@media (max-width: 1299.98px){
 
   /* Estado base: solo un panel (mobile-solo) */
   body.split-view-active.mobile-solo{
@@ -3701,7 +3730,7 @@ body.qbank-open #qbank-session {
 /* Asegura que al hacer scroll el título quede justo debajo del header de 4rem */
 
 /* —— MOBILE <640 + split —— */
-@media (max-width: 639.98px){
+@media (max-width: 1299.98px){
   /* --- altura del switch en móvil (mantenela en sync con el botón) --- */
   :root {
     --switch-h: 34px;
@@ -3781,7 +3810,7 @@ body.qbank-open #qbank-session {
 /* ==== Ubicación del TOC como en la captura (ambos lados) ==== */
 
 
-@media (max-width: 639.98px){
+@media (max-width: 1299.98px){
   body.bars-hidden #sidebar,
   body.bars-hidden #sb-switch,
   body.bars-hidden #mobile-overlay {
@@ -3800,7 +3829,7 @@ body.bars-hidden #sidebar,
 }
 
 /* ≥640px: mostrar barras y eliminar cualquier “invisibilidad” heredada */
-@media (min-width: 640px){
+@media (min-width: 1300px){
   body.bars-hidden #sidebar,
   body.bars-hidden #sb-switch,
   body.bars-hidden #mobile-overlay {
@@ -3817,7 +3846,7 @@ body.bars-hidden #sidebar,
 }
 
 /* <640px: barras ocultas por defecto (móvil) */
-@media (max-width: 639.98px){
+@media (max-width: 1299.98px){
   body.bars-hidden #sidebar,
   body.bars-hidden #subcategoria-sidebar {
     display: none !important;
@@ -5470,7 +5499,7 @@ window.goToLibraryArticles = () => showArticles();
     // Ensure TOC/sidebar visible again on sm+ breakpoints
     const tocSidebar = document.getElementById('subcategoria-sidebar');
     if (tocSidebar) {
-      const canShowSidebar = (typeof window.matchMedia === 'function') ? window.matchMedia('(min-width: 640px)').matches : true;
+      const canShowSidebar = (typeof window.matchMedia === 'function') ? window.matchMedia('(min-width: 1300px)').matches : true;
       if (canShowSidebar) tocSidebar.classList.remove('hidden');
     }
 
@@ -5667,7 +5696,7 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
 
 
     // — Móvil: ocultar sidebars (principal y TOC) de inicio —
-  const isMobile = window.matchMedia('(max-width: 639.98px)').matches;
+  const isMobile = window.matchMedia('(max-width: 1299.98px)').matches;
   if (isMobile) {
     // principal
     const mainSidebar = document.getElementById('sidebar');
@@ -7392,7 +7421,7 @@ if (!shouldHide) {
       qbankEls.tocContent.classList.remove('hidden');
     }
     const canShowSidebar = typeof window.matchMedia === 'function'
-      ? window.matchMedia('(min-width: 640px)').matches
+      ? window.matchMedia('(min-width: 1300px)').matches
       : true;
     if (
       canShowSidebar &&
@@ -7418,7 +7447,7 @@ if (!shouldHide) {
       sidebar.classList.remove('hidden');
       sidebar.setAttribute('aria-hidden', 'false');
       const canShowTocSidebar = typeof window.matchMedia === 'function'
-        ? window.matchMedia('(min-width: 640px)').matches
+        ? window.matchMedia('(min-width: 1300px)').matches
         : true;
       if (canShowTocSidebar) {
         qbankEls.tocSidebar?.classList.remove('hidden');
@@ -8725,7 +8754,7 @@ subWrap.innerHTML = tocHTML;
   
     // Muestra la TOC SOLO cuando el contenido ya está pintado (NO en móvil)
   requestAnimationFrame(() => requestAnimationFrame(() => {
-    const isDesktop = window.matchMedia('(min-width: 640px)').matches;
+    const isDesktop = window.matchMedia('(min-width: 1300px)').matches;
     if (isDesktop && !document.body.classList.contains('favorites-split')) {
       subSidebar.classList.remove('hidden');
     }
@@ -11058,7 +11087,7 @@ function resetModalLayout({ keepCarousel = false, preserveSplit = false } = {}) 
   const iframeEl = document.getElementById('modal-iframe');
 
   // Ahora: en <640px la descripción arranca cerrada
-const isMobile = window.matchMedia('(max-width: 639.98px)').matches;
+const isMobile = window.matchMedia('(max-width: 1299.98px)').matches;
 const mainDesc  = document.getElementById('video-main-panel');
 const splitDesc = document.getElementById('video-desc-panel');
 
@@ -14845,7 +14874,7 @@ document.addEventListener('keydown', (ev) => {
   const sbMain    = document.getElementById('sidebar');
   const sbTOC     = document.getElementById('subcategoria-sidebar');
 
-  const isMobile = () => window.matchMedia('(max-width: 639.98px)').matches;
+  const isMobile = () => window.matchMedia('(max-width: 1299.98px)').matches;
 
   const isShown = (el, isMain=false) => {
     if (!el) return false;
@@ -14922,7 +14951,7 @@ document.addEventListener('keydown', (ev) => {
 
 <script>
 (function () {
-  const isMobile = () => window.matchMedia('(max-width: 639.98px)').matches;
+  const isMobile = () => window.matchMedia('(max-width: 1299.98px)').matches;
 
   function hideSidebarsOnMobile() {
     if (!isMobile()) return;
@@ -14958,7 +14987,7 @@ document.addEventListener('keydown', (ev) => {
 (function(){
   const modal = document.getElementById('video-modal');
 
-  function isMobile(){ return window.matchMedia('(max-width: 639.98px)').matches; }
+  function isMobile(){ return window.matchMedia('(max-width: 1299.98px)').matches; }
 
   function ensureSwitchBtn(){
     let btn = document.getElementById('mobile-split-switch');
@@ -15033,7 +15062,7 @@ document.addEventListener('keydown', (ev) => {
     if (!tocItem) return;
 
     // Oculta barras laterales solo en móvil; en desktop se mantiene fijo
-    const isMobile = window.matchMedia('(max-width: 639.98px)').matches;
+    const isMobile = window.matchMedia('(max-width: 1299.98px)').matches;
     if (isMobile) {
       document.body.classList.add('bars-hidden');
     }
@@ -15067,7 +15096,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script>
   (function () {
-    const mq = window.matchMedia('(min-width: 640px)');
+    const mq = window.matchMedia('(min-width: 1300px)');
 
     function applyLayout() {
       const isDesktop = mq.matches;
@@ -15838,4 +15867,4 @@ popover.addEventListener('keydown', hideOnEnter);
 
 </html>
 
-<!-- === 128octubre octubre noche nochiiilaeeeeee === -->
+<!-- === 142octubre octubre noche nochiiilaeeeeee === -->
