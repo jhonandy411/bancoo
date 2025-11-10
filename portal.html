@@ -1288,7 +1288,7 @@ body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden))
 }
 
 #qbank-session{
-  --labs-panel-width: min(480px, 42vw);
+  --labs-panel-width: min(530px, 42vw);
 }
 
 #qbank-labs-close{
@@ -1302,7 +1302,7 @@ body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden))
 #qbank-session .labs-panel{
   display: none;
   width: var(--labs-panel-width);
-  max-width: 520px;
+  max-width: 570px;
   flex-direction: column;
   background: #ffffff;
   border-left: 1px solid #e2e8f0;
@@ -1316,33 +1316,130 @@ body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden))
 
 #qbank-session .labs-panel header{
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start !important;  /* sin espacio extra automático */
+  gap: 8px !important;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
 }
 
 #qbank-session .labs-panel .labs-tabs{
   display: flex;
-  gap: .25rem;
-  flex-wrap: wrap;
+  gap: 1.5rem;
+  border-bottom: 1px solid #cbd5f5;
+  padding-left: .25rem;
+  flex: 0 0 auto;   /* solo ocupa su ancho real */
+}
+
+.labs-tabs{
+  flex: 0 0 auto !important;   /* que no se expanda */
 }
 
 #qbank-session .labs-panel .labs-tab{
-  border-radius: .5rem;
-  padding: .4rem .75rem;
-  font-size: .75rem;
+  font-size: .95rem;
   font-weight: 600;
-  letter-spacing: .025em;
   color: #475569;
-  text-transform: uppercase;
-  transition: background-color .2s ease, color .2s ease;
+  padding-bottom: .65rem;
+  border-bottom: 3px solid transparent;
+  transition: color .2s ease, border-color .2s ease;
 }
 
 #qbank-session .labs-panel .labs-tab.is-active{
-  background: #0ea5e9;
-  color: #f8fafc;
+  color: #056c8d;
+  border-color: #3bb3ce;
 }
 
 #qbank-session .labs-panel .labs-tab:not(.is-active):hover{
+  color: #0f172a;
+}
+
+.labs-search{
+  margin-left: auto !important; /* se va a la derecha */
+  flex: 0 0 auto !important;
+}
+
+#qbank-session .labs-panel .labs-search{
+  display: flex;
+  padding: 0;
+  flex: 0 0 auto !important;               
+  justify-content: flex-start !important;  
+}
+.labs-search{ margin-right: 4px !important; }
+
+/* Override del search en Labs */
+#qbank-session .labs-panel .labs-search-field{
+  display: flex !important;
+  align-items: center !important;
+  gap: .5rem !important;
+  background: #f5f7fb !important;
+  border: 1px solid transparent !important;   /* SIN MARCO COLOREADO */
+  border-radius: 4px !important;
+  padding: .35rem 1rem !important;
+  width: 160px !important;                    /* ANCHO EXACTO */
+  min-width: 160px !important;
+  box-shadow: none !important;                /* evitar cualquier halo */
+}
+
+#qbank-session .labs-panel .labs-search-field i{
+  color: #64748b !important;
+  font-size: .9rem !important;
+}
+
+
+#qbank-session .labs-panel .labs-search-input{
+  border: none;
+  background: transparent;
+  font-size: .9rem;
+  color: #0f172a;
+  width: 100%;
+}
+
+#qbank-session .labs-panel .labs-search-input:focus{
+  outline: none;
+}
+
+#qbank-session .labs-panel .labs-header-actions{
+  display: flex;
+  align-items: center;
+  gap: 4px !important;
+  margin-left: 8px !important;   /* ya no ocupa todo el espacio; deja que el search empuje */
+}
+
+
+.labs-header{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+
+
+#qbank-session .labs-panel .labs-divider{
+  width: 1px;
+  height: 28px;
   background: #e2e8f0;
-  color: #1e293b;
+  margin-right: 2px !important;
+  margin-left: 2px !important;
+}
+
+#qbank-session .labs-panel .labs-close{
+  padding: 2px !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f172a;
+  border: 1px solid transparent;
+  transition: color .2s ease, background-color .2s ease, border-color .2s ease;
+}
+
+#qbank-session .labs-panel .labs-close:hover{
+  background: #f1f5f9;
+  border-color: #cbd5f5;
 }
 
 #qbank-session .labs-panel main{
@@ -1376,6 +1473,9 @@ body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden))
   border-bottom: 1px solid #e2e8f0;
 }
 
+
+
+
 #qbank-session .labs-panel .labs-row{
   border-top: 1px solid #e2e8f0;
 }
@@ -1400,6 +1500,13 @@ body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden))
   color: #1e293b;
   border-right: 1px solid #e2e8f0;
   border-bottom: 1px solid #e2e8f0;
+}
+
+#qbank-session .labs-panel mark.labs-highlight{
+  background: #fef3c7;
+  color: inherit;
+  padding: 0;
+  border-radius: 2px;
 }
 
 #qbank-session .labs-panel .labs-row td:first-child{
@@ -1498,7 +1605,7 @@ body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden))
 
 #qbank-session.labs-open{
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) var(--labs-panel-width);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: 1fr auto;
   column-gap: var(--qbank-gap);
 }
@@ -1521,6 +1628,8 @@ body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden))
   margin-top: var(--qbank-header-offset);
   height: calc(100vh - var(--qbank-header-offset));
   max-height: calc(100vh - var(--qbank-header-offset));
+  width: 100%;
+  max-width: none;
 }
 
 #qbank-session.labs-open .labs-panel main{
@@ -1547,6 +1656,7 @@ body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden))
     width: 100%;
     max-width: none;
     margin-top: 0;
+    padding-top: var(--qbank-header-offset);
     min-height: 100vh;
     height: auto;
     max-height: none;
@@ -2767,6 +2877,18 @@ body.favorites-split #favorites-view.hidden{display:none;}
 
 body.split-view-active .dashboard-container{
   width: calc(var(--split-left)) !important; /* mitad izquierda real */
+}
+
+/* Qbank overlay comparte el espacio izquierdo cuando el visor está en split */
+body.split-view-active #qbank-session{
+  right: var(--split-w) !important;
+  width: calc(100vw - var(--split-w)) !important;
+}
+body.split-view-active #qbank-session .max-w-7xl{
+  max-width: none !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
 /* Sugerencia: si aún tienes algo así en tu CSS, bórralo o déjalo comentado:
@@ -4235,6 +4357,74 @@ body.qbank-setup-open { overflow: hidden; }
   transition: background-color .2s ease, color .2s ease, opacity .2s ease;
 }
 
+/* ——— Anti-colisión: search + X arriba si falta espacio ——— */
+#qbank-session .labs-panel header{
+  flex-wrap: wrap;             /* permite salto de fila */
+  container-type: inline-size; /* activa @container por ancho del header */
+}
+
+/* Layout ancho (por defecto): tabs | ... | search [ X ] */
+#qbank-session .labs-panel .labs-tabs   { order: 1; flex: 0 1 auto; }
+#qbank-session .labs-panel .labs-search { order: 2; margin-left:auto !important; flex:0 0 auto !important; }
+#qbank-session .labs-panel .labs-header-actions,
+#qbank-session .labs-panel .labs-close  { order: 3; }  /* acciones/X quedan a la derecha de search */
+
+/* Estrecho: fuerza tabs a nueva fila, search+X siempre arriba */
+@container (max-width: 500px){
+  /* Fila superior (misma fila): search crece, acciones/X a la derecha */
+  #qbank-session .labs-panel .labs-search{
+    order: -2;                      /* antes que todo lo demás */
+    flex: 1 1 auto !important;      /* ocupa el resto de esa fila */
+    min-width: 0 !important;        /* permite encoger sin romper */
+    margin-left: 0 !important;
+    margin-right: .5rem !important; /* gap con acciones */
+    margin-bottom: .5rem !important;/* separación con la fila de tabs */
+    justify-content: flex-start !important;
+  }
+  #qbank-session .labs-panel .labs-header-actions,
+  #qbank-session .labs-panel .labs-close{
+    order: -1;                      /* junto a search en la fila superior */
+    flex: 0 0 auto !important;
+    margin-left: auto !important;   /* pegado a la derecha de esa fila */
+    margin-bottom: .5rem !important;
+  }
+
+  /* Forzar SIEMPRE que las tabs bajen a la siguiente fila */
+  #qbank-session .labs-panel .labs-tabs{
+    order: 10;                      /* después del top-row */
+    flex: 0 0 100% !important;      /* ocupa 100% => fuerza nueva fila */
+    width: 100% !important;         /* máxima especificidad para asegurar wrap */
+  }
+}
+#qbank-session .labs-panel .labs-divider{
+  order: -1 !important;   /* igual que .labs-close */
+}
+
+
+/* --- Search arriba de tabs cuando hay query --- */
+#qbank-session .labs-panel .labs-header{ flex-wrap: nowrap; }
+#qbank-session .labs-panel .labs-header.has-query{ flex-wrap: wrap; align-items:flex-start; }
+
+
+#qbank-session .labs-panel .labs-header.has-query .labs-search{
+  order:-20; margin-left:0 !important; flex:0 0 auto !important; min-width:0;
+}
+
+
+#qbank-session .labs-panel .labs-header.has-query .labs-header-actions{
+  order:-10; display:inline-flex; align-items:center; gap:4px; margin-left:8px !important;
+}
+#qbank-session .labs-panel .labs-header.has-query .labs-header-actions .labs-divider{ order:0; }
+#qbank-session .labs-panel .labs-header.has-query .labs-header-actions .labs-close{ order:1; }
+
+
+#qbank-session .labs-panel .labs-header.has-query .labs-tabs{
+  order: 10;              /* queda debajo */
+  width: 100%;
+}
+
+
+
 
 
 
@@ -5346,6 +5536,7 @@ function hardCloseModal(){
     if (typeof ensureTocVisible === 'function') {
       ensureTocVisible();
     }
+    window.__applySubcatDesktopLayout?.('toc');
   };
 
   window.addEventListener('popstate', async (event) => {
@@ -5710,6 +5901,7 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   } else {
     showSubcat();
   }
+  window.__applySubcatDesktopLayout?.('toc');
   // Garantizar que Home quede oculto (evita estilos/resets ligados a esa vista)
   document.getElementById('home-content')?.classList.add('hidden');
 
@@ -5923,7 +6115,8 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
               <div class="flex-1 min-h-0 overflow-y-auto px-8 py-4 space-y-6">
 
                                     <!-- Nuevo encabezado con barra y botón AA -->
-                    <header class="relative z-[100000] flex items-center justify-end border-b border-gray-200 py-3 w-[calc(100%+4rem)] -mx-8 px-6 -translate-y-[4px]">  <div class="border-l border-gray-300 h-8 mr-3 translate-y-[1px]"></div>
+                    <header class="relative z-[100000] flex items-center justify-end border-b border-gray-200 py-3 w-[calc(100%+4rem)] -mx-8 px-6 -translate-y-[4px]">  
+                      <div class="border-l border-gray-300 h-8 mr-[2px]  translate-y-[1px]"></div>
                     <button id="qbank-font-btn" class="hl-btn flex items-end gap-[1px] h-8 px-3 translate-y-[1px] cursor-pointer">
                       <span class="pointer-events-none text-[11px] font-normal text-slate-500 leading-none">A</span>
                       <span class="pointer-events-none text-[15px] font-bold text-slate-700 leading-none">A</span>
@@ -5961,7 +6154,7 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
       <span class="uppercase tracking-wide text-[11px] font-semibold text-slate-700">Key info</span>
     </button>
 
-    <button type="button" class="flex items-center gap-2 text-slate-600 hover:text-slate-800">
+    <button id="btn-attending-tip" type="button" class="flex items-center gap-2 text-slate-600 hover:text-slate-800">
       <span class="inline-flex items-center justify-center w-5 h-5 rounded-full border border-slate-600 text-[11px] font-bold text-slate-700">?</span>
       <span class="uppercase tracking-wide text-[11px] font-semibold text-slate-700">Attending tip</span>
     </button>
@@ -6051,6 +6244,29 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   </div>
 </div>
 </div>
+
+<section id="qbank-attending-tip" class="hidden -mx-8 px-8 block !mt-0 mb-0 pt-4 pb-4 border-t border-gray-200 w-[calc(100%+4rem)]" data-open="false">
+                      <div class="flex items-start gap-4">
+                    <img src="./assets/doctor.png" class="h-12 w-12 rounded-xl border border-amber-200 bg-white shadow-inner object-contain" alt="Doctor icon">
+                    <div class="flex-1 space-y-2">
+                      <div class="flex items-center justify-between text-[11px] uppercase tracking-wide font-semibold">
+                        <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-700 px-2 py-0.5">
+                          <i class="fa-solid fa-check text-[10px]"></i>
+                          Hint used
+                        </span>
+                        <button type="button" class="text-slate-500 hover:text-slate-700 font-semibold tracking-wide flex items-center gap-1 text-[10px]">
+                          <i class="fa-regular fa-comment text-[11px]"></i>
+                          Give feedback
+                        </button>
+                      </div>
+                      <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-amber-700">
+                        <i class="fa-solid fa-circle-info text-[11px]"></i>
+                        <span>Attending tip</span>
+                      </div>
+                      <div class="text-[13px] leading-relaxed text-slate-800" data-role="attending-body"></div>
+                    </div>
+                  </div>
+                </section>
 
                 <section id="qbank-options" class="qbank-option-container -mx-8 !mt-0 !pt-0"></section>
                 
@@ -6195,6 +6411,9 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     resumeBtn: pauseOverlay.querySelector('#qbank-resume-btn'),
     pauseClose: pauseOverlay.querySelector('[data-qbank="pause-close"]'),
     controls: qbankSessionEl.querySelector('#qbank-controls'),
+    attendingBtn: qbankSessionEl.querySelector('#btn-attending-tip'),
+    attendingTip: qbankSessionEl.querySelector('#qbank-attending-tip'),
+    attendingBody: qbankSessionEl.querySelector('#qbank-attending-tip [data-role="attending-body"]'),
     labsCloseNav: qbankSessionEl.querySelector('#qbank-labs-close'),
     tocSidebar: document.getElementById('subcategoria-sidebar'),
     tocContent: document.getElementById('subcategoria-sidebar-content')
@@ -6206,14 +6425,18 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     panel.className = 'labs-panel';
     panel.setAttribute('aria-hidden', 'true');
     panel.innerHTML = `
-      <header class="px-6 py-4 border-b border-slate-200 bg-white">
-        <div class="flex items-start justify-between gap-4">
-          <div class="flex flex-col gap-3">
-            <p class="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500">Labs</p>
-            <div class="labs-tabs" role="tablist"></div>
+      <header class="labs-header">
+        <div class="labs-tabs" role="tablist"></div>
+        <div class="labs-search">
+          <div class="labs-search-field">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="search" class="labs-search-input" placeholder="Search..." aria-label="Buscar en Labs">
           </div>
+        </div>
+        <div class="labs-header-actions">
+          <span class="labs-divider" aria-hidden="true"></span>
           <button type="button" class="labs-close" aria-label="Cerrar panel de labs">
-            <i class="fa-solid fa-xmark text-lg"></i>
+            <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
       </header>
@@ -6236,6 +6459,18 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     const navCloseBtn = qbankEls.labsCloseNav = panel.querySelector('#qbank-labs-close');
     navCloseBtn?.removeAttribute('data-labs-bound');
 
+    const headerEl = panel.querySelector('.labs-header');
+    const searchInput = panel.querySelector('.labs-search-input');
+
+    function updateHeaderLayout() {
+      if (!headerEl || !searchInput) return;
+      headerEl.classList.toggle('has-query', searchInput.value.trim().length > 0);
+    }
+
+    updateHeaderLayout(); // estado inicial
+
+
+
     const TAB_ORDER = [
       { id: 'serum', label: 'Serum' },
       { id: 'cerebrospinal', label: 'Cerebrospinal' },
@@ -6250,10 +6485,118 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
       active: 'serum',
       data: null,
       loading: false,
-      error: null
+      error: null,
+      query: ''
     };
 
     const defaultMeta = metaHost?.textContent || '';
+    const htmlScratch = document.createElement('div');
+
+    function textFromHTML(html) {
+      if (!html) return '';
+      htmlScratch.innerHTML = html;
+      return htmlScratch.textContent || '';
+    }
+
+    function rowMatchesQuery(row, lowerQuery) {
+      if (!row || row.type !== 'value') return false;
+      const blob = [
+        textFromHTML(row.label || ''),
+        textFromHTML(row.ref || ''),
+        textFromHTML(row.si || '')
+      ].join(' ').toLowerCase();
+      return blob.includes(lowerQuery);
+    }
+
+    function filterRowsByQuery(rows, query) {
+      if (!Array.isArray(rows) || !query) return rows;
+      const lowerQuery = query.toLowerCase();
+      const measurementHits = new Set();
+      rows.forEach((row) => {
+        if (row.type !== 'value') return;
+        if (rowMatchesQuery(row, lowerQuery)) {
+          measurementHits.add(row.measurementId);
+        }
+      });
+      if (!measurementHits.size) return [];
+      const filtered = [];
+      const includedGroups = new Set();
+      const groupStack = [];
+      rows.forEach((row, idx) => {
+        if (row.type === 'group') {
+          while (groupStack.length && groupStack[groupStack.length - 1].level >= row.level) {
+            groupStack.pop();
+          }
+          const clone = { ...row, __rowId: `group-${idx}` };
+          groupStack.push(clone);
+          return;
+        }
+        if (!measurementHits.has(row.measurementId)) return;
+        groupStack.forEach(group => {
+          if (includedGroups.has(group.__rowId)) return;
+          filtered.push(group);
+          includedGroups.add(group.__rowId);
+        });
+        filtered.push(row);
+      });
+      return filtered;
+    }
+
+    function applyHighlights(root, query) {
+      if (!root || !query) return;
+      const target = root.querySelector('tbody') || root;
+      const needle = query.toLowerCase();
+      const walker = document.createTreeWalker(
+        target,
+        NodeFilter.SHOW_TEXT,
+        {
+          acceptNode(node) {
+            if (!node || !node.textContent || !node.textContent.trim()) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            if (node.parentNode && node.parentNode.closest && node.parentNode.closest('mark.labs-highlight')) {
+              return NodeFilter.FILTER_REJECT;
+            }
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        }
+      );
+      const nodes = [];
+      while (walker.nextNode()) {
+        nodes.push(walker.currentNode);
+      }
+      nodes.forEach(node => {
+        const original = node.textContent || '';
+        const haystack = original.toLowerCase();
+        let start = haystack.indexOf(needle);
+        if (start === -1) return;
+        const frag = document.createDocumentFragment();
+        let lastIndex = 0;
+        while (start !== -1) {
+          if (start > lastIndex) {
+            frag.appendChild(document.createTextNode(original.slice(lastIndex, start)));
+          }
+          const mark = document.createElement('mark');
+          mark.className = 'labs-highlight';
+          mark.textContent = original.slice(start, start + query.length);
+          frag.appendChild(mark);
+          lastIndex = start + query.length;
+          start = haystack.indexOf(needle, lastIndex);
+        }
+        if (lastIndex < original.length) {
+          frag.appendChild(document.createTextNode(original.slice(lastIndex)));
+        }
+        node.parentNode?.replaceChild(frag, node);
+      });
+    }
+
+    function handleSearchInput(event) {
+      state.query = event.target.value || '';
+      updateHeaderLayout();
+      renderContent();
+    }
+
+    searchInput?.addEventListener('input', handleSearchInput);
 
     function getDb() {
       try {
@@ -6365,6 +6708,8 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
       return null;
     }
 
+    let measurementCounter = 0;
+
     function buildRows(map, level = 0, acc = []) {
       if (!map || typeof map !== 'object') return acc;
       const orderList = extractOrderList(map);
@@ -6384,6 +6729,7 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
       for (const [key, value] of entries) {
         if (META_KEYS.has(key)) continue;
         if (isLeaf(value)) {
+          const measurementId = `m-${measurementCounter++}`;
           const leaf = normalizeLeaf(value);
           const refParts = splitMultiRow(leaf.ref);
           const siParts = splitMultiRow(leaf.si);
@@ -6398,6 +6744,7 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
             }
             acc.push({
               type: 'value',
+              measurementId,
               label: idx === 0 ? escHTML(key) : '',
               level,
               ref: refContent,
@@ -6473,6 +6820,7 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
         metaHost?.classList.add('hidden');
         return;
       }
+      measurementCounter = 0;
       const rows = buildRows(doc);
       if (!rows.length) {
         contentHost.innerHTML = `
@@ -6483,7 +6831,18 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
         metaHost?.classList.add('hidden');
         return;
       }
-      const tbody = rows.map(row => {
+      const query = (state.query || '').trim();
+      const visibleRows = query ? filterRowsByQuery(rows, query) : rows;
+      if (!visibleRows.length) {
+        contentHost.innerHTML = `
+          <div class="labs-empty">
+            No encontramos valores que coincidan con “${escHTML(query)}”.
+          </div>
+        `;
+        metaHost?.classList.add('hidden');
+        return;
+      }
+      const tbody = visibleRows.map(row => {
         if (row.type === 'group') {
           return `
             <tr class="labs-row">
@@ -6516,6 +6875,12 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
           <tbody>${tbody}</tbody>
         </table>
       `;
+      if (query) {
+        requestAnimationFrame(() => {
+          const table = contentHost.querySelector('.labs-table');
+          applyHighlights(table, query);
+        });
+      }
       if (metaHost) {
         const docMeta = typeof doc === 'object' ? doc : null;
         const updatedAt = docMeta && docMeta.updatedAt;
@@ -6567,6 +6932,14 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     async function open(tabId) {
       if (tabId && TAB_ORDER.some(tab => tab.id === tabId)) {
         state.active = tabId;
+      }
+      if (document.body.classList.contains('split-view-active')) {
+        if (typeof exitSplitIfAny === 'function') {
+          await exitSplitIfAny();
+        } else {
+          document.body.classList.remove('split-view-active');
+          document.getElementById('video-modal')?.classList.add('hidden');
+        }
       }
       if (state.open) {
         navCloseBtn?.classList.remove('hidden');
@@ -6630,6 +7003,16 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
 
     return { open, close, toggle };
   })();
+
+
+  qbankEls.attendingBtn?.addEventListener('click', () => {
+    const card = qbankEls.attendingTip;
+    if (!card || card.dataset.hasTip !== 'true') return;
+    const isOpen = card.dataset.open === 'true';
+    card.dataset.open = isOpen ? 'false' : 'true';
+    card.classList.toggle('hidden', isOpen);
+    qbankEls.attendingBtn?.setAttribute('aria-expanded', (!isOpen).toString());
+  });
 
   if (qbankEls.labsCloseNav && !qbankEls.labsCloseNav.dataset.labsBound) {
     qbankEls.labsCloseNav.dataset.labsBound = 'true';
@@ -7118,6 +7501,26 @@ if (!shouldHide) {
     return escHTML(trimmed);
   };
 
+  function updateAttendingTipCard(question) {
+    const btn = qbankEls.attendingBtn;
+    const card = qbankEls.attendingTip;
+    const bodyEl = qbankEls.attendingBody;
+    if (!btn || !card) return;
+    const raw = question?.meta?.attending;
+    const text = typeof raw === 'string' ? raw.trim() : '';
+    const hasTip = text.length > 0;
+    btn.disabled = !hasTip;
+    btn.setAttribute('aria-disabled', hasTip ? 'false' : 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.classList.toggle('opacity-40', !hasTip);
+    card.dataset.hasTip = hasTip ? 'true' : 'false';
+    card.dataset.open = 'false';
+    card.classList.add('hidden');
+    if (bodyEl) {
+      bodyEl.innerHTML = hasTip ? renderRich(text) : '';
+    }
+  }
+
   function normaliseQuestion(docId, data = {}) {
     const getText = (src = {}) => src.pregunta || src.titulo || src.title || src.enunciado || src.texto || src.explicacion || '';
     const text = String(getText(data)).trim();
@@ -7478,6 +7881,7 @@ if (!shouldHide) {
       }
       qbankState.sidebarSnapshot = null;
     }
+    window.__applySubcatDesktopLayout?.(active ? 'qbank' : 'toc');
   }
 
   function renderQbankSidebar() {
@@ -7704,6 +8108,9 @@ function getValidImageURL(url) {
       const imgURL = question.meta && question.meta.imagen
         ? getValidImageURL(question.meta.imagen)
         : '';
+      const imgDescRaw = question.meta?.imagenDescripcion || question.meta?.imagenTitulo || 'Question media';
+      const safeImgDesc = escHTML(imgDescRaw);
+      const safeImgURL = escHTML(imgURL);
 
       // armamos el bloque visual que irá dentro de #qbank-question-text
 const questionHTML = `
@@ -7714,16 +8121,21 @@ const questionHTML = `
                      sm:order-2 sm:mb-0 sm:ml-auto sm:flex sm:justify-end sm:max-w-[160px]">
              <div class="relative inline-block max-w-full">
                <img
-                 src="${imgURL}"
-                 alt="Question image"
+                 src="${safeImgURL}"
+                 alt="${safeImgDesc}"
                  class="max-h-40 max-w-full rounded border border-slate-200 object-contain"
                  onerror="this.style.display='none';"
                />
 <div class="absolute right-2 bottom-2 bg-slate-800/80 text-white rounded-[4px] shadow-md p-1.5">
-  <button type="button" class="flex items-center justify-center leading-none">
+  <button type="button" class="flex items-center justify-center leading-none qbank-media-expand" data-qbank-media-expand="true" aria-label="Expand image">
     <i class="fa-solid fa-up-right-and-down-left-from-center text-[12px] leading-none"></i>
   </button>
 </div>
+              <div class="hidden media-gallery qbank-media-gallery">
+                <figure class="media-thumb image-thumb qbank-media-thumb" data-img-url="${safeImgURL}" data-img-desc="${safeImgDesc}">
+                  <img src="${safeImgURL}" alt="${safeImgDesc}">
+                </figure>
+              </div>
              </div>
            </div>`
         : ``
@@ -7735,7 +8147,21 @@ const questionHTML = `
 `;
 
       qbankEls.question.innerHTML = questionHTML;
+      if (imgURL) {
+        const expandBtn = qbankEls.question.querySelector('[data-qbank-media-expand]');
+        const hiddenThumb = qbankEls.question.querySelector('.qbank-media-gallery .media-thumb');
+        if (expandBtn && hiddenThumb) {
+          expandBtn.addEventListener('click', () => {
+            abrirModalMedio({
+              preventDefault() {},
+              stopPropagation() {},
+              target: hiddenThumb
+            });
+          });
+        }
+      }
     }
+    updateAttendingTipCard(question);
 
     // Estado de los botones inferiores:
     // Regla:
@@ -7888,6 +8314,16 @@ const questionHTML = `
     renderQbank();
   }
 
+  function clearSplitOnQuestionChange() {
+    if (!document.body.classList.contains('split-view-active')) return;
+    if (typeof exitSplitIfAny === 'function') {
+      exitSplitIfAny();
+    } else {
+      document.body.classList.remove('split-view-active');
+      document.getElementById('video-modal')?.classList.remove('split-view');
+    }
+  }
+
   const handleQbankNavClick = (event) => {
     const button = event.target.closest('button[data-q-index]');
     if (!button) return;
@@ -7897,6 +8333,7 @@ const questionHTML = `
     finalizeQuestionTimer();
     qbankState.currentIndex = Math.max(0, Math.min(idx, qbankState.questions.length - 1));
     qbankState.questionStartedAt = null;
+    clearSplitOnQuestionChange();
     renderQbank();
   };
 
@@ -7955,6 +8392,7 @@ const questionHTML = `
     finalizeQuestionTimer();
     qbankState.currentIndex -= 1;
     qbankState.questionStartedAt = null;
+    clearSplitOnQuestionChange();
     renderQbankQuestion();
   });
 
@@ -7971,6 +8409,7 @@ const questionHTML = `
     finalizeQuestionTimer();
     qbankState.currentIndex += 1;
     qbankState.questionStartedAt = null;
+    clearSplitOnQuestionChange();
     renderQbankQuestion();
   });
 
@@ -15098,6 +15537,39 @@ document.addEventListener('DOMContentLoaded', () => {
   (function () {
     const mq = window.matchMedia('(min-width: 1300px)');
 
+    function applySubcatDesktopLayout(forcedMode = null) {
+      if (!mq.matches) return false;
+      const main = document.getElementById('main-content');
+      if (!main?.classList.contains('subcat-active')) return false;
+
+      const body = document.body;
+      const sidebar = document.getElementById('sidebar');
+      const tocSidebar = document.getElementById('subcategoria-sidebar');
+      const qbankSidebar = document.getElementById('qbank-sidebar');
+
+      body.classList.remove('bars-hidden');
+      sidebar?.classList.add('collapsed');
+      sidebar?.classList.remove('open', 'force-hidden');
+
+      const showQbankSidebar = forcedMode === 'qbank'
+        ? true
+        : forcedMode === 'toc'
+          ? false
+          : !!(qbankSidebar && !qbankSidebar.classList.contains('hidden'));
+
+      if (showQbankSidebar) {
+        tocSidebar?.classList.remove('hidden');
+        qbankSidebar?.classList.remove('hidden');
+      } else {
+        qbankSidebar?.classList.add('hidden');
+        if (!body.classList.contains('favorites-split')) {
+          tocSidebar?.classList.remove('hidden');
+        }
+      }
+
+      return true;
+    }
+
     function applyLayout() {
       const isDesktop = mq.matches;
       const body = document.body;
@@ -15105,6 +15577,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const subcat  = document.getElementById('subcategoria-sidebar');
 
       if (isDesktop) {
+        if (applySubcatDesktopLayout()) return;
         // Desktop: barras visibles
         body.classList.remove('bars-hidden');
         sidebar.classList.add('open');
@@ -15121,7 +15594,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    document.addEventListener('DOMContentLoaded', applyLayout);
+    document.addEventListener('DOMContentLoaded', () => {
+      applyLayout();
+      window.__applySubcatDesktopLayout = (mode) => applySubcatDesktopLayout(mode);
+    });
     mq.addEventListener('change', applyLayout);
   })();
 </script>
@@ -15845,6 +16321,29 @@ popover.addEventListener('keydown', hideOnEnter);
 </script>
 
 
+<script>
+// Ocultar sidebar principal en móvil ANTES de mostrar Home
+if (window.matchMedia('(max-width: 1299.98px)').matches) {
+  document.body.classList.add('bars-hidden');
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) sidebar.classList.add('force-hidden');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const isMobile = window.matchMedia('(max-width: 1299.98px)').matches;
+  if (isMobile) {
+    // Forzar ocultar después de cualquier inicialización
+    setTimeout(() => {
+      document.body.classList.add('bars-hidden');
+      const sidebar = document.getElementById('sidebar');
+      if (sidebar) {
+        sidebar.classList.add('force-hidden');
+        sidebar.classList.remove('open');
+      }
+    }, 0);
+  }
+});
+</script>
 
 
 
@@ -15867,4 +16366,4 @@ popover.addEventListener('keydown', hideOnEnter);
 
 </html>
 
-<!-- === 142octubre octubre noche nochiiilaeeeeee === -->
+<!-- === 180octubre octubre noche nochiiilaeeeeee === -->
