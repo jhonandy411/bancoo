@@ -1,0 +1,120 @@
+<script>
+function hideSidebarForAnalytics() {
+  const tocContent = document.getElementById('subcategoria-sidebar-content');
+  if (tocContent && !tocContent.dataset.analyticsPrevHidden) {
+    tocContent.dataset.analyticsPrevHidden = tocContent.classList.contains('hidden') ? '1' : '0';
+    tocContent.classList.remove('hidden');
+    tocContent.dataset.analyticsActive = 'true';
+  }
+  const qbankSidebar = document.getElementById('qbank-sidebar');
+  if (qbankSidebar && !qbankSidebar.dataset.analyticsPrevHidden) {
+    qbankSidebar.dataset.analyticsPrevHidden = qbankSidebar.classList.contains('hidden') ? '1' : '0';
+    qbankSidebar.classList.add('hidden');
+    qbankSidebar.setAttribute('aria-hidden', 'true');
+  }
+}
+
+function restoreSidebarAfterAnalytics() {
+  const qbankSidebar = document.getElementById('qbank-sidebar');
+  if (qbankSidebar && qbankSidebar.dataset.analyticsPrevHidden) {
+    if (qbankSidebar.dataset.analyticsPrevHidden === '0') {
+      qbankSidebar.classList.remove('hidden');
+      qbankSidebar.setAttribute('aria-hidden', 'false');
+    }
+    delete qbankSidebar.dataset.analyticsPrevHidden;
+  }
+  const tocContent = document.getElementById('subcategoria-sidebar-content');
+  if (tocContent && tocContent.dataset.analyticsPrevHidden) {
+    if (tocContent.dataset.analyticsPrevHidden === '1') {
+      tocContent.classList.add('hidden');
+    }
+    delete tocContent.dataset.analyticsPrevHidden;
+    delete tocContent.dataset.analyticsActive;
+  }
+}
+window.restoreAnalyticsSidebar = restoreSidebarAfterAnalytics;
+
+function updateRandomAnalyticsSidebar() {
+  hideSidebarForAnalytics();
+
+  const numbers = Array.from({ length: 10 }, (_, idx) => idx + 1);
+  for (let i = numbers.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+  }
+  const listHtml = numbers.map((num, idx) => `
+    <button type="button" class="w-full flex items-center justify-between px-4 py-3 text-[13px] text-slate-700 hover:bg-slate-50" data-random="${idx}">
+      <span class="font-semibold text-slate-500">Item ${idx + 1}</span>
+      <span class="text-slate-900">${num}</span>
+    </button>
+  `).join('') || `<div class="px-4 py-3 text-[12px] text-slate-500">Sin números.</div>`;
+
+  const sidebarList = document.getElementById('qbank-sidebar-list');
+  if (sidebarList) sidebarList.innerHTML = listHtml;
+  const qbankList = document.getElementById('qbank-question-list');
+  if (qbankList) qbankList.innerHTML = listHtml;
+  const tocContent = document.getElementById('subcategoria-sidebar-content');
+  if (tocContent) {
+    const tocItems = numbers.map((num, idx) => `
+      <div class="toc-section">
+        <button class="toc-h2" data-random-index="${idx}">Número ${num}</button>
+      </div>
+    `).join('');
+    tocContent.innerHTML = `
+      <div class="toc-topic" id="toc-topic">Lista aleatoria</div>
+      <nav class="toc">
+        ${tocItems}
+      </nav>
+    `;
+    tocContent.classList.remove('hidden');
+  }
+}
+window.updateRandomAnalyticsSidebar = updateRandomAnalyticsSidebar;
+
+const analyticsBtn = document.getElementById("btn-analytics");
+if (analyticsBtn) {
+  analyticsBtn.addEventListener("click", async () => {
+    const main = document.getElementById("main-content");
+    updateRandomAnalyticsSidebar();
+
+    const response = await fetch("analytics.html");
+    const html = await response.text();
+    main.innerHTML = html;
+  });
+}
+</script>
+
+<script>
+// Ocultar analytics.html al presionar botón ATRÁS
+window.addEventListener('popstate', async () => {
+  const main = document.getElementById('main-content');
+  if (!main) return;
+
+  const hasAnalytics = main.querySelector('#analytics-page, .analytics-root, h1')?.textContent?.includes('Analysis');
+  if (!hasAnalytics) return;
+
+  try {
+    window.restoreAnalyticsSidebar?.();
+  } catch (err) {
+    console.error('restoreAnalyticsSidebar failed:', err);
+  }
+
+  const ctx = typeof getCurrentSubcatCtx === 'function'
+    ? getCurrentSubcatCtx()
+    : (window.__CURRENT_SUBCAT_CTX__ || {});
+  const sup = ctx?.supracategoriaId;
+  const cat = ctx?.categoriaId;
+  const sub = ctx?.subcategoriaId;
+
+  if (sup && cat && sub && typeof showSubcategoriaContent === 'function') {
+    try {
+      await showSubcategoriaContent(sub, cat, sup, { skipShowView: false });
+      return;
+    } catch (err) {
+      console.error('Error al restaurar subcategoría tras analytics:', err);
+    }
+  }
+
+  main.innerHTML = window.__ULTIMO_HTML_QBANK__ || '';
+});
+</script>

@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Session Analysis</title>
+  <!-- Tailwind CDN (retíralo si ya lo compilas en tu build) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Borde izquierdo del panel Articles sólo visible al pasar el cursor cuando está colapsado */
+    #tab-articles.collapsed:hover {
+      border-color: rgb(100 116 139); /* slate-500 */
+    }
+
+    /* Iconos de orden (up/down) por defecto: gris más claro */
+    .sort-icon-up,
+    .sort-icon-down {
+      fill: rgb(148 163 184); /* slate-400 */
+    }
+
+    /* Activo ASC: solo el triángulo superior más oscuro */
+    th[data-sort-direction="asc"] .sort-icon-up {
+      fill: rgb(55 65 81); /* slate-700 */
+    }
+
+    /* Activo DESC: solo el triángulo inferior más oscuro */
+    th[data-sort-direction="desc"] .sort-icon-down {
+      fill: rgb(55 65 81); /* slate-700 */
+    }
+  </style>
+
+
+
+</head>
+<body class="bg-slate-50 text-slate-800">
+<div class="w-full max-w-[950px] mx-auto px-6 lg:px-8 pb-20">
+  
+    <!-- Header -->
+    <header class="mt-4 mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+      <h1 class="text-[28px] font-bold tracking-tight">Session Analysis</h1>
+
+      <button id="btn-anki" type="button"
+        class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-transparent px-3.5 py-2 text-sm font-semibold text-slate-800 hover:bg-transparent">
+        <!-- estrella -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="opacity-90" viewBox="0 0 24 24" fill="currentColor">
+          <path d="m12 17.27 6.18 3.73-1.64-7.03L22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21z"/>
+        </svg>
+        Get Anki cards
+      </button>
+    </header>
+
+    <!-- Grid principal -->
+    <div class="space-y-6">
+      <!-- Columna izquierda -->
+      <div class="space-y-6">
+        <!-- Métricas (píldora gris) -->
+        <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <!-- Completed -->
+            <div class="flex flex-col items-center justify-center gap-1">
+              <div class="text-[13px] font-bold leading-4" id="anl-stat-completed">1/1</div>
+
+              <div class="flex items-center gap-2">
+      <svg viewBox="0 0 22 22" class="h-5 w-5 text-purple-500">
+        <path fill="currentColor" d="M6.8 12.1a1 1 0 1 1 0 2C3.05 14.1 0 11.005 0 7.2 0 3.387 2.987.4 6.8.4c3.75 0 6.8 3.05 6.8 6.8a1 1 0 1 1-2 0c0-2.646-2.154-4.8-4.8-4.8C4.109 2.4 2 4.509 2 7.2c0 2.748 2.109 4.9 4.8 4.9m-1-7.4a1 1 0 0 1 2 0v2.085l1.007 1.008a1 1 0 0 1-1.414 1.414l-1.3-1.3A1 1 0 0 1 5.8 7.2zm7.3 12.486L10.914 15 17.4 8.514l2.185 2.186zM10.686 19.6H8.5v-2.185l1-1 2.186 2.185zm11.02-9.607-3.598-3.6a1 1 0 0 0-1.414 0l-9.901 9.9A1 1 0 0 0 6.5 17v3.6a1 1 0 0 0 1 1h3.6a1 1 0 0 0 .708-.293l9.899-9.9a1 1 0 0 0 0-1.414"/>
+      </svg>
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Completed</span>
+              </div>
+            </div>
+            <!-- Correct -->
+            <div class="flex flex-col items-center justify-center gap-1">
+              <div class="text-[13px] font-bold leading-4" id="anl-stat-correct">0%</div>
+              <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Correct</span>
+              </div>
+            </div>
+            <!-- Time per question -->
+            <div class="flex flex-col items-center justify-center gap-1">
+              <div class="text-[13px] font-bold leading-4" id="anl-stat-time-per-question">00m 07s</div>
+              <div class="flex items-center gap-2">
+                <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Fondo rojo: 100% answered como incorrecto -->
+                  <circle cx="12" cy="12" r="7" fill="none" stroke="#fecaca" stroke-width="2" />
+                  <!-- Arco verde: proporción de correctas (incluyendo hints) sobre respondidas -->
+                  <circle
+                    id="anl-mini-correct-arc"
+                    cx="12"
+                    cy="12"
+                    r="7"
+                    fill="none"
+                    stroke="#4ade80"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-dasharray="44"
+                    stroke-dashoffset="44"
+                    transform="rotate(-90 12 12)"
+                  />
+                </svg>
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Time per question</span>
+              </div>
+            </div>
+            <!-- Total time -->
+            <div class="flex flex-col items-center justify-center gap-1">
+              <div class="text-[13px] font-bold leading-4" id="anl-stat-total-time">0h 00m</div>
+              <div class="flex items-center gap-2">
+<svg viewBox="0 0 24 24" class="h-5 w-5 text-sky-600" fill="none" stroke="currentColor" stroke-width="2">
+  <circle cx="12" cy="12" r="7" />
+  <path d="M12 9v3l1.5 1.5m3.01 3.85-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7.35-3.83A2 2 0 0 1 9.83 1h4.35a2 2 0 0 1 2 1.82l.35 3.83" />
+</svg>                  <circle cx="12" cy="12" r="7"/><path d="M12 9v3l1.5 1.5"/>
+                </svg>
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Total time spent</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card: Questions based on + donut + leyenda + CTAs -->
+        <div class="grid items-start gap-6 min-[1300px]:grid-cols-2">
+        <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h3 class="mb-3 text-[15px] font-semibold">
+            Questions based on "<span id="anl-topic-name">Pneumonia</span>" <span class="text-slate-500 font-normal">(not yet seen or skipped)</span>
+          </h3>
+          <hr class="-mx-4 mb-3 border-slate-200" />
+
+          <div class="grid grid-cols-1 items-center gap-6">
+            <!-- Donut 0% -->
+            <div class="flex items-center justify-center">
+              <svg width="220" height="220" viewBox="0 0 100 100" role="img">
+                <circle cx="50" cy="50" r="44" fill="none" stroke="#e5e7eb" stroke-width="6"/>
+                <!-- Segmento rojo: porcentaje de incorrectas sobre respondidas -->
+                <circle
+                  id="anl-donut-incorrect"
+                  cx="50"
+                  cy="50"
+                  r="44"
+                  fill="none"
+                  stroke="#fb7185"
+                  stroke-width="6"
+                  stroke-linecap="round"
+                  stroke-dasharray="276"
+                  stroke-dashoffset="276"
+                  transform="rotate(-90 50 50)"
+                />
+                <!-- Segmento verde: porcentaje de correctas (incluyendo hints) sobre respondidas -->
+                <circle
+                  id="anl-donut-correct"
+                  cx="50"
+                  cy="50"
+                  r="44"
+                  fill="none"
+                  stroke="#34d399"
+                  stroke-width="6"
+                  stroke-linecap="round"
+                  stroke-dasharray="276"
+                  stroke-dashoffset="276"
+                  transform="rotate(-90 50 50)"
+                />
+                <!-- centro -->
+                <circle cx="50" cy="50" r="36" fill="#fff"/>
+                <text id="anl-donut-percent" x="50" y="48" text-anchor="middle" font-size="18" font-weight="900" fill="#0f172a">0%</text>
+                <text x="50" y="62" text-anchor="middle" font-size="4" font-weight="900" fill="#64748b">CORRECT + USING HINTS</text>
+              </svg>
+            </div>
+
+            <!-- Leyenda + CTAs -->
+            <div>
+              <p class="text-slate-700 text-sm mb-2" id="anl-answer-summary">You completed 1/1 questions. You answered:</p>
+              <ul class="space-y-1 text-sm">
+                <li class="flex items-center gap-2">
+                  <span class="h-3 w-5 rounded inline-block" style="background: linear-gradient(45deg, rgb(57, 214, 172) 30%, rgba(57, 214, 172, 0.6) 100%);"></span>
+                  <span class="font-semibold"><span id="anl-correct-percent">0%</span> correctly</span>
+                  <span> (<span id="anl-correct-count">0</span> questions)</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <span class="h-3 w-5 rounded inline-block" style="background: linear-gradient(45deg, rgb(252, 211, 77) 30%, rgba(252, 211, 77, 0.7) 100%);"></span>
+                  <span class="font-semibold"><span id="anl-hints-percent">0%</span> correctly using hints</span>
+                  <span> (<span id="anl-hints-count">0</span> questions)</span>
+                </li>
+                <li class="flex items-center gap-2">
+                  <span class="h-3 w-5 rounded inline-block" style="background: linear-gradient(45deg, rgb(251, 113, 133) 30%, rgba(251, 113, 133, 0.7) 100%);"></span>
+                  <span class="font-semibold"><span id="anl-incorrect-percent">100%</span> incorrectly</span>
+                  <span> (<span id="anl-incorrect-count">1</span> question)</span>
+                </li>
+              </ul>
+
+              <div class="mt-4 grid grid-cols-2 gap-3">
+                <button id="btn-repeat" type="button"
+                  class="rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50">
+                  Repeat Session
+                </button>
+                <button id="btn-resume" type="button"
+                  class="rounded-md bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-800">
+                  Resume Session
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+              <!-- Columna derecha (Study recommendations) — EXPANDIDA -->
+<aside class="space-y-6">
+  <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm overflow-hidden">
+    <!-- Header -->
+    <div>
+      <div class="flex items-center justify-between">
+        <h3 class="text-[16px] font-semibold">Study recommendations</h3>
+      </div>
+      <hr class="-mx-4 mt-3 border-slate-200" />
+    </div>
+
+    <!-- Tabs (subrayados como captura) -->
+    <div class="-mx-4 bg-slate-50">
+      <div class="flex gap-6 text-[14px] border-b border-slate-200">
+        <button data-tab="articles" class="tab-btn px-5 py-3 -mt-px border-t-4 border-slate-500 font-semibold text-slate-900 bg-white">Articles</button>
+        <button data-tab="disciplines" class="tab-btn px-5 py-3 -mt-px border-t-4 border-transparent text-slate-600 hover:text-slate-800 bg-transparent">Disciplines</button>
+        <button data-tab="systems" class="tab-btn px-5 py-3 -mt-px border-t-4 border-transparent text-slate-600 hover:text-slate-800 bg-transparent">Systems</button>
+      </div>
+    </div>
+
+    <!-- PANEL: Articles -->
+    <div id="tab-articles" class="tab-panel space-y-3 border-l-4 border-transparent collapsed -ml-4 pl-4 -mb-4 pb-4">
+      <!-- Ítem principal -->
+      <div id="rec-item" class="rounded-lg p-4">
+        <div class="flex items-start justify-between gap-3">
+          <!-- Izquierda: icono + título + barra -->
+          <div class="flex flex-1 items-start gap-3">
+            <div class="flex h-9 w-9 items-center justify-center rounded-md text-slate-600">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 2h16v20H4zm12 4H8m6 4H8"/><path d="M8 14h8v4H8z"/></svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <a href="#" class="block text-[18px] font-semibold text-slate-900 hover:underline" data-testid="recommendation-item-link">1. Pneumonia</a>
+              <!-- barra fina roja bajo el título (progreso ~7%) -->
+              <div class="mt-2 h-1.5 w-full rounded-full bg-slate-200">
+                <div id="anl-topic-progress" class="h-1.5 rounded-full bg-rose-400" style="width:7%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Derecha: Qbank + chevron arriba (abierto) -->
+          <div class="flex items-center gap-2">
+            <button type="button" class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold hover:bg-slate-50">
+              <svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" class="text-slate-700"><path fill="currentColor" d="M6 1a1 1 0 0 1 1-1h2a1 1 0 0 1 0 2H7a1 1 0 0 1-1-1m3 5a1 1 0 0 0-2 0v2h2z"/><path fill="currentColor" fill-rule="evenodd" d="M8 2a6 6 0 0 1 5.827 4.565 2.414 2.414 0 0 1 1.384 4.226l-.007.006L9.4 15.76a1 1 0 0 1-.65.24H6.5a1 1 0 0 1-.98-1.197l.248-1.232A6.002 6.002 0 0 1 8 2M4 8a4 4 0 0 1 7.92-.801l.009.045-5.348 4.543.015-.04A4 4 0 0 1 4 8m9.353.659a.414.414 0 0 1 .547.622L8.38 14h-.659l.135-.671 5.487-4.662z" clip-rule="evenodd"/></svg>
+              Qbank
+            </button>
+            <button id="rec-toggle" type="button" aria-label="collapse" class="rounded-md p-2 text-slate-500 hover:bg-slate-100 transition">
+              <svg id="rec-chevron" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="transition-transform">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Detalle expandido (visible por defecto) -->
+        <div id="rec-detail" class="overflow-hidden transition-[max-height] duration-300 ease-in-out" style="max-height:0px">
+          <!-- Métricas 4 ítems -->
+          <div class="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2">
+            <!-- 0% correctly -->
+            <div class="flex items-start gap-3">
+              <span class="mt-1 inline-block h-3 w-6 rounded-full" style="background: linear-gradient(45deg, rgb(57, 214, 172) 30%, rgba(57, 214, 172, 0.6) 100%);"></span>
+              <div>
+                <div class="font-semibold text-slate-700">0% correctly</div>
+                <div class="text-slate-600">(<span>0 questions</span>)</div>
+              </div>
+            </div>
+            <!-- 0% correctly using hints -->
+            <div class="flex items-start gap-3">
+              <span class="mt-1 inline-block h-3 w-6 rounded-full" style="background: linear-gradient(45deg, rgb(252, 211, 77) 30%, rgba(252, 211, 77, 0.8) 100%);"></span>
+              <div>
+                <div class="font-semibold text-slate-700">0% correctly using hints</div>
+                <div class="text-slate-600">(<span>0 questions</span>)</div>
+              </div>
+            </div>
+            <!-- 100% incorrectly -->
+            <div class="flex items-start gap-3">
+              <span class="mt-1 inline-block h-3 w-6 rounded-full" style="background: linear-gradient(45deg, rgb(251, 113, 133) 30%, rgba(251, 113, 133, 0.8) 100%);"></span>
+              <div>
+                <div class="font-semibold text-slate-700">100% incorrectly</div>
+                <div class="text-slate-600">(<span>3 questions</span>)</div>
+              </div>
+            </div>
+            <!-- Not answered -->
+            <div class="flex items-start gap-3">
+              <span class="mt-1 inline-block h-3 w-6 rounded-full" style="background: linear-gradient(45deg, rgb(148, 163, 184) 30%, rgba(148, 163, 184, 0.7) 100%);"></span>
+              <div>
+                <div class="font-semibold text-slate-700">Not answered</div>
+                <div class="text-slate-600"><span>38 questions</span></div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-6 border-slate-200" />
+
+          <!-- 3 columnas inferiores -->
+          <div class="grid grid-cols-1 gap-6 min-[1300px]:grid-cols-2 text-[14px] leading-snug">
+            <div>
+              <div class="flex items-center gap-3">
+                <span class="text-slate-800 font-semibold">1st</span>
+                <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">PRIORITY</span>
+              </div>
+              <p class="mt-3 italic text-[12px] leading-snug text-slate-600">Learning priority based on your performance and exam representation. The higher up in the list, the more you should study this topic.</p>
+            </div>
+            <div>
+              <div class="flex items-center gap-3">
+                <span class="text-slate-800 font-semibold" id="anl-topic-progress-label">7%</span>
+                <span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">COMPLETED</span>
+              </div>
+              <p class="mt-3 italic text-[12px] leading-snug text-slate-600">41 questions cover this topic for Continuing medical education.</p>
+            </div>
+            <div>
+              <div class="flex items-center gap-3">
+                <span class="text-slate-800 font-semibold">High</span>
+                <span class="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">REPRESENTATION</span>
+              </div>
+              <p class="mt-3 italic text-[12px] leading-snug text-slate-600">This topic represents 0.50% of the practice questions for Continuing medical education.</p>
+            </div>
+          </div>
+
+          <hr class="mt-6 border-slate-200" />
+        </div>
+      </div>
+    </div>
+
+    <!-- PLACEHOLDERS -->
+    <div id="tab-disciplines" class="tab-panel hidden text-sm text-slate-600">Contenido de "Disciplines"…</div>
+    <div id="tab-systems" class="tab-panel hidden text-sm text-slate-600">Contenido de "Systems"…</div>
+  </section>
+        </aside>
+        </div>
+
+        <!-- Performance analytics -->
+        <section class="space-y-3">
+          <div class="flex items-center gap-2">
+            <h2 class="text-xl font-semibold leading-tight">Performance analytics</h2>
+            <button type="button" aria-label="Info" class="rounded-md p-2 text-slate-500 hover:bg-slate-100">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7"></circle><path d="M8 11V8m0-3h.01"></path></svg>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div>
+              <table class="min-w-[900px] text-left text-sm">
+                <thead class="text-slate-600 border-b border-slate-200">
+                  <tr>
+                    <th class="px-4 py-3 font-semibold border-r border-slate-200 w-[45%]" data-sortable="true" data-sort-direction="asc">
+                      <span class="inline-flex items-center gap-1 cursor-pointer select-none">
+                        <span>Questions</span>
+                        <span aria-hidden="true" class="css-1d9wsjc-SortIcon e14h4dsy0">
+                          <span data-ds-id="Icon" data-variant="inherit" color="inherit" class="css-1u6ocsx-StyledIcon e1kkd7uc0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                              <path class="sort-icon-up" fill="currentColor" d="m11.707 7-3-3.707a1 1 0 0 0-1.414 0L4.293 7z"></path>
+                              <path class="sort-icon-down" fill="currentColor" d="M4.293 9l3 3.707a1 1 0 0 0 1.414 0l3-3.707z"></path>
+                            </svg>
+                          </span>
+                        </span>
+                      </span>
+                    </th>
+                    <th class="px-4 py-3 font-semibold" data-sortable="true">
+                      <span class="inline-flex items-center gap-1 cursor-pointer select-none">
+                        <span>Status</span>
+                        <span aria-hidden="true" class="css-1d9wsjc-SortIcon e14h4dsy0">
+                          <span data-ds-id="Icon" data-variant="inherit" color="inherit" class="css-1u6ocsx-StyledIcon e1kkd7uc0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                              <path class="sort-icon-up" fill="currentColor" d="m11.707 7-3-3.707a1 1 0 0 0-1.414 0L4.293 7z"></path>
+                              <path class="sort-icon-down" fill="currentColor" d="M4.293 9l3 3.707a1 1 0 0 0 1.414 0l3-3.707z"></path>
+                            </svg>
+                          </span>
+                        </span>
+                      </span>
+                    </th>
+                    <th class="px-4 py-3 font-semibold" data-sortable="true">
+                      <span class="inline-flex items-center gap-1 cursor-pointer select-none">
+                        <span>Difficulty</span>
+                        <span aria-hidden="true" class="css-1d9wsjc-SortIcon e14h4dsy0">
+                          <span data-ds-id="Icon" data-variant="inherit" color="inherit" class="css-1u6ocsx-StyledIcon e1kkd7uc0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                              <path class="sort-icon-up" fill="currentColor" d="m11.707 7-3-3.707a1 1 0 0 0-1.414 0L4.293 7z"></path>
+                              <path class="sort-icon-down" fill="currentColor" d="M4.293 9l3 3.707a1 1 0 0 0 1.414 0l3-3.707z"></path>
+                            </svg>
+                          </span>
+                        </span>
+                      </span>
+                    </th>
+                    <th class="px-4 py-3 font-semibold" data-sortable="true">
+                      <span class="inline-flex items-center gap-1 cursor-pointer select-none">
+                        <span>Time per question</span>
+                        <span aria-hidden="true" class="css-1d9wsjc-SortIcon e14h4dsy0">
+                          <span data-ds-id="Icon" data-variant="inherit" color="inherit" class="css-1u6ocsx-StyledIcon e1kkd7uc0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                              <path class="sort-icon-up" fill="currentColor" d="m11.707 7-3-3.707a1 1 0 0 0-1.414 0L4.293 7z"></path>
+                              <path class="sort-icon-down" fill="currentColor" d="M4.293 9l3 3.707a1 1 0 0 0 1.414 0l3-3.707z"></path>
+                            </svg>
+                          </span>
+                        </span>
+                      </span>
+                    </th>
+                    <th class="px-4 py-3 font-semibold" data-sortable="true">
+                      <span class="inline-flex items-center gap-1 cursor-pointer select-none">
+                        <span>Peer stats</span>
+                        <span aria-hidden="true" class="css-1d9wsjc-SortIcon e14h4dsy0">
+                          <span data-ds-id="Icon" data-variant="inherit" color="inherit" class="css-1u6ocsx-StyledIcon e1kkd7uc0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                              <path class="sort-icon-up" fill="currentColor" d="m11.707 7-3-3.707a1 1 0 0 0-1.414 0L4.293 7z"></path>
+                              <path class="sort-icon-down" fill="currentColor" d="M4.293 9l3 3.707a1 1 0 0 0 1.414 0l3-3.707z"></path>
+                            </svg>
+                          </span>
+                        </span>
+                      </span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="anl-table-body" class="divide-y divide-slate-100">
+                  <tr>
+                    <td class="px-4 py-3 align-top border-r border-slate-200 w-[45%]">
+                      <div class="flex items-baseline gap-2">
+                        <div class="text-slate-500">1.</div>
+                        <a href="#" class="text-slate-800 hover:underline">
+                          A 39-year-old woman comes to the physician because of a fever, nausea, and a nonproductive cough for 7 days...
+                        </a>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 align-top">
+                      <div class="inline-flex items-center gap-2 rounded-full bg-red-50 px-2.5 py-1 text-red-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor">
+                          <path fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m3.707-11.707a1 1 0 0 1 0 1.414L9.414 8l2.293 2.293a1 1 0 0 1-1.414 1.414L8 9.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L6.586 8 4.293 5.707a1 1 0 0 1 1.414-1.414L8 6.586l2.293-2.293a1 1 0 0 1 1.414 0"/>
+                        </svg>
+                        <span>Incorrect</span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 align-top">
+                      <div class="flex items-center gap-1 text-slate-600" aria-label="difficulty 3/5">
+                        <span class="inline-block" title="hammer">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor"><path d="m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172"/></svg>
+                        </span>
+                        <span class="inline-block" title="hammer">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor"><path d="m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172"/></svg>
+                        </span>
+                        <span class="inline-block" title="hammer">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor"><path d="m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172"/></svg>
+                        </span>
+                        <span class="opacity-30" title="placeholder">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor"><path d="m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172"/></svg>
+                        </span>
+                        <span class="opacity-30" title="placeholder">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor"><path d="m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172"/></svg>
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 align-top whitespace-nowrap">0m 7s</td>
+                    <td class="px-4 py-3 align-top">67%</td>
+                  </tr>
+                  <tr>
+                    <td class="px-4 py-3 align-top border-r border-slate-200 w-[45%]">
+                      <div class="flex items-baseline gap-2">
+                        <div class="text-slate-500">2.</div>
+                        <a href="#" class="text-slate-800 hover:underline">
+                          A 55-year-old man with a history of smoking presents with productive cough and mild dyspnea for 3 days...
+                        </a>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 align-top">
+                      <div class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M3 8l3 3 7-7"/>
+                        </svg>
+                        <span>Correct</span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 align-top">
+                      <div class="flex items-center gap-1 text-slate-600" aria-label="difficulty 2/5">
+                        <span class="inline-block" title="hammer">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor"><path d="m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172"/></svg>
+                        </span>
+                        <span class="inline-block" title="hammer">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor"><path d="m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172"/></svg>
+                        </span>
+                        <span class="opacity-30" title="placeholder">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor"><path d="m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172"/></svg>
+                        </span>
+                        <span class="opacity-30" title="placeholder">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor"><path d="m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172"/></svg>
+                        </span>
+                        <span class="opacity-30" title="placeholder">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor"><path d="m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172"/></svg>
+                        </span>
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 align-top whitespace-nowrap">0m 5s</td>
+                    <td class="px-4 py-3 align-top">74%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="flex items-center justify-center gap-4 border-t border-slate-200 px-4 py-2 text-sm text-slate-600">
+              <!-- Prev icon-only pictogram button -->
+              <button
+                type="button"
+                aria-label="Go to prev page"
+                class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-300 hover:bg-slate-100 disabled:cursor-default disabled:text-slate-300 disabled:hover:bg-transparent"
+                disabled
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  class="h-4 w-4"
+                >
+                  <path d="M10 12 6 8l4-4"></path>
+                </svg>
+              </button>
+
+              <!-- Center text -->
+              <p id="anl-results-range" class="text-sm text-slate-600">
+                Results 1 - 10 of 12
+              </p>
+
+              <!-- Next icon-only pictogram button -->
+              <button
+                type="button"
+                aria-label="Go to next page"
+                class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-slate-300"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  class="h-4 w-4"
+                >
+                  <path d="m6 12 4-4-4-4"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+
+    </div>
+  </main>
+
+  <!-- JS Tabs -->
+  <script>
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const panels = {
+      articles: document.getElementById('tab-articles'),
+      disciplines: document.getElementById('tab-disciplines'),
+      systems: document.getElementById('tab-systems')
+    };
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.tab;
+        // botones
+        tabBtns.forEach(b => {
+          b.classList.remove('border-slate-500','font-semibold','text-slate-900','bg-white');
+          b.classList.add('border-transparent','text-slate-600','bg-transparent');
+        });
+        btn.classList.remove('border-transparent','text-slate-600','bg-transparent');
+        btn.classList.add('border-slate-500','font-semibold','text-slate-900','bg-white');
+        // panels
+        Object.values(panels).forEach(p => p.classList.add('hidden'));
+        panels[key].classList.remove('hidden');
+      });
+    });
+
+
+
+        // Botones de acción
+    document.getElementById('btn-repeat')?.addEventListener('click', () => {
+      if (window.parent.__SUBCAT_QBANK__) {
+        window.parent.__SUBCAT_QBANK__.close();
+        setTimeout(() => {
+          window.parent.__SUBCAT_QBANK__.open();
+        }, 100);
+      }
+    });
+  </script>
+
+  <script>
+  // Toggle del item (abre/cierra detalle) – abierto por defecto como la captura
+  (function () {
+    const row = document.getElementById('rec-item');
+    const toggleBtn = document.getElementById('rec-toggle');
+    const chevron = document.getElementById('rec-chevron');
+    const detail = document.getElementById('rec-detail');
+    const tabArticles = document.getElementById('tab-articles');
+
+    function isOpen() {
+      return detail.style.maxHeight && detail.style.maxHeight !== '0px';
+    }
+    function open() {
+      detail.style.maxHeight = detail.scrollHeight + 'px';
+      chevron.classList.add('rotate-180');
+      chevron.querySelector('path').setAttribute('d', 'm6 15 6-6 6 6'); // punta hacia arriba
+      // Panel expandido: borde visible siempre
+      tabArticles.classList.remove('collapsed','border-transparent');
+      tabArticles.classList.add('border-slate-500');
+    }
+    function close() {
+      detail.style.maxHeight = '0px';
+      chevron.classList.remove('rotate-180');
+      chevron.querySelector('path').setAttribute('d', 'm6 9 6 6 6-6'); // punta hacia abajo
+      // Panel colapsado: borde oculto salvo hover
+      tabArticles.classList.add('collapsed','border-transparent');
+      tabArticles.classList.remove('border-slate-500');
+    }
+    function toggle() {
+      isOpen() ? close() : open();
+    }
+
+    // Click en toda la fila excepto botón Qbank
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('button') && e.target.closest('button') !== toggleBtn) return;
+      toggle();
+    });
+    toggleBtn.addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
+
+    // Estado inicial: CERRADO
+    close();
+  })();
+  </script>
+
+<script>
+  (function () {
+    const DONUT_CIRCUMFERENCE = 276;
+    const MINI_CIRCUMFERENCE = 2 * Math.PI * 7; // radio 7 del mini círculo
+    const statusConfig = {
+      correct: {
+        label: 'Correct',
+        classes: 'bg-emerald-50 text-emerald-700',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l3 3 7-7"/></svg>'
+      },
+      incorrect: {
+        label: 'Incorrect',
+        classes: 'bg-rose-50 text-rose-600',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor"><path fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m3.707-11.707a1 1 0 0 1 0 1.414L9.414 8l2.293 2.293a1 1 0 0 1-1.414 1.414L8 9.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L6.586 8 4.293 5.707a1 1 0 0 1 1.414-1.414L8 6.586l2.293-2.293a1 1 0 0 1 1.414 0"/></svg>'
+      },
+      reviewed: {
+        label: 'Reviewed',
+        classes: 'bg-sky-50 text-sky-700',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 8s3-4 7-4 7 4 7 4-3 4-7 4-7-4-7-4z"/><circle cx="8" cy="8" r="2"/></svg>'
+      },
+      skipped: {
+        label: 'Skipped',
+        classes: 'bg-slate-50 text-slate-600',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8h12"/></svg>'
+      },
+      pending: {
+        label: 'Not answered',
+        classes: 'bg-slate-50 text-slate-600',
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4v4l3 2"/></svg>'
+      }
+    };
+
+    function escapeHtml(str = '') {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatMinutesSeconds(ms = 0) {
+      const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+    }
+
+    function formatHoursMinutes(ms = 0) {
+      const totalMinutes = Math.max(0, Math.floor(ms / 60000));
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      return `${hours}h ${String(minutes).padStart(2, '0')}m`;
+    }
+
+    function formatTableTime(ms = 0) {
+      const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
+    }
+
+    function renderStatusBadge(statusKey) {
+      const cfg = statusConfig[statusKey] || statusConfig.pending;
+      return `<div class="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-sm ${cfg.classes}">
+        ${cfg.icon}
+        <span>${cfg.label}</span>
+      </div>`;
+    }
+
+    function renderDifficultyIcons(value) {
+      const total = 5;
+      const filled = Math.max(0, Math.min(total, Number(value) || 0));
+      const icon = (active) => `<span class="${active ? '' : 'opacity-30'}" title="hammer">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor"><path d="m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172"/></svg>
+        </span>`;
+      const icons = Array.from({ length: total }, (_, idx) => icon(idx < filled)).join('');
+      const label = filled ? `difficulty ${filled}/${total}` : 'difficulty';
+      return `<div class="flex items-center gap-1 text-slate-600" aria-label="${label}">${icons}</div>`;
+    }
+
+    function renderQuestionRow(row) {
+      const peerText = (typeof row.peerPercent === 'number' && !Number.isNaN(row.peerPercent))
+        ? `${row.peerPercent}%`
+        : '—';
+      return `<tr>
+        <td class="px-4 py-3 align-top border-r border-slate-200 w-[45%]">
+          <div class="flex items-baseline gap-2">
+            <div class="text-slate-500">${row.index}.</div>
+            <span class="text-slate-800">${escapeHtml(row.question)}</span>
+          </div>
+        </td>
+        <td class="px-4 py-3 align-top">${renderStatusBadge(row.statusKey)}</td>
+        <td class="px-4 py-3 align-top">${renderDifficultyIcons(row.difficultyValue)}</td>
+        <td class="px-4 py-3 align-top whitespace-nowrap">${formatTableTime(row.timeMs)}</td>
+        <td class="px-4 py-3 align-top">${peerText}</td>
+      </tr>`;
+    }
+
+    function updateLegend(data, total) {
+      const correct = data.correctCount || 0;
+      const hints = data.correctUsingHints || 0;
+      const incorrect = data.incorrectCount || 0;
+      const safeTotal = total || 0;
+      const pct = (val) => (safeTotal ? Math.round((val / safeTotal) * 100) : 0);
+      document.getElementById('anl-correct-percent').textContent = `${pct(correct)}%`;
+      document.getElementById('anl-correct-count').textContent = correct;
+      document.getElementById('anl-hints-percent').textContent = `${pct(hints)}%`;
+      document.getElementById('anl-hints-count').textContent = hints;
+      document.getElementById('anl-incorrect-percent').textContent = `${pct(incorrect)}%`;
+      document.getElementById('anl-incorrect-count').textContent = incorrect;
+    }
+
+    function hydrateAnalytics(data) {
+      if (!data) return;
+      const total = data.totalQuestions || 0;
+      const completed = data.completedCount || 0;
+      const topicTitle = data.topicTitle || '—';
+      const correctTotal = data.correctCount || 0;
+      const hintsTotal = data.correctUsingHints || 0;
+      const incorrectTotal = data.incorrectCount || 0;
+      const answeredTotal = correctTotal + hintsTotal + incorrectTotal;
+
+      const completedEl = document.getElementById('anl-stat-completed');
+      if (!completedEl) return;
+
+      completedEl.textContent = `${completed}/${total || 0}`;
+      document.getElementById('anl-stat-correct').textContent = `${total ? Math.round((correctTotal / total) * 100) : 0}%`;
+      document.getElementById('anl-stat-time-per-question').textContent = formatMinutesSeconds(data.avgTimeMs || 0);
+      document.getElementById('anl-stat-total-time').textContent = formatHoursMinutes(data.sessionTimeMs || 0);
+      document.getElementById('anl-topic-name').textContent = topicTitle;
+      document.getElementById('anl-answer-summary').textContent = `You completed ${completed}/${total || 0} questions. You answered:`;
+
+      // Leyenda y donut: porcentajes sólo sobre preguntas respondidas (correct + hints + incorrect)
+      updateLegend(data, answeredTotal);
+
+      const donutPercent = answeredTotal
+        ? Math.round(((correctTotal + hintsTotal) / answeredTotal) * 100)
+        : 0;
+      document.getElementById('anl-donut-percent').textContent = `${donutPercent}%`;
+
+      // Donut grande: 100% del círculo sólo para preguntas respondidas
+      // verde = (correctas + con hints) / respondidas, rojo = resto (incorrectas)
+      const correctAnswered = correctTotal + hintsTotal;
+      const donutCorrect = document.getElementById('anl-donut-correct');
+      const donutIncorrect = document.getElementById('anl-donut-incorrect');
+      if (donutCorrect && donutIncorrect && answeredTotal > 0) {
+        // Fracción correcta sobre las PREGUNTAS RESPONDIDAS (por ej. 0.5 = mitad del círculo)
+        const correctFrac = Math.max(0, Math.min(1, correctAnswered / answeredTotal));
+        const offset = DONUT_CIRCUMFERENCE * (1 - correctFrac);
+
+        // Arco verde tipo “progress circle”: se pinta un solo segmento
+        donutCorrect.style.strokeDasharray = `${DONUT_CIRCUMFERENCE} ${DONUT_CIRCUMFERENCE}`;
+        donutCorrect.style.strokeDashoffset = `${offset}`;
+
+        // Arco rojo: círculo completo por debajo del verde.
+        // Si hay incorrectas, dejamos el anillo rojo completo; el verde tapa su parte.
+        if (incorrectTotal > 0) {
+          donutIncorrect.style.strokeDasharray = `${DONUT_CIRCUMFERENCE} ${DONUT_CIRCUMFERENCE}`;
+          donutIncorrect.style.strokeDashoffset = `0`;
+        } else {
+          // Si no hay incorrectas, ocultamos el rojo
+          donutIncorrect.style.strokeDasharray = `0 ${DONUT_CIRCUMFERENCE}`;
+          donutIncorrect.style.strokeDashoffset = `${DONUT_CIRCUMFERENCE}`;
+        }
+      } else if (donutCorrect && donutIncorrect) {
+        // Sin respondidas: ocultar segmentos coloreados
+        donutCorrect.style.strokeDasharray = `0 ${DONUT_CIRCUMFERENCE}`;
+        donutCorrect.style.strokeDashoffset = `${DONUT_CIRCUMFERENCE}`;
+        donutIncorrect.style.strokeDasharray = `0 ${DONUT_CIRCUMFERENCE}`;
+        donutIncorrect.style.strokeDashoffset = `${DONUT_CIRCUMFERENCE}`;
+      }
+
+      // Mini círculo (24x24) junto a "Time per question":
+      // verde = (correctas + con hints) / respondidas; rojo = resto (incorrectas)
+      const miniArc = document.getElementById('anl-mini-correct-arc');
+      if (miniArc) {
+        const correctAnswered = correctTotal + hintsTotal;
+        const frac = answeredTotal ? correctAnswered / answeredTotal : 0;
+        const clamped = Math.min(Math.max(frac, 0), 1);
+        miniArc.style.strokeDasharray = `${MINI_CIRCUMFERENCE}`;
+        miniArc.style.strokeDashoffset = `${MINI_CIRCUMFERENCE * (1 - clamped)}`;
+      }
+
+      const progress = document.getElementById('anl-topic-progress');
+      const progressLabel = document.getElementById('anl-topic-progress-label');
+      const progressPercent = total ? Math.round((completed / total) * 100) : 0;
+      if (progress) progress.style.width = `${progressPercent}%`;
+      if (progressLabel) progressLabel.textContent = `${progressPercent}%`;
+
+      const tbody = document.getElementById('anl-table-body');
+      if (tbody) {
+        const rows = Array.isArray(data.questions) ? data.questions : [];
+        if (rows.length) {
+          tbody.innerHTML = rows.map(renderQuestionRow).join('');
+        } else {
+          tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-sm text-slate-500">No recorded questions yet.</td></tr>`;
+        }
+        const rangeText = rows.length
+          ? `Results 1 - ${rows.length} of ${rows.length}`
+          : 'No results';
+        const rangeEl = document.getElementById('anl-results-range');
+        if (rangeEl) rangeEl.textContent = rangeText;
+      }
+    }
+
+    function boot() {
+      if (window.__QBANK_ANALYTICS_DATA__) {
+        hydrateAnalytics(window.__QBANK_ANALYTICS_DATA__);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', boot);
+    } else {
+      boot();
+    }
+
+    window.addEventListener('qbank:analytics-data', (event) => {
+      hydrateAnalytics(event.detail);
+    });
+  })();
+</script>
+
+
+<template id="sort-icon-template">
+  <span aria-hidden="true" class="css-1d9wsjc-SortIcon e14h4dsy0">
+    <span data-ds-id="Icon" data-variant="inherit" color="inherit" class="css-1u6ocsx-StyledIcon e1kkd7uc0">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+        <path class="sort-icon-up" fill="currentColor" d="m11.707 7-3-3.707a1 1 0 0 0-1.414 0L4.293 7z"></path>
+        <path class="sort-icon-down" fill="currentColor" d="M4.293 9l3 3.707a1 1 0 0 0 1.414 0l3-3.707z"></path>
+      </svg>
+    </span>
+  </span>
+</template>
+
+<script>
+  (function () {
+    const headers = document.querySelectorAll('th[data-sortable="true"]');
+    if (!headers.length) return;
+
+    // Helper: obtener valor normalizado según columna
+    function getCellValue(row, index) {
+      const cell = row.children[index];
+      if (!cell) return '';
+      const text = cell.textContent.trim();
+
+      switch (index) {
+        // Questions (1., 2., ...)
+        case 0: {
+          const match = text.match(/^(\d+)\./);
+          return match ? parseInt(match[1], 10) : text;
+        }
+        // Status (Correct / Incorrect)
+        case 1:
+          return text.toLowerCase();
+        // Difficulty (usar aria-label "difficulty 3/5")
+        case 2: {
+          const lbl = cell.querySelector('[aria-label]');
+          if (!lbl) return text;
+          const m = lbl.getAttribute('aria-label').match(/(\d+)\s*\/\s*\d+/);
+          return m ? parseInt(m[1], 10) : text;
+        }
+        // Time per question (0m 7s)
+        case 3: {
+          const m = text.match(/(\d+)\s*m\s*(\d+)\s*s/i);
+          if (!m) return text;
+          const minutes = parseInt(m[1], 10) || 0;
+          const seconds = parseInt(m[2], 10) || 0;
+          return minutes * 60 + seconds;
+        }
+        // Peer stats (67%)
+        case 4: {
+          const m = text.match(/(\d+(\.\d+)?)\s*%?/);
+          return m ? parseFloat(m[1]) : text;
+        }
+        default:
+          return text;
+      }
+    }
+
+    function compareValues(a, b, direction) {
+      if (typeof a === 'number' && typeof b === 'number') {
+        return direction === 'asc' ? a - b : b - a;
+      }
+      const aStr = String(a);
+      const bStr = String(b);
+      return direction === 'asc'
+        ? aStr.localeCompare(bStr)
+        : bStr.localeCompare(aStr);
+    }
+
+    function applySort(th, direction) {
+      const table = th.closest('table');
+      if (!table) return;
+      const tbody = table.tBodies[0];
+      if (!tbody) return;
+
+      const index = th.cellIndex;
+
+      // Resetear el resto de headers
+      headers.forEach((h) => {
+        if (h !== th) h.dataset.sortDirection = 'none';
+      });
+      th.dataset.sortDirection = direction;
+
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+
+      rows.sort((rowA, rowB) => {
+        const aVal = getCellValue(rowA, index);
+        const bVal = getCellValue(rowB, index);
+        return compareValues(aVal, bVal, direction);
+      });
+
+      // Reinsertar filas ordenadas
+      rows.forEach((row) => tbody.appendChild(row));
+    }
+
+    // Adjuntar listeners a cada header
+    headers.forEach((th) => {
+      if (!th.dataset.sortDirection) {
+        th.dataset.sortDirection = 'none';
+      }
+
+      th.addEventListener('click', () => {
+        const current = th.dataset.sortDirection;
+        const nextDirection = current === 'asc' ? 'desc' : 'asc';
+        applySort(th, nextDirection);
+      });
+    });
+
+    // Por defecto: activar orden ascendente en la primera columna (Questions)
+    applySort(headers[0], headers[0].dataset.sortDirection === 'desc' ? 'desc' : 'asc');
+  })();
+</script>
+
+</body>
+</html>
+
+  <!-- 201 diciembre-->

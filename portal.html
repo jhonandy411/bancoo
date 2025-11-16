@@ -3615,7 +3615,7 @@ body.qbank-open #qbank-session {
 .qbank-difficulty-chevrons {
   margin-left: auto;
   display: inline-flex;
-  gap: 4px;
+  gap: 1px;
   font-size: 16px;
   line-height: 1;
   color: #94a3b8;
@@ -3627,6 +3627,16 @@ body.qbank-open #qbank-session {
 
 .qbank-difficulty-chevrons .off {
   opacity: 0.45;
+}
+
+.qbank-mark-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 16px;
+  margin-left: 8px;
+  color: #0f172a;
 }
 
 
@@ -4407,7 +4417,16 @@ body.qbank-setup-open { overflow: hidden; }
 
 
 #qbank-session .labs-panel .labs-header.has-query .labs-search{
-  order:-20; margin-left:0 !important; flex:0 0 auto !important; min-width:0;
+  order:-20;
+  margin-left:0 !important;
+  margin-right:.75rem !important;  /* respiro antes del divider/X */
+  flex:1 1 auto !important;        /* crece pero deja espacio a la derecha */
+  min-width:0 !important;
+}
+#qbank-session .labs-panel .labs-header.has-query .labs-search-field{
+  width:100% !important;
+  min-width:0 !important;
+  flex:1 1 auto !important;
 }
 
 
@@ -4422,6 +4441,10 @@ body.qbank-setup-open { overflow: hidden; }
   order: 10;              /* queda debajo */
   width: 100%;
 }
+
+
+
+
 
 
 
@@ -5375,7 +5398,9 @@ function hardCloseModal(){
     'favorites-view': '#favorites',
     'favorites-split': '#favorites/split',
     'subcategoria-content': '#subcategoria',
-    'qbank-session': '#subcategoria/qbank'
+    'qbank-session': '#subcategoria/qbank',
+      'analytics-view': '#analytics'  // 👈 NUEVO
+
   };
 
   function pushViewState(viewId, { replace = false, state = {} } = {}) {
@@ -5539,16 +5564,18 @@ function hardCloseModal(){
     window.__applySubcatDesktopLayout?.('toc');
   };
 
-  window.addEventListener('popstate', async (event) => {
+window.addEventListener('popstate', async (event) => {
     const modal = document.getElementById('video-modal');
     const subcatContent = document.getElementById('subcategoria-content');
+    
+    // Manejo de split-view
     const splitActive =
       document.body.classList.contains('split-view-active') &&
       modal &&
       !modal.classList.contains('hidden') &&
       subcatContent &&
       !subcatContent.classList.contains('hidden');
-
+    
     if (splitActive) {
       try {
         if (typeof exitSplitIfAny === 'function') {
@@ -5572,20 +5599,55 @@ function hardCloseModal(){
     }
 
     const viewId = event.state?.viewId || resolveViewIdFromHash(location.hash) || 'home-content';
-    if (viewId === 'qbank-session') {
-      window.showSubcat({ skipHistory: true });
-      window.__SUBCAT_QBANK__?.open({ skipHistory: true });
-      return;
-    }
+    
+    // 👉 NUEVO: Manejo específico de Analytics
+   //  if (viewId === 'analytics-view') {showView('subcategoria-content'); return;}
+    
+    // 👉 NUEVO: Si venimos desde Analytics hacia Qbank
+if (viewId === 'qbank-session') {
+  // Volver desde Analytics a la sesión de Qbank
 
+  // 1) Ocultar el contenedor de Analytics si sigue montado
+  const analyticsContainer = document.getElementById('analytics-container');
+  if (analyticsContainer) {
+    analyticsContainer.classList.add('hidden');
+  }
+
+  // 2) Asegurar que la vista base sea la subcategoría (sin pushear nuevo estado)
+  window.showSubcat({ skipHistory: true });
+
+  // 3) Reabrir Qbank usando el bridge oficial, que se encarga
+  //    de mostrar el overlay, la barra lateral y sincronizar estados
+  if (window.__SUBCAT_QBANK__?.open) {
+    window.__SUBCAT_QBANK__.open({ skipHistory: true });
+  }
+
+  // 4) Si tenés la bandera de "volver a la primera" pregunta, reseteá índice
+  if (window.__QBANK_RETURN_TO_FIRST__) {
+    try {
+      qbankState.currentIndex = 0;
+      renderQbank();
+    } catch (err) {
+      console.error('No se pudo resetear Qbank al volver desde Analytics', err);
+    }
+    window.__QBANK_RETURN_TO_FIRST__ = false;
+  }
+
+  return;
+}
+
+
+// Resto del manejo normal
     const qbankBridge = window.__SUBCAT_QBANK__;
     if (qbankBridge?.isOpen()) {
       qbankBridge.close({ skipHistory: true });
     }
+    
     if (viewId === 'articles-panel') {
       window.showArticles({ skipHistory: true });
       return;
     }
+    
     if (viewId === 'favorites-split') {
       const { sup, cat, sub, favoriteKey } = event.state || {};
       if (sup && cat && sub && favoriteKey) {
@@ -5597,6 +5659,7 @@ function hardCloseModal(){
       }
       return;
     }
+    
     if (viewId === 'favorites-view') {
       if (typeof window.showFavorites === 'function') {
         window.showFavorites({ skipHistory: true });
@@ -5605,13 +5668,14 @@ function hardCloseModal(){
       }
       return;
     }
+    
     if (viewId === 'subcategoria-content') {
       window.showSubcat({ skipHistory: true });
       return;
     }
+    
     window.showHome({ skipHistory: true });
   });
-
   
   
   window.addEventListener('DOMContentLoaded', () => {
@@ -5951,7 +6015,12 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   wrapper.className = "qbank-wrapper";
 
 
-  const headerHtml = `
+
+
+
+
+
+  const headerHtml =  `
 <!-- fila principal: columna en xs, fila en sm+ -->
 <div class="px-6 flex flex-col sm:flex-row sm:justify-between items-start gap-2 pb-4">
   <!-- Columna izquierda: título y botón -->
@@ -6078,6 +6147,8 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
 </div>
 `;
   // Convertir el string a nodos y añadir al wrapper
+  
+  
   const headerNode = document.createRange().createContextualFragment(headerHtml);
   wrapper.appendChild(headerNode);
 
@@ -6142,24 +6213,80 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
                     <div id="qbank-question-text" class="text-[12px] leading-relaxed text-slate-800"></div>
                   </div>
                 </div>
+
+
 <div id="qbank-tags" class="flex flex-wrap gap-2 justify-end rounded-[1px]"></div>
+
+
+
+
+<div id="qbank-notes-wrapper" class="hidden w-full mt-2">
+  <div class="notes-card">
+    <div class="notes-head">
+      <div class="notes-title-wrap">
+        <div class="notes-title">Notes</div>
+        <span class="notes-counter" id="qbank-notes-counter">0/1000</span>
+      </div>
+      <div class="notes-actions">
+        <button type="button" class="notes-btn-sm" data-act="cancel">Cancel</button>
+        <button type="button" class="notes-btn-sm primary" data-act="save">Save</button>
+      </div>
+    </div>
+
+    <div class="notes-toolbar">
+      <button class="notes-tool" data-cmd="bold" title="Bold"><i class="fas fa-bold"></i></button>
+      <button class="notes-tool" data-cmd="italic" title="Italic"><i class="fas fa-italic"></i></button>
+      <button class="notes-tool" data-cmd="underline" title="Underline"><i class="fas fa-underline"></i></button>
+
+      <button class="notes-tool" data-cmd="insertUnorderedList" title="Bulleted list"><i class="fas fa-list-ul"></i></button>
+      <button class="notes-tool" data-cmd="insertOrderedList" title="Numbered list"><i class="fas fa-list-ol"></i></button>
+
+      <div class="notes-format">
+        <button class="notes-tool notes-format-toggle" type="button" title="Paragraph formats">
+          <i class="fas fa-paragraph"></i>
+        </button>
+        <div class="notes-menu" data-menu="format">
+          <button type="button" class="notes-menu-item" data-format="p">Normal</button>
+          <button type="button" class="notes-menu-item" data-format="h2"><span style="font-weight:700;font-size:1.1em">Heading 2</span></button>
+          <button type="button" class="notes-menu-item" data-format="h3"><span style="font-weight:700;">Heading 3</span></button>
+          <button type="button" class="notes-menu-item" data-format="h4"><span style="font-weight:700;">Heading 4</span></button>
+        </div>
+      </div>
+
+      <button class="notes-tool" data-cmd="undo" title="Undo (⌘Z)"><i class="fas fa-undo"></i></button>
+      <button class="notes-tool opacity-40 pointer-events-none" data-cmd="redo" title="Redo (⌘⇧Z)" disabled><i class="fas fa-redo"></i></button>
+
+      <button class="notes-tool" data-cmd="formatBlock" data-value="blockquote" title="Quote"><i class="fas fa-quote-right"></i></button>
+      <button class="notes-tool" data-cmd="removeFormat" title="Clear"><i class="fas fa-eraser"></i></button>
+    </div>
+
+    <div class="notes-editor" contenteditable="true" spellcheck="true"></div>
+  </div>
+</div>
+
+
+
+
+
+
+
                 <!-- Barra tipo KEY INFO / ADD NOTES -->
-                <div id="qbank-action-bar"
-     class="flex flex-wrap items-center justify-between text-[13px] font-medium text-slate-600 pt-2 pb-3 gap-y-3">
+<div id="qbank-action-bar"
+     class="flex flex-wrap items-center justify-between text-[13px] font-medium text-slate-600 pt-2 pb-0 gap-y-3">
   
   <!-- Grupo izquierdo -->
   <div class="flex items-center space-x-8">
-    <button type="button" class="flex items-center gap-2 text-slate-600 hover:text-slate-800">
+        <button id="btn-key" type="button" data-action-selectable="true" data-selected="false" class="flex items-center gap-2 text-slate-600 hover:text-slate-800 pb-1 border-b-[3px] border-transparent -mb-[3px]">
       <i class="fa-solid fa-bars text-[14px]"></i>
       <span class="uppercase tracking-wide text-[11px] font-semibold text-slate-700">Key info</span>
     </button>
 
-    <button id="btn-attending-tip" type="button" class="flex items-center gap-2 text-slate-600 hover:text-slate-800">
+    <button id="btn-attending-tip" type="button" data-action-selectable="true" data-selected="false" class="flex items-center gap-2 text-slate-600 hover:text-slate-800 pb-1 border-b-[3px] border-transparent -mb-[3px]">
       <span class="inline-flex items-center justify-center w-5 h-5 rounded-full border border-slate-600 text-[11px] font-bold text-slate-700">?</span>
       <span class="uppercase tracking-wide text-[11px] font-semibold text-slate-700">Attending tip</span>
     </button>
 
-    <button id="btn-labs" type="button" class="flex items-center gap-2 text-slate-600 hover:text-slate-800">
+    <button id="btn-labs" type="button" data-action-selectable="true" data-selected="false" class="flex items-center gap-2 text-slate-600 hover:text-slate-800 pb-1 border-b-[3px] border-transparent -mb-[3px]">
       <i class="fa-regular fa-clipboard text-[14px]"></i>
       <span class="uppercase tracking-wide text-[11px] font-semibold text-slate-700">Labs</span>
     </button>
@@ -6172,19 +6299,37 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   <div id="btn-group-optional" class="flex items-center space-x-8">
 
     <!-- ADD NOTE -->
-    <button id="btn-addnote" type="button" class="flex items-center gap-2 text-slate-600 hover:text-slate-800">
-      <i class="fa-solid fa-pen-to-square text-[14px]"></i>
+    <button id="btn-addnote" type="button" data-action-selectable="true" data-selected="false" data-transparent-border="true" class="relative flex items-center gap-2 pl-4 text-slate-600 hover:text-slate-800 pb-1 border-b-[3px] border-transparent -mb-[3px]">
+<span id="qbank-addnote-indicator"
+      class="absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full notes-indicator opacity-0 bg-slate-300"></span>
+
+<i class="fa-solid fa-pen-to-square text-[14px] ml-1.5"></i>
       <span class="uppercase tracking-wide text-[11px] font-semibold text-slate-700">Add note</span>
     </button>
 
-    <!-- NOTESMARK -->
-    <button id="btn-mark" type="button" class="flex items-center gap-2 text-slate-600 hover:text-slate-800">
-      <i class="fa-solid fa-highlighter text-[14px]"></i>
-      <span class="uppercase tracking-wide text-[11px] font-semibold text-slate-700">Mark</span>
-    </button>
+<!-- NOTESMARK -->
+<button id="btn-mark"
+  type="button"
+  data-action-selectable="true"
+  data-selected="false"
+  data-transparent-border="true"
+  class="flex items-center gap-2 text-slate-600 hover:text-slate-800 pb-1 border-b-[3px] border-transparent -mb-[3px]">
+
+  <span id="mark-icon" class="text-[14px]">
+    <!-- icono NO relleno -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 16 16">
+      <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+        <path d="M3 10.28s.625-.72 2.5-.72S8.625 11 10.5 11s2.5-.72 2.5-.72V2.72s-.625.72-2.5.72S7.375 2 5.5 2 3 2.72 3 2.72z"></path>
+        <path d="M3 15v-5"></path>
+      </g>
+    </svg>
+  </span>
+
+  <span class="uppercase tracking-wide text-[11px] font-semibold text-slate-700">Mark</span>
+</button>
 
     <!-- GET ANKI CARD -->
-    <button id="btn-anki" type="button" class="flex items-center gap-2 text-slate-600 hover:text-slate-800">
+    <button id="btn-anki" type="button" data-action-selectable="true" data-selected="false" data-transparent-border="true" class="flex items-center gap-2 text-slate-600 hover:text-slate-800 pb-1 border-b-[3px] border-transparent -mb-[3px]">
       <i class="fa-solid fa-layer-group text-[14px]"></i>
       <span class="uppercase tracking-wide text-[11px] font-semibold text-slate-700">Get anki card</span>
     </button>
@@ -6247,8 +6392,10 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
 
 <section id="qbank-attending-tip" class="hidden -mx-8 px-8 block !mt-0 mb-0 pt-4 pb-4 border-t border-gray-200 w-[calc(100%+4rem)]" data-open="false">
                       <div class="flex items-start gap-4">
-                    <img src="./assets/doctor.png" class="h-12 w-12 rounded-xl border border-amber-200 bg-white shadow-inner object-contain" alt="Doctor icon">
-                    <div class="flex-1 space-y-2">
+<img src="./assets/doctor.png"
+     class="h-12 w-12 rounded-xl bg-white object-contain"
+     alt="Doctor icon">                    
+     <div class="flex-1 space-y-2">
                       <div class="flex items-center justify-between text-[11px] uppercase tracking-wide font-semibold">
                         <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-700 px-2 py-0.5">
                           <i class="fa-solid fa-check text-[10px]"></i>
@@ -6397,6 +6544,9 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     position: qbankSessionEl.querySelector('#qbank-position'),
     closeBtn: qbankSessionEl.querySelector('[data-qbank="close"]'),
     timer: qbankSessionEl.querySelector('#qbank-session-timer'),
+    addNoteBtn: qbankSessionEl.querySelector('#btn-addnote'),
+    addNoteIndicator: qbankSessionEl.querySelector('#qbank-addnote-indicator'),
+    notesWrapper: qbankSessionEl.querySelector('#qbank-notes-wrapper'),
     sidebar: document.getElementById('qbank-sidebar'),
     sidebarList: document.getElementById('qbank-sidebar-list'),
     sidebarTitle: document.getElementById('qbank-sidebar-title'),
@@ -6418,6 +6568,256 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     tocSidebar: document.getElementById('subcategoria-sidebar'),
     tocContent: document.getElementById('subcategoria-sidebar-content')
   };
+
+  qbankEls.tags?.addEventListener('click', (e) => {
+    const tagBtn = e.target.closest('.qtag,[data-tag]');
+    if (!tagBtn) return;
+    tagBtn.classList.toggle('selected');
+  });
+
+  const notesEditor = qbankEls.notesWrapper?.querySelector('.notes-editor');
+  const notesCounter = qbankEls.notesWrapper?.querySelector('#qbank-notes-counter');
+  const notesCancelBtn = qbankEls.notesWrapper?.querySelector('[data-act="cancel"]');
+  const notesSaveBtn = qbankEls.notesWrapper?.querySelector('[data-act="save"]');
+    const notesToolbarButtons = qbankEls.notesWrapper?.querySelectorAll('.notes-toolbar .notes-tool');
+  const notesFormatToggle = qbankEls.notesWrapper?.querySelector('.notes-format-toggle');
+  const notesFormatMenu = qbankEls.notesWrapper?.querySelector('.notes-menu[data-menu="format"]');
+  const MAX_NOTES_CHARS = 1000;
+  const getDb = () => {
+    if (!window.firebase || !window.firebase.firestore) return null;
+    return window.db || firebase.firestore();
+  };
+  const getCurrentUserId = () => {
+    if (!window.firebase || typeof window.firebase.auth !== 'function') return null;
+    return firebase.auth().currentUser?.uid || null;
+  };
+
+  let notesLoadToken = 0;
+
+
+
+  function updateNotesCounter() {
+    if (!notesCounter || !notesEditor) return;
+    const rawText = notesEditor.textContent || '';
+    const normalized = rawText.replace('Write your notes here…', '').trim();
+    const isEmpty = notesEditor.classList.contains('notes-empty') || !normalized;
+    const length = isEmpty ? 0 : normalized.length;
+          notesCounter.textContent = `${Math.min(length, MAX_NOTES_CHARS)}/${MAX_NOTES_CHARS}`;
+  }
+
+  function setNotesEditorContent(html) {
+    if (!notesEditor) return;
+    const safe = typeof html === 'string' ? html : '';
+    if (safe.trim()) {
+      notesEditor.innerHTML = safe;
+      notesEditor.classList.remove('notes-empty');
+    } else {
+      notesEditor.textContent = 'Write your notes here…';
+      notesEditor.classList.add('notes-empty');
+    }
+    updateNotesCounter();
+    setAddNoteIndicatorState(Boolean(safe.trim()));
+  }
+
+  function setAddNoteIndicatorState(active) {
+    const indicator = qbankEls.addNoteIndicator;
+    if (!indicator) return;
+    indicator.classList.toggle('opacity-0', !active);
+    indicator.classList.toggle('bg-emerald-500', active);
+    indicator.classList.toggle('bg-slate-300', !active);
+  }
+
+  async function loadCurrentQuestionNote() {
+    if (!notesEditor) return;
+    const question = qbankState.questions[qbankState.currentIndex];
+    if (!question) {
+      setNotesEditorContent('');
+      setAddNoteIndicatorState(false);
+      return;
+    }
+    const questionId = question.id ?? question.meta?.id ?? String(qbankState.currentIndex);
+    const uid = getCurrentUserId();
+    const db = getDb();
+    if (!uid || !db) {
+      setNotesEditorContent('');
+      setAddNoteIndicatorState(false);
+      return;
+    }
+    const token = ++notesLoadToken;
+    try {
+      const snap = await db.collection('users').doc(uid).collection('qbankNotes').doc(String(questionId)).get();
+      if (token !== notesLoadToken) return;
+      const html = snap.exists ? (snap.data()?.content || '') : '';
+      setNotesEditorContent(html);
+      setAddNoteIndicatorState(Boolean(html && html.trim()));
+    } catch (err) {
+      console.error('Error al cargar la nota del Qbank:', err);
+      if (token === notesLoadToken) {
+        setNotesEditorContent('');
+        setAddNoteIndicatorState(false);
+      }
+    }
+  }
+
+  notesEditor?.addEventListener('focus', () => {
+    if (notesEditor.classList.contains('notes-empty')) {
+      notesEditor.textContent = '';
+      notesEditor.classList.remove('notes-empty');
+    }
+  });
+
+  notesEditor?.addEventListener('input', () => {
+    notesEditor.classList.toggle('notes-empty', !notesEditor.textContent.trim());
+    updateNotesCounter();
+  });
+  notesEditor?.addEventListener('blur', () => {
+    if (!notesEditor.textContent.trim()) {
+      setNotesEditorContent('');
+    }
+  });
+     setNotesEditorContent('');
+
+  notesToolbarButtons?.forEach((btn) => {
+    if (btn.closest('.notes-format')) return;
+    btn.addEventListener('click', (event) => {
+      event.preventDefault();
+      const cmd = btn.dataset.cmd;
+      if (!cmd || !notesEditor) return;
+      const value = btn.dataset.value || null;
+      notesEditor.focus();
+      try {
+        document.execCommand(cmd, false, value);
+      } catch (err) {
+        console.warn('Notes toolbar command failed:', cmd, err);
+      }
+    });
+  });
+
+
+  if (notesFormatToggle && notesFormatMenu && notesEditor) {
+    const closeMenu = () => notesFormatMenu.classList.remove('open');
+    notesFormatToggle.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const open = notesFormatMenu.classList.contains('open');
+      closeMenu();
+      if (!open) notesFormatMenu.classList.add('open');
+    });
+    document.addEventListener('click', closeMenu);
+    notesFormatMenu.querySelectorAll('.notes-menu-item').forEach((item) => {
+      item.addEventListener('click', (event) => {
+        event.preventDefault();
+        const format = (item.dataset.format || 'p').toUpperCase();
+        notesEditor.focus();
+        document.execCommand('formatBlock', false, format === 'P' ? 'P' : format);
+        closeMenu();
+      });
+    });
+  }
+
+  const markBtn = qbankSessionEl.querySelector('#btn-mark');
+  const markIcon = qbankSessionEl.querySelector('#mark-icon');
+  const selectableButtons = qbankSessionEl.querySelectorAll('[data-action-selectable="true"]');
+
+  const MARK_ICON_OUTLINE = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 16 16">
+      <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+        <path d="M3 10.28s.625-.72 2.5-.72S8.625 11 10.5 11s2.5-.72 2.5-.72V2.72s-.625.72-2.5.72S7.375 2 5.5 2 3 2.72 3 2.72z"></path>
+        <path d="M3 15v-5"></path>
+      </g>
+    </svg>`;
+  const MARK_ICON_FILLED = `
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 16 16">
+  <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+    <path fill="currentColor"
+      d="M3 10.28s.625-.72 2.5-.72S8.625 11 10.5 11s2.5-.72 2.5-.72V2.72s-.625.72-2.5.72S7.375 2 5.5 2 3 2.72 3 2.72z"></path>
+    <path d="M3 15v-5"></path>
+  </g>
+</svg>`;
+
+  function toggleNotesCard(force) {
+    if (!qbankEls.notesWrapper) return;
+    const shouldShow = typeof force === 'boolean'
+      ? force
+      : qbankEls.notesWrapper.classList.contains('hidden');
+    qbankEls.notesWrapper.classList.toggle('hidden', !shouldShow);
+  }
+
+  function syncSelectableState(btn, selected) {
+    if (!btn) return;
+    const isSelected = Boolean(selected);
+    btn.dataset.selected = isSelected ? 'true' : 'false';
+    btn.setAttribute('aria-pressed', isSelected.toString());
+    const forceTransparent = btn.dataset.transparentBorder === 'true';
+    if (!forceTransparent) {
+      btn.classList.toggle('border-slate-400', isSelected);
+      btn.classList.toggle('border-transparent', !isSelected);
+    } else {
+      btn.classList.remove('border-slate-400');
+      btn.classList.add('border-transparent');
+    }
+    if (btn === markBtn && markIcon) {
+      markIcon.innerHTML = isSelected ? MARK_ICON_FILLED : MARK_ICON_OUTLINE;
+    }
+    if (btn === qbankEls.addNoteBtn && !isSelected) {
+      toggleNotesCard(false);
+    }
+  }
+
+  function resetSelectableButtons() {
+    selectableButtons.forEach((btn) => syncSelectableState(btn, false));
+  }
+
+  qbankEls.addNoteBtn?.addEventListener('click', (event) => {
+    if (!qbankEls.notesWrapper) return;
+        loadCurrentQuestionNote();
+
+    toggleNotesCard(true);
+    notesEditor?.focus();
+  });
+
+  notesCancelBtn?.addEventListener('click', (event) => {
+    event?.preventDefault?.();
+    toggleNotesCard(false);
+    syncSelectableState(qbankEls.addNoteBtn, false);
+  });
+
+  notesSaveBtn?.addEventListener('click', async (event) => {
+    event?.preventDefault?.();
+    if (!notesEditor) return;
+    const question = qbankState.questions[qbankState.currentIndex];
+    if (!question) return;
+    const questionId = question.id ?? question.meta?.id ?? String(qbankState.currentIndex);
+    const uid = getCurrentUserId();
+    const db = getDb();
+    if (!uid || !db) {
+      alert('Debes iniciar sesión para guardar notas.');
+      return;
+    }
+    const docRef = db.collection('users').doc(uid).collection('qbankNotes').doc(String(questionId));
+    const content = notesEditor.classList.contains('notes-empty') ? '' : (notesEditor.innerHTML || '');
+    try {
+      notesSaveBtn.disabled = true;
+      await docRef.set({
+        questionId: String(questionId),
+        content,
+        topicTitle: displayTitle || '',
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      setAddNoteIndicatorState(Boolean(content && content.trim()));
+      const prev = notesSaveBtn.textContent;
+      notesSaveBtn.textContent = 'Saved ✓';
+      setTimeout(() => {
+        notesSaveBtn.textContent = prev;
+      }, 1200);
+      toggleNotesCard(false);
+    } catch (err) {
+      console.error('Error al guardar nota de Qbank:', err);
+      alert('No se pudo guardar la nota. Intenta de nuevo.');
+    } finally {
+      notesSaveBtn.disabled = false;
+    }
+  });
 
   const labsControls = (() => {
     const panel = document.createElement('aside');
@@ -7042,6 +7442,34 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     }
 
     if (!labsBtn || !addNoteBtn || !optionalGroup || !menuIcon || !actionBar) return;
+
+    if (selectableButtons.length) {
+      selectableButtons.forEach((btn) => {
+        syncSelectableState(btn, btn.dataset.selected === 'true');
+        btn.addEventListener('click', () => {
+          if (btn === markBtn) {
+            const nextState = btn.dataset.selected !== 'true';
+            syncSelectableState(btn, nextState);
+            const answer = ensureAnswerState(qbankState.currentIndex);
+            if (answer) {
+              answer.markSelected = nextState;
+              renderQbankSidebar();
+            }
+            return;
+          }
+          selectableButtons.forEach((otherBtn) => {
+            if (otherBtn === markBtn) return;
+            const nextState = btn.dataset.selected !== 'true';
+            if (otherBtn === btn) {
+              syncSelectableState(otherBtn, nextState);
+            } else if (nextState) {
+              syncSelectableState(otherBtn, false);
+            }
+          });
+        });
+      });
+    }
+
 
     const updateToolbar = () => {
       const wasHidden = optionalGroup.classList.contains('hidden');
@@ -7669,13 +8097,23 @@ if (!shouldHide) {
     qbankState.questionStartedAt = Date.now();
   }
 
-  function getCurrentQuestionElapsed() {
-    const idx = qbankState.currentIndex;
+  function getQuestionElapsedMs(idx) {
     const stored = qbankState.questionTimers[idx] || 0;
     const running = (qbankState.activeQuestionIndex === idx && qbankState.questionStartedAt)
       ? Math.max(0, Date.now() - qbankState.questionStartedAt)
       : 0;
     return stored + running;
+  }
+
+  function getCurrentQuestionElapsed() {
+    return getQuestionElapsedMs(qbankState.currentIndex);
+  }
+
+  function getSessionElapsedMs() {
+    if (qbankState.startedAt) {
+      return qbankState.sessionElapsedMs + Math.max(0, Date.now() - qbankState.startedAt);
+    }
+    return qbankState.sessionElapsedMs;
   }
 
   function updateTimerDisplays() {
@@ -7885,7 +8323,7 @@ if (!shouldHide) {
   }
 
   function renderQbankSidebar() {
-    const renderChevrons = (level) => {
+    const renderChevrons = (level, marked) => {
       const numericLevel = Number(level);
       if (!Number.isFinite(numericLevel) || numericLevel <= 0) return '';
       const clamped = Math.max(1, Math.min(5, Math.round(numericLevel)));
@@ -7893,7 +8331,10 @@ if (!shouldHide) {
         const chevronClass = idx < clamped ? 'on' : 'off';
         return `<span class="${chevronClass}">›</span>`;
       }).join('');
-      return `<div class="qbank-difficulty-chevrons" aria-hidden="true">${chevrons}</div>`;
+      const markIconHtml = marked
+        ? `<span class="qbank-mark-indicator text-slate-500" aria-hidden="true">${MARK_ICON_FILLED}</span>`
+        : `<span class="qbank-mark-indicator" aria-hidden="true"></span>`;
+      return `<div class="qbank-difficulty-chevrons" aria-hidden="true">${chevrons}${markIconHtml}</div>`;
     };
 
     const html = qbankState.questions.map((q, idx) => {
@@ -7911,6 +8352,7 @@ if (!shouldHide) {
         isActive ? 'font-semibold' : 'font-medium'
       ].join(' ');
       const secondary = '';
+      const marked = !!answer?.markSelected;
       return `
         <button type="button" class="${baseClasses}" data-q-index="${idx}">
           <div class="flex items-center gap-3">
@@ -7919,7 +8361,7 @@ if (!shouldHide) {
               <span class="text-slate-500">${idx + 1}</span>
               <span class="truncate">${questionText}</span>
             </span>
-            ${renderChevrons(q.difficulty)}
+            ${renderChevrons(q.difficulty, marked)}
           </div>
           ${secondary}
         </button>
@@ -7940,11 +8382,12 @@ if (!shouldHide) {
     const atFirst = qbankState.currentIndex <= 0;
     const atLast = qbankState.currentIndex >= qbankState.questions.length - 1;
     qbankEls.prevBtn.disabled = atFirst;
-    qbankEls.nextBtn.disabled = atLast;
-    qbankEls.prevBtn.classList.toggle('opacity-40', atFirst);
+const disableNext = qbankState.questions.length === 0;
+    qbankEls.nextBtn.disabled = disableNext;
+        qbankEls.prevBtn.classList.toggle('opacity-40', atFirst);
     qbankEls.prevBtn.classList.toggle('cursor-not-allowed', atFirst);
-    qbankEls.nextBtn.classList.toggle('opacity-40', atLast);
-    qbankEls.nextBtn.classList.toggle('cursor-not-allowed', atLast);
+    qbankEls.nextBtn.classList.toggle('opacity-40', disableNext);
+    qbankEls.nextBtn.classList.toggle('cursor-not-allowed', disableNext);
   }
 
   function renderQbankExplanation(question, answer) {
@@ -8077,7 +8520,15 @@ function getValidImageURL(url) {
     const question = qbankState.questions[qbankState.currentIndex];
     if (!question) return;
 
+    loadCurrentQuestionNote();
+
+    resetSelectableButtons();
+    toggleNotesCard(false);
+
     const answer = ensureAnswerState(qbankState.currentIndex);
+    if (markBtn) {
+      syncSelectableState(markBtn, !!answer.markSelected);
+    }
 
     // --- timers ---
     if (isQuestionComplete(answer)) {
@@ -8190,25 +8641,121 @@ const questionHTML = `
       qbankEls.hideStats.classList.toggle('cursor-not-allowed', !revealed);
     }
 
-    // botón Next / Skip + color
-    if (qbankEls.nextBtn) {
-      const hasResponse =
-        answer.revealed ||
-        (answer.selected !== null && answer.selected !== undefined);
+// botón Next / Skip + color
+if (qbankEls.nextBtn) {
 
-      const label = hasResponse ? 'Next' : 'Skip';
+  const hasResponse =
+    answer.revealed ||
+    (answer.selected !== null && answer.selected !== undefined);
 
-      if (qbankEls.nextLabel) {
-        qbankEls.nextLabel.textContent = label;
-      } else {
-        qbankEls.nextBtn.textContent = label;
-      }
+  let label;
+  const isLast = qbankState.currentIndex === qbankState.questions.length - 1;
 
-      qbankEls.nextBtn.classList.toggle('bg-sky-600', hasResponse);
-      qbankEls.nextBtn.classList.toggle('hover:bg-sky-700', hasResponse);
-      qbankEls.nextBtn.classList.toggle('bg-slate-500', !hasResponse);
-      qbankEls.nextBtn.classList.toggle('hover:bg-slate-600', !hasResponse);
+// 3. Modifica el botón "SEE ANALYSIS" para registrar correctamente en el historial
+if (isLast) {
+  label = "SEE ANALYSIS";
+  qbankEls.nextBtn.disabled = false;
+  qbankEls.nextBtn.classList.remove("opacity-40", "cursor-not-allowed");
+
+qbankEls.nextBtn.onclick = async () => {
+  window.__QBANK_RETURN_TO_FIRST__ = true;
+
+  stopCurrentQuestionTimer();
+  stopQbankTimer();
+  const analyticsPayload = buildQbankAnalyticsSnapshot();
+  if (analyticsPayload) {
+    window.__QBANK_ANALYTICS_DATA__ = analyticsPayload;
+    window.dispatchEvent(new CustomEvent('qbank:analytics-data', { detail: analyticsPayload }));
+  } else {
+    window.__QBANK_ANALYTICS_DATA__ = null;
+  }
+
+  pushViewState('analytics-view', { replace: false });
+
+  // Configurar sidebar
+  // 👇 GUARDAR el HTML de la TOC ANTES de que Analytics la modifique
+  const tocContent = document.getElementById("subcategoria-sidebar-content");
+  if (tocContent && !window.__ORIGINAL_TOC_FRAGMENT__) {
+    const frag = document.createDocumentFragment();
+    while (tocContent.firstChild) {
+      frag.appendChild(tocContent.firstChild);
     }
+    window.__ORIGINAL_TOC_FRAGMENT__ = frag;
+  }
+
+  const sc = document.getElementById("subcategoria-sidebar-content");
+  if (sc) {
+    sc.classList.remove("hidden");
+    sc.innerHTML = [...Array(10).keys()]
+      .map(i => i + 1)
+      .sort(() => Math.random() - 0.5)
+      .map(n => `<div class="px-4 py-2 text-sm text-slate-700">Número ${n}</div>`)
+      .join('');
+  }
+  
+  document.getElementById("qbank-sidebar")?.classList.add("hidden");
+
+  // 👇 Esconde Qbank session
+  const qbankSession = document.getElementById('qbank-session');
+  if (qbankSession) {
+    qbankSession.classList.add('hidden');
+  }
+
+  // 👇 Crear contenedor temporal para Analytics
+  const main = document.getElementById("main-content");
+  let analyticsContainer = document.getElementById('analytics-container');
+  if (!analyticsContainer) {
+    analyticsContainer = document.createElement('div');
+    analyticsContainer.id = 'analytics-container';
+    main.appendChild(analyticsContainer);
+  }
+
+  // Cargar Analytics en el contenedor
+  const response = await fetch("analytics.html");
+  const html = await response.text();
+  
+  const temp = document.createElement("div");
+  temp.innerHTML = html;
+  
+  const scripts = temp.querySelectorAll("script");
+  scripts.forEach(s => s.parentNode.removeChild(s));
+  
+  analyticsContainer.innerHTML = temp.innerHTML;
+  analyticsContainer.classList.remove('hidden');
+  
+  scripts.forEach(oldScript => {
+    const newScript = document.createElement("script");
+    if (oldScript.src) newScript.src = oldScript.src;
+    else newScript.textContent = oldScript.textContent;
+    document.body.appendChild(newScript);
+  });
+
+  if (window.__QBANK_ANALYTICS_DATA__) {
+    window.dispatchEvent(new CustomEvent('qbank:analytics-data', { detail: window.__QBANK_ANALYTICS_DATA__ }));
+  }
+};
+
+
+}
+  
+  else {
+    label = hasResponse ? "Next" : "Skip";
+
+    // 👉 Restaurar comportamiento normal del botón
+    qbankEls.nextBtn.onclick = null;
+  }
+
+  if (qbankEls.nextLabel) {
+    qbankEls.nextLabel.textContent = label;
+  } else {
+    qbankEls.nextBtn.textContent = label;
+  }
+
+  qbankEls.nextBtn.classList.toggle('bg-sky-600', hasResponse);
+  qbankEls.nextBtn.classList.toggle('hover:bg-sky-700', hasResponse);
+  qbankEls.nextBtn.classList.toggle('bg-slate-500', !hasResponse);
+  qbankEls.nextBtn.classList.toggle('hover:bg-slate-600', !hasResponse);
+}
 
     // resto de la UI
     renderQbankTags(question);
@@ -8277,8 +8824,26 @@ const questionHTML = `
     hidePauseOverlay();
     updateTimerDisplays();
     document.removeEventListener('keydown', handleEscape);
+
+
+
+
+      const tocContent = document.getElementById('subcategoria-sidebar-content');
+  if (tocContent) {
+    if (window.__ORIGINAL_TOC_FRAGMENT__) {
+      tocContent.innerHTML = '';
+      tocContent.appendChild(window.__ORIGINAL_TOC_FRAGMENT__);
+      window.__ORIGINAL_TOC_FRAGMENT__ = null;
+    } else if (window.__ORIGINAL_TOC_HTML__) {
+      tocContent.innerHTML = window.__ORIGINAL_TOC_HTML__;
+      delete window.__ORIGINAL_TOC_HTML__; // limpiar después de usar
+    }
+  }
   }
 
+  
+  
+  
   async function openQbankSession(options = {}) {
     const opts = options instanceof Event ? {} : (options || {});
     if (options instanceof Event) {
@@ -8425,6 +8990,69 @@ const questionHTML = `
   };
   qbankEls.resumeBtn?.addEventListener('click', handleResume);
   qbankEls.pauseClose?.addEventListener('click', handleResume);
+
+  function deriveAnalyticsStatusKey(answer) {
+    if (!answer) return 'pending';
+    if (answer.status === 'correct') return 'correct';
+    if (answer.status === 'incorrect') return 'incorrect';
+    if (answer.status === 'reviewed') return 'reviewed';
+    if (answer.status === 'skipped') return 'skipped';
+    return 'pending';
+  }
+
+  function buildQbankAnalyticsSnapshot() {
+    if (!qbankState.questions.length) return null;
+    const questionRows = qbankState.questions.map((question, idx) => {
+      const answer = ensureAnswerState(idx);
+      const statusKey = deriveAnalyticsStatusKey(answer);
+      const difficultyValue = question.difficulty ?? question.meta?.dificultad ?? null;
+      const peerRaw = question.meta?.peerStats ?? question.meta?.peer ?? question.meta?.peers ?? null;
+      return {
+        index: idx + 1,
+        question: question.text,
+        statusKey,
+        difficultyValue,
+        difficultyLabel: difficultyLabels[difficultyValue] || null,
+        timeMs: getQuestionElapsedMs(idx),
+        peerPercent: typeof peerRaw === 'number' ? peerRaw : null
+      };
+    });
+
+    const summary = questionRows.reduce((acc, row) => {
+      if (row.statusKey === 'correct') {
+        acc.correct += 1;
+        acc.completed += 1;
+      } else if (row.statusKey === 'incorrect') {
+        acc.incorrect += 1;
+        acc.completed += 1;
+      } else if (row.statusKey === 'reviewed') {
+        acc.reviewed += 1;
+        acc.completed += 1;
+      } else if (row.statusKey === 'skipped') {
+        acc.skipped += 1;
+      } else {
+        acc.pending += 1;
+      }
+      acc.totalTimeMs += row.timeMs;
+      return acc;
+    }, { correct: 0, incorrect: 0, reviewed: 0, skipped: 0, pending: 0, completed: 0, totalTimeMs: 0 });
+
+    return {
+      topicTitle: displayTitle || '',
+      totalQuestions: qbankState.questions.length,
+      completedCount: summary.completed,
+      correctCount: summary.correct,
+      incorrectCount: summary.incorrect,
+      reviewedCount: summary.reviewed,
+      skippedCount: summary.skipped,
+      pendingCount: summary.pending,
+      correctUsingHints: 0,
+      avgTimeMs: summary.completed ? Math.round(summary.totalTimeMs / summary.completed) : 0,
+      sessionTimeMs: getSessionElapsedMs(),
+      questionTimeMs: summary.totalTimeMs,
+      questions: questionRows
+    };
+  }
 
   const qbankBtn = wrapper.querySelector('#qbank-session-btn');
   qbankBtn?.addEventListener('click', async (event) => {
@@ -8968,7 +9596,71 @@ child.dataset.noteId = `${supracategoriaId}/${categoriaId}/${subcategoriaId}/h3:
 
   bodyEl.appendChild(wrapper);
 
-    // selecciona el contenedor de scroll y tu nuevo header
+    
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  // selecciona el contenedor de scroll y tu nuevo header
   // Sentinel para detectar cuando el header se pega arriba
 const content = document.getElementById('main-content');
 const subcatHeader = wrapper.querySelector('#subcat-header');
@@ -11120,9 +11812,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const _showView = window.showView;
   window.showHome = (options = {}) => {
-    body.classList.remove('bars-hidden');
-    sb.classList.remove('force-hidden','collapsed');
-    sb.classList.add('open');           
+    const isMobile = window.matchMedia('(max-width: 1299.98px)').matches;
+    if (isMobile) {
+      body.classList.add('bars-hidden');
+      sb.classList.add('force-hidden');
+      sb.classList.remove('open','collapsed');
+    } else {
+      body.classList.remove('bars-hidden');
+      sb.classList.remove('force-hidden','collapsed');
+      sb.classList.add('open');
+    }
     toc && toc.classList.add('hidden'); 
     // Asegura que "Home" quede marcado como activo en la barra principal
     const homeLink = document.querySelector('#group-home .sidebar-item');
@@ -12836,7 +13535,11 @@ card.querySelectorAll('.notes-tool').forEach(btn => {
     // ===== Contador de caracteres (0/1000) =====
     const LIMIT = 1000;
     const counterEl = card.querySelector('#notes-counter');
-    const plainLen = () => (editor.textContent || '').trim().length;
+    const plainLen = () => {
+      const text = (editor.textContent || '').trim();
+      if (editor.classList.contains('notes-empty') || text === 'Write your notes here…') return 0;
+      return text.length;
+    };
 
     const updateCounter = () => {
       const len = plainLen();
@@ -12905,8 +13608,9 @@ card.querySelectorAll('.notes-tool').forEach(btn => {
     // Recalcular contador tras la carga
     const counterEl = card.querySelector('#notes-counter');
     if (counterEl) {
-      const len = (editor.textContent || '').trim().length;
       const LIMIT = 1000;
+      const text = (editor.textContent || '').trim();
+      const len = (editor.classList.contains('notes-empty') || text === 'Write your notes here…') ? 0 : text.length;
       counterEl.textContent = `${len}/${LIMIT}`;
       counterEl.classList.toggle('is-over', len > LIMIT);
     }
@@ -15762,7 +16466,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   data-cat="${cat}"
                   data-sub="${sub}">
             <span class="w-12 flex items-center justify-center border-r border-gray-200 py-2">
-              <img src="./assets/iconopanel3b.png" alt="" class="w-3 h-5 opacity-80">
+              <img src="./assets/iconopanel3b.png" alt="" class="w-4 h-5 opacity-80">
             </span>
             <span class="flex-1 pl-4 py-2 text-slate-700">${title}</span>
           </button>
@@ -16353,6 +17057,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+
+
+
+
+
+
+
 <button id="mobile-split-switch" type="button">
   <i class="fas fa-arrow-left"></i><span>SWITCH VIEW</span>
 </button>
@@ -16366,4 +17077,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </html>
 
-<!-- === 180octubre octubre noche nochiiilaeeeeee === -->
+<!-- ===201 diciembre === -->
