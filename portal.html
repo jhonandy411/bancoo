@@ -4354,11 +4354,21 @@ body.qbank-setup-open { overflow: hidden; }
 
 /* resto igual */
 #qbank-setup-modal .qbank-checkbox {
-  width: 18px; height: 18px;
-  border-radius: 5px; border: 1px solid #CBD5E1;
-  display: inline-flex; align-items: center; justify-content: center;
-  background: #FFFFFF; color: #FFFFFF; font-size: 11px;
+  width: 20px; height: 20px;          /* un poco más grande */
+  border-radius: 3px;                 /* menos redondeado */
+  border: 1px solid #CBD5E1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFFFFF;
+  color: #FFFFFF;
+  font-size: 12px;                    /* agranda el símbolo interno */
 }
+#qbank-setup-modal .qbank-checkbox svg {
+  width: 16px;
+  height: 16px;
+}
+
 #qbank-setup-modal .qbank-checkbox--on { background: #047A88; border-color: #047A88; }
 #qbank-setup-modal .qbank-setup-input {
   border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 0; text-align: center;
@@ -4441,6 +4451,9 @@ body.qbank-setup-open { overflow: hidden; }
   order: 10;              /* queda debajo */
   width: 100%;
 }
+
+
+
 
 
 
@@ -4802,7 +4815,7 @@ body.qbank-setup-open { overflow: hidden; }
 
   <div id="accordion-exams" class="ml-8 mt-1 space-y-1 hidden">
     <a href="#" class="sidebar-item block px-2 py-1 rounded" onclick="setActiveLink(this)">Qbank</a>
-    <a href="#" class="sidebar-item block px-2 py-1 rounded" onclick="setActiveLink(this)">Session history</a>
+    <a href="#" class="sidebar-item block px-2 py-1 rounded" onclick="setActiveLink(this); openAnalyticsHistory(event)">Session history</a>
     <a href="#" class="sidebar-item block px-2 py-1 rounded" onclick="setActiveLink(this)">Study plans and courses</a>
     <a href="#" class="sidebar-item block px-2 py-1 rounded" onclick="setActiveLink(this)">Study summary</a>
     <a href="#" class="sidebar-item block px-2 py-1 rounded" onclick="setActiveLink(this)">USMLE score predictor</a>
@@ -4938,6 +4951,27 @@ body.qbank-setup-open { overflow: hidden; }
           <button id="qbank-sidebar-exit" type="button" class="w-full border-t border-slate-200 px-4 py-3 text-[12px] font-semibold uppercase tracking-wide text-slate-600 hover:bg-slate-50 transition">
             Exit session
           </button>
+        </div>
+      </div>
+      <div id="analytics-session-panel" class="hidden h-full flex flex-col bg-white border-t border-gray-200">
+        <div class="px-4 py-4 border-b border-slate-100">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Latest sessions</p>
+          <p class="text-xs text-slate-500 mt-1">Study mode history</p>
+        </div>
+<div id="analytics-session-panel-list"
+     class="flex-1 overflow-y-auto px-3 pt-0 pb-4 space-y-0 bg-slate-50/60">
+
+          <div class="rounded-xl border border-dashed border-slate-200 px-4 py-5 bg-white shadow-sm space-y-3">
+            <p class="text-sm text-slate-700 font-medium">Session summary</p>
+
+            <!-- Barra de progreso 100% -->
+            <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden flex">
+              <div id="as-correct"   class="bg-[#2f855a] h-full" style="width: 0%;"></div>
+              <div id="as-incorrect" class="bg-[#e57373] h-full" style="width: 0%;"></div>
+            </div>
+
+            <p class="text-xs text-slate-500">Loading sessions…</p>
+          </div>
         </div>
       </div>
     </aside>
@@ -5512,6 +5546,8 @@ function hardCloseModal(){
     showView('home-content');
   };
   window.showArticles = async (options = {}) => {
+      document.getElementById('analytics-container')?.classList.add('hidden');
+  document.getElementById('analytics-session-panel')?.classList.add('hidden');
     if (!options.skipHistory) pushViewState('articles-panel', { replace: options.replaceHistory });
     showView('articles-panel');
 
@@ -5562,6 +5598,137 @@ function hardCloseModal(){
       ensureTocVisible();
     }
     window.__applySubcatDesktopLayout?.('toc');
+  };
+
+  async function showAnalyticsView(options = {}) {
+    const { skipHistory = false, replaceHistory = false, dispatchAnalyticsEvent = true } = options;
+
+    if (!skipHistory) {
+      pushViewState('analytics-view', { replace: replaceHistory });
+    }
+
+    async function enforceAnalyticsLayout() {
+      try {
+        if (typeof exitSplitIfAny === 'function') {
+          await exitSplitIfAny();
+        } else if (typeof hardCloseModal === 'function') {
+          hardCloseModal();
+        }
+      } catch (err) {
+        console.error('Failed to exit split view before loading analytics', err);
+      }
+
+      if (typeof hardCloseModal === 'function') {
+        try { hardCloseModal(); } catch (_) {}
+      }
+
+      const qbankBridge = window.__SUBCAT_QBANK__;
+      if (qbankBridge?.isOpen?.()) {
+        qbankBridge.close({ skipHistory: true });
+      } else {
+        document.getElementById('qbank-session')?.classList.add('hidden');
+        if (typeof toggleQbankSidebar === 'function') {
+          toggleQbankSidebar(false, { forceShowToc: true });
+        }
+      }
+
+      document.body.classList.remove(
+        'bars-hidden',
+        'split-view-active',
+        'favorites-split',
+        'toc-hidden',
+        'force-bars-hidden',
+        'mobile-solo',
+        'show-left',
+        'show-right',
+        'qbank-open'
+      );
+
+      const overlay = document.getElementById('mobile-overlay');
+      if (overlay) {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('show');
+        overlay.style.left = '0px';
+      }
+
+      const mainSidebar = document.getElementById('sidebar');
+      if (mainSidebar) {
+        mainSidebar.classList.remove('force-hidden', 'open', 'hover-expanded');
+        mainSidebar.classList.add('collapsed');
+      }
+
+      const subSidebar = document.getElementById('subcategoria-sidebar');
+      subSidebar?.classList.remove('hidden');
+
+      document.getElementById('qbank-sidebar')?.classList.add('hidden');
+      document.getElementById('subcategoria-sidebar-content')?.classList.add('hidden');
+      document.getElementById('analytics-session-panel')?.classList.remove('hidden');
+      showAnalyticsSessionsSidebar(true);
+
+  const mainContent = document.getElementById('main-content');
+  if (mainContent) {
+    mainContent.classList.add('subcat-active');
+    mainContent.style.marginLeft = '';
+    mainContent.style.paddingLeft = '';
+    mainContent.style.width = '';
+  }
+
+  // 🔒 Ocultar vistas previas al entrar en Analytics
+  document.getElementById('home-content')?.classList.add('hidden');
+  document.getElementById('subcategoria-content')?.classList.add('hidden');
+
+  window.__applySubcatDesktopLayout?.('toc');
+}
+
+    await enforceAnalyticsLayout();
+
+    const main = document.getElementById("main-content");
+    if (!main) return;
+
+    let analyticsContainer = document.getElementById('analytics-container');
+    if (!analyticsContainer) {
+      analyticsContainer = document.createElement('div');
+      analyticsContainer.id = 'analytics-container';
+      main.appendChild(analyticsContainer);
+    }
+
+    try {
+      const response = await fetch("analytics.html");
+      const html = await response.text();
+
+      const temp = document.createElement("div");
+      temp.innerHTML = html;
+
+      const scripts = temp.querySelectorAll("script");
+      scripts.forEach(s => s.parentNode.removeChild(s));
+
+      analyticsContainer.innerHTML = temp.innerHTML;
+      analyticsContainer.classList.remove('hidden');
+
+      scripts.forEach(oldScript => {
+        const newScript = document.createElement("script");
+        if (oldScript.src) newScript.src = oldScript.src;
+        else newScript.textContent = oldScript.textContent;
+        document.body.appendChild(newScript);
+      });
+
+      if (dispatchAnalyticsEvent) {
+        setTimeout(() => {
+          if (window.__QBANK_ANALYTICS_DATA__) {
+            window.dispatchEvent(new CustomEvent('qbank:analytics-data', {
+              detail: window.__QBANK_ANALYTICS_DATA__
+            }));
+          }
+        }, 100);
+      }
+    } catch (err) {
+      console.error('❌ Error loading analytics:', err);
+    }
+  }
+
+  window.openAnalyticsHistory = function(event) {
+    event?.preventDefault?.();
+    showAnalyticsView({ replaceHistory: false });
   };
 
 window.addEventListener('popstate', async (event) => {
@@ -5948,6 +6115,15 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
   window.__ARTICLES_RESTORE_PENDING__ = true;
   const tocEl = document.getElementById('subcategoria-sidebar');
   tocEl?.classList.add('hidden');
+
+    // Al abrir una subcategoría desde el panel 3 asegúrate de limpiar cualquier máscara de Qbank
+  if (typeof toggleSubcatMask === 'function') {
+    try {
+      toggleSubcatMask(false);
+    } catch (err) {
+      console.error('toggleSubcatMask failed while opening subcat', err);
+    }
+  }
 
 
     // — Móvil: ocultar sidebars (principal y TOC) de inicio —
@@ -6568,6 +6744,294 @@ async function showSubcategoriaContent(subcategoriaId, categoriaId, supracategor
     tocSidebar: document.getElementById('subcategoria-sidebar'),
     tocContent: document.getElementById('subcategoria-sidebar-content')
   };
+
+  const analyticsSessionSidebar = {
+    panel: document.getElementById('analytics-session-panel'),
+    list: document.getElementById('analytics-session-panel-list')
+  };
+
+  const analyticsSessionState = {
+    loadedUid: null,
+    loading: false
+  };
+
+  const analyticsSessionMessageCard = (text) => `
+    <div class="rounded-xl border border-dashed border-slate-200 px-4 py-5 text-sm text-slate-500 bg-white shadow-sm">${text}</div>
+  `;
+
+  const formatAnalyticsSessionDuration = (ms = 0) => {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
+  };
+
+  const formatAnalyticsSessionDate = (timestamp) => {
+    if (!timestamp) return '';
+    let date = timestamp;
+    if (timestamp.toDate) {
+      date = timestamp.toDate();
+    }
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+    return new Intl.DateTimeFormat('en', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    }).format(date);
+  };
+
+function renderAnalyticsSessionCard(session, docId) {
+  // Título / modo
+  const topic = session.topicTitle || 'Study session';
+  const modeLabel = (session.mode || 'Study mode').toUpperCase();
+
+  // === Texto "3/4 QUESTIONS" y "75% completed" ===
+  const total =
+    session.totalQuestions ||
+    (Array.isArray(session.questions) ? session.questions.length : 0) ||
+    0;
+
+  const completed = Number.isFinite(session.completedCount)
+    ? session.completedCount
+    : (
+        Array.isArray(session.questions)
+          ? session.questions.filter(q => q && q.status && q.status !== 'pending').length
+          : 0
+      );
+
+  const percentCompleted = total
+    ? Math.round((completed / total) * 100)
+    : 0;
+
+  const completedLabel = total
+    ? `${completed}/${total} QUESTIONS`
+    : `${completed || 0} QUESTIONS`;
+
+  // Duración y fecha
+  const sessionTime =
+    session.sessionTimeMs != null
+      ? formatAnalyticsSessionDuration(session.sessionTimeMs)
+      : '--';
+
+  const createdLabel = formatAnalyticsSessionDate(session.createdAt);
+
+  // === NUEVO: correctas vs incorrectas ===
+  const stats = session.stats || {};
+
+  let correct = Number.isFinite(session.correctCount)
+    ? session.correctCount
+    : (Number.isFinite(stats.correct) ? stats.correct : 0);
+
+  let incorrect = Number.isFinite(session.incorrectCount)
+    ? session.incorrectCount
+    : (Number.isFinite(stats.incorrect) ? stats.incorrect : 0);
+
+  correct = Math.max(0, correct || 0);
+  incorrect = Math.max(0, incorrect || 0);
+
+  // Base = total de preguntas; si no está, usamos correct+incorrect
+  const baseForPct = total || (correct + incorrect) || 1;
+
+  let correctPct = (correct / baseForPct) * 100;
+  let incorrectPct = (incorrect / baseForPct) * 100;
+
+  // Clamp y que no se pasen de 100
+  correctPct = Math.max(0, Math.min(100, correctPct));
+  incorrectPct = Math.max(0, Math.min(100 - correctPct, incorrectPct));
+  const cutPoint = correctPct + incorrectPct;
+
+  // Gradiente: verde (correctas), rojo (incorrectas), gris (no respondidas)
+  const barGradient = `
+    linear-gradient(
+      to right,
+      #16a34a 0%,
+      #16a34a ${correctPct}%,
+      #f97373 ${correctPct}%,
+      #f97373 ${cutPoint}%,
+      #e5e7eb ${cutPoint}%,
+      #e5e7eb 100%
+    )
+  `.trim();
+
+  // === Minimalist markup ===
+  return `
+<article class="w-full cursor-pointer hover:bg-slate-50 transition-colors rounded-md px-2 -mx-3 -my-[1px] border-l-4 border-l-transparent"
+         data-session-id="${docId || ''}">
+        <p class="pt-1 text-[11px] font-semibold tracking-[0.2em] text-slate-500 uppercase">
+                    ${modeLabel}
+        </p>
+
+        <p class="mt-1 text-sm font-semibold text-slate-900">
+          ${topic}
+        </p>
+
+        <p class="mt-1 text-xs font-semibold text-slate-700">
+          ${completedLabel}
+        </p>
+
+        <p class="mt-1 text-[11px] text-slate-400 flex items-center gap-2">
+          ${
+            createdLabel
+              ? `<span class="inline-flex items-center gap-2">
+                   <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                   ${createdLabel}
+                 </span>`
+              : ''
+          }
+        </p>
+
+        <p class="mt-1 text-[11px] text-slate-500 flex items-center gap-2">
+          <span>${percentCompleted}% completed</span>
+          <span>•</span>
+          <span>${sessionTime}</span>
+        </p>
+
+        <div class="mt-2 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+          <div class="h-full" style="width: 100%; background: ${barGradient};"></div>
+        </div>
+
+        <div class="mt-3 w-full h-px bg-slate-200"></div>
+      </article>
+  `;
+}
+ 
+  function setAnalyticsSessionMessage(message) {
+    if (!analyticsSessionSidebar.list) return;
+    analyticsSessionSidebar.list.innerHTML = analyticsSessionMessageCard(message);
+  }
+
+  async function loadAnalyticsSessions(force = false) {
+    if (!analyticsSessionSidebar.list) return;
+    const hasFirebase = !!(window.firebase && firebase.firestore && firebase.auth);
+    if (!hasFirebase) {
+      setAnalyticsSessionMessage('Firestore is not available right now.');
+      return;
+    }
+    const user = firebase.auth().currentUser;
+    if (!user) {
+      analyticsSessionState.loadedUid = null;
+      setAnalyticsSessionMessage('Sign in to view your stored sessions.');
+      return;
+    }
+    if (analyticsSessionState.loading) return;
+    if (!force && analyticsSessionState.loadedUid === user.uid) return;
+    analyticsSessionState.loading = true;
+    setAnalyticsSessionMessage('Loading sessions…');
+    try {
+      const db = window.db || firebase.firestore();
+      const snap = await db
+        .collection('users')
+        .doc(user.uid)
+        .collection('qbankAnalyticsSessions')
+        .orderBy('createdAt', 'desc')
+        .limit(15)
+        .get();
+      analyticsSessionState.loadedUid = user.uid;
+      if (snap.empty) {
+        setAnalyticsSessionMessage('No stored sessions yet. Complete a Qbank run to see it here.');
+        return;
+      }
+      const items = [];
+      snap.forEach(doc => {
+        items.push(renderAnalyticsSessionCard(doc.data() || {}, doc.id));
+      });
+      analyticsSessionSidebar.list.innerHTML = items.join('');
+      attachAnalyticsSessionHandlers();
+    } catch (err) {
+      console.error('Error loading analytics sessions', err);
+      setAnalyticsSessionMessage('Unable to load sessions. Please try again later.');
+    } finally {
+      analyticsSessionState.loading = false;
+    }
+  }
+
+  window.showAnalyticsSessionsSidebar = function (visible) {
+    if (!analyticsSessionSidebar.panel) return;
+    analyticsSessionSidebar.panel.classList.toggle('hidden', !visible);
+    if (visible) {
+      loadAnalyticsSessions();
+    }
+  };
+
+  function setActiveAnalyticsSessionItem(selectedItem) {
+    if (!analyticsSessionSidebar.list) return;
+    analyticsSessionSidebar.list.querySelectorAll('[data-session-id]').forEach(el => {
+      el.classList.remove('border-l-slate-400');
+    });
+    if (selectedItem) {
+      selectedItem.classList.add('border-l-slate-400');
+    }
+  }
+
+  function attachAnalyticsSessionHandlers() {
+    if (!analyticsSessionSidebar.list) return;
+    analyticsSessionSidebar.list.querySelectorAll('[data-session-id]').forEach(item => {
+      item.addEventListener('click', async () => {
+        const sessionId = item.dataset.sessionId;
+        if (!sessionId) return;
+        setActiveAnalyticsSessionItem(item);
+        item.classList.add('opacity-60');
+        try {
+          const sessionData = await loadAnalyticsSessionDetail(sessionId);
+          if (sessionData) {
+            window.__QBANK_ANALYTICS_DATA__ = sessionData;
+            window.dispatchEvent(new CustomEvent('qbank:analytics-data', { detail: sessionData }));
+          }
+        } catch (err) {
+          console.error('Failed to hydrate analytics session', err);
+        } finally {
+          item.classList.remove('opacity-60');
+        }
+      });
+    });
+  }
+
+async function loadAnalyticsSessionDetail(sessionId) {
+  if (!sessionId) return null;
+  const hasFirebase = !!(window.firebase && firebase.firestore && firebase.auth);
+  if (!hasFirebase) return null;
+  const user = firebase.auth().currentUser;
+  if (!user) return null;
+  try {
+    const db = window.db || firebase.firestore();
+    const docSnap = await db
+      .collection('users')
+      .doc(user.uid)
+      .collection('qbankAnalyticsSessions')
+      .doc(sessionId)
+      .get();
+    if (!docSnap.exists) return null;
+    
+    const sessionData = docSnap.data() || null;
+    
+    // NUEVO: Restaurar el contexto de subcategoría si está disponible
+    if (sessionData && sessionData.supracategoriaId && sessionData.categoriaId && sessionData.subcategoriaId) {
+      window.__CURRENT_SUBCAT_CTX__ = {
+        supracategoriaId: sessionData.supracategoriaId,
+        categoriaId: sessionData.categoriaId,
+        subcategoriaId: sessionData.subcategoriaId,
+        title: sessionData.topicTitle || ''
+      };
+    }
+    
+    return sessionData;
+  } catch (err) {
+    console.error('Error loading analytics session detail', err);
+    return null;
+  }
+}
+
+  if (window.firebase?.auth) {
+    firebase.auth().onAuthStateChanged(() => {
+      analyticsSessionState.loadedUid = null;
+      if (analyticsSessionSidebar.panel && analyticsSessionSidebar.panel.classList.contains('hidden')) {
+        setAnalyticsSessionMessage('Loading sessions…');
+      } else {
+        loadAnalyticsSessions(true);
+      }
+    });
+  }
 
   qbankEls.tags?.addEventListener('click', (e) => {
     const tagBtn = e.target.closest('.qtag,[data-tag]');
@@ -7652,6 +8116,8 @@ if (!shouldHide) {
     answers: [],
     questionLimit: null,
     lastSelectedLimit: null,
+    questionStatuses: new Map(),
+    activeFilters: new Set(['all']),
     currentIndex: 0,
     timerId: null,
     startedAt: null,
@@ -7677,14 +8143,241 @@ if (!shouldHide) {
     close: null,
     backdrop: null,
     topic: null,
+    statusHost: null,
+    statusSummary: null,
+    selectedStatuses: new Set(['all']),
+    filteredQuestions: [],
     keyHandler: null,
     current: 1,
     totalCount: 1
   };
 
+  const QBANK_STATUS_OPTIONS = [
+    { key: 'all', label: 'Todas las preguntas', color: '#047A88' },
+    { key: 'unanswered', label: 'No respondidas', color: '#F97316' },
+    { key: 'incorrect', label: 'Respondidas incorrectas', color: '#EF4444' },
+    { key: 'correct', label: 'Respondidas correctas', color: '#2563EB' }
+  ];
+
+  const QBANK_FILTER_KEYS = new Set(QBANK_STATUS_OPTIONS.map((item) => item.key));
+
+  function getQuestionStableId(question) {
+    if (!question || typeof question !== 'object') return null;
+    const rawId = question.id ?? question.meta?.id ?? question.meta?.qid ?? null;
+    if (rawId == null) return null;
+    return String(rawId);
+  }
+
+  function createEmptyStatusSummary() {
+    return {
+      all: [],
+      unanswered: [],
+      incorrect: [],
+      correct: []
+    };
+  }
+
+  function normalizeStatusKey(key) {
+    if (!key) return 'unanswered';
+    const lower = String(key).toLowerCase();
+    if (QBANK_FILTER_KEYS.has(lower)) return lower;
+    if (lower === 'wrong') return 'incorrect';
+    if (lower === 'right') return 'correct';
+    return 'unanswered';
+  }
+
+  function determineQuestionStatus(stats) {
+    if (!stats || typeof stats !== 'object') return 'unanswered';
+    const answeredCount = Number(stats.answeredCount || 0);
+    if (!answeredCount) return 'unanswered';
+    const last = normalizeStatusKey(stats.lastResult);
+    if (last === 'correct' && Number(stats.correctCount || 0) > 0) return 'correct';
+    if (last === 'incorrect' && Number(stats.incorrectCount || 0) > 0) return 'incorrect';
+    if (Number(stats.correctCount || 0) > 0) return 'correct';
+    if (Number(stats.incorrectCount || 0) > 0) return 'incorrect';
+    return 'unanswered';
+  }
+
+  function buildStatusSummary(questions, statsMap) {
+    const summary = createEmptyStatusSummary();
+    if (!Array.isArray(questions) || !questions.length) return summary;
+    summary.all = [...questions];
+    const statusMap = new Map();
+    questions.forEach((question) => {
+      const id = getQuestionStableId(question);
+      const stats = id ? statsMap?.get(id) : null;
+      const status = determineQuestionStatus(stats);
+      summary[status].push(question);
+      if (id) {
+        statusMap.set(id, status);
+      }
+    });
+    if (statusMap.size) {
+      qbankState.questionStatuses = statusMap;
+    } else {
+      qbankState.questionStatuses = new Map();
+    }
+    return summary;
+  }
+
+  function collectQuestionsForFilters(summary, filters) {
+    if (!summary) return [];
+    if (!filters || !filters.size || filters.has('all')) {
+      return summary.all ? [...summary.all] : [];
+    }
+    const seen = new Set();
+    const collected = [];
+    filters.forEach((key) => {
+      const group = summary[key] || [];
+      group.forEach((question) => {
+        if (seen.has(question)) return;
+        seen.add(question);
+        collected.push(question);
+      });
+    });
+    return collected;
+  }
+
+  function getFilteredQuestionPool(filters) {
+    const source = Array.isArray(qbankState.allQuestions) ? qbankState.allQuestions : [];
+    if (!filters || !filters.size || filters.has('all')) return source;
+    return source.filter((question) => {
+      const id = getQuestionStableId(question);
+      const status = id ? qbankState.questionStatuses.get(id) : null;
+      const key = normalizeStatusKey(status);
+      return filters.has(key);
+    });
+  }
+
+  async function fetchUserQuestionStats(questionIds = []) {
+    const unique = [...new Set(questionIds.filter(Boolean).map(String))];
+    if (!unique.length) return new Map();
+    const hasFirebase = !!(window.firebase && firebase.firestore && firebase.auth);
+    if (!hasFirebase) return new Map();
+    const user = firebase.auth().currentUser;
+    if (!user) return new Map();
+    const db = window.db || firebase.firestore();
+    if (!db?.collection) return new Map();
+    const statsRef = db.collection('users').doc(user.uid).collection('qbankQuestionStats');
+    const results = new Map();
+    const docIdPath = firebase.firestore.FieldPath?.documentId?.();
+    if (docIdPath) {
+      for (let i = 0; i < unique.length; i += 10) {
+        const slice = unique.slice(i, i + 10);
+        try {
+          const snap = await statsRef.where(docIdPath, 'in', slice).get();
+          snap.forEach((doc) => {
+            results.set(doc.id, doc.data() || {});
+          });
+        } catch (err) {
+          console.error('Failed to fetch question stats batch', err);
+          break;
+        }
+      }
+      return results;
+    }
+    await Promise.all(unique.map(async (id) => {
+      try {
+        const snap = await statsRef.doc(id).get();
+        if (snap.exists) results.set(id, snap.data() || {});
+      } catch (err) {
+        console.error('Failed to fetch question stats doc', { id, err });
+      }
+    }));
+    return results;
+  }
+
+  async function refreshQbankSetupStatusSummary() {
+    const questions = Array.isArray(qbankState.allQuestions) ? qbankState.allQuestions : [];
+    if (!questions.length) {
+      qbankSetupModalState.statusSummary = createEmptyStatusSummary();
+      qbankSetupModalState.statusSummary.all = [];
+      renderQbankSetupStatuses();
+      updateQbankSetupTotalsFromFilters();
+      return;
+    }
+    try {
+      const statsMap = await fetchUserQuestionStats(questions.map((q) => getQuestionStableId(q)).filter(Boolean));
+      qbankSetupModalState.statusSummary = buildStatusSummary(questions, statsMap);
+    } catch (err) {
+      console.error('Failed to refresh qbank question stats', err);
+      qbankSetupModalState.statusSummary = buildStatusSummary(questions, new Map());
+    }
+    renderQbankSetupStatuses();
+    updateQbankSetupTotalsFromFilters();
+  }
+
+  function renderQbankSetupStatuses() {
+    if (!qbankSetupModalState.statusHost) return;
+    const summary = qbankSetupModalState.statusSummary;
+    const countsFallback = Array.isArray(qbankState.allQuestions) ? qbankState.allQuestions.length : 0;
+    qbankSetupModalState.statusHost.innerHTML = QBANK_STATUS_OPTIONS.map((option) => {
+      const active = qbankSetupModalState.selectedStatuses.has(option.key) || (
+        option.key === 'all' && (!qbankSetupModalState.selectedStatuses.size)
+      );
+      const count = summary
+        ? (option.key === 'all'
+          ? (summary.all?.length || 0)
+          : (summary[option.key]?.length || 0))
+        : (option.key === 'all' ? countsFallback : 0);
+      const checkedClass = active ? 'qbank-checkbox--on' : '';
+      const checkIcon = active
+        ? '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 16 16"><path d="M4.5 8.5l2.5 2.5L11.5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>'
+        : '';
+      return `
+        <button type="button" class="flex w-full items-center justify-between gap-3 text-[13px] text-slate-600" data-status-option="${option.key}">
+          <span class="inline-flex items-center gap-3">
+            <span class="qbank-checkbox ${checkedClass}">
+              ${checkIcon}
+            </span>
+            <span class="inline-flex items-center gap-2">
+              <span class="inline-flex w-2.5 h-2.5 rounded-full" style="background:${option.color};"></span>
+              ${option.label}
+            </span>
+          </span>
+          <span class="text-[12px] font-semibold text-slate-500">${count}</span>
+        </button>
+      `;
+    }).join('');
+  }
+
+  function updateQbankSetupTotalsFromFilters() {
+    const summary = qbankSetupModalState.statusSummary;
+    const fallback = Array.isArray(qbankState.allQuestions) ? qbankState.allQuestions : [];
+    const available = summary
+      ? collectQuestionsForFilters(summary, qbankSetupModalState.selectedStatuses)
+      : [...fallback];
+    qbankSetupModalState.filteredQuestions = available;
+    qbankSetupModalState.totalCount = available.length;
+    if (qbankSetupModalState.totalLabel) {
+      qbankSetupModalState.totalLabel.textContent = String(available.length);
+    }
+    const max = available.length || 1;
+    if (qbankSetupModalState.slider) {
+      qbankSetupModalState.slider.max = String(max);
+      qbankSetupModalState.slider.min = available.length ? '1' : '0';
+      qbankSetupModalState.slider.disabled = available.length === 0;
+    }
+    if (qbankSetupModalState.input) {
+      qbankSetupModalState.input.max = String(max);
+      qbankSetupModalState.input.min = available.length ? '1' : '0';
+      qbankSetupModalState.input.disabled = available.length === 0;
+    }
+    if (qbankSetupModalState.start) {
+      qbankSetupModalState.start.disabled = available.length === 0;
+    }
+    if (!available.length) {
+      updateQbankSetupCount(0);
+      return;
+    }
+    const baseValue = Math.min(qbankSetupModalState.current || available.length, available.length);
+    updateQbankSetupCount(baseValue);
+  }
+
+
   function applyQuestionLimit(limit) {
-    const all = Array.isArray(qbankState.allQuestions) ? qbankState.allQuestions : [];
-    const total = all.length;
+    const pool = getFilteredQuestionPool(qbankState.activeFilters);
+    const total = pool.length;
     const numeric = Number.isFinite(limit) ? Math.floor(limit) : null;
     if (!total) {
       qbankState.questionLimit = 0;
@@ -7699,7 +8392,7 @@ if (!shouldHide) {
     }
     useLimit = Math.max(1, Math.min(useLimit, total));
     qbankState.questionLimit = useLimit;
-    qbankState.questions = all.slice(0, useLimit);
+    qbankState.questions = pool.slice(0, useLimit);
     qbankState.answers = qbankState.questions.map(() => ({ selected: null, revealed: false, status: 'pending' }));
     qbankState.currentIndex = 0;
   }
@@ -7709,30 +8402,13 @@ if (!shouldHide) {
     injectQbankSetupStyles();
     let root = document.getElementById('qbank-setup-modal');
     if (!root) {
-      const statusItems = [
-        { label: 'Not yet answered', color: '#047A88', checked: true },
-        { label: 'Answered correctly using hints', color: '#F97316', checked: false },
-        { label: 'Answered incorrectly', color: '#EF4444', checked: false },
-        { label: 'Answered correctly', color: '#2563EB', checked: false }
-      ];
-      const statusMarkup = statusItems.map((item) => `
-        <div class="flex items-center gap-3 text-[13px] text-slate-600">
-          <span class="qbank-checkbox ${item.checked ? 'qbank-checkbox--on' : ''}">
-            ${item.checked ? `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 16 16"><path d="M4.5 8.5l2.5 2.5L11.5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>` : ''}
-          </span>
-          <span class="inline-flex items-center gap-2">
-            <span class="inline-flex w-2.5 h-2.5 rounded-full" style="background:${item.color};"></span>
-            ${item.label}
-          </span>
-        </div>
-      `).join('');
       root = document.createElement('div');
       root.id = 'qbank-setup-modal';
       root.className = 'hidden fixed inset-0 z-[999]';
       root.innerHTML = `
         <div data-role="backdrop" class="absolute inset-0 bg-slate-900/55"></div>
         <div class="absolute inset-0 flex items-center justify-center px-4">
-          <div class="qbank-setup-card relative w-full max-w-[420px] rounded-[20px] bg-white p-6">
+          <div class="qbank-setup-card relative w-full max-w-[420px] rounded-[10px] bg-white p-6">
             <div class="flex items-start justify-between gap-4">
               <div>
                 <h2 class="text-[18px] leading-[24px] font-semibold text-slate-900">Create Question Session Based On</h2>
@@ -7745,9 +8421,7 @@ if (!shouldHide) {
 
             <div class="mt-5">
               <p class="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500">Status</p>
-              <div class="mt-3 space-y-3">
-                ${statusMarkup}
-              </div>
+              <div class="mt-3 space-y-3" data-role="status-list"></div>
             </div>
 
             <div class="mt-6 space-y-3">
@@ -7761,7 +8435,9 @@ if (!shouldHide) {
                   <span class="text-slate-400 text-[13px]">/<span data-role="total">1</span></span>
                 </div>
                 <button type="button" class="flex items-center gap-1 rounded-md px-3 py-2 text-[12px] font-semibold text-slate-500 hover:text-slate-700">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" d="M1.333 1h13.334a1 1 0 0 1 .832 1.555l-4.706 6.748V15a1 1 0 0 1-1.351.936l-4-1.5a1 1 0 0 1-.65-.936V9.303L.503 2.555A1 1 0 0 1 1.333 1Z"></path></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                    <path fill="currentColor" fill-rule="evenodd" d="M.452 1.528A1 1 0 0 1 1.333 1h13.334a1 1 0 0 1 .832 1.555l-4.706 6.748V15a1 1 0 0 1-1.351.936l-4-1.5a1 1 0 0 1-.65-.936V9.303L.503 2.555a1 1 0 0 1-.05-1.027ZM3.202 3l3.423 5.445A1 1 0 0 1 6.793 9v3.807l2 .75V9a1 1 0 0 1 .168-.555L12.798 3z" clip-rule="evenodd"></path>
+                  </svg>
                   Refine
                 </button>
               </div>
@@ -7783,15 +8459,30 @@ if (!shouldHide) {
     qbankSetupModalState.close = root.querySelector('[data-role="close"]');
     qbankSetupModalState.topic = root.querySelector('[data-role="topic"]');
     qbankSetupModalState.backdrop = root.querySelector('[data-role="backdrop"]');
+    qbankSetupModalState.statusHost = root.querySelector('[data-role="status-list"]');
 
     const syncValue = (value) => updateQbankSetupCount(Number(value));
     qbankSetupModalState.slider?.addEventListener('input', (event) => syncValue(event.target.value));
     qbankSetupModalState.input?.addEventListener('input', (event) => syncValue(event.target.value));
     qbankSetupModalState.close?.addEventListener('click', hideQbankSetupModal);
     qbankSetupModalState.backdrop?.addEventListener('click', hideQbankSetupModal);
+    qbankSetupModalState.statusHost?.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-status-option]');
+      if (!button) return;
+      const key = button.dataset.statusOption;
+      if (!key) return;
+      if (key === 'all') {
+        qbankSetupModalState.selectedStatuses = new Set(['all']);
+      } else {
+        qbankSetupModalState.selectedStatuses = new Set([normalizeStatusKey(key)]);
+      }
+      renderQbankSetupStatuses();
+      updateQbankSetupTotalsFromFilters();
+    });
     qbankSetupModalState.start?.addEventListener('click', () => {
       if (!qbankSetupModalState.totalCount) return;
       qbankState.lastSelectedLimit = qbankSetupModalState.current;
+      qbankState.activeFilters = new Set(qbankSetupModalState.selectedStatuses);
       hideQbankSetupModal();
       openQbankSession({ limit: qbankSetupModalState.current });
     });
@@ -7844,27 +8535,16 @@ if (!shouldHide) {
     if (modal.totalLabel) {
       modal.totalLabel.textContent = String(modal.totalCount);
     }
-    const max = modal.totalCount || 1;
-    if (modal.slider) {
-      modal.slider.max = String(max);
-      modal.slider.min = modal.totalCount ? '1' : '0';
-      modal.slider.disabled = modal.totalCount === 0;
-    }
-    if (modal.input) {
-      modal.input.max = String(max);
-      modal.input.min = modal.totalCount ? '1' : '0';
-      modal.input.disabled = modal.totalCount === 0;
-    }
-    if (modal.start) {
-      modal.start.disabled = modal.totalCount === 0;
-    }
     const base = modal.totalCount === 0
       ? 0
       : Math.max(1, Math.min(Number(initial) || modal.totalCount, modal.totalCount));
-    updateQbankSetupCount(base);
-    if (!modal.totalCount && modal.input) {
-      modal.input.value = '';
-    }
+    modal.current = base;
+    const activeFilters = (qbankState.activeFilters && qbankState.activeFilters.size)
+      ? new Set(qbankState.activeFilters)
+      : new Set(['all']);
+    modal.selectedStatuses = activeFilters;
+    renderQbankSetupStatuses();
+    updateQbankSetupTotalsFromFilters();
     updateQbankSetupSliderBackground();
     modal.root.classList.remove('hidden');
     document.body.classList.add('qbank-setup-open');
@@ -7874,6 +8554,7 @@ if (!shouldHide) {
       }
     };
     document.addEventListener('keydown', modal.keyHandler);
+    refreshQbankSetupStatusSummary();
   }
 
   async function waitForQbankLoading() {
@@ -8041,6 +8722,14 @@ if (!shouldHide) {
           if (normalised) questions.push(normalised);
         });
         questions.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        const defaultStatusMap = new Map();
+        questions.forEach((question) => {
+          const id = getQuestionStableId(question);
+          if (!id) return;
+          const prev = qbankState.questionStatuses?.get(id) || 'unanswered';
+          defaultStatusMap.set(id, normalizeStatusKey(prev));
+        });
+        qbankState.questionStatuses = defaultStatusMap;
         qbankState.allQuestions = questions;
         qbankState.error = null;
         qbankState.loaded = true;
@@ -8659,21 +9348,36 @@ if (isLast) {
 
 qbankEls.nextBtn.onclick = async () => {
   window.__QBANK_RETURN_TO_FIRST__ = true;
-
   stopCurrentQuestionTimer();
   stopQbankTimer();
+  
   const analyticsPayload = buildQbankAnalyticsSnapshot();
+  
   if (analyticsPayload) {
+    // 👇 USAR SOLO __CURRENT_SUBCAT_CTX__ (sin getCurrentSubcatCtx)
+    const ctx = window.__CURRENT_SUBCAT_CTX__ || {};
+    analyticsPayload.supracategoriaId = ctx.supracategoriaId;
+    analyticsPayload.categoriaId = ctx.categoriaId;
+    analyticsPayload.subcategoriaId = ctx.subcategoriaId;
+    
+    console.log('📊 Analytics payload with context:', {
+      supra: ctx.supracategoriaId,
+      cat: ctx.categoriaId,
+      sub: ctx.subcategoriaId
+    });
+    
     window.__QBANK_ANALYTICS_DATA__ = analyticsPayload;
+    
+    // Guardar en Firestore
+    await persistQbankAnalyticsSession(analyticsPayload);
+    
+    // Disparar evento
     window.dispatchEvent(new CustomEvent('qbank:analytics-data', { detail: analyticsPayload }));
   } else {
     window.__QBANK_ANALYTICS_DATA__ = null;
   }
 
-  pushViewState('analytics-view', { replace: false });
-
-  // Configurar sidebar
-  // 👇 GUARDAR el HTML de la TOC ANTES de que Analytics la modifique
+  // Guardar TOC
   const tocContent = document.getElementById("subcategoria-sidebar-content");
   if (tocContent && !window.__ORIGINAL_TOC_FRAGMENT__) {
     const frag = document.createDocumentFragment();
@@ -8683,59 +9387,8 @@ qbankEls.nextBtn.onclick = async () => {
     window.__ORIGINAL_TOC_FRAGMENT__ = frag;
   }
 
-  const sc = document.getElementById("subcategoria-sidebar-content");
-  if (sc) {
-    sc.classList.remove("hidden");
-    sc.innerHTML = [...Array(10).keys()]
-      .map(i => i + 1)
-      .sort(() => Math.random() - 0.5)
-      .map(n => `<div class="px-4 py-2 text-sm text-slate-700">Número ${n}</div>`)
-      .join('');
-  }
-  
-  document.getElementById("qbank-sidebar")?.classList.add("hidden");
-
-  // 👇 Esconde Qbank session
-  const qbankSession = document.getElementById('qbank-session');
-  if (qbankSession) {
-    qbankSession.classList.add('hidden');
-  }
-
-  // 👇 Crear contenedor temporal para Analytics
-  const main = document.getElementById("main-content");
-  let analyticsContainer = document.getElementById('analytics-container');
-  if (!analyticsContainer) {
-    analyticsContainer = document.createElement('div');
-    analyticsContainer.id = 'analytics-container';
-    main.appendChild(analyticsContainer);
-  }
-
-  // Cargar Analytics en el contenedor
-  const response = await fetch("analytics.html");
-  const html = await response.text();
-  
-  const temp = document.createElement("div");
-  temp.innerHTML = html;
-  
-  const scripts = temp.querySelectorAll("script");
-  scripts.forEach(s => s.parentNode.removeChild(s));
-  
-  analyticsContainer.innerHTML = temp.innerHTML;
-  analyticsContainer.classList.remove('hidden');
-  
-  scripts.forEach(oldScript => {
-    const newScript = document.createElement("script");
-    if (oldScript.src) newScript.src = oldScript.src;
-    else newScript.textContent = oldScript.textContent;
-    document.body.appendChild(newScript);
-  });
-
-  if (window.__QBANK_ANALYTICS_DATA__) {
-    window.dispatchEvent(new CustomEvent('qbank:analytics-data', { detail: window.__QBANK_ANALYTICS_DATA__ }));
-  }
+  await showAnalyticsView();
 };
-
-
 }
   
   else {
@@ -8824,6 +9477,7 @@ qbankEls.nextBtn.onclick = async () => {
     hidePauseOverlay();
     updateTimerDisplays();
     document.removeEventListener('keydown', handleEscape);
+    showAnalyticsSessionsSidebar(false);
 
 
 
@@ -8849,6 +9503,7 @@ qbankEls.nextBtn.onclick = async () => {
     if (options instanceof Event) {
       options.preventDefault?.();
     }
+    showAnalyticsSessionsSidebar(false);
     const { skipHistory = false, limit = null } = opts;
     if (Number.isFinite(limit)) {
       const parsed = Math.floor(Number(limit));
@@ -9009,6 +9664,7 @@ qbankEls.nextBtn.onclick = async () => {
       const peerRaw = question.meta?.peerStats ?? question.meta?.peer ?? question.meta?.peers ?? null;
       return {
         index: idx + 1,
+        questionId: question.id ?? question.meta?.id ?? null,
         question: question.text,
         statusKey,
         difficultyValue,
@@ -9054,6 +9710,140 @@ qbankEls.nextBtn.onclick = async () => {
     };
   }
 
+  async function updateQuestionGlobalStats(userId, sessionId, questions, createdAt) {
+    const hasFirebase = !!(window.firebase && firebase.firestore);
+    if (!hasFirebase || !userId || !Array.isArray(questions) || !questions.length) return;
+    const db = window.db || firebase.firestore();
+    if (!db?.collection) return;
+    const statsCollection = db.collection('users').doc(userId).collection('qbankQuestionStats');
+    const answeredAt = createdAt || (firebase.firestore.FieldValue?.serverTimestamp
+      ? firebase.firestore.FieldValue.serverTimestamp()
+      : new Date());
+
+    for (const q of questions) {
+      const rawId = q?.questionId ?? q?.question ?? null;
+      const questionId = rawId != null ? String(rawId) : null;
+      if (!questionId) continue;
+      const status = (q?.statusKey || '').toLowerCase();
+      if (status !== 'correct' && status !== 'incorrect') continue;
+
+      try {
+        const statRef = statsCollection.doc(questionId);
+        await db.runTransaction(async (tx) => {
+          const snap = await tx.get(statRef);
+          const prev = snap.exists ? snap.data() || {} : {};
+          const answeredCount = Number(prev.answeredCount || 0) + 1;
+          const correctCount = Number(prev.correctCount || 0) + (status === 'correct' ? 1 : 0);
+          const incorrectCount = Number(prev.incorrectCount || 0) + (status === 'incorrect' ? 1 : 0);
+
+          tx.set(statRef, {
+            questionId,
+            answeredCount,
+            correctCount,
+            incorrectCount,
+            lastResult: status,
+            lastSessionId: sessionId || prev.lastSessionId || null,
+            lastAnsweredAt: answeredAt
+          }, { merge: true });
+        });
+      } catch (err) {
+        console.error('Failed to update global question stats', { questionId, err });
+      }
+    }
+  }
+
+  async function getGlobalQuestionStatus(userId, questionId) {
+    const hasFirebase = !!(window.firebase && firebase.firestore);
+    if (!hasFirebase || !userId || !questionId) return null;
+    const db = window.db || firebase.firestore();
+    if (!db?.collection) return null;
+    try {
+      const snap = await db
+        .collection('users')
+        .doc(userId)
+        .collection('qbankQuestionStats')
+        .doc(String(questionId))
+        .get();
+      return snap.exists ? snap.data() : null;
+    } catch (err) {
+      console.error('Failed to fetch global question status', err);
+      return null;
+    }
+  }
+
+  window.qbankQuestionStats = {
+    updateQuestionGlobalStats,
+    getGlobalQuestionStatus
+  };
+
+async function persistQbankAnalyticsSession(snapshot) {
+  if (!snapshot) return;
+  const hasFirebase = !!(window.firebase && firebase.firestore && firebase.auth);
+  if (!hasFirebase) return;
+  const user = firebase.auth().currentUser;
+  if (!user) return;
+  try {
+    const db = window.db || firebase.firestore();
+    const questionsForStorage = Array.isArray(snapshot.questions)
+      ? snapshot.questions.map((row) => {
+          const { question: questionText, questionId, ...rest } = row;
+          const finalId = questionId || questionText || null;
+          return {
+            ...rest,
+            questionId: finalId,
+            question: finalId
+          };
+        })
+      : [];
+
+    // 👇 USAR SOLO __CURRENT_SUBCAT_CTX__
+    const ctx = window.__CURRENT_SUBCAT_CTX__ || {};
+
+    const sessionDoc = {
+      topicTitle: snapshot.topicTitle,
+      totalQuestions: snapshot.totalQuestions,
+      completedCount: snapshot.completedCount,
+      correctCount: snapshot.correctCount,
+      incorrectCount: snapshot.incorrectCount,
+      reviewedCount: snapshot.reviewedCount,
+      skippedCount: snapshot.skippedCount,
+      pendingCount: snapshot.pendingCount,
+      correctUsingHints: snapshot.correctUsingHints,
+      avgTimeMs: snapshot.avgTimeMs,
+      sessionTimeMs: snapshot.sessionTimeMs,
+      questionTimeMs: snapshot.questionTimeMs,
+      questions: questionsForStorage,
+      // Guardar contexto
+      supracategoriaId: ctx.supracategoriaId,
+      categoriaId: ctx.categoriaId,
+      subcategoriaId: ctx.subcategoriaId,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    const sessionRef = await db
+      .collection('users')
+      .doc(user.uid)
+      .collection('qbankAnalyticsSessions')
+      .add(sessionDoc);
+
+    await updateQuestionGlobalStats(
+      user.uid,
+      sessionRef?.id || null,
+      snapshot.questions || [],
+      firebase.firestore.FieldValue?.serverTimestamp
+        ? firebase.firestore.FieldValue.serverTimestamp()
+        : new Date()
+    );
+
+    console.log('✅ Session saved with context:', ctx);
+  } catch (err) {
+    console.error('❌ Error saving session:', err);
+  }
+}
+  
+  
+  
+  
   const qbankBtn = wrapper.querySelector('#qbank-session-btn');
   qbankBtn?.addEventListener('click', async (event) => {
     event.preventDefault();
@@ -11351,6 +12141,17 @@ initializeBookmarkControls();
 
 // Función para establecer el enlace o botón activo (marcado con active-link)
 function setActiveLink(element) {
+
+    const analyticsContainer = document.getElementById('analytics-container');
+  const analyticsSessionPanel = document.getElementById('analytics-session-panel');
+  
+  if (analyticsContainer && !analyticsContainer.classList.contains('hidden')) {
+    analyticsContainer.classList.add('hidden');
+  }
+  
+  if (analyticsSessionPanel && !analyticsSessionPanel.classList.contains('hidden')) {
+    analyticsSessionPanel.classList.add('hidden');
+  }
   // Oculta sub-sidebar cada vez que cambias de sección
   document.getElementById("subcategoria-sidebar").classList.add("hidden");
 
@@ -11812,6 +12613,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const _showView = window.showView;
   window.showHome = (options = {}) => {
+
+      document.getElementById('analytics-container')?.classList.add('hidden');
+  document.getElementById('analytics-session-panel')?.classList.add('hidden');
+    
     const isMobile = window.matchMedia('(max-width: 1299.98px)').matches;
     if (isMobile) {
       body.classList.add('bars-hidden');
@@ -17077,4 +17882,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </html>
 
-<!-- ===201 diciembre === -->
+<!-- ===308 diciembre === -->
