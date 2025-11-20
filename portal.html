@@ -1291,6 +1291,14 @@ body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden))
   --labs-panel-width: min(530px, 42vw);
 }
 
+.qbank-option-exp {
+  width: 100%;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #475569;
+  padding-left: 2.5rem;
+}
+
 #qbank-labs-close{
   display: none;
 }
@@ -3092,6 +3100,11 @@ body.bars-hidden #sb-switch { display: none !important; }
 }
 .option-row:hover { background: #f9fafb; }
 
+.option-exp {
+  font-size: 12px;
+  color: #475569;
+}
+
 /* Círculo con la letra (A, B, …) */
 .opt-bullet {
   width: 14px; height: 14px;          /* círculo se mantiene */
@@ -3615,18 +3628,41 @@ body.qbank-open #qbank-session {
 .qbank-difficulty-chevrons {
   margin-left: auto;
   display: inline-flex;
-  gap: 1px;
-  font-size: 16px;
-  line-height: 1;
+  gap: 0px;
+}
+
+/* Base para cada chevron — más pequeño */
+.qbank-difficulty-chevrons .on,
+.qbank-difficulty-chevrons .off {
+  position: relative;
+  width: 11px;
+  height: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: #94a3b8;
 }
 
+/* Activo más oscuro */
 .qbank-difficulty-chevrons .on {
   color: #1e293b;
 }
 
+/* Inactivo más tenue */
 .qbank-difficulty-chevrons .off {
   opacity: 0.45;
+}
+
+/* Icono SVG reducido a 11×11 */
+.qbank-difficulty-chevrons .on::before,
+.qbank-difficulty-chevrons .off::before {
+  content: "";
+  width: 11px;
+  height: 11px;
+  display: block;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172'/%3E%3C/svg%3E") no-repeat center / contain;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172'/%3E%3C/svg%3E") no-repeat center / contain;
 }
 
 .qbank-mark-indicator {
@@ -8312,9 +8348,10 @@ if (!shouldHide) {
     const summary = qbankSetupModalState.statusSummary;
     const countsFallback = Array.isArray(qbankState.allQuestions) ? qbankState.allQuestions.length : 0;
     qbankSetupModalState.statusHost.innerHTML = QBANK_STATUS_OPTIONS.map((option) => {
-      const active = qbankSetupModalState.selectedStatuses.has(option.key) || (
-        option.key === 'all' && (!qbankSetupModalState.selectedStatuses.size)
-      );
+const active = option.key === 'all'
+  ? (qbankSetupModalState.selectedStatuses.has('all') || !qbankSetupModalState.selectedStatuses.size)
+  : qbankSetupModalState.selectedStatuses.has(option.key);
+
       const count = summary
         ? (option.key === 'all'
           ? (summary.all?.length || 0)
@@ -8370,8 +8407,9 @@ if (!shouldHide) {
       updateQbankSetupCount(0);
       return;
     }
-    const baseValue = Math.min(qbankSetupModalState.current || available.length, available.length);
-    updateQbankSetupCount(baseValue);
+  const baseValue = available.length; // siempre el máximo posible
+updateQbankSetupCount(baseValue);
+
   }
 
 
@@ -8466,19 +8504,30 @@ if (!shouldHide) {
     qbankSetupModalState.input?.addEventListener('input', (event) => syncValue(event.target.value));
     qbankSetupModalState.close?.addEventListener('click', hideQbankSetupModal);
     qbankSetupModalState.backdrop?.addEventListener('click', hideQbankSetupModal);
-    qbankSetupModalState.statusHost?.addEventListener('click', (event) => {
-      const button = event.target.closest('[data-status-option]');
-      if (!button) return;
-      const key = button.dataset.statusOption;
-      if (!key) return;
-      if (key === 'all') {
-        qbankSetupModalState.selectedStatuses = new Set(['all']);
-      } else {
-        qbankSetupModalState.selectedStatuses = new Set([normalizeStatusKey(key)]);
-      }
-      renderQbankSetupStatuses();
-      updateQbankSetupTotalsFromFilters();
-    });
+qbankSetupModalState.statusHost?.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-status-option]');
+  if (!button) return;
+  const key = button.dataset.statusOption;
+  if (!key) return;
+
+  if (key === 'all') {
+    qbankSetupModalState.selectedStatuses =
+      qbankSetupModalState.selectedStatuses.has('all') && qbankSetupModalState.selectedStatuses.size === 1
+        ? new Set()
+        : new Set(['all']);
+  } else {
+    const normalized = normalizeStatusKey(key);
+    const next = new Set(qbankSetupModalState.selectedStatuses);
+    next.delete('all');
+    next.has(normalized) ? next.delete(normalized) : next.add(normalized);
+    if (!next.size) next.add('all');
+    qbankSetupModalState.selectedStatuses = next;
+  }
+
+  renderQbankSetupStatuses();
+  updateQbankSetupTotalsFromFilters();
+});
+
     qbankSetupModalState.start?.addEventListener('click', () => {
       if (!qbankSetupModalState.totalCount) return;
       qbankState.lastSelectedLimit = qbankSetupModalState.current;
@@ -8506,7 +8555,10 @@ if (!shouldHide) {
       qbankSetupModalState.slider.style.background = 'linear-gradient(to right, #E0E6EB 0%, #E0E6EB 100%)';
       return;
     }
-    const pct = Math.max(0, Math.min(100, (qbankSetupModalState.current / total) * 100));
+const min = Number(qbankSetupModalState.slider?.min || 0);
+const max = qbankSetupModalState.totalCount || min;
+const denom = Math.max(1, max - min);
+const pct = Math.max(0, Math.min(100, ((qbankSetupModalState.current - min) / denom) * 100));
     qbankSetupModalState.slider.style.background = `linear-gradient(to right, #047A88 0%, #047A88 ${pct}%, #E0E6EB ${pct}%, #E0E6EB 100%)`;
   }
 
@@ -8610,6 +8662,27 @@ if (!shouldHide) {
     return escHTML(trimmed);
   };
 
+  function normalizeOptionExplanations(raw) {
+    const pickText = (entry) => {
+      if (entry == null) return '';
+      if (typeof entry === 'string' || typeof entry === 'number') {
+        return String(entry);
+      }
+      if (typeof entry === 'object') {
+        return entry.texto || entry.text || entry.explicacion || entry.explanation || entry.descripcion || '';
+      }
+      return '';
+    };
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw.map(pickText);
+    if (typeof raw === 'object') {
+      return Object.keys(raw)
+        .sort((a, b) => Number(a) - Number(b))
+        .map((key) => pickText(raw[key]));
+    }
+    return [];
+  }
+
   function updateAttendingTipCard(question) {
     const btn = qbankEls.attendingBtn;
     const card = qbankEls.attendingTip;
@@ -8663,6 +8736,7 @@ if (!shouldHide) {
 
     const explanation = data.explicacion || data.explicaciondetallada || data.explicaciondetalle || data.explanation || '';
     const explanationImage = data.explicacionimagen || data.explicacionImagen || data.explanationImage || '';
+    const optionExplanations = normalizeOptionExplanations(data.explicaciones);
 
     let order = data.orden ?? data.order ?? data.index ?? null;
     if (typeof order !== 'number') {
@@ -8678,6 +8752,7 @@ if (!shouldHide) {
       correct,
       explanation,
       explanationImage,
+      optionExplanations,
       difficulty: data.dif ?? data.dificultad ?? null,
       rent: data.rent ?? null,
       type: data.tipo ?? null,
@@ -8907,15 +8982,33 @@ if (!shouldHide) {
   function renderStatusMarker(status) {
     const baseCls = 'flex items-center justify-center w-5 shrink-0';
     if (!status) return `<span class="${baseCls}"></span>`;
+
     if (status.key === 'correct') {
-      return `<span class="${baseCls}"><span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-100 text-emerald-600"><svg class="w-3 h-3" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></span>`;
+      // Círculo verde con tilde (SVG provisto)
+      return `<span class="${baseCls}">
+        <span class="inline-flex items-center justify-center text-emerald-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 16 16" fill="none">
+            <path fill="currentColor" fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m4.737-10.324a1 1 0 0 0-1.474-1.352L6.5 9.52 4.737 7.597a1 1 0 0 0-1.474 1.351l2.5 2.728a1 1 0 0 0 1.474 0z" clip-rule="evenodd"></path>
+          </svg>
+        </span>
+      </span>`;
     }
+
     if (status.key === 'incorrect') {
-      return `<span class="${baseCls}"><span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-rose-100 text-rose-500"><svg class="w-3 h-3" viewBox="0 0 16 16" fill="none"><path d="M5 5l6 6M11 5l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></span>`;
+      // Círculo rojo con X (SVG provisto)
+      return `<span class="${baseCls}">
+        <span class="inline-flex items-center justify-center text-rose-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 16 16" fill="none">
+            <path fill="currentColor" fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m3.707-11.707a1 1 0 0 1 0 1.414L9.414 8l2.293 2.293a1 1 0 0 1-1.414 1.414L8 9.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L6.586 8 4.293 5.707a1 1 0 0 1 1.414-1.414L8 6.586l2.293-2.293a1 1 0 0 1 1.414 0" clip-rule="evenodd"></path>
+          </svg>
+        </span>
+      </span>`;
     }
+
     if (status.key === 'skipped' || status.key === 'reviewed') {
-      return `<span class="${baseCls}"><span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-300"></span></span>`;
+      return `<span class="${baseCls}"><span class="inline-block w-2 h-2 rounded-full bg-slate-300"></span></span>`;
     }
+
     return `<span class="${baseCls}"></span>`;
   }
 
@@ -9012,13 +9105,16 @@ if (!shouldHide) {
   }
 
   function renderQbankSidebar() {
-    const renderChevrons = (level, marked) => {
+    const renderChevrons = (level, marked, status) => {
+      // No mostrar chevrons si la pregunta sigue pendiente (no respondida)
+      if (!status || status.key === 'pending') return '';
+
       const numericLevel = Number(level);
       if (!Number.isFinite(numericLevel) || numericLevel <= 0) return '';
       const clamped = Math.max(1, Math.min(5, Math.round(numericLevel)));
       const chevrons = Array.from({ length: 5 }, (_, idx) => {
         const chevronClass = idx < clamped ? 'on' : 'off';
-        return `<span class="${chevronClass}">›</span>`;
+        return `<span class="${chevronClass}"></span>`;
       }).join('');
       const markIconHtml = marked
         ? `<span class="qbank-mark-indicator text-slate-500" aria-hidden="true">${MARK_ICON_FILLED}</span>`
@@ -9031,8 +9127,8 @@ if (!shouldHide) {
       const status = statusLabel(answer);
       const isActive = idx === qbankState.currentIndex;
       const baseClasses = [
-        'w-full text-left px-4 py-3 transition flex flex-col gap-1 text-[13px]',
-        isActive ? 'bg-white' : 'bg-transparent hover:bg-white'
+        'w-full text-left px-4 py-3 transition flex flex-col gap-1 text-[10px]',
+        isActive ? 'bg-slate-100' : 'bg-transparent hover:bg-slate-50'
       ].join(' ');
       const marker = renderStatusMarker(status);
       const questionText = escHTML(truncate(q.text, 48));
@@ -9050,7 +9146,7 @@ if (!shouldHide) {
               <span class="text-slate-500">${idx + 1}</span>
               <span class="truncate">${questionText}</span>
             </span>
-            ${renderChevrons(q.difficulty, marked)}
+            ${renderChevrons(q.difficulty, marked, status)}
           </div>
           ${secondary}
         </button>
@@ -9110,17 +9206,17 @@ const disableNext = qbankState.questions.length === 0;
   function renderQbankOptions(question, answer) {
     if (!qbankEls.options) return;
     // Modificado: elimina margen y padding lateral del grupo de opciones
-    const groupClasses = 'qbank-option-group border-y border-slate-200 rounded-none overflow-hidden bg-white shadow-sm m-0 px-0';
+const groupClasses = 'qbank-option-group border-y border-slate-200 rounded-none overflow-hidden bg-white shadow-sm m-0 px-0';    const optionExplanations = Array.isArray(question.optionExplanations) ? question.optionExplanations : [];
     const optionsMarkup = question.options.map((opt, idx) => {
       const isSelected = answer.selected === idx;
       const isCorrect = question.correct === idx;
       const letter = String.fromCharCode(65 + idx);
       // Modificado: px-6 → px-0 para eliminar padding lateral
       const baseClasses = [
-        'qbank-option w-full text-left flex items-center gap-4 px-6 py-4 text-sm leading-relaxed transition border-l-4 border-l-transparent',
-        idx === 0 ? '' : 'border-t border-slate-200'
-      ].filter(Boolean);
-      let badgeClasses = 'flex items-center justify-center w-8 h-8 rounded-full border border-slate-300 text-[13px] font-semibold text-slate-600 bg-white';
+        'qbank-option w-full text-left flex flex-col gap-0 px-0 text-sm leading-relaxed transition border-l-4 border-l-transparent',
+  idx === 0 ? '' : 'border-t border-slate-200'
+].filter(Boolean);
+      let badgeClasses = 'flex items-center justify-center w-6 h-6 rounded-full border border-slate-300 text-[10px] font-semibold text-slate-600 bg-white';
       // Nueva línea statusSymbol según instrucción:
 let statusSymbol = `
 <span 
@@ -9135,32 +9231,59 @@ let statusClasses = 'ml-auto text-slate-300 text-lg font-light';
       if (answer.revealed) {
         if (isCorrect) {
           baseClasses.push('bg-emerald-50', 'border-l-emerald-400');
-          badgeClasses = 'flex items-center justify-center w-8 h-8 rounded-full text-[13px] font-semibold bg-emerald-500 text-white';
+          badgeClasses = 'flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-semibold bg-emerald-500 text-white';
           statusSymbol = '✓';
           statusClasses = 'ml-auto text-emerald-500 text-lg font-semibold';
         } else if (isSelected) {
           baseClasses.push('bg-rose-50', 'border-l-rose-400');
-          badgeClasses = 'flex items-center justify-center w-8 h-8 rounded-full text-[13px] font-semibold bg-rose-500 text-white';
+          badgeClasses = 'flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-semibold bg-rose-500 text-white';
           statusSymbol = '–';
           statusClasses = 'ml-auto text-rose-500 text-lg font-semibold';
         } else {
           baseClasses.push('border-l-rose-200');
-          badgeClasses = 'flex items-center justify-center w-8 h-8 rounded-full border border-rose-200 text-[13px] font-semibold text-rose-500 bg-white';
+          badgeClasses = 'flex items-center justify-center w-7 h-7 rounded-full border border-rose-200 text-[12px] font-semibold text-rose-500 bg-white';
           statusSymbol = '–';
           statusClasses = 'ml-auto text-rose-300 text-lg font-semibold';
         }
       } else if (isSelected) {
         baseClasses.push('bg-slate-50');
-        badgeClasses = 'flex items-center justify-center w-8 h-8 rounded-full border border-slate-400 text-[13px] font-semibold text-slate-700 bg-slate-100';
+        badgeClasses = 'flex items-center justify-center w-7 h-7 rounded-full border border-slate-400 text-[12px] font-semibold text-slate-700 bg-slate-100';
       } else {
         baseClasses.push('hover:bg-slate-50');
       }
 
+      const contentClasses = ['flex items-center gap-4 w-full px-6 py-2'];
+      if (answer.revealed) {
+        if (isCorrect) {
+          contentClasses.push('bg-emerald-100');
+        } else if (isSelected) {
+          contentClasses.push('bg-rose-100');
+        }
+      }
+
+      const explanationText = optionExplanations[idx];
+      let explanationClasses = ['qbank-option-exp'];
+      if (answer.revealed && (isCorrect || isSelected)) {
+        explanationClasses = explanationClasses.concat(['mt-0', 'pt-1', 'border-t', 'border-slate-200']);
+      }
+      const explanationMarkup = answer.revealed && explanationText
+        ? `
+          <div class="flex items-start gap-4 w-full px-6 pb-4 ${explanationClasses.join(' ')}">
+            <span class="w-6 h-6"></span>
+            <div class="flex-1 text-slate-700 text-[10px] leading-relaxed">${renderRich(explanationText)}</div>
+            <span class="w-6"></span>
+          </div>
+        `
+        : '';
+
       return `
         <button type="button" class="${baseClasses.join(' ')}" data-option-index="${idx}">
-          <span class="${badgeClasses}">${letter}</span>
-          <div class="flex-1 text-slate-700">${renderRich(opt)}</div>
-          <span class="${statusClasses}">${statusSymbol}</span>
+          <div class="${contentClasses.join(' ')}">
+            <span class="${badgeClasses}">${letter}</span>
+            <div class="flex-1 text-slate-700">${renderRich(opt)}</div>
+            <span class="${statusClasses}">${statusSymbol}</span>
+          </div>
+          ${explanationMarkup}
         </button>
       `;
     }).join('');
@@ -9585,6 +9708,7 @@ qbankEls.nextBtn.onclick = async () => {
       answer.status = 'reviewed';
       stopCurrentQuestionTimer();
     }
+    recordImmediateQuestionStat(question, answer.status);
     renderQbankQuestion();
   });
 
@@ -9776,6 +9900,29 @@ qbankEls.nextBtn.onclick = async () => {
     getGlobalQuestionStatus
   };
 
+  async function recordImmediateQuestionStat(question, statusKey) {
+    const normalized = typeof statusKey === 'string' ? statusKey.toLowerCase() : '';
+    if (normalized !== 'correct' && normalized !== 'incorrect') return;
+    const hasFirebase = !!(window.firebase && firebase.firestore && firebase.auth);
+    if (!hasFirebase) return;
+    const questionId = getQuestionStableId(question);
+    if (!questionId) return;
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+    try {
+      await updateQuestionGlobalStats(
+        user.uid,
+        null,
+        [{ questionId, statusKey: normalized }],
+        firebase.firestore.FieldValue?.serverTimestamp
+          ? firebase.firestore.FieldValue.serverTimestamp()
+          : new Date()
+      );
+    } catch (err) {
+      console.error('Failed to update immediate question stats', { questionId, err });
+    }
+  }
+
 async function persistQbankAnalyticsSession(snapshot) {
   if (!snapshot) return;
   const hasFirebase = !!(window.firebase && firebase.firestore && firebase.auth);
@@ -9825,15 +9972,6 @@ async function persistQbankAnalyticsSession(snapshot) {
       .doc(user.uid)
       .collection('qbankAnalyticsSessions')
       .add(sessionDoc);
-
-    await updateQuestionGlobalStats(
-      user.uid,
-      sessionRef?.id || null,
-      snapshot.questions || [],
-      firebase.firestore.FieldValue?.serverTimestamp
-        ? firebase.firestore.FieldValue.serverTimestamp()
-        : new Date()
-    );
 
     console.log('✅ Session saved with context:', ctx);
   } catch (err) {
@@ -11054,7 +11192,8 @@ async function getOpcionesParaItems(items){
         opciones: Array.isArray(data.opciones) ? data.opciones : [],
         corr: Number(data.corr ?? -1),
         explicacion: data.explicacion || '',
-        explicacionimagen: data.explicacionimagen || ''
+        explicacionimagen: data.explicacionimagen || '',
+        explicaciones: normalizeOptionExplanations(data.explicaciones)
       });
       });
     }
@@ -11070,8 +11209,8 @@ async function getOpcionesParaItems(items){
         opciones: Array.isArray(data.opciones) ? data.opciones : [],
         corr: Number(data.corr ?? -1),
         explicacion: data.explicacion || '',
-        explicacionimagen: data.explicacionimagen || ''
-        
+        explicacionimagen: data.explicacionimagen || '',
+        explicaciones: normalizeOptionExplanations(data.explicaciones)
       });
     }
   }));
@@ -11128,11 +11267,45 @@ box.innerHTML = `
   li.insertBefore(box, corrRow.nextSibling);
 }
 
+function clearOptionExplanations(list){
+  list?.querySelectorAll('.option-exp').forEach((node) => node.remove());
+}
+
+function renderOptionExplanations(list){
+  if (!list) return;
+  clearOptionExplanations(list);
+  let parsed = [];
+  try {
+    parsed = JSON.parse(list.dataset.exps || '[]');
+  } catch (_) {
+    parsed = [];
+  }
+  if (!Array.isArray(parsed) || !parsed.length) return;
+  const texts = parsed.map((val) => {
+    if (typeof val === 'string') return val;
+    if (typeof val === 'number') return String(val);
+    if (val && typeof val === 'object') {
+      return val.texto || val.text || val.explicacion || val.explanation || '';
+    }
+    return '';
+  });
+  const rows = list.querySelectorAll(':scope > li');
+  rows.forEach((li, idx) => {
+    const txt = texts[idx];
+    if (!txt || !String(txt).trim()) return;
+    const box = document.createElement('div');
+box.className = 'option-exp mt-2 leading-relaxed text-[11px] text-slate-600';
+    box.innerHTML = `<div class="whitespace-pre-wrap">${__escHTML(txt)}</div>`;
+    li.appendChild(box);
+  });
+}
+
 function applyAnswerState(list, st){
   if (!list || !st) return;
   const { locked, selected, corr } = st;
   const allRows = list.querySelectorAll('.option-row');
   const allBullets = list.querySelectorAll('.opt-bullet');
+  clearOptionExplanations(list);
 
   // baseline: todo rojo (err)
 allRows.forEach(r => r.classList.remove(
@@ -11180,10 +11353,11 @@ allRows.forEach(r => r.classList.remove(
       b.setAttribute('aria-disabled','true');
 
     renderCorrectExplanation(list);
+    renderOptionExplanations(list);
     enableReset(list, true);
 
     });
-    
+
   }
   
   // 🚫 al estar bloqueado, deshabilitar los botones de tachar
@@ -11225,6 +11399,7 @@ function resetQuestion(list){
 
   // 1) eliminar explicación si existe
   list.querySelectorAll(':scope > li > .explicacion-box').forEach(el=>el.remove());
+  clearOptionExplanations(list);
 
   // 2) desbloquear
   list.dataset.locked = '0';
@@ -11311,7 +11486,8 @@ async function renderSuggestionsConOpciones(list, data, shown) {
             data-corr="${corr}"
             data-locked="0"
             data-exp="${esc(meta.explicacion || '')}"
-            data-expimg="${esc(meta.explicacionimagen || '')}">
+            data-expimg="${esc(meta.explicacionimagen || '')}"
+            data-exps="${esc(JSON.stringify(meta.explicaciones || []))}">
           ${opcionesHtml}
                </ul>
         <div class="opt-footer">
@@ -11510,6 +11686,7 @@ document.addEventListener('click', (e) => {
 
 
   renderCorrectExplanation(list);
+  renderOptionExplanations(list);
 
   enableReset(list, true);
 
@@ -17882,4 +18059,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </html>
 
-<!-- ===308 diciembre === -->
+<!-- ===414 diciembre === -->
