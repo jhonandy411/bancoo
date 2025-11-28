@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firestore Content Uploader</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f5f5f7;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #1d1d1f;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            background: #f5f5f7;
+            border-radius: 8px;
+        }
+
+        button {
+            background-color: #0071e3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #0077ed;
+        }
+
+        button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info {
+            background-color: #e2e3e5;
+            color: #383d41;
+            border: 1px solid #d6d8db;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Firestore Content Uploader</h1>
+        <p>Upload rich HTML content to the <code>articulos_contenido</code> collection.</p>
+
+        <div class="form-group">
+            <label for="docId">Document ID (Subcategory ID):</label>
+            <input type="text" id="docId" placeholder="e.g., subcat_123" value="test_upload_1">
+            <small style="color: #666;">This ID must match the subcategory ID used in navigation.</small>
+        </div>
+
+        <div class="form-group">
+            <label for="fileInput">Select HTML File:</label>
+            <input type="file" id="fileInput" accept=".html">
+        </div>
+
+        <button id="uploadBtn">Upload to Firestore</button>
+
+        <div id="status"></div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+            authDomain: "bancomicina-62bfe.firebaseapp.com",
+            projectId: "bancomicina-62bfe",
+            storageBucket: "bancomicina-62bfe.appspot.com",
+            messagingSenderId: "737254665977",
+            appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
+        // UI Elements
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileInput = document.getElementById('fileInput');
+        const docIdInput = document.getElementById('docId');
+        const statusDiv = document.getElementById('status');
+
+        function showStatus(message, type) {
+            statusDiv.textContent = message;
+            statusDiv.className = type;
+            statusDiv.style.display = 'block';
+        }
+
+        uploadBtn.addEventListener('click', async () => {
+            const file = fileInput.files[0];
+            let docPath = docIdInput.value.trim();
+
+            if (!file) {
+                showStatus('Please select a file first.', 'error');
+                return;
+            }
+
+            if (!docPath) {
+                showStatus('Please enter a Firestore Document Path.', 'error');
+                return;
+            }
+
+            // Remove leading slash if present
+            if (docPath.startsWith('/')) {
+                docPath = docPath.substring(1);
+            }
+
+            // Disable button during upload
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            showStatus('Reading file...', 'info');
+
+            try {
+                // Read file content
+                const textContent = await readFileAsText(file);
+
+                showStatus(`File read successfully (${(textContent.length / 1024).toFixed(2)} KB). Uploading to Firestore...`, 'info');
+
+                // Upload to Firestore at the specific path
+                // Using merge: true to avoid overwriting existing metadata (nombre, orden, etc.)
+                await db.doc(docPath).set({
+                    html_completo: textContent,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+
+                showStatus(`Success! Content uploaded to '${docPath}'.`, 'success');
+                console.log('Document successfully written!');
+
+            } catch (error) {
+                console.error('Error uploading document: ', error);
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload to Firestore';
+            }
+        });
+
+        function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e);
+                reader.readAsText(file);
+            });
+        }
+    </script>
+</body>
+
+</html>
+
+<!-- 22222 -->

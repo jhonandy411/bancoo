@@ -21,14 +21,14 @@
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
-<div class="w-full max-w-[950px] mx-auto px-6 lg:px-8 pb-20">
+<div class="w-full max-w-[750px] mx-auto px-6 lg:px-8 pb-20">
   
     <header class="mt-4 mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-      <h1 class="text-[28px] font-bold tracking-tight">Session Analysis</h1>
+      <h1 class="text-[18px] font-bold tracking-tight">Session Analysis</h1>
       <button id="btn-anki" type="button"
         class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-transparent px-3.5 py-2 text-sm font-semibold text-slate-800 hover:bg-transparent">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="opacity-90" viewBox="0 0 24 24" fill="currentColor">
-          <path d="m12 17.27 6.18 3.73-1.64-7.03L22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.46 4.73L5.82 21z"/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" class="opacity-90" fill="currentColor">
+          <path fill="currentColor" d="m7.29 3.3 1.53 1.71c.38.43.93.67 1.49.67.08 0 .16 0 .24-.01l2.28-.28-1.16 1.9c-.35.57-.39 1.28-.11 1.89l.94 2.02-2.28-.49c-.14-.03-.28-.05-.42-.05-.49 0-.97.18-1.34.52l-1.73 1.57-.2-2.22c-.06-.67-.45-1.26-1.04-1.58L3.53 7.88l2.12-.9c.6-.26 1.04-.79 1.17-1.43zM6.71.16c-.09 0-.17.01-.26.03-.36.1-.64.39-.72.76l-.88 4.18-4 1.72c-.35.15-.59.49-.61.87s.18.74.52.93l3.77 2.05.37 4.22c.03.38.28.7.63.84.12.05.24.07.36.07.24 0 .48-.09.67-.26l3.22-2.92 4.25.92c.07.02.14.02.21.02a1 1 0 0 0 .78-.38c.24-.3.29-.7.13-1.05l-1.79-3.84 2.24-3.66a.998.998 0 0 0-.85-1.52h-.12l-4.33.52L7.46.49a.97.97 0 0 0-.75-.33"/>
         </svg>
         Get Anki cards
       </button>
@@ -39,39 +39,39 @@
         <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
           <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div class="flex flex-col items-center justify-center gap-1">
-              <div class="text-[13px] font-bold leading-4" id="anl-stat-completed">1/1</div>
+              <div class="text-[12px] font-bold leading-4" id="anl-stat-completed">1/1</div>
               <div class="flex items-center gap-2">
       <svg viewBox="0 0 22 22" class="h-5 w-5 text-purple-500">
         <path fill="currentColor" d="M6.8 12.1a1 1 0 1 1 0 2C3.05 14.1 0 11.005 0 7.2 0 3.387 2.987.4 6.8.4c3.75 0 6.8 3.05 6.8 6.8a1 1 0 1 1-2 0c0-2.646-2.154-4.8-4.8-4.8C4.109 2.4 2 4.509 2 7.2c0 2.748 2.109 4.9 4.8 4.9m-1-7.4a1 1 0 0 1 2 0v2.085l1.007 1.008a1 1 0 0 1-1.414 1.414l-1.3-1.3A1 1 0 0 1 5.8 7.2zm7.3 12.486L10.914 15 17.4 8.514l2.185 2.186zM10.686 19.6H8.5v-2.185l1-1 2.186 2.185zm11.02-9.607-3.598-3.6a1 1 0 0 0-1.414 0l-9.901 9.9A1 1 0 0 0 6.5 17v3.6a1 1 0 0 0 1 1h3.6a1 1 0 0 0 .708-.293l9.899-9.9a1 1 0 0 0 0-1.414"/>
       </svg>
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Completed</span>
+                <span class="text-[9px] font-semibold uppercase tracking-wider text-slate-500">Completed</span>
               </div>
             </div>
             <div class="flex flex-col items-center justify-center gap-1">
-              <div class="text-[13px] font-bold leading-4" id="anl-stat-correct">0%</div>
+              <div class="text-[12px] font-bold leading-4" id="anl-stat-correct">0%</div>
               <div class="flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Correct</span>
+                <span class="text-[9px] font-semibold uppercase tracking-wider text-slate-500">Correct</span>
               </div>
             </div>
             <div class="flex flex-col items-center justify-center gap-1">
-              <div class="text-[13px] font-bold leading-4" id="anl-stat-time-per-question">00m 07s</div>
+              <div class="text-[12px] font-bold leading-4" id="anl-stat-time-per-question">00m 07s</div>
               <div class="flex items-center gap-2">
 <svg viewBox="0 0 24 24" class="h-5 w-5 text-sky-600" fill="none" stroke="currentColor" stroke-width="2">
   <circle cx="12" cy="12" r="7" />
   <path d="M12 9v3l1.5 1.5m3.01 3.85-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7.35-3.83A2 2 0 0 1 9.83 1h4.35a2 2 0 0 1 2 1.82l.35 3.83" />
 </svg>
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Time per question</span>
+                <span class="text-[9px] font-semibold uppercase tracking-wider text-slate-500">Time per question</span>
               </div>
             </div>
             <div class="flex flex-col items-center justify-center gap-1">
-              <div class="text-[13px] font-bold leading-4" id="anl-stat-total-time">0h 00m</div>
+              <div class="text-[12px] font-bold leading-4" id="anl-stat-total-time">0h 00m</div>
               <div class="flex items-center gap-2">
 <svg viewBox="0 0 24 24" class="h-5 w-5 text-sky-600" fill="none" stroke="currentColor" stroke-width="2">
   <circle cx="12" cy="12" r="7" />
   <path d="M12 9v3l1.5 1.5m3.01 3.85-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7.35-3.83A2 2 0 0 1 9.83 1h4.35a2 2 0 0 1 2 1.82l.35 3.83" />
 </svg>
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Total time spent</span>
+                <span class="text-[9px] font-semibold uppercase tracking-wider text-slate-500">Total time spent</span>
               </div>
             </div>
           </div>
@@ -79,23 +79,23 @@
 
         <div class="grid items-start gap-6 min-[1300px]:grid-cols-2">
         <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <h3 class="mb-3 text-[15px] font-semibold">
+          <h3 class="mb-3 text-[13px] font-semibold">
             Questions based on "<span id="anl-topic-name">Pneumonia</span>" <span class="text-slate-500 font-normal">(not yet seen or skipped)</span>
           </h3>
           <hr class="-mx-4 mb-3 border-slate-200" />
 
           <div class="grid grid-cols-1 items-center gap-6">
             <div class="flex items-center justify-center">
-              <svg width="220" height="220" viewBox="0 0 100 100" role="img">
-                <circle cx="50" cy="50" r="44" fill="none" stroke="#e5e7eb" stroke-width="6"/>
+              <svg width="200" height="200" viewBox="0 0 100 100" role="img">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" stroke-width="4"/>
                 <circle
                   id="anl-donut-incorrect"
                   cx="50"
                   cy="50"
-                  r="44"
+                  r="40"
                   fill="none"
                   stroke="#fb7185"
-                  stroke-width="6"
+                  stroke-width="4"
                   stroke-linecap="round"
                   stroke-dasharray="276"
                   stroke-dashoffset="276"
@@ -105,48 +105,48 @@
                   id="anl-donut-correct"
                   cx="50"
                   cy="50"
-                  r="44"
+                  r="40"
                   fill="none"
                   stroke="#34d399"
-                  stroke-width="6"
+                  stroke-width="4"
                   stroke-linecap="round"
                   stroke-dasharray="276"
                   stroke-dashoffset="276"
                   transform="rotate(-90 50 50)"
                 />
                 <circle cx="50" cy="50" r="36" fill="#fff"/>
-                <text id="anl-donut-percent" x="50" y="48" text-anchor="middle" font-size="18" font-weight="900" fill="#0f172a">0%</text>
+                <text id="anl-donut-percent" x="50" y="48" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">0%</text>
                 <text x="50" y="62" text-anchor="middle" font-size="4" font-weight="900" fill="#64748b">CORRECT + USING HINTS</text>
               </svg>
             </div>
 
             <div>
-              <p class="text-slate-700 text-sm mb-2" id="anl-answer-summary">You completed 1/1 questions. You answered:</p>
-              <ul class="space-y-1 text-sm">
+              <p class="text-slate-700 text-[10px] mb-2" id="anl-answer-summary">You completed 1/1 questions. You answered:</p>
+              <ul class="space-y-1 text-[10px]">
                 <li class="flex items-center gap-2">
                   <span class="h-3 w-5 rounded inline-block" style="background: linear-gradient(45deg, rgb(57, 214, 172) 30%, rgba(57, 214, 172, 0.6) 100%);"></span>
-                  <span class="font-semibold"><span id="anl-correct-percent">0%</span> correctly</span>
-                  <span> (<span id="anl-correct-count">0</span> questions)</span>
+                  <span class="font-semibold text-[10px]"><span id="anl-correct-percent">0%</span> correctly</span>
+                  <span class="text-[12px]"> (<span id="anl-correct-count">0</span> questions)</span>
                 </li>
                 <li class="flex items-center gap-2">
                   <span class="h-3 w-5 rounded inline-block" style="background: linear-gradient(45deg, rgb(252, 211, 77) 30%, rgba(252, 211, 77, 0.7) 100%);"></span>
-                  <span class="font-semibold"><span id="anl-hints-percent">0%</span> correctly using hints</span>
-                  <span> (<span id="anl-hints-count">0</span> questions)</span>
+                  <span class="font-semibold text-[10px]"><span id="anl-hints-percent">0%</span> correctly using hints</span>
+                  <span class="text-[10px]"> (<span id="anl-hints-count">0</span> questions)</span>
                 </li>
                 <li class="flex items-center gap-2">
                   <span class="h-3 w-5 rounded inline-block" style="background: linear-gradient(45deg, rgb(251, 113, 133) 30%, rgba(251, 113, 133, 0.7) 100%);"></span>
-                  <span class="font-semibold"><span id="anl-incorrect-percent">100%</span> incorrectly</span>
-                  <span> (<span id="anl-incorrect-count">1</span> question)</span>
+                  <span class="font-semibold text-[10px]"><span id="anl-incorrect-percent">100%</span> incorrectly</span>
+                  <span class="text-[10px]"> (<span id="anl-incorrect-count">1</span> question)</span>
                 </li>
               </ul>
 
               <div class="mt-4 grid grid-cols-2 gap-3">
                 <button id="btn-repeat" type="button"
-                  class="rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50">
+                  class="rounded-md border border-slate-300 bg-white px-4 py-2.5 text-[12px] font-semibold text-slate-800 shadow-sm hover:bg-slate-50">
                   Repeat Session
                 </button>
                 <button id="btn-resume" type="button"
-                  class="rounded-md bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-800">
+                  class="rounded-md bg-teal-700 px-4 py-2.5 text-[12px] font-semibold text-white shadow-sm hover:bg-teal-800">
                   Resume Session
                 </button>
               </div>
@@ -158,41 +158,41 @@
   <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm overflow-hidden">
     <div>
       <div class="flex items-center justify-between">
-        <h3 class="text-[16px] font-semibold">Study recommendations</h3>
+        <h3 class="text-[13px] font-semibold">Study recommendations</h3>
       </div>
       <hr class="-mx-4 mt-3 border-slate-200" />
     </div>
 
     <div class="-mx-4 bg-slate-50">
-      <div class="flex gap-6 text-[14px] border-b border-slate-200">
-        <button data-tab="articles" class="tab-btn px-5 py-3 -mt-px border-t-4 border-slate-500 font-semibold text-slate-900 bg-white">Articles</button>
-        <button data-tab="disciplines" class="tab-btn px-5 py-3 -mt-px border-t-4 border-transparent text-slate-600 hover:text-slate-800 bg-transparent">Disciplines</button>
-        <button data-tab="systems" class="tab-btn px-5 py-3 -mt-px border-t-4 border-transparent text-slate-600 hover:text-slate-800 bg-transparent">Systems</button>
+      <div class="flex gap-6 text-[12px] border-b border-slate-200">
+        <button data-tab="articles" class="tab-btn px-5 py-3 mt-0 text-[11px] shadow-[inset_0_3px_0_0_rgb(100_116_139)] text-slate-900 bg-white">Articles</button>
+        <button data-tab="disciplines" class="tab-btn px-5 py-3 mt-0 text-[11px] shadow-[inset_0_3px_0_0_transparent] text-slate-600 hover:text-slate-800 bg-transparent">Disciplines</button>
+        <button data-tab="systems" class="tab-btn px-5 py-3 mt-0 text-[11px] shadow-[inset_0_3px_0_0_transparent] text-slate-600 hover:text-slate-800 bg-transparent">Systems</button>
       </div>
     </div>
 
-    <div id="tab-articles" class="tab-panel space-y-3 border-l-4 border-transparent collapsed -ml-4 pl-4 -mb-4 pb-4">
-      <div id="rec-item" class="rounded-lg p-4">
+    <div id="tab-articles" class="tab-panel space-y-3 border-l-[3px] border-transparent collapsed -ml-4 pl-4 -mb-4 pb-4">
+      <div id="rec-item" class="rounded-lg px-0 pt-4 pb-0">
         <div class="flex items-start justify-between gap-3">
           <div class="flex flex-1 items-start gap-3">
-            <div class="flex h-9 w-9 items-center justify-center rounded-md text-slate-600">
+            <div class="flex h-6 w-6 items-center justify-center rounded-md text-[#4ba4b6]">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 2h16v20H4zm12 4H8m6 4H8"/><path d="M8 14h8v4H8z"/></svg>
             </div>
             <div class="min-w-0 flex-1">
-              <a href="#" class="block text-[18px] font-semibold text-slate-900 hover:underline" data-testid="recommendation-item-link">1. Pneumonia</a>
+              <a href="#" class="block text-[13ç2px] font-normal text-slate-900 hover:underline" data-testid="recommendation-item-link">1. Atrioventricular block</a>
               <div class="mt-2 h-1.5 w-full rounded-full bg-slate-200">
                 <div id="anl-topic-progress" class="h-1.5 rounded-full bg-rose-400" style="width:7%;"></div>
               </div>
             </div>
           </div>
 
-          <div class="flex items-center gap-2">
-            <button type="button" class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold hover:bg-slate-50">
-              <svg xmlns="http://www.w3.org/2000/svg" width="17" height="16" viewBox="0 0 17 16" class="text-slate-700"><path fill="currentColor" d="M6 1a1 1 0 0 1 1-1h2a1 1 0 0 1 0 2H7a1 1 0 0 1-1-1m3 5a1 1 0 0 0-2 0v2h2z"/><path fill="currentColor" fill-rule="evenodd" d="M8 2a6 6 0 0 1 5.827 4.565 2.414 2.414 0 0 1 1.384 4.226l-.007.006L9.4 15.76a1 1 0 0 1-.65.24H6.5a1 1 0 0 1-.98-1.197l.248-1.232A6.002 6.002 0 0 1 8 2M4 8a4 4 0 0 1 7.92-.801l.009.045-5.348 4.543.015-.04A4 4 0 0 1 4 8m9.353.659a.414.414 0 0 1 .547.622L8.38 14h-.659l.135-.671 5.487-4.662z" clip-rule="evenodd"/></svg>
+          <div class="flex items-center gap-1">
+            <button type="button" class="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2 py-1 text-[11px] font-semibold hover:bg-slate-50">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="14" viewBox="0 0 17 16" class="text-slate-700"><path fill="currentColor" d="M6 1a1 1 0 0 1 1-1h2a1 1 0 0 1 0 2H7a1 1 0 0 1-1-1m3 5a1 1 0 0 0-2 0v2h2z"/><path fill="currentColor" fill-rule="evenodd" d="M8 2a6 6 0 0 1 5.827 4.565 2.414 2.414 0 0 1 1.384 4.226l-.007.006L9.4 15.76a1 1 0 0 1-.65.24H6.5a1 1 0 0 1-.98-1.197l.248-1.232A6.002 6.002 0 0 1 8 2M4 8a4 4 0 0 1 7.92-.801l.009.045-5.348 4.543.015-.04A4 4 0 0 1 4 8m9.353.659a.414.414 0 0 1 .547.622L8.38 14h-.659l.135-.671 5.487-4.662z" clip-rule="evenodd"/></svg>
               Qbank
             </button>
-            <button id="rec-toggle" type="button" aria-label="collapse" class="rounded-md p-2 text-slate-500 hover:bg-slate-100 transition">
-              <svg id="rec-chevron" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="transition-transform">
+            <button id="rec-toggle" type="button" aria-label="collapse" class="rounded-md p-1 text-slate-500 hover:bg-slate-100 transition">
+              <svg id="rec-chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="transition-transform">
                 <path d="m6 9 6 6 6-6"></path>
               </svg>
             </button>
@@ -200,31 +200,31 @@
         </div>
 
         <div id="rec-detail" class="overflow-hidden transition-[max-height] duration-300 ease-in-out" style="max-height:0px">
-          <div class="mt-5 grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div class="mt-5 grid grid-cols-1 gap-2 md:grid-cols-2">
             <div class="flex items-start gap-3">
               <span class="mt-1 inline-block h-3 w-6 rounded-full" style="background: linear-gradient(45deg, rgb(57, 214, 172) 30%, rgba(57, 214, 172, 0.6) 100%);"></span>
-              <div>
+              <div class="text-[11px]">
                 <div class="font-semibold text-slate-700">0% correctly</div>
                 <div class="text-slate-600">(<span>0 questions</span>)</div>
               </div>
             </div>
             <div class="flex items-start gap-3">
               <span class="mt-1 inline-block h-3 w-6 rounded-full" style="background: linear-gradient(45deg, rgb(252, 211, 77) 30%, rgba(252, 211, 77, 0.8) 100%);"></span>
-              <div>
+              <div class="text-[11px]">
                 <div class="font-semibold text-slate-700">0% correctly using hints</div>
                 <div class="text-slate-600">(<span>0 questions</span>)</div>
               </div>
             </div>
             <div class="flex items-start gap-3">
               <span class="mt-1 inline-block h-3 w-6 rounded-full" style="background: linear-gradient(45deg, rgb(251, 113, 133) 30%, rgba(251, 113, 133, 0.8) 100%);"></span>
-              <div>
+              <div class="text-[11px]">
                 <div class="font-semibold text-slate-700">100% incorrectly</div>
                 <div class="text-slate-600">(<span>3 questions</span>)</div>
               </div>
             </div>
             <div class="flex items-start gap-3">
               <span class="mt-1 inline-block h-3 w-6 rounded-full" style="background: linear-gradient(45deg, rgb(148, 163, 184) 30%, rgba(148, 163, 184, 0.7) 100%);"></span>
-              <div>
+              <div class="text-[11px]">
                 <div class="font-semibold text-slate-700">Not answered</div>
                 <div class="text-slate-600"><span>38 questions</span></div>
               </div>
@@ -233,31 +233,31 @@
 
           <hr class="my-6 border-slate-200" />
 
-          <div class="grid grid-cols-1 gap-6 min-[1300px]:grid-cols-2 text-[14px] leading-snug">
+          <div class="grid grid-cols-1 gap-3 min-[1300px]:grid-cols-2 text-[14px] leading-snug">
             <div>
               <div class="flex items-center gap-3">
                 <span class="text-slate-800 font-semibold">1st</span>
                 <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">PRIORITY</span>
               </div>
-              <p class="mt-3 italic text-[12px] leading-snug text-slate-600">Learning priority based on your performance and exam representation. The higher up in the list, the more you should study this topic.</p>
+              <p class="mt-3 italic text-[10px] leading-snug text-slate-600">Learning priority based on your performance and exam representation. The higher up in the list, the more you should study this topic.</p>
             </div>
             <div>
               <div class="flex items-center gap-3">
                 <span class="text-slate-800 font-semibold" id="anl-topic-progress-label">7%</span>
                 <span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">COMPLETED</span>
               </div>
-              <p class="mt-3 italic text-[12px] leading-snug text-slate-600">41 questions cover this topic for Continuing medical education.</p>
+              <p class="mt-3 italic text-[10px] leading-snug text-slate-600">41 questions cover this topic for Continuing medical education.</p>
             </div>
             <div>
               <div class="flex items-center gap-3">
                 <span class="text-slate-800 font-semibold">High</span>
                 <span class="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">REPRESENTATION</span>
               </div>
-              <p class="mt-3 italic text-[12px] leading-snug text-slate-600">This topic represents 0.50% of the practice questions for Continuing medical education.</p>
+              <p class="mt-3 italic text-[10px] leading-snug text-slate-600">This topic represents 0.50% of the practice questions for Continuing medical education.</p>
             </div>
           </div>
 
-          <hr class="mt-6 border-slate-200" />
+          
         </div>
       </div>
     </div>
@@ -276,12 +276,12 @@
             </button>
           </div>
 
-          <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div>
-              <table class="min-w-[900px] text-left text-sm">
+          <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="min-w-[900px] w-full table-fixed text-left text-sm">
                 <thead class="text-slate-600 border-b border-slate-200">
                   <tr>
-                    <th class="px-4 py-3 font-semibold border-r border-slate-200 w-[45%]" data-sortable="true" data-sort-direction="asc">
+                    <th class="px-4 py-3 font-semibold border-r border-slate-200 w-[30%] sticky left-0 z-20 bg-white overflow-hidden" data-sortable="true" data-sort-direction="asc">
                       <span class="inline-flex items-center gap-1 cursor-pointer select-none">
                         <span>Questions</span>
                         <span aria-hidden="true" class="css-1d9wsjc-SortIcon e14h4dsy0">
@@ -350,10 +350,10 @@
                 </thead>
                 <tbody id="anl-table-body" class="divide-y divide-slate-100">
                   <tr>
-                    <td class="px-4 py-3 align-top border-r border-slate-200 w-[45%]">
-                      <div class="flex items-baseline gap-2">
-                        <div class="text-slate-500">1.</div>
-                        <a href="#" class="text-slate-800 hover:underline">
+                    <td class="px-4 py-3 align-top border-r border-slate-200 w-[30%] sticky left-0 z-10 bg-white overflow-hidden max-w-0">
+                      <div class="flex items-baseline gap-2 min-w-0 w-full max-w-0">
+                        <div class="text-slate-500 shrink-0">1.</div>
+                        <a href="#" class="text-slate-800 hover:underline flex-1 min-w-0 truncate whitespace-nowrap block">
                           Loading question...
                         </a>
                       </div>
@@ -395,7 +395,7 @@
               <button
                 type="button"
                 aria-label="Go to prev page"
-                class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-300 hover:bg-slate-100 disabled:cursor-default disabled:text-slate-300 disabled:hover:bg-transparent"
+                class="inline-flex h-6 w-6 items-center justify-center rounded-full text-slate-300 hover:bg-slate-100 disabled:cursor-default disabled:text-slate-300 disabled:hover:bg-transparent text-[11px]"
                 disabled
               >
                 <svg
@@ -408,7 +408,7 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  class="h-4 w-4"
+                  class="h-3 w-3"
                 >
                   <path d="M10 12 6 8l4-4"></path>
                 </svg>
@@ -421,7 +421,7 @@
               <button
                 type="button"
                 aria-label="Go to next page"
-                class="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-slate-300"
+                class="inline-flex h-6 w-6 items-center justify-center rounded-full text-slate-700 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-slate-300 text-[11px]"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -433,7 +433,7 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  class="h-4 w-4"
+                  class="h-3 w-3"
                 >
                   <path d="m6 12 4-4-4-4"></path>
                 </svg>
@@ -456,11 +456,11 @@
       btn.addEventListener('click', () => {
         const key = btn.dataset.tab;
         tabBtns.forEach(b => {
-          b.classList.remove('border-slate-500','font-semibold','text-slate-900','bg-white');
-          b.classList.add('border-transparent','text-slate-600','bg-transparent');
+          b.classList.remove('shadow-[inset_0_3px_0_0_rgb(100_116_139)]','font-semibold','text-slate-900','bg-white');
+          b.classList.add('shadow-[inset_0_3px_0_0_transparent]','text-slate-600','bg-transparent');
         });
-        btn.classList.remove('border-transparent','text-slate-600','bg-transparent');
-        btn.classList.add('border-slate-500','font-semibold','text-slate-900','bg-white');
+        btn.classList.remove('shadow-[inset_0_3px_0_0_transparent]','text-slate-600','bg-transparent');
+        btn.classList.add('shadow-[inset_0_3px_0_0_rgb(100_116_139)]','text-slate-900','bg-white');
         Object.values(panels).forEach(p => p.classList.add('hidden'));
         panels[key].classList.remove('hidden');
       });
@@ -677,10 +677,10 @@ async function enrichQuestionsWithRealText(questions) {
         ? `${row.peerPercent}%`
         : '—';
       return `<tr>
-        <td class="px-4 py-3 align-top border-r border-slate-200 w-[45%]">
-          <div class="flex items-baseline gap-2">
-            <div class="text-slate-500">${row.index}.</div>
-            <span class="text-slate-800">${escapeHtml(row.question)}</span>
+        <td class="px-4 py-3 align-top border-r border-slate-200 w-[30%] sticky left-0 z-10 bg-white">
+          <div class="flex items-baseline gap-2 min-w-0 w-full">
+            <div class="text-slate-500 shrink-0">${row.index}.</div>
+            <span class="text-slate-800 flex-1 min-w-0 truncate whitespace-nowrap block">${escapeHtml(row.question)}</span>
           </div>
         </td>
         <td class="px-4 py-3 align-top">${renderStatusBadge(row.statusKey)}</td>
@@ -909,4 +909,4 @@ async function enrichQuestionsWithRealText(questions) {
 </body>
 </html>
 
-<!-- ===300 diciembre === -->
+<!-- ===400 diciembre === -->

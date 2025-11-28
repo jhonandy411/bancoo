@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Triangle Segments Loader</title>
+
+<style>
+  .triangle-loader {
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+  }
+
+  .triangle-loader svg {
+    width: 100%;
+    height: 100%;
+    stroke: rgb(93,150,160);  /* color solicitado */
+    stroke-width: 0.9;        /* ← más fino */
+    stroke-linecap: round;
+    fill: none;
+
+    /* 3 segmentos separados */
+    stroke-dasharray: 8.5 8.7 8.5 8.7 8.5 8.7;
+    stroke-dashoffset: 0;
+
+    animation: triangleSegments 1.1s linear infinite reverse; /* antihorario */
+  }
+
+  @keyframes triangleSegments {
+    0%   { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: -51.6; }
+  }
+</style>
+
+</head>
+<body>
+
+<div class="triangle-loader">
+  <svg viewBox="0 0 22 22">
+    <path d="M11 3 L19 19 L3 19 Z"></path>
+  </svg>
+</div>
+
+</body>
+</html>

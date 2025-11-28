@@ -1,0 +1,54 @@
+<div id="dynamic-content-loader" style="padding: 20px; text-align: center;">
+  <p>Loading content from Firestore...</p>
+</div>
+
+<script>
+  (function () {
+    const docPath = '/supracategorias/Cardiología y cirugía cardiovascular/categorias/Taquicardias/subcategorias/Taquicardia supraventricular';
+    const container = document.getElementById('dynamic-content-loader');
+
+    // Ensure Firebase is initialized (it should be from portal1.html)
+    if (typeof db !== 'undefined') {
+      console.log('Fetching content from:', docPath);
+      db.doc(docPath).get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          if (data.html_completo) {
+            // Replace the loader with the rich content
+            // We use a parent wrapper to replace the loader div itself if needed, 
+            // or just update the main-content if we can access it.
+            // Since this is injected via innerHTML, we can just replace the container's parent content or itself.
+
+            // Find the main-content container
+            const mainContent = document.getElementById('main-content');
+            if (mainContent) {
+              mainContent.innerHTML = data.html_completo;
+
+              // Re-run any necessary scripts or styles if needed
+              // (Note: inline scripts in the fetched HTML might not run automatically depending on how it's inserted,
+              // but portal1.html usually handles this. If not, we might need a safer injection method, 
+              // but innerHTML is what was requested).
+            } else {
+              // Fallback if main-content isn't found (e.g. standalone)
+              document.body.innerHTML = data.html_completo;
+            }
+          } else {
+            container.innerHTML = '<p style="color:red">Document found, but no HTML content.</p>';
+          }
+        } else {
+          container.innerHTML = '<p style="color:red">Content not found in Firestore.</p>';
+        }
+      }).catch(error => {
+        console.error('Error loading dynamic content:', error);
+        container.innerHTML = '<p style="color:red">Error loading content: ' + error.message + '</p>';
+      });
+    } else {
+      container.innerHTML = '<p style="color:red">Firebase not initialized.</p>';
+    }
+  })();
+</script>
+
+
+
+
+<!-- 22222 -->
