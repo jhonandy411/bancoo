@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pathology Viewer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+  --bg: #0d0f0e; --surface: #141716; --border: #2a2e2c;
+  --accent: #c8f060; --accent2: #60f0c8;
+  --text: #e8ede9; --muted: #6b7470;
+  --pin: #c8f060; --pin-glow: rgba(200,240,96,0.4);
+
+  /* más celeste */
+  --region: #67dfff;
+  --region-glow: rgba(103,223,255,0.42);
+
+  --panel-w: 340px;
+}
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+  header { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface); z-index: 10; }
+  header h1 { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; }
+  header span { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+  .badge { background: var(--accent); color: #0d0f0e; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 20px; display:none; }
+
+  .workspace { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+  /* UPLOAD */
+  #upload-zone { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 20; background: var(--bg); }
+  .upload-card { display: flex; flex-direction: column; align-items: center; gap: 18px; max-width: 480px; width: 90%; }
+  .upload-title { font-family: 'Playfair Display', serif; font-size: 26px; text-align: center; line-height: 1.2; }
+  .upload-title span { color: var(--accent); }
+  .upload-sub { font-size: 13px; color: var(--muted); text-align: center; line-height: 1.6; }
+  .drop-box { width: 100%; border: 1.5px dashed var(--border); border-radius: 12px; padding: 36px 24px; display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; transition: all 0.2s; position: relative; }
+  .drop-box:hover, .drop-box.dragover { border-color: var(--accent); background: rgba(200,240,96,0.04); }
+  .drop-box input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .drop-icon { font-size: 24px; }
+  .drop-label { font-size: 14px; }
+  .drop-hint { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+  .drop-status { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); display: none; }
+  .divider { display: flex; align-items: center; gap: 12px; width: 100%; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .divider span { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+  .json-drop { width: 100%; border: 1.5px dashed var(--border); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; position: relative; }
+  .json-drop:hover { border-color: var(--accent2); background: rgba(96,240,200,0.04); }
+  .json-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .json-icon { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent2); background: rgba(96,240,200,0.1); padding: 3px 8px; border-radius: 4px; }
+  .json-label { font-size: 13px; }
+  .json-status { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent2); display: none; }
+  .upload-note { font-size: 11px; color: var(--muted); text-align: center; line-height: 1.6; background: rgba(200,240,96,0.04); border: 1px solid rgba(200,240,96,0.12); border-radius: 8px; padding: 10px 14px; }
+  .upload-note code { font-family: 'DM Mono', monospace; color: var(--accent2); font-size: 10px; }
+
+  /* VIEWER */
+  #viewer { display: none; flex: 1; overflow: hidden; position: relative; }
+  #img-container { position: absolute; inset: 0; overflow: hidden; cursor: grab; background: var(--bg); }
+  #img-container.grabbing { cursor: grabbing; }
+  #img-wrap {
+  position: absolute;
+  user-select: none;
+  transform-origin: center center;
+  transition: none;
+}
+
+#img-wrap.rotating {
+  transition: transform 2s cubic-bezier(0.16, 0.84, 0.24, 1);
+}
+
+#img-wrap.no-transition {
+  transition: none !important;
+}
+  #main-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; pointer-events: none; user-select: none; }
+
+  /* PINS */
+ .pin{
+  position:absolute;
+  left:0;
+  top:0;
+  width:60px;
+  height:56px;
+  --pin-rotation: 0deg;
+  transform:translate(-14.2px, -42.2px) rotate(var(--pin-rotation));
+  cursor:pointer;
+  z-index:5;
+  transition:transform 0.15s ease, filter 0.15s ease;
+  transform-origin:14.2px 42.2px; /* la punta del pin */
+}
+
+.pin:hover,
+.pin.active{
+  transform:translate(-14.2px, -42.2px) rotate(var(--pin-rotation)) scale(1.18);
+  filter:drop-shadow(0 7px 16px rgba(0,0,0,0.62));
+}
+
+  .pin-svg{
+    width:100%;
+    height:100%;
+    display:block;
+    overflow:visible;
+    pointer-events:none;
+  }
+.pin-text{
+  fill:#ffffff;
+  font-family:'DM Mono', monospace;
+  font-size:9px;
+  font-weight:600;
+  text-anchor:middle;
+  dominant-baseline:middle;
+  pointer-events:none;
+  user-select:none;
+
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+
+  paint-order: stroke fill;
+  stroke: rgba(0,0,0,0.35);
+  stroke-width: 0.8px;
+}
+
+  /* REGION SVG */
+  .region-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 4; }
+.region-poly {
+  fill: rgba(0, 190, 255, 0.55);   /* más intenso y menos transparente */
+  stroke: rgba(0, 200, 255, 0.95);
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  cursor: pointer;
+  pointer-events: all;
+  transition: fill 0.2s, stroke 0.2s;
+}
+
+.region-poly:hover,
+.region-poly.active {
+  fill: rgba(0, 200, 255, 0.70);
+  stroke: #00d2ff;
+  stroke-width: 2.8;
+}
+
+.region-badge{
+  position:absolute;
+  left:0;
+  top:0;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:6;
+  pointer-events:none;
+  user-select:none;
+
+  transform:translate(-50%, -50%) rotate(var(--region-rotation, 0deg));
+  transform-origin:center center;
+
+  background: rgba(150, 158, 170, 0.18);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+
+  border: 1px solid rgba(255,255,255,0.16);
+
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.20),
+    inset 0 -1px 2px rgba(0,0,0,0.10),
+    0 4px 14px rgba(0,0,0,0.16);
+}
+
+.region-badge-text{
+  color:#ffffff;
+  font-family:'DM Mono', monospace;
+  font-size:9px;
+  font-weight:600;
+  line-height:1;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings:"tnum";
+  -webkit-text-stroke: 0.7px rgba(0,0,0,0.30);
+  paint-order: stroke fill;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.22);
+}
+
+  /* PANEL */
+  #panel { width: var(--panel-w); flex-shrink: 0; border-left: 1px solid var(--border); background: var(--surface); display: none; flex-direction: column; overflow: hidden; }
+  .panel-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .panel-header h2 { font-family: 'Playfair Display', serif; font-size: 14px; margin-bottom: 4px; }
+  .panel-header p { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .anno-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .anno-list::-webkit-scrollbar { width: 4px; }
+  .anno-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .anno-item { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; cursor: pointer; transition: all 0.15s; position: relative; }
+  .anno-item:hover { border-color: rgba(200,240,96,0.3); background: rgba(200,240,96,0.04); }
+  .anno-item.active { border-color: var(--accent); background: rgba(200,240,96,0.07); }
+  .anno-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); border-radius: 8px 0 0 8px; }
+  .anno-item.region-item:hover { border-color: rgba(56,189,248,0.4); background: rgba(56,189,248,0.04); }
+  .anno-item.region-item.active { border-color: var(--region); background: rgba(56,189,248,0.07); }
+  .anno-item.region-item.active::before { background: var(--region); }
+  .anno-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); margin-bottom: 4px; }
+  .anno-num.region-num { color: var(--region); }
+  .anno-title { font-size: 12px; font-weight: 500; line-height: 1.4; margin-bottom: 3px; }
+  .anno-desc { font-size: 11px; color: var(--muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  /* DETAIL */
+  #detail-panel { border-top: 1px solid var(--border); padding: 16px 20px; display: none; flex-direction: column; gap: 8px; background: rgba(200,240,96,0.03); flex-shrink: 0; max-height: 220px; overflow-y: auto; }
+  #detail-panel.visible { display: flex; }
+  .detail-close { align-self: flex-end; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; }
+  .detail-close:hover { color: var(--text); }
+  .detail-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); }
+  .detail-title { font-family: 'Playfair Display', serif; font-size: 13px; line-height: 1.3; }
+  .detail-text { font-size: 11px; color: #8a9490; line-height: 1.6; }
+  .detail-coords { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* TOOLTIP */
+  /* TOOLTIP */
+#tooltip {
+  position: absolute;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  max-width: 260px;
+}
+
+#tooltip.visible {
+  opacity: 1;
+}
+
+.tooltip-inner {
+  position: relative;
+  background: #1a1e1c;
+  border: 1px solid rgba(255,255,255,0.92);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+}
+
+/* triángulo */
+.tooltip-inner::before,
+.tooltip-inner::after {
+  content: "";
+  position: absolute;
+  left: var(--arrow-left, 28px);
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+}
+
+/* borde blanco del triángulo */
+.tooltip-inner::before {
+  border-left: 11px solid transparent;
+  border-right: 11px solid transparent;
+}
+
+/* relleno del triángulo */
+.tooltip-inner::after {
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+}
+
+/* tooltip arriba del punto -> triángulo abajo apuntando hacia abajo */
+#tooltip.arrow-bottom .tooltip-inner::before {
+  bottom: -12px;
+  border-top: 12px solid rgba(255,255,255,0.92);
+}
+
+#tooltip.arrow-bottom .tooltip-inner::after {
+  bottom: -10px;
+  border-top: 10px solid #1a1e1c;
+}
+
+/* tooltip abajo del punto -> triángulo arriba apuntando hacia arriba */
+#tooltip.arrow-top .tooltip-inner::before {
+  top: -12px;
+  border-bottom: 12px solid rgba(255,255,255,0.92);
+}
+
+#tooltip.arrow-top .tooltip-inner::after {
+  top: -10px;
+  border-bottom: 10px solid #1a1e1c;
+}
+
+.tooltip-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: #ffffff;
+  opacity: 0.72;
+  margin-bottom: 4px;
+}
+
+.tooltip-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 13px;
+  margin-bottom: 6px;
+  line-height: 1.3;
+  color: #ffffff;
+}
+
+.tooltip-text {
+  font-size: 11px;
+  color: #c7cdca;
+  line-height: 1.5;
+}
+
+  /* CONTROLS */
+  .zoom-controls { position: absolute; bottom: 20px; left: 20px; display: flex; flex-direction: column; gap: 4px; z-index: 10; }
+  .zoom-btn { width: 34px; height: 34px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-family: 'DM Mono', monospace; user-select: none; }
+  .zoom-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .coords-bar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(20,23,22,0.85); border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); backdrop-filter: blur(8px); z-index: 10; white-space: nowrap; }
+
+  /* TOP TOOLBAR */
+  .top-toolbar {
+    position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 0;
+    background: rgba(15,15,15,0.82); backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 14px;
+    padding: 7px 10px; z-index: 20;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.45);
+  }
+  .tb-btn {
+    width: 36px; height: 36px; border-radius: 8px; border: none;
+    background: none; color: rgba(255,255,255,0.75); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .tb-btn svg { width: 18px; height: 18px; }
+  .tb-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .tb-btn.active { background: rgba(255,255,255,0.15); color: #fff; }
+  .tb-sep { width: 1px; height: 22px; background: rgba(255,255,255,0.15); margin: 0 6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Pathology Viewer</h1>
+  <span id="header-sub">Upload image + JSON to begin</span>
+  <div class="badge" id="anno-count"></div>
+</header>
+
+<div class="workspace">
+
+  <div id="upload-zone">
+    <div class="upload-card">
+      <div class="upload-title">Pathology Image<br><span>Annotation Viewer</span></div>
+      <p class="upload-sub">Upload the slide image and the annotations JSON generated by the universal downloader.</p>
+
+      <div class="drop-box" id="img-drop">
+        <input type="file" id="img-input" accept="image/*">
+        <div class="drop-icon">🔬</div>
+        <span class="drop-label">Drop slide image here</span>
+        <span class="drop-hint">PNG · JPG</span>
+        <span class="drop-status" id="img-status"></span>
+      </div>
+
+      <div class="divider"><span>then</span></div>
+
+      <div class="json-drop" id="json-drop-box">
+        <input type="file" id="json-input" accept=".json,application/json">
+        <span class="json-icon">JSON</span>
+        <span class="json-label">Drop annotations JSON file</span>
+        <span class="json-status" id="json-status"></span>
+      </div>
+
+      <div class="upload-note">
+        JSON del descargador universal:<br>
+        <code>{ "slide": {...}, "annotations": [{ "type": "pin"|"region", ... }] }</code>
+      </div>
+    </div>
+  </div>
+
+  <div id="viewer">
+    <div id="img-container">
+      <div id="img-wrap">
+        <img id="main-img" src="" alt="" draggable="false">
+      </div>
+    </div>
+
+    <!-- Toolbar flotante superior centrado -->
+    <div class="top-toolbar">
+      <button class="tb-btn" id="tb-nums" onclick="tbToggleNumbers()" title="Toggle numbers">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="6" height="6" rx="1"/><path d="M21 6h-6M21 12h-6M15 18h6"/><path d="M3 17l2-2v4"/></svg>
+      </button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" id="tb-info"   onclick="tbInfo()"   title="Info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      </button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" id="tb-pins"   onclick="tbTogglePins()"    title="Toggle pins">
+        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/><line x1="12" y1="2" x2="12" y2="7" stroke="currentColor" stroke-width="2"/><line x1="12" y1="17" x2="12" y2="22" stroke="currentColor" stroke-width="2"/><line x1="2" y1="12" x2="7" y2="12" stroke="currentColor" stroke-width="2"/><line x1="17" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" id="tb-fit"    onclick="resetView()"       title="Fit to screen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      </button>
+    </div>
+
+    <div class="zoom-controls">
+  <div class="zoom-btn" onclick="zoom(1.25)">+</div>
+  <div class="zoom-btn" onclick="zoom(0.8)">−</div>
+  <div class="zoom-btn" onclick="rotateLeft()" title="Rotate left">↺</div>
+  <div class="zoom-btn" onclick="rotateRight()" title="Rotate right">↻</div>
+  <div class="zoom-btn" onclick="resetView()" style="font-size:12px" title="Reset">⊡</div>
+</div>
+
+
+    <div class="coords-bar" id="coords-bar">Powered by Bancomicina Zoom Ⓒ 2026 Smart In Media</div>
+    <div id="tooltip">
+      <div class="tooltip-inner">
+        <div class="tooltip-num"   id="tt-num"></div>
+        <div class="tooltip-title" id="tt-title"></div>
+        <div class="tooltip-text"  id="tt-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel">
+    <div class="panel-header">
+      <h2 id="panel-title">Annotations</h2>
+      <p  id="panel-meta">—</p>
+    </div>
+    <div class="anno-list" id="anno-list"></div>
+    <div id="detail-panel">
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+      <div class="detail-num"    id="dp-num"></div>
+      <div class="detail-title"  id="dp-title"></div>
+      <div class="detail-text"   id="dp-text"></div>
+      <div class="detail-coords" id="dp-coords"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+'use strict';
+
+const MAX_SCALE = 3;
+const MIN_SCALE = 0.2;
+
+// ── STATE ─────────────────────────────────────────────────────
+let imgSrc = null;
+let pins   = [];
+let regions = [];
+let scale = 1, panX = 0, panY = 0;
+let rotation = 0;
+let isRotating = false;
+let imgW = 1, imgH = 1;
+let SLIDE_W = 0, SLIDE_H = 0;
+const PAN_SENSITIVITY = 0.65;   // menor = arrastra menos
+const ZOOM_IN_FACTOR  = 1.06;   // antes 1.12
+const ZOOM_OUT_FACTOR = 0.94;   // antes 0.89
+
+// ── PARSE JSON ────────────────────────────────────────────────
+function parseJSON(data) {
+  const outPins = [], outRegs = [];
+
+  if (data && data.slide && Array.isArray(data.annotations)) {
+    SLIDE_W = data.slide.width;
+    SLIDE_H = data.slide.height;
+
+    data.annotations.forEach((a, i) => {
+      const id   = a.id ?? i + 1;
+      
+      // Soporte tanto para formato procesado como RAW
+      const title = a.title || a.userDefined?.annotationTitle || `Annotation ${id}`;
+      const desc  = a.description || a.userDefined?.annotationText || '';
+      
+      // Determinar si es región (en RAW typeId suele ser 2 o más para polígonos)
+      const isRegion = a.type === 'region' || (a.typeId !== undefined && a.typeId !== 1);
+
+      if (isRegion) {
+        let points = a.points;
+        let bbox   = a.bbox;
+        let center = a.center;
+
+        // Si es RAW y tiene 'coord' como array de puntos
+        if (!points && a.coord && Array.isArray(a.coord) && Array.isArray(a.coord[0])) {
+          points = a.coord.map(p => {
+            const x = Math.abs(p[0]);
+            const y = Math.abs(p[1]);
+            return {
+              x, y,
+              normX: x / SLIDE_W,
+              normY: y / SLIDE_H
+            };
+          });
+          
+          const xs = points.map(p => p.x), ys = points.map(p => p.y);
+          const minX = Math.min(...xs), maxX = Math.max(...xs);
+          const minY = Math.min(...ys), maxY = Math.max(...ys);
+          const midX = (minX + maxX) / 2;
+          const midY = (minY + maxY) / 2;
+          
+          bbox = {
+            minX, minY, maxX, maxY,
+            normMinX: minX / SLIDE_W, normMinY: minY / SLIDE_H,
+            normMaxX: maxX / SLIDE_W, normMaxY: maxY / SLIDE_H
+          };
+          center = { 
+            x: midX, y: midY, 
+            normX: midX / SLIDE_W, normY: midY / SLIDE_H 
+          };
+        }
+
+        if (points && points.length) {
+          outRegs.push({ id, title, description: desc, points, bbox, center });
+        }
+      } else {
+        // Es un PIN
+        let normX = null, normY = null;
+        
+        // 1. Prioridad: Formato procesado con campos explícitos
+        if (a.coords?.normalized?.x != null) {
+          normX = a.coords.normalized.x;
+          normY = a.coords.normalized.y;
+        } else if (a.coords?.original?.x != null) {
+          const sw = a.coords.original.image_width  || SLIDE_W;
+          const sh = a.coords.original.image_height || SLIDE_H;
+          normX = a.coords.original.x / sw;
+          normY = a.coords.original.y / sh;
+        } 
+        // 2. Formato RAW: coord: [x, y]
+        else if (a.coord && Array.isArray(a.coord) && typeof a.coord[0] === 'number') {
+          normX = Math.abs(a.coord[0]) / SLIDE_W;
+          normY = Math.abs(a.coord[1]) / SLIDE_H;
+        }
+
+        if (normX == null || isNaN(normX)) normX = 0;
+        if (normY == null || isNaN(normY)) normY = 0;
+        outPins.push({ id, title, description: desc, normX, normY });
+      }
+    });
+
+    // Deduplicar pines si tienen la misma ubicación y título (opcional pero recomendado)
+    const seen = new Set();
+    const finalPins = outPins.filter(p => {
+      const key = `${p.title}|${p.normX.toFixed(6)}|${p.normY.toFixed(6)}`;
+      if (seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+    // Reasignar IDs tras deduplicar
+    finalPins.forEach((p, i) => { p.id = i + 1; });
+    
+    console.log(`📍 ${finalPins.length} pins (de ${outPins.length}) | 🔷 ${outRegs.length} regiones`);
+    return { pins: finalPins, regions: outRegs };
+
+  } else if (Array.isArray(data)) {
+    data.forEach((a, i) => {
+      const normX = SLIDE_W ? Math.abs(a.x || 0) / SLIDE_W : 0;
+      const normY = SLIDE_H ? Math.abs(a.y || 0) / SLIDE_H : 0;
+      outPins.push({ id: a.id ?? i+1, title: a.title || '', description: a.description || '', normX, normY });
+    });
+    return { pins: outPins, regions: outRegs };
+  }
+
+  return { pins: outPins, regions: outRegs };
+}
+
+// ── UPLOADS ───────────────────────────────────────────────────
+document.getElementById('img-input').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    imgSrc = ev.target.result;
+    const s = document.getElementById('img-status');
+    s.textContent = `✓ ${file.name}`; s.style.display = 'block';
+    tryLaunch();
+  };
+  r.readAsDataURL(file);
+});
+
+document.getElementById('json-input').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const parsed = parseJSON(JSON.parse(ev.target.result));
+      pins    = parsed.pins;
+      regions = parsed.regions;
+      const s = document.getElementById('json-status');
+      s.textContent = `✓ ${file.name} · ${pins.length} pins · ${regions.length} regiones`;
+      s.style.display = 'block';
+      tryLaunch();
+    } catch(err) { alert('JSON inválido: ' + err.message); }
+  };
+  r.readAsText(file);
+});
+
+['img-drop','json-drop-box'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('dragover',  e => { e.preventDefault(); el.classList.add('dragover'); });
+  el.addEventListener('dragleave', () => el.classList.remove('dragover'));
+  el.addEventListener('drop',      e => { e.preventDefault(); el.classList.remove('dragover'); });
+});
+
+function tryLaunch() {
+  if (imgSrc && (pins.length || regions.length)) launch();
+}
+
+// ── LAUNCH ────────────────────────────────────────────────────
+function launch() {
+  document.getElementById('upload-zone').style.display = 'none';
+  document.getElementById('viewer').style.display      = 'block';
+  document.getElementById('panel').style.display       = 'flex';
+
+  const img = document.getElementById('main-img');
+  img.onload = () => {
+    imgW = img.naturalWidth;
+    imgH = img.naturalHeight;
+    if (!SLIDE_W) { SLIDE_W = imgW; SLIDE_H = imgH; }
+
+    resetView();
+    renderRegions();
+    renderPins();
+    renderList();
+
+    document.getElementById('header-sub').textContent = `${imgW}×${imgH}px`;
+    const b = document.getElementById('anno-count');
+    b.style.display = 'flex';
+    b.textContent = `${pins.length + regions.length} annotations`;
+    document.getElementById('panel-meta').textContent =
+      `${pins.length} pins · ${regions.length} regions`;
+  };
+  img.src = imgSrc;
+  setupPanZoom();
+}
+
+// ── TRANSFORM ─────────────────────────────────────────────────
+function resetView() {
+  if (isRotating) return;
+
+  const c = document.getElementById('img-container');
+  const w = document.getElementById('img-wrap');
+
+  isRotating = true;
+
+  w.classList.remove('no-transition');
+  w.classList.add('rotating');
+
+  rotation -= ((rotation % 360) + 540) % 360 - 180;
+
+  scale = Math.min(c.clientWidth / imgW, c.clientHeight / imgH) * 0.95;
+  panX = c.clientWidth / 2;
+  panY = c.clientHeight / 2;
+
+  applyTransform();
+
+  clearTimeout(w._rotateTimer);
+  w._rotateTimer = setTimeout(() => {
+    w.classList.remove('rotating');
+    isRotating = false;
+  }, 2050);
+}
+
+function applyTransform() {
+  const w = document.getElementById('img-wrap');
+  w.style.width  = imgW + 'px';
+  w.style.height = imgH + 'px';
+
+  w.style.left = panX + 'px';
+  w.style.top  = panY + 'px';
+
+  w.style.transformOrigin = 'center center';
+  w.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${rotation}deg)`;
+
+  updatePinOrientations();
+  updateRegionLabelOrientations();
+}
+
+
+function updatePinOrientations() {
+  document.querySelectorAll('.pin').forEach(pin => {
+    pin.style.setProperty('--pin-rotation', `${-rotation}deg`);
+  });
+}
+function updateRegionLabelOrientations() {
+  document.querySelectorAll('.region-badge').forEach(label => {
+    label.style.setProperty('--region-rotation', `${-rotation}deg`);
+  });
+}
+
+function zoom(factor) {
+  scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale * factor));
+  applyTransform();
+}
+
+function rotateLeft() {
+  rotateBy(-90);
+}
+
+function rotateRight() {
+  rotateBy(90);
+}
+
+function rotateBy(delta) {
+  if (isRotating) return;
+
+  const w = document.getElementById('img-wrap');
+  isRotating = true;
+
+  w.classList.remove('no-transition');
+  w.classList.add('rotating');
+
+  rotation += delta;
+  applyTransform();
+
+  clearTimeout(w._rotateTimer);
+  w._rotateTimer = setTimeout(() => {
+    w.classList.remove('rotating');
+    isRotating = false;
+  }, 2050);
+}
+
+// ── PAN & ZOOM ────────────────────────────────────────────────
+function setupPanZoom() {
+  const c = document.getElementById('img-container');
+  const w = document.getElementById('img-wrap');
+  let dragging = false, sx = 0, sy = 0;
+
+  c.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    dragging = true;
+   sx = e.clientX;
+sy = e.clientY;
+    w.classList.add('no-transition');
+    c.classList.add('grabbing');
+    hideTooltip();
+  });
+
+ window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+
+  panX += (e.clientX - sx) * PAN_SENSITIVITY;
+  panY += (e.clientY - sy) * PAN_SENSITIVITY;
+  applyTransform();
+
+  sx = e.clientX;
+  sy = e.clientY;
+
+  const r = c.getBoundingClientRect();
+  const localX = e.clientX - r.left - panX;
+  const localY = e.clientY - r.top  - panY;
+
+  const rad = -rotation * Math.PI / 180;
+  const unrotX = (localX * Math.cos(rad) - localY * Math.sin(rad)) / scale;
+  const unrotY = (localX * Math.sin(rad) + localY * Math.cos(rad)) / scale;
+
+  const mx = unrotX + imgW / 2;
+  const my = unrotY + imgH / 2;
+
+ 
+});
+
+  window.addEventListener('mouseup', () => {
+    dragging = false;
+    w.classList.remove('no-transition');
+    c.classList.remove('grabbing');
+  });
+
+  c.addEventListener('wheel', e => {
+    e.preventDefault();
+    w.classList.add('no-transition');
+    const f = e.deltaY < 0 ? ZOOM_IN_FACTOR : ZOOM_OUT_FACTOR;
+scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale * f));
+applyTransform();
+    clearTimeout(w._wheelTimer);
+    w._wheelTimer = setTimeout(() => w.classList.remove('no-transition'), 90);
+  }, { passive: false });
+}
+
+// ── RENDER REGIONS ────────────────────────────────────────────
+function renderRegions() {
+  document.querySelectorAll('.region-svg').forEach(el => el.remove());
+  const wrap = document.getElementById('img-wrap');
+
+  regions.forEach((reg, ri) => {
+    if (!reg.points?.length) return;
+
+    const NS  = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.classList.add('region-svg');
+    svg.setAttribute('viewBox', '0 0 1000 1000');
+    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.dataset.regIdx = ri;
+
+    const poly = document.createElementNS(NS, 'polygon');
+    poly.classList.add('region-poly');
+    poly.dataset.regIdx = ri;
+    poly.setAttribute('points',
+      reg.points.map(p => `${(p.normX * 1000).toFixed(2)},${(p.normY * 1000).toFixed(2)}`).join(' ')
+    );
+
+    poly.addEventListener('mouseenter', e => showTooltip({
+      id: reg.id, label: 'REGIÓN', title: reg.title, description: reg.description
+    }, e));
+    poly.addEventListener('mouseleave', hideTooltip);
+    poly.addEventListener('click', e => { e.stopPropagation(); selectRegion(ri); });
+
+    svg.appendChild(poly);
+
+
+
+    wrap.appendChild(svg);
+
+
+    if (reg.center) {
+  const badge = document.createElement('div');
+  badge.className = 'region-badge';
+  badge.style.left = (reg.center.normX * 100) + '%';
+  badge.style.top  = (reg.center.normY * 100) + '%';
+  badge.style.setProperty('--region-rotation', `${-rotation}deg`);
+  badge.innerHTML = `<span class="region-badge-text">${reg.id}</span>`;
+  wrap.appendChild(badge);
+}
+  });
+}
+
+// ── RENDER PINS ───────────────────────────────────────────────
+// Pin geometry (viewBox 0 0 56 52):
+//   Head circle: cx=21.1  cy=11.2  r=10.2   → bottom edge at y=21.4
+//   Tip point:   x=14.2   y=42.2
+//
+// The stick connects the bottom of the head to the tip.
+// All stick parts use the same mask so nothing overlaps the head.
+//
+// Mask "stickMask-N": white=visible, black=hidden.
+// We subtract the head circle so the stick is never drawn on top of it.
+
+function renderPins() {
+  document.querySelectorAll('.pin').forEach(p => p.remove());
+  const wrap = document.getElementById('img-wrap');
+
+  pins.forEach((ann, i) => {
+    const pin = document.createElement('div');
+    pin.className = 'pin';
+    pin.dataset.idx = i;
+    pin.style.left = (ann.normX * 100) + '%';
+    pin.style.top  = (ann.normY * 100) + '%';
+
+    // Head: cx=21.1 cy=11.2 r=10.2  → bottom of head = 21.4
+    // Stick left edge leaves head at ≈(13.5, 21.0), right edge at ≈(22.5, 21.0)
+    // Tip: (14.2, 42.2)
+    // The mask punches out the head circle so the stick is NEVER drawn inside it.
+    pin.innerHTML = `
+      <svg class="pin-svg" viewBox="0 0 56 52" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <!-- Mask: white = draw, black = hide (punches out the head area) -->
+          <mask id="stickMask-${i}">
+            <rect x="0" y="0" width="56" height="52" fill="white"/>
+            <circle cx="21.1" cy="11.2" r="10.6" fill="black"/>
+          </mask>
+        </defs>
+
+        <!-- Drop shadow under the head -->
+        <ellipse
+  cx="38.3" cy="36.2" rx="10.8" ry="4.1"
+  fill="rgba(60,60,60,0.78)"
+/>
+
+        <!-- Stick shadow — masked so it never enters the head -->
+        <line
+  x1="38.3" y1="36.2"
+  x2="14.2" y2="42.2"
+  stroke="rgba(60,60,60,0.78)"
+  stroke-width="1.35"
+  stroke-linecap="round"
+  mask="url(#stickMask-${i})"
+/>
+
+        <!-- White outline of head -->
+        <circle cx="21.1" cy="11.2" r="11.7" fill="#ffffff"/>
+
+        <!-- White stick outline — masked -->
+        <polygon
+          points="16.9,21.4 22.6,21.4 14.2,42.2"
+          fill="#ffffff"
+          mask="url(#stickMask-${i})"
+        />
+
+        <!-- Red head -->
+        <circle cx="21.1" cy="11.2" r="10.2" fill="#f12517"/>
+
+        <!-- Grey stick body — masked -->
+        <polygon
+          points="18.35,21.4 20.9,21.4 14.2,42.2"
+          fill="#6f6f6f"
+          mask="url(#stickMask-${i})"
+        />
+
+        <!-- Dark edge line on stick — masked -->
+        <line
+          x1="19.7" y1="21.4"
+          x2="14.2" y2="42.2"
+          stroke="#1f1f1f"
+          stroke-width="1.02"
+          stroke-linecap="round"
+          mask="url(#stickMask-${i})"
+        />
+
+        <text
+  x="21.1"
+  y="11.2"
+  text-anchor="middle"
+  dominant-baseline="middle"
+  class="pin-text"
+>${ann.id}</text>
+
+      </svg>
+      
+    `;
+
+    pin.addEventListener('click', e => {
+      e.stopPropagation();
+      selectPin(i, pin);
+    });
+
+    pin.addEventListener('mouseenter', e => {
+      showTooltip({
+        id: ann.id,
+        label: 'PIN',
+        title: ann.title,
+        description: ann.description
+      }, e);
+    });
+
+    pin.addEventListener('mouseleave', hideTooltip);
+
+    wrap.appendChild(pin);
+  });
+}
+
+// ── TOOLTIP ───────────────────────────────────────────────────
+function showTooltip(ann, e) {
+  const tt = document.getElementById('tooltip');
+  const inner = tt.querySelector('.tooltip-inner');
+
+  document.getElementById('tt-num').textContent   = `${ann.label || 'PIN'} ${ann.id}`;
+  document.getElementById('tt-title').textContent = ann.title;
+  document.getElementById('tt-text').textContent  = ann.description || 'No description';
+
+  const container = document.getElementById('img-container');
+  const containerRect = container.getBoundingClientRect();
+
+  let px, py;
+
+  const target = e.currentTarget;
+
+  // ── ANCLAJE REAL ───────────────────────────────────────────
+  if (target && target.classList.contains('pin')) {
+    const pinRect = target.getBoundingClientRect();
+
+    // cabeza del pin dentro del SVG original
+    const headCx = 21.1;
+    const headCy = 11.2;
+    const vbW = 56;
+    const vbH = 52;
+
+    px = (pinRect.left - containerRect.left) + (headCx / vbW) * pinRect.width;
+    py = (pinRect.top  - containerRect.top)  + (headCy / vbH) * pinRect.height;
+
+  } else if (target && target.classList.contains('region-poly')) {
+    const r = target.getBoundingClientRect();
+    px = (r.left + r.right) / 2 - containerRect.left;
+    py = (r.top + r.bottom) / 2 - containerRect.top;
+
+  } else {
+    px = e.clientX - containerRect.left;
+    py = e.clientY - containerRect.top;
+  }
+
+  // medir tamaño real
+  tt.classList.remove('visible', 'arrow-top', 'arrow-bottom');
+  tt.style.left = '0px';
+  tt.style.top = '0px';
+  tt.classList.add('visible');
+
+  const box = tt.getBoundingClientRect();
+  const w = box.width;
+  const h = box.height;
+
+  const GAP = 28;
+  let tx = px - w / 2;
+  let ty = py - h - GAP;
+  let arrowMode = 'arrow-bottom';
+
+  // si no entra arriba, va abajo
+  if (ty < 8) {
+    ty = py + GAP;
+    arrowMode = 'arrow-top';
+  }
+
+  // clamp horizontal
+  tx = Math.max(8, Math.min(containerRect.width - w - 8, tx));
+
+  tt.classList.remove('arrow-top', 'arrow-bottom');
+  tt.classList.add(arrowMode);
+
+  tt.style.left = `${tx}px`;
+  tt.style.top  = `${ty}px`;
+
+  // triángulo exactamente hacia el punto ancla
+  const arrowLeft = Math.max(16, Math.min(w - 16, px - tx));
+  inner.style.setProperty('--arrow-left', `${arrowLeft}px`);
+}
+
+
+function hideTooltip() { document.getElementById('tooltip').classList.remove('visible'); }
+
+// ── SELECT PIN ────────────────────────────────────────────────
+function selectPin(idx, pinEl) {
+  clearActive();
+  pinEl.classList.add('active');
+  const ann = pins[idx];
+  showDetail(`PIN ${ann.id}`, ann.title, ann.description,
+    `norm (${ann.normX.toFixed(4)}, ${ann.normY.toFixed(4)})  orig (${Math.round(ann.normX*SLIDE_W)}, ${Math.round(ann.normY*SLIDE_H)})`
+  );
+  const item = document.querySelector(`.anno-item[data-pin-idx="${idx}"]`);
+  if (item) { item.classList.add('active'); item.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+}
+
+// ── SELECT REGION ─────────────────────────────────────────────
+function selectRegion(ri) {
+  clearActive();
+  const reg = regions[ri];
+
+  const poly = document.querySelector(`.region-svg[data-reg-idx="${ri}"] .region-poly`);
+  if (poly) poly.classList.add('active');
+
+  showDetail(`REGIÓN ${reg.id}`, reg.title, reg.description,
+    reg.bbox
+      ? `bbox (${reg.bbox.normMinX.toFixed(3)}, ${reg.bbox.normMinY.toFixed(3)}) → (${reg.bbox.normMaxX.toFixed(3)}, ${reg.bbox.normMaxY.toFixed(3)})`
+      : ''
+  );
+
+  const item = document.querySelector(`.anno-item[data-reg-idx="${ri}"]`);
+  if (item) { item.classList.add('active'); item.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+
+  if (reg.center) {
+    const c = document.getElementById('img-container');
+    panX = c.clientWidth / 2;
+panY = c.clientHeight / 2;
+applyTransform();
+  }
+}
+
+function clearActive() {
+  document.querySelectorAll('.pin, .anno-item, .region-poly').forEach(el => el.classList.remove('active'));
+}
+
+function showDetail(num, title, text, coords) {
+  document.getElementById('dp-num').textContent    = num;
+  document.getElementById('dp-title').textContent  = title;
+  document.getElementById('dp-text').textContent   = text || 'No description.';
+  document.getElementById('dp-coords').textContent = coords || '';
+  document.getElementById('detail-panel').classList.add('visible');
+}
+
+function closeDetail() {
+  document.getElementById('detail-panel').classList.remove('visible');
+  clearActive();
+}
+
+// ── RENDER LIST ───────────────────────────────────────────────
+function renderList() {
+  const list = document.getElementById('anno-list');
+  list.innerHTML = '';
+
+  regions.forEach((reg, ri) => {
+    const item = document.createElement('div');
+    item.className = 'anno-item region-item';
+    item.dataset.regIdx = ri;
+    item.innerHTML = `
+      <div class="anno-num region-num">🔷 REGIÓN ${reg.id}</div>
+      <div class="anno-title">${reg.title}</div>
+      ${reg.description ? `<div class="anno-desc">${reg.description}</div>` : ''}`;
+    item.addEventListener('click', () => selectRegion(ri));
+    list.appendChild(item);
+  });
+
+  pins.forEach((ann, i) => {
+    const item = document.createElement('div');
+    item.className = 'anno-item';
+    item.dataset.pinIdx = i;
+    item.innerHTML = `
+      <div class="anno-num">PIN ${ann.id}</div>
+      <div class="anno-title">${ann.title}</div>
+      ${ann.description ? `<div class="anno-desc">${ann.description}</div>` : ''}`;
+    item.addEventListener('click', () => {
+      const pin = document.querySelector(`.pin[data-idx="${i}"]`);
+      if (pin) selectPin(i, pin);
+      const c = document.getElementById('img-container');
+      panX = c.clientWidth / 2;
+panY = c.clientHeight / 2;
+applyTransform();
+    });
+    list.appendChild(item);
+  });
+}
+
+document.getElementById('img-container').addEventListener('click', hideTooltip);
+
+// ── TOOLBAR ───────────────────────────────────────────────────
+let pinsVisible = true;
+let numbersVisible = true;
+
+function tbToggleNumbers() {
+  numbersVisible = !numbersVisible;
+  document.getElementById('tb-nums').classList.toggle('active', !numbersVisible);
+
+  document.querySelectorAll('.pin-text').forEach(el => {
+    el.setAttribute('display', numbersVisible ? 'inline' : 'none');
+  });
+
+  document.querySelectorAll('.region-badge').forEach(el => {
+    el.style.display = numbersVisible ? '' : 'none';
+  });
+}
+
+function tbInfo() {
+  const btn = document.getElementById('tb-info');
+  btn.classList.toggle('active');
+  const panel = document.getElementById('panel');
+  if (panel.style.display === 'none') {
+    panel.style.display = 'flex';
+  } else {
+    panel.style.display = 'none';
+  }
+}
+
+function tbTogglePins() {
+  pinsVisible = !pinsVisible;
+  const btn = document.getElementById('tb-pins');
+  btn.classList.toggle('active', !pinsVisible);
+  document.querySelectorAll('.pin').forEach(el => {
+    el.style.display = pinsVisible ? '' : 'none';
+  });
+  document.querySelectorAll('.region-svg').forEach(el => {
+    el.style.display = pinsVisible ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

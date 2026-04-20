@@ -1,0 +1,6 @@
+<script>
+fetch('data:text/plain;base64,SGVsbG8gV29ybGQ=')
+  .then(r=>r.blob())
+  .then(blob=>console.log(blob.size, blob.type))
+  .catch(e=>console.error(e));
+</script>

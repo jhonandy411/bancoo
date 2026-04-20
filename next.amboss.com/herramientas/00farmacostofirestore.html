@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firestore Uploader - Farmacos</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .header h1 { font-size: 28px; margin-bottom: 10px; }
+    .header p { opacity: .9; font-size: 15px; }
+
+    .content { padding: 30px; }
+    .section { margin-bottom: 22px; }
+
+    .section-title{
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 12px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .input-group { display:flex; gap:10px; margin-bottom: 10px; }
+
+    input[type="text"]{
+      flex:1;
+      padding: 12px 15px;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: .2s;
+    }
+    input[type="text"]:focus{
+      outline:none;
+      border-color:#e67e22;
+      box-shadow: 0 0 0 3px rgba(230,126,34,.12);
+    }
+
+    textarea{
+      width:100%;
+      min-height: 260px;
+      padding: 15px;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+      font-size: 13px;
+      resize: vertical;
+      transition: .2s;
+    }
+    textarea:focus{
+      outline:none;
+      border-color:#e67e22;
+      box-shadow: 0 0 0 3px rgba(230,126,34,.12);
+    }
+
+    .button{
+      background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+      color:white;
+      border:none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor:pointer;
+      transition: .2s;
+      box-shadow: 0 4px 15px rgba(230,126,34,.4);
+    }
+    .button:hover{ transform: translateY(-2px); box-shadow: 0 6px 20px rgba(230,126,34,.55); }
+    .button:active{ transform: translateY(0); }
+    .button:disabled{ opacity:.6; cursor:not-allowed; transform:none; box-shadow:none; }
+
+    .preview{
+      background:#f8f9fa;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 420px;
+      overflow:auto;
+    }
+    .preview-item{
+      background:white;
+      border-left:4px solid #e67e22;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    .preview-item h4{ color:#2c3e50; font-size: 15px; margin-bottom: 6px; }
+    .preview-item .muted{ opacity:.65; font-size:12px; }
+    .preview-item .def{ font-size:13px; color:#444; margin-top: 6px; white-space: pre-wrap; max-height: 80px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+
+    .status{
+      padding: 14px;
+      border-radius: 8px;
+      margin-top: 14px;
+      display:none;
+      white-space: pre-wrap;
+    }
+    .status.success{ background:#d4edda; border:1px solid #c3e6cb; color:#155724; display:block; }
+    .status.error{ background:#f8d7da; border:1px solid #f5c6cb; color:#721c24; display:block; }
+    .status.info{ background:#d1ecf1; border:1px solid #bee5eb; color:#0c5460; display:block; }
+
+    .firebase-config{
+      background:#fff3cd;
+      border:2px solid #ffc107;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+    .firebase-config h3{ color:#856404; font-size: 15px; margin-bottom: 8px; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>💊 Firestore Uploader - Farmacos</h1>
+      <p>Pegás los <code>.cloned-popup-wrapper</code> (generados por <code>seleccionafarmacos.html</code>) y sube a Firestore.</p>
+    </div>
+
+    <div class="content">
+      <div class="firebase-config">
+        <h3>⚠️ Configuración de Firebase requerida</h3>
+        <p style="color:#856404;">
+          Si tu proyecto cambia, reemplazá las credenciales en el JS al final.
+        </p>
+      </div>
+
+      <div class="section">
+        <label class="section-title">📁 Ruta de la colección en Firestore</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="collectionPath"
+            placeholder="Ejemplo: farmacos"
+            value="farmacos"
+          />
+        </div>
+      </div>
+
+      <div class="section">
+        <label class="section-title">📋 Pega aquí el HTML clonado</label>
+        <textarea
+          id="htmlInput"
+          placeholder="Pega aquí el HTML que contiene los .cloned-popup-wrapper..."
+        ></textarea>
+      </div>
+
+      <div class="section" style="display:flex; gap:12px;">
+        <button class="button" onclick="parseHTML()">🔍 Analizar</button>
+        <button class="button" onclick="uploadToFirestore()" id="uploadBtn" disabled>⬆️ Subir a Firestore</button>
+      </div>
+
+      <div id="statusMessage" class="status"></div>
+
+      <div class="section" id="previewSection" style="display:none;">
+        <h3 class="section-title">👁️ Vista previa</h3>
+        <div id="preview" class="preview"></div>
+      </div>
+    </div>
+  </div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+  import { getFirestore, collection, doc, writeBatch } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+    authDomain: "bancomicina-62bfe.firebaseapp.com",
+    projectId: "bancomicina-62bfe",
+    storageBucket: "bancomicina-62bfe.appspot.com",
+    messagingSenderId: "737254665977",
+    appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  let parsedItems = [];
+  window.db = db;
+
+  function showStatus(type, message) {
+    const statusDiv = document.getElementById('statusMessage');
+    statusDiv.className = `status ${type}`;
+    statusDiv.textContent = message;
+    statusDiv.style.display = 'block';
+  }
+  window.showStatus = showStatus;
+
+  function makeSafeIdFromTitle(title, fallbackId) {
+    if (!title || !title.trim()) return fallbackId;
+    let cleaned = title.trim();
+    cleaned = cleaned.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    cleaned = cleaned.replace(/[^\w\s:\-\(\)]/g, ""); // Keep some readable chars
+    cleaned = cleaned.replace(/\//g, "-");
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+    return cleaned || fallbackId;
+  }
+
+  function displayPreview(items) {
+    const preview = document.getElementById('preview');
+    const previewSection = document.getElementById('previewSection');
+    preview.innerHTML = '';
+
+    items.forEach((it, idx) => {
+      const div = document.createElement('div');
+      div.className = 'preview-item';
+      let html = `
+        <div>
+          <h4>#${idx+1} — ${it.title} <span class="muted">(ID: ${it.id})</span></h4>
+      `;
+      if(it.titutlopie) {
+        html += `<div style="color:#e67e22; font-weight:600; font-size:13px; margin-bottom:4px;">📍 ${it.titutlopie}</div>`;
+      }
+      html += `
+          <div class="def">${it.definition}</div>
+        </div>
+      `;
+      div.innerHTML = html;
+      preview.appendChild(div);
+    });
+    previewSection.style.display = 'block';
+  }
+
+  window.parseHTML = function() {
+    const htmlInput = document.getElementById('htmlInput').value.trim();
+    if (!htmlInput) {
+      showStatus('error', '⚠️ Pegá el HTML primero.');
+      return;
+    }
+
+    try {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlInput;
+
+      const wrappers = tempDiv.querySelectorAll('.cloned-popup-wrapper');
+      if (!wrappers.length) {
+        showStatus('error', '❌ No se encontraron .cloned-popup-wrapper. Asegurate de copiar el HTML generado por el script seleccionafarmacos.html.');
+        return;
+      }
+
+      parsedItems = [];
+      const usedIds = new Set();
+
+      wrappers.forEach((wrapper, i) => {
+        // 1. Title Extraction
+        const titleEl = wrapper.querySelector('strong');
+        const fullTitle = titleEl ? titleEl.textContent : `Item ${i+1}`;
+        // Clean prefix like "#1 💊 "
+        const cleanTitle = fullTitle.replace(/^#\d+\s*💊\s*/u, '').trim();
+
+        // 2. titutlopie & definition Extraction
+        const clone = wrapper.cloneNode(true);
+        // CLEANING: Remove unwanted elements
+        clone.querySelectorAll('[data-e2e-test-id*="split-view"], [data-ds-id="Icon"], [class*="StyledIcon"], .splitViewIconLink, [data-e2e-test-id="split-view-icon-links"]').forEach(el => el.remove());
+
+        // EXTRACTION: titutlopie (Drug context subtitle)
+        let titutlopie = "";
+        const potentialTitutlo = clone.querySelectorAll('[class*="StyledInlineItem"]');
+        for(let j=0; j<potentialTitutlo.length; j++){
+          const el = potentialTitutlo[j];
+          const p = el.querySelector("p");
+          if(p && p.innerText.trim()){
+            titutlopie = p.innerText.trim();
+            el.remove(); // Remove from clone so it doesn't end up in definition
+            break; // Only the first one is the subtitle
+          }
+        }
+
+        // EXTRACTION: definition (Dosage instructions)
+        let definition = "";
+        const phrasionaryRoot = clone.querySelector('._704b81c021ed2ef9--phrasionaryContainer') || clone;
+        
+        // Clean out the title header we added manually in selecionafarmacos if it exists
+        const headerTitle = phrasionaryRoot.querySelector('strong'); 
+        if(headerTitle) headerTitle.remove();
+        
+        const nodes = phrasionaryRoot.querySelectorAll(".css-den2g6-StyledText, p");
+        const parts = [];
+        nodes.forEach(el => {
+          const t = (el.innerText || "").trim();
+          // Skip if empty, drug name, titutlopie, or "Split view"
+          if(t && t.length > 2 && t !== "Split view" && t !== titutlopie && t.toLowerCase() !== cleanTitle.toLowerCase()) {
+            parts.push(t);
+          }
+        });
+        definition = [...new Set(parts)].join("\n");
+
+        // 4. ID Generation
+        let baseId = makeSafeIdFromTitle(cleanTitle, `farmaco_${i+1}`);
+        let finalId = baseId;
+        let c = 2;
+        while(usedIds.has(finalId)){
+            finalId = `${baseId}-${c}`;
+            c++;
+        }
+        usedIds.add(finalId);
+        
+        if (cleanTitle) {
+          parsedItems.push({
+            id: finalId,
+            title: cleanTitle,
+            drugName: cleanTitle, // Store searchable name
+            titutlopie: titutlopie,
+            definition: definition,
+            createdAt: new Date().toISOString()
+          });
+        }
+      });
+
+      window.parsedItems = parsedItems;
+      displayPreview(parsedItems);
+      document.getElementById('uploadBtn').disabled = false;
+
+      showStatus('success', `✅ Listos para subir: ${parsedItems.length} fármacos.`);
+
+    } catch (err) {
+      console.error(err);
+      showStatus('error', `❌ Error al analizar: ${err.message}`);
+    }
+  };
+
+  async function commitInChunks(db, collectionPathSegments, items, chunkSize = 450) {
+    let done = 0;
+    const colRef = collection(db, ...collectionPathSegments);
+
+    while (done < items.length) {
+      const batch = writeBatch(db);
+      const slice = items.slice(done, done + chunkSize);
+
+      slice.forEach(item => {
+        const ref = doc(colRef, item.id);
+        batch.set(ref, item);
+      });
+
+      await batch.commit();
+      done += slice.length;
+    }
+  }
+
+  window.uploadToFirestore = async function() {
+    const collectionPathInput = document.getElementById('collectionPath').value.trim();
+    if (!collectionPathInput) {
+      showStatus('error', '⚠️ Ingresá la ruta.');
+      return;
+    }
+    if (!parsedItems.length) {
+      showStatus('error', '⚠️ No hay items. Primero analizá.');
+      return;
+    }
+
+    const uploadBtn = document.getElementById('uploadBtn');
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = '⏳ Subiendo...';
+
+    try {
+      let finalPath = collectionPathInput;
+      let segments = collectionPathInput.split('/').filter(Boolean);
+
+      if (segments.length === 0) {
+         showStatus('error', '❌ Ruta inválida.');
+         uploadBtn.disabled = false;
+         return;
+      }
+
+      // Check if path points to a document (even segments)
+      if (segments.length % 2 === 0) {
+        finalPath = collectionPathInput.replace(/\/+$/, '') + '/items';
+        segments = finalPath.split('/').filter(Boolean);
+        showStatus('info', `ℹ️ Ruta era DOCUMENTO. Usando: "${finalPath}"`);
+      }
+
+      showStatus('info', `📤 Subiendo ${parsedItems.length} fármacos a "${finalPath}"...`);
+      await commitInChunks(db, segments, parsedItems, 450);
+
+      showStatus('success', `🎉 Éxito: ${parsedItems.length} fármacos subidos a "${finalPath}".`);
+      uploadBtn.textContent = '✅ Subido';
+    } catch (err) {
+      console.error(err);
+      showStatus('error', `❌ Error al subir: ${err.message}`);
+      uploadBtn.disabled = false;
+      uploadBtn.textContent = '⬆️ Subir a Firestore';
+    }
+  };
+</script>
+
+</body>
+</html>

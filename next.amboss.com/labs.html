@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labs</title>
+    <style>
+  :root {
+    --p: #056c8d;
+    --s: #3bb3ce;
+    --b: #e2e8f0;
+    --bg: #f8fafc;
+    --t: #1e293b;
+    --m: #64748b;
+  }
+  
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+
+  #l-cnt {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: hidden;
+    background: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--t);
+  }
+
+  /* —— Header & Controls —— */
+  .l-hdr {
+    display: flex;
+    align-items: center;
+    padding: 2px 16px 0px 0px;
+    min-height: 44px;
+    flex-wrap: wrap-reverse;
+    flex-shrink: 0;
+    background: #f5f7f9;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 0px solid transparent;
+  }
+
+  .l-tbs {
+    display: flex;
+    gap: 0rem;
+    height: 44px;
+    align-items: stretch;
+    flex-grow: 1000;
+  }
+
+  .l-tb {
+    font-size: 13px;
+    font-weight: 550;
+    color: var(--m);
+    height: 100%;
+    border: 0;
+    background: 0;
+    cursor: pointer;
+    border-top: 3px solid transparent;
+    padding: 0 16px;
+    transition: 0.2s;
+  }
+
+  .l-tb:hover {
+    color: var(--p);
+    background: #eef2f6;
+  }
+
+  .l-tb.act {
+    color: var(--p);
+    border-top: 4px solid #5a7183;
+    background: #fff;
+  }
+
+  .l-ctrl {
+    margin-left: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-grow: 1;
+  }
+
+  /* —— Search Bar —— */
+  .l-sch {
+    background: #eef2f5;
+    border-radius: 4px;
+    padding: 2px 8px;
+    display: flex;
+    align-items: center;
+    height: 28px;
+    gap: 6px;
+    min-width: 200px;
+    transition: 0.2s;
+    border: 1px solid transparent;
+    width: 100%;
+  }
+
+  .l-sch:focus-within {
+    background: #fff;
+    border-color: rgba(5, 108, 141, 0.12);
+    box-shadow: none;
+  }
+
+  .l-sch-icon {
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .l-sch input {
+    border: 0;
+    outline: none;
+    background: transparent;
+    font-size: 12px;
+    width: 100%;
+    color: var(--t);
+    flex: 1;
+  }
+
+  .l-sch input::placeholder {
+    color: #94a3b8;
+  }
+
+  .l-sch-count {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .l-sch-sep {
+    width: 1px;
+    height: 12px;
+    background: #cbd5e1;
+    margin: 0 2px;
+  }
+
+  .l-sch-btn {
+    border: 0;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    padding: 2px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+  }
+
+  .l-sch-btn:hover {
+    color: #1e293b;
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  /* —— Main Content —— */
+  .l-mn {
+    flex: 1;
+    background: var(--bg);
+    position: relative;
+    overflow-y: auto;
+  }
+
+  .l-mn-inner {
+    padding: 16px;
+    background: #fff;
+    min-height: 100%;
+  }
+
+  /* —— Typography —— */
+  .title-main {
+    text-align: left;
+    font-size: 14px;
+    margin: 4px 0 12px 0;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+  }
+
+  /* —— Table —— */
+  .tbl-wrap {
+    border: 1px solid var(--b);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .l-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    font-size: 11px;
+    table-layout: fixed;
+  }
+
+  .l-tbl th {
+    text-align: left;
+    background: #e7ebee;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--b);
+    color: #475569;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .l-tbl td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--b);
+    vertical-align: top;
+    border-right: 1px solid var(--b);
+    line-height: 1.4;
+    word-wrap: break-word;
+  }
+
+  .l-tbl td:last-child {
+    border-right: 0;
+  }
+
+  .l-cat td {
+    background: #f8fafc;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    padding: 8px 14px !important;
+  }
+
+  .spinner-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #ddd;
+    border-top-color: var(--p);
+    border-radius: 50%;
+    animation: s .8s linear infinite;
+  }
+
+  @keyframes s {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  mark.hl {
+    background: #fef08a;
+    color: #0f172a;
+    padding: 0 1px;
+    border-radius: 2px;
+    font-weight: 600;
+  }
+  mark.hl.act {
+    background: #0aa6b8;
+    color: #fff;
+    outline: 2px solid #0aa6b8;
+  }
+
+  .btn-close-global {
+    border: 0;
+    background: 0;
+    cursor: pointer;
+    font-size: 24px;
+    color: var(--m);
+    padding: 0;
+    line-height: 1;
+  }
+
+  .btn-close-global:hover {
+    color: var(--t);
+  }
+
+  .v-sep {
+    width: 1px;
+    height: 16px;
+    background-color: #e2e8f0;
+    margin: 0 4px;
+  }
+</style>
+<style>
+  .l-ftr {
+    margin-top: auto;
+    border-top: 1px solid #e2e8f0;
+    background: #fff;
+    padding: 0;
+    flex-shrink: 0;
+    height: 40px;
+  }
+  .l-ftr ._940d78d08f86143e--space {
+    width: 100%;
+    height: 100%;
+    display: flex;
+  }
+  .l-ftr ._940d78d08f86143e--buttonContainer {
+    width: 100%;
+    background-color: #5a7183;
+  }
+  .l-ftr ._940d78d08f86143e--buttonContainer button {
+    height: 100%;
+    width: 100%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+  }
+  .l-ftr ._940d78d08f86143e--buttonContainer button:hover {
+    background: #505e74;
+  }
+</style>
+</head>
+<body>
+
+<div id="l-cnt">
+  <header class="l-hdr">
+    <nav class="l-tbs" id="tbs"></nav>
+
+    <div class="l-ctrl">
+        
+      <!-- Search Bar -->
+      <div class="l-sch">
+        <!-- Icon 1 -->
+        <div class="l-sch-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M6.667 1a5.667 5.667 0 1 0 3.237 10.318l3.389 3.39a1 1 0 0 0 1.414-1.415l-3.389-3.389A5.667 5.667 0 0 0 6.666 1M3 6.667a3.667 3.667 0 1 1 7.333 0 3.667 3.667 0 0 1-7.333 0" />
+          </svg>
+        </div>
+        
+
+
+        <input type="text" id="sch" placeholder="Search values...">
+        
+        <!-- Search Controls -->
+        <div id="sch-actions" class="_0c59bed9cdc20904--arrowsAndCrossContainer hidden" style="display:flex; align-items:center;">
+          <div class="_0c59bed9cdc20904--counterContainer" style="width: 40px; height: 16px; margin-right: 2px;">
+            <svg height="100%" preserveAspectRatio="xMinYMid meet" viewBox="0 0 16 16" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <title>Search results counter</title>
+              <text id="sch-stats" dominant-baseline="middle" fill="#99a7b3" font-size="11" font-weight="600"  x="50%" y="60%">0/0</text>
+            </svg>
+          </div>
+          <button data-ds-id="Button" type="button" aria-label="Previous lab values" class="l-sch-btn">
+            <div class="css-c3523d-StyledInner ejph2fy1">
+              <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                  <div data-e2e-test-id="chevron-up" data-testid="chevron-up" data-ds-id="Icon" data-variant="inherit" aria-hidden="true" class="css-10pd6gh-StyledIcon e1tsg83e0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10 8 6l-4 4"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </button>
+          <button data-ds-id="Button" type="button" aria-label="Next lab values" class="l-sch-btn">
+            <div class="css-c3523d-StyledInner ejph2fy1">
+              <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                  <div data-e2e-test-id="chevron-down" data-testid="chevron-down" data-ds-id="Icon" data-variant="inherit" aria-hidden="true" class="css-10pd6gh-StyledIcon e1tsg83e0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 6 4 4 4-4"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </button>
+          <button id="sch-clear" data-ds-id="Button" type="button" aria-label="Clear lab values" class="l-sch-btn">
+            <div class="css-c3523d-StyledInner ejph2fy1">
+              <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                  <div data-e2e-test-id="x" data-testid="x" data-ds-id="Icon" data-variant="inherit" aria-hidden="true" class="css-10pd6gh-StyledIcon e1tsg83e0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                      <g fill="currentColor">
+                        <path d="M12.707 4.707a1 1 0 0 0-1.414-1.414zm-9.414 6.586a1 1 0 1 0 1.414 1.414zm8-8-8 8 1.414 1.414 8-8z"></path>
+                        <path d="M4.707 3.293a1 1 0 0 0-1.414 1.414zm6.586 9.414a1 1 0 0 0 1.414-1.414zm-8-8 8 8 1.414-1.414-8-8z"></path>
+                      </g>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+
+
+      </div>
+        <div class="v-sep"></div>
+        <button id="cls" class="btn-close-global" aria-label="Close Panel">&times;</button>
+    </div>
+  </header>
+
+  <main class="l-mn">
+    <div id="ld" class="spinner-box">
+      <span data-loading-spinner data-size="30"></span>
+    </div>
+
+    <div id="dv" class="hidden l-mn-inner">
+      <h1 id="main-title" class="title-main">Lab Values</h1>
+      <div class="tbl-wrap">
+        <table class="l-tbl">
+          <thead>
+            <tr>
+              <th id="th-m" style="width: 34%;">Serum</th>
+              <th style="width:33%;">Reference Range</th>
+              <th style="width:33%;">SI Reference</th>
+            </tr>
+          </thead>
+          <tbody id="bd"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  
+  <footer class="l-ftr">
+    <div class="_940d78d08f86143e--space _940d78d08f86143e--secondarySpace" data-testid="secondary-space">
+      <div class="_940d78d08f86143e--buttonContainer _940d78d08f86143e--reverseOrder">
+        <button id="cls-ftr" data-ds-id="Button" type="button" class="css-xaqme7-StyledButton ejph2fy0">
+          <div class="css-c3523d-StyledInner ejph2fy1">
+            <div data-ds-id="Inline" class="css-1iyebzw-InlineContainer e6i75dx0">
+              <div class="css-h0nko7-StyledInlineItem e6i75dx1" style="margin-right:8px;">
+                <div data-e2e-test-id="x" data-testid="x" data-ds-id="Icon" data-variant="inherit" aria-hidden="true" class="css-10pd6gh-StyledIcon e1tsg83e0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                    <g fill="currentColor">
+                      <path d="M12.707 4.707a1 1 0 0 0-1.414-1.414zm-9.414 6.586a1 1 0 1 0 1.414 1.414zm8-8-8 8 1.414 1.414 8-8z"></path>
+                      <path d="M4.707 3.293a1 1 0 0 0-1.414 1.414zm6.586 9.414a1 1 0 0 0 1.414-1.414zm-8-8 8 8 1.414-1.414-8-8z"></path>
+                    </g>
+                  </svg>
+                </div>
+              </div>
+              <div class="css-h0nko7-StyledInlineItem e6i75dx1">close</div>
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    const db = window.db || (window.parent && window.parent.db);
+    const state = { active: 'serum', data: null, q: '', cur: 0, tot: 0 };
+    const TABS = [
+      { id: 'serum', l: 'Serum' },
+      { id: 'cerebrospinal', l: 'Cerebrospinal' },
+      { id: 'blood', l: 'Blood' },
+      { id: 'urine_bmi', l: 'Urine and BMI' }
+    ];
+
+    const els = {
+      sch: document.getElementById('sch'),
+      stats: document.getElementById('sch-stats'),
+      actions: document.getElementById('sch-actions'),
+      bd: document.getElementById('bd'),
+      ld: document.getElementById('ld'),
+      dv: document.getElementById('dv'),
+      mTitle: document.getElementById('main-title'),
+      thM: document.getElementById('th-m'),
+      tbs: document.getElementById('tbs')
+    };
+
+    function highlight(text) {
+      if (!state.q || !text) return text;
+      const qEsc = state.q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp(`(${qEsc})`, 'gi');
+      return String(text).replace(re, '<mark class="hl">$1</mark>');
+    }
+
+    function splitVal(s) {
+      return (s || '').split(/\s*\/\/\/\s*/).filter(x => x.trim());
+    }
+
+    function renderLab(name, ref, si, isBold = false) {
+      const rs = splitVal(ref), ss = splitVal(si);
+      const n = Math.max(rs.length, ss.length, 1);
+      let h = '';
+      const matchesQuery = state.q && (
+        name.toLowerCase().includes(state.q.toLowerCase()) ||
+        (ref || '').toLowerCase().includes(state.q.toLowerCase()) ||
+        (si || '').toLowerCase().includes(state.q.toLowerCase())
+      );
+
+      for (let i = 0; i < n; i++) {
+        h += '<tr>';
+        if (i === 0) h += `<td rowspan="${n}" style="${isBold ? 'font-weight:700;' : ''} vertical-align:middle;">${highlight(name)}</td>`;
+        h += `<td style="border-right:1px solid #e2e8f0;">${highlight(rs[i])}</td><td>${highlight(ss[i])}</td></tr>`;
+      }
+      return { html: h, match: matchesQuery ? 1 : 0 };
+    }
+
+    function updateBts() {
+      if (!state.q) {
+        els.stats.textContent = '';
+        els.actions.classList.add('hidden');
+      } else {
+        els.stats.textContent = state.tot > 0 ? `${state.cur}/${state.tot}` : '0/0';
+        els.actions.classList.remove('hidden');
+      }
+    }
+
+    function hlCur() {
+      const ms = document.querySelectorAll('.l-mn mark.hl');
+      ms.forEach(m => m.classList.remove('act'));
+      if (state.cur > 0 && ms[state.cur - 1]) {
+        const m = ms[state.cur - 1];
+        m.classList.add('act');
+        m.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    }
+
+    function render() {
+      els.tbs.innerHTML = TABS.map(t =>
+        `<button class="l-tb ${t.id === state.active ? 'act' : ''}" onclick="setTab('${t.id}')">${t.l}</button>`
+      ).join('');
+
+      if (!state.data) return;
+
+      els.thM.textContent = TABS.find(t => t.id === state.active).l;
+      els.mTitle.innerHTML = highlight('Lab Values');
+
+      const doc = state.data[state.active] || {};
+      const rootOrder = doc._order || Object.keys(doc).filter(k => !k.startsWith('_')).sort();
+      let htmlContent = '';
+      let totalMatches = 0;
+      const find = state.q.toLowerCase();
+
+      rootOrder.forEach(key => {
+        const g = doc[key]; if (!g || key === '_order') return;
+        if (g.ref !== undefined) {
+          htmlContent += renderLab(key, g.ref, g.si, false).html;
+        } else {
+          const sub = g._order || Object.keys(g).filter(k => !k.startsWith('_')).sort();
+          htmlContent += `<tr class="l-cat"><td colspan="3">${highlight(key)}</td></tr>`;
+          sub.forEach(lk => {
+            const l = g[lk]; if (!l || lk === '_order') return;
+            htmlContent += renderLab(lk, l.ref, l.si).html;
+          });
+        }
+      });
+
+      els.bd.innerHTML = htmlContent || '<tr><td colspan="3" style="text-align:center;padding:2rem;color:#94a3b8;">No values found.</td></tr>';
+      state.tot = document.querySelectorAll('.l-mn mark.hl').length;
+      state.cur = state.tot > 0 ? 1 : 0;
+      updateBts();
+      hlCur();
+      els.ld.classList.add('hidden');
+      els.dv.classList.remove('hidden');
+    }
+
+    window.setTab = (id) => { state.active = id; render(); };
+    els.sch.addEventListener('input', (e) => { state.q = e.target.value; render(); });
+    const bUp = els.actions.querySelector('[aria-label="Previous lab values"]');
+    const bDn = els.actions.querySelector('[aria-label="Next lab values"]');
+    if(bUp) bUp.onclick = () => { if(state.tot){ state.cur = state.cur > 1 ? state.cur - 1 : state.tot; updateBts(); hlCur(); }};
+    if(bDn) bDn.onclick = () => { if(state.tot){ state.cur = state.cur < state.tot ? state.cur + 1 : 1; updateBts(); hlCur(); }};
+    document.getElementById('sch-clear').addEventListener('click', () => { state.q = ''; els.sch.value = ''; render(); els.sch.focus(); });
+    const cf = document.getElementById('cls-ftr'); if(cf) cf.onclick = () => window.parent.exitSplitView && window.parent.exitSplitView();
+    const ch = document.getElementById('cls'); if(ch) ch.onclick = () => window.parent.exitSplitView && window.parent.exitSplitView();
+
+    async function load() {
+      try {
+        if (!db && !window.db) console.warn('DB not found, waiting...');
+        const snap = await db.collection('labs').get();
+        state.data = {};
+        snap.forEach(d => state.data[d.id] = d.data());
+        render();
+      } catch (e) {
+        els.ld.classList.add('hidden');
+        els.bd.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem;">Unable to load data.</td></tr>';
+        els.dv.classList.remove('hidden');
+      }
+    }
+    load();
+  })();
+</script>
+<script src="shared/amboss-ui.js"></script>
+<script>
+  if (typeof AmbossUI !== 'undefined' && AmbossUI.initLoadingSpinners) {
+    AmbossUI.initLoadingSpinners();
+  }
+</script>
+</body>
+</html>

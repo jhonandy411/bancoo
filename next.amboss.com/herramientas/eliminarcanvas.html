@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portal Visor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --border: #2a2a3d;
+      --accent: #7c3aed;
+      --accent2: #06b6d4;
+      --text: #e2e8f0;
+      --muted: #64748b;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Fondo animado */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 80% 20%, rgba(124,58,237,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 50% at 20% 80%, rgba(6,182,212,0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Grid lines de fondo */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(124,58,237,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    header {
+      position: relative; z-index: 10;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,10,15,0.8);
+      backdrop-filter: blur(12px);
+    }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      border: 2px solid var(--accent);
+      border-radius: 8px;
+      display: grid; place-items: center;
+      font-size: 16px;
+      box-shadow: 0 0 16px rgba(124,58,237,0.4);
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text span { color: var(--accent2); }
+
+    .badge {
+      margin-left: auto;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--accent2);
+      border: 1px solid rgba(6,182,212,0.3);
+      padding: 3px 10px;
+      border-radius: 99px;
+      letter-spacing: 1px;
+    }
+
+    main {
+      position: relative; z-index: 10;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 28px 32px 16px;
+      gap: 16px;
+      height: calc(100vh - 73px);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .url-wrapper {
+      flex: 1;
+      position: relative;
+    }
+
+    .url-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--accent2);
+      letter-spacing: 2px;
+      position: absolute;
+      top: -18px; left: 4px;
+    }
+
+    input[type="url"] {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="url"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+    }
+
+    input[type="url"]::placeholder { color: var(--muted); }
+
+    button {
+      padding: 12px 24px;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+      box-shadow: 0 4px 20px rgba(124,58,237,0.3);
+    }
+
+    button:hover {
+      background: #6d28d9;
+      box-shadow: 0 4px 28px rgba(124,58,237,0.5);
+    }
+
+    button:active { transform: scale(0.97); }
+
+    .btn-clear {
+      padding: 12px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      box-shadow: none;
+      font-size: 18px;
+    }
+
+    .btn-clear:hover {
+      border-color: #ef4444;
+      color: #ef4444;
+      background: rgba(239,68,68,0.08);
+      box-shadow: none;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      min-height: 20px;
+    }
+
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: background 0.3s;
+    }
+
+    .dot.active { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    .dot.loading { background: var(--accent2); animation: pulse 1s infinite; }
+    .dot.error { background: #ef4444; }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .frame-container {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      background: var(--surface);
+      transition: border-color 0.3s;
+    }
+
+    .frame-container.has-content { border-color: rgba(124,58,237,0.4); }
+
+    .frame-corner {
+      position: absolute;
+      width: 16px; height: 16px;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .frame-corner.tl { top: -1px; left: -1px; border-top: 2px solid var(--accent); border-left: 2px solid var(--accent); border-radius: 14px 0 0 0; }
+    .frame-corner.tr { top: -1px; right: -1px; border-top: 2px solid var(--accent); border-right: 2px solid var(--accent); border-radius: 0 14px 0 0; }
+    .frame-corner.bl { bottom: -1px; left: -1px; border-bottom: 2px solid var(--accent); border-left: 2px solid var(--accent); border-radius: 0 0 0 14px; }
+    .frame-corner.br { bottom: -1px; right: -1px; border-bottom: 2px solid var(--accent); border-right: 2px solid var(--accent); border-radius: 0 0 14px 0; }
+
+    .placeholder {
+      position: absolute; inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      color: var(--muted);
+    }
+
+    .placeholder-icon {
+      font-size: 48px;
+      opacity: 0.3;
+      filter: grayscale(1);
+    }
+
+    .placeholder p {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      text-align: center;
+      line-height: 1.8;
+      opacity: 0.5;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none;
+      background: white;
+    }
+
+    iframe.visible { display: block; }
+
+    .warning {
+      background: rgba(234,179,8,0.08);
+      border: 1px solid rgba(234,179,8,0.25);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: #fbbf24;
+      display: none;
+      line-height: 1.6;
+    }
+
+    .warning.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">⬡</div>
+  <div class="logo-text">Portal<span>Visor</span></div>
+  <div class="badge">EMBEDDER v1.0</div>
+</header>
+
+<main>
+  <div class="input-row">
+    <div class="url-wrapper">
+      <span class="url-label">// URL DESTINO</span>
+      <input type="url" id="urlInput" placeholder="https://ejemplo.com" autocomplete="off" spellcheck="false"/>
+    </div>
+    <button onclick="loadUrl()">▶ Cargar</button>
+    <button class="btn-clear" onclick="clearFrame()" title="Limpiar">✕</button>
+  </div>
+
+  <div class="status-bar">
+    <div class="dot" id="dot"></div>
+    <span id="statusText">Esperando URL...</span>
+  </div>
+
+  <div class="warning" id="warning">
+    ⚠ Algunos sitios bloquean la incrustación mediante cabeceras X-Frame-Options o CSP.<br>
+    Si la página no carga, prueba con otro enlace o abre en una nueva pestaña.
+  </div>
+
+  <div class="frame-container" id="frameContainer">
+    <div class="frame-corner tl"></div>
+    <div class="frame-corner tr"></div>
+    <div class="frame-corner bl"></div>
+    <div class="frame-corner br"></div>
+
+    <div class="placeholder" id="placeholder">
+      <div class="placeholder-icon">⬡</div>
+      <p>Introduce una URL arriba<br>y pulsa <strong style="color:var(--accent)">Cargar</strong> para embeber la página</p>
+    </div>
+
+    <iframe id="frame" title="Contenido embebido" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+  </div>
+</main>
+
+<script>
+  const urlInput = document.getElementById('urlInput');
+  const frame = document.getElementById('frame');
+  const placeholder = document.getElementById('placeholder');
+  const dot = document.getElementById('dot');
+  const statusText = document.getElementById('statusText');
+  const frameContainer = document.getElementById('frameContainer');
+  const warning = document.getElementById('warning');
+
+  urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') loadUrl(); });
+
+  function setStatus(type, msg) {
+    dot.className = 'dot ' + type;
+    statusText.textContent = msg;
+  }
+
+  function loadUrl() {
+    let url = urlInput.value.trim();
+    if (!url) return;
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+
+    urlInput.value = url;
+    setStatus('loading', 'Cargando ' + url);
+    placeholder.style.display = 'none';
+    frame.classList.remove('visible');
+    frameContainer.classList.add('has-content');
+    warning.classList.remove('visible');
+
+    frame.src = url;
+
+    frame.onload = () => {
+      frame.classList.add('visible');
+      setStatus('active', 'Página cargada: ' + url);
+      warning.classList.add('visible');
+    };
+
+    frame.onerror = () => {
+      setStatus('error', 'Error al cargar la página');
+      warning.classList.add('visible');
+    };
+  }
+
+  function clearFrame() {
+    frame.src = 'about:blank';
+    frame.classList.remove('visible');
+    placeholder.style.display = 'flex';
+    frameContainer.classList.remove('has-content');
+    urlInput.value = '';
+    warning.classList.remove('visible');
+    setStatus('', 'Esperando URL...');
+    dot.className = 'dot';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Overlay Extractor</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #111; color: #eee; padding: 2rem; min-height: 100vh; }
+  h1 { font-size: 18px; font-weight: 500; margin-bottom: 1.5rem; }
+  .card { background: #1a1a1a; border: 0.5px solid #333; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  label { font-size: 13px; color: #888; display: block; margin-bottom: 6px; }
+  .drop-zone {
+    border: 1.5px dashed #444; border-radius: 8px; padding: 1.5rem 1rem;
+    text-align: center; cursor: pointer; transition: border-color 0.15s;
+    position: relative;
+  }
+  .drop-zone:hover, .drop-zone.over { border-color: #4a9; }
+  .drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .drop-zone .icon { font-size: 24px; margin-bottom: 6px; }
+  .drop-zone .hint { font-size: 12px; color: #555; margin-top: 4px; }
+  .drop-zone .name { font-size: 13px; color: #4a9; margin-top: 6px; font-weight: 500; }
+  .preview-thumb { width: 100%; height: 80px; object-fit: cover; border-radius: 6px; margin-top: 8px; display: none; }
+  .slider-row { display: flex; align-items: center; gap: 12px; margin-top: 1rem; }
+  input[type="range"] { flex: 1; accent-color: #4a9; }
+  .val { font-size: 13px; font-weight: 500; min-width: 28px; text-align: right; }
+  button { display: block; width: 100%; margin-top: 1rem; padding: 10px; background: #2a2a2a; border: 0.5px solid #444; border-radius: 8px; color: #eee; font-size: 14px; cursor: pointer; transition: background 0.15s; }
+  button:hover:not(:disabled) { background: #333; }
+  button:disabled { opacity: 0.4; cursor: default; }
+  .log { font-size: 12px; color: #666; margin-top: 8px; min-height: 18px; }
+  .preview { display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; }
+  .preview-box { flex: 1; min-width: 200px; }
+  .preview-label { font-size: 11px; color: #555; margin-bottom: 6px; }
+  canvas { max-width: 100%; border-radius: 8px; border: 0.5px solid #333; display: block; background: #000; }
+  .dl-btn { background: #1a3a2a; border-color: #2a5a3a; color: #4a9; margin-top: 8px; }
+  .dl-btn:hover { background: #1f4a30 !important; }
+  .hidden { display: none; }
+  .stats { font-size: 12px; color: #555; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<h1>Overlay Extractor — archivos locales</h1>
+
+<div class="card">
+  <div class="row">
+    <div>
+      <label>Imagen BASE (sin overlay)</label>
+      <div class="drop-zone" id="zoneBase">
+        <input type="file" accept="image/*" onchange="loadFile(this,'base')">
+        <div class="icon">🖼</div>
+        <div>Arrastrá o clickeá</div>
+        <div class="hint">big_69738cc...jpg</div>
+        <div class="name" id="nameBase"></div>
+      </div>
+      <img class="preview-thumb" id="thumbBase">
+    </div>
+    <div>
+      <label>Imagen con OVERLAY</label>
+      <div class="drop-zone" id="zoneView">
+        <input type="file" accept="image/*" onchange="loadFile(this,'view')">
+        <div class="icon">🖼</div>
+        <div>Arrastrá o clickeá</div>
+        <div class="hint">69738cc...jpg (views)</div>
+        <div class="name" id="nameView"></div>
+      </div>
+      <img class="preview-thumb" id="thumbView">
+    </div>
+  </div>
+
+  <div class="slider-row">
+    <label style="margin:0;white-space:nowrap;color:#888;font-size:13px">Umbral de diferencia</label>
+    <input type="range" id="threshold" min="5" max="120" value="30" oninput="document.getElementById('thVal').textContent=this.value">
+    <span class="val" id="thVal">30</span>
+  </div>
+
+  <button id="btnRun" onclick="runExtract()" disabled>Extraer overlay</button>
+  <div class="log" id="log">Cargá las dos imágenes para continuar</div>
+</div>
+
+<div class="card hidden" id="resultCard">
+  <div class="preview">
+    <div class="preview-box">
+      <div class="preview-label">Transparente (PNG con alpha)</div>
+      <canvas id="cvAlpha"></canvas>
+      <button class="dl-btn" onclick="download('cvAlpha','overlay_transparent.png')">Descargar PNG transparente</button>
+    </div>
+    <div class="preview-box">
+      <div class="preview-label">Sobre fondo negro</div>
+      <canvas id="cvBlack"></canvas>
+      <button class="dl-btn" onclick="download('cvBlack','overlay_black.png')">Descargar PNG negro</button>
+    </div>
+  </div>
+  <div class="stats" id="stats"></div>
+</div>
+
+<script>
+const imgs = { base: null, view: null };
+
+function loadFile(input, key) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('name' + cap(key)).textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      imgs[key] = img;
+      const thumb = document.getElementById('thumb' + cap(key));
+      thumb.src = e.target.result;
+      thumb.style.display = 'block';
+      checkReady();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function checkReady() {
+  const ready = imgs.base && imgs.view;
+  document.getElementById('btnRun').disabled = !ready;
+  if (ready) document.getElementById('log').textContent = 'Listo para extraer.';
+}
+
+function runExtract() {
+  const threshold = parseInt(document.getElementById('threshold').value);
+  const base = imgs.base;
+  const view = imgs.view;
+
+  document.getElementById('btnRun').disabled = true;
+  document.getElementById('log').textContent = 'Procesando...';
+
+  setTimeout(() => {
+    const w = view.naturalWidth || view.width;
+    const h = view.naturalHeight || view.height;
+
+    const tmp = document.createElement('canvas');
+    tmp.width = w; tmp.height = h;
+    const ctx = tmp.getContext('2d');
+
+    ctx.drawImage(view, 0, 0, w, h);
+    const d1 = ctx.getImageData(0, 0, w, h);
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.drawImage(base, 0, 0, w, h);
+    const d2 = ctx.getImageData(0, 0, w, h);
+
+    const outA = ctx.createImageData(w, h);
+    const outB = ctx.createImageData(w, h);
+    let count = 0;
+
+    for (let i = 0; i < d1.data.length; i += 4) {
+      const delta = Math.abs(d1.data[i]-d2.data[i])
+                  + Math.abs(d1.data[i+1]-d2.data[i+1])
+                  + Math.abs(d1.data[i+2]-d2.data[i+2]);
+      if (delta > threshold) {
+        outA.data[i]   = outB.data[i]   = d1.data[i];
+        outA.data[i+1] = outB.data[i+1] = d1.data[i+1];
+        outA.data[i+2] = outB.data[i+2] = d1.data[i+2];
+        outA.data[i+3] = 255;
+        outB.data[i+3] = 255;
+        count++;
+      }
+    }
+
+    const cvA = document.getElementById('cvAlpha');
+    cvA.width = w; cvA.height = h;
+    cvA.getContext('2d').putImageData(outA, 0, 0);
+
+    const cvB = document.getElementById('cvBlack');
+    cvB.width = w; cvB.height = h;
+    const ctxB = cvB.getContext('2d');
+    ctxB.fillStyle = '#000';
+    ctxB.fillRect(0, 0, w, h);
+    ctxB.putImageData(outB, 0, 0);
+
+    document.getElementById('stats').textContent =
+      `${count.toLocaleString()} píxeles detectados — ${((count/(w*h))*100).toFixed(1)}% de la imagen (${w}×${h}px)`;
+
+    document.getElementById('resultCard').classList.remove('hidden');
+    document.getElementById('log').textContent = 'Listo.';
+    document.getElementById('btnRun').disabled = false;
+  }, 50);
+}
+
+function download(canvasId, filename) {
+  document.getElementById(canvasId).toBlob(blob => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+  }, 'image/png');
+}
+
+['zoneBase','zoneView'].forEach(id => {
+  const zone = document.getElementById(id);
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('over');
+    const key = id === 'zoneBase' ? 'base' : 'view';
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    const fakeInput = { files: [file] };
+    loadFile(fakeInput, key);
+  });
+});
+</script>
+</body>
+</html>

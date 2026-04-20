@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uploader Qbank - Firebase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .path-builder {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            color: #555;
+            font-size: 0.875rem;
+        }
+
+        .input-group input,
+        .input-group select {
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .path-display {
+            padding: 1rem;
+            background: white;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            font-family: 'Monaco', monospace;
+            font-size: 0.875rem;
+            color: #667eea;
+            margin-top: 1rem;
+        }
+
+        .json-section textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Monaco', monospace;
+            font-size: 0.875rem;
+            resize: vertical;
+        }
+
+        .json-section textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        button {
+            flex: 1;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .preview {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .preview h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .preview-content {
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .preview-content strong {
+            color: #333;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Uploader Qbank - Firestore</h1>
+            <p>Sube preguntas estructuradas a Firestore con ruta jerárquica</p>
+        </div>
+
+        <div class="content">
+            <div id="alertContainer"></div>
+
+            <!-- Sección 1: Configuración de Ruta -->
+            <div class="section">
+                <h2>📍 Paso 1: Configurar Ruta de Firestore</h2>
+                
+                <div class="path-builder">
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>Supracategoría</label>
+                            <input type="text" id="supracategoria" placeholder="Ej: Cardiología y cirugía cardiovascular">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Categoría</label>
+                            <input type="text" id="categoria" placeholder="Ej: Anatomía y fisiología cardiaca">
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>Subcategoría</label>
+                            <input type="text" id="subcategoria" placeholder="Ej: Generalidades">
+                        </div>
+
+                        <div class="input-group">
+                            <label>ID de la Pregunta <small>(opcional - se generará automáticamente)</small></label>
+                            <input type="text" id="questionId" placeholder="Ej: question_001 o dejar vacío">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="path-display" id="pathDisplay">
+                    Ruta: <strong>/supracategorias/{supracategoria}/categorias/{categoria}/subcategorias/{subcategoria}/preguntas/{questionId}</strong>
+                </div>
+                <!-- Full path input (optional) -->
+                <div class="input-group" style="margin-top:1rem;">
+                    <label>Ruta completa (sobrescribe los campos arriba)</label>
+                    <input type="text" id="fullPath" placeholder="Ej: supracategorias/Cardiología y cirugía cardiovascular/categorias/Anatomía y fisiología cardiaca/subcategorias/Generalidades/preguntas/65">
+                </div>
+            </div>
+
+            <!-- Sección 2: JSON de la Pregunta -->
+            <div class="section json-section">
+                <h2>📝 Paso 2: Pegar JSON de la Pregunta</h2>
+                <p style="color: #666; margin-bottom: 1rem; font-size: 0.875rem;">
+                    Copia el JSON generado desde <strong>converqbank.html</strong> y pégalo aquí
+                </p>
+                <textarea id="jsonInput" placeholder='{"metadata": {...}, "questionContent": {...}, ...}'></textarea>
+
+                <div class="input-group" style="margin-top: 1rem;">
+                    <label for="jsonFileInput">O subir archivo JSON:</label>
+                    <input type="file" id="jsonFileInput" accept=".json" style="margin-top: 0.5rem;">
+                    <button class="btn-secondary" style="margin-top: 1rem; width: auto; flex: none;" onclick="cargarDesdeArchivo()">Cargar JSON desde archivo</button>
+                <button class="btn-primary" style="margin-top: 1rem; width: auto; flex: none;" onclick="cargarYSubir()">Cargar y Subir JSON</button>
+                </div>
+            </div>
+
+            <!-- Sección 3: Vista Previa -->
+            <div class="section" id="previewSection" style="display: none;">
+                <h2>👁️ Paso 3: Vista Previa</h2>
+                <div class="preview" id="previewContent"></div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="button-group">
+                <button class="btn-secondary" onclick="validarYVistaPrevia()">👁️ Vista Previa</button>
+                <button class="btn-primary" id="uploadBtn" onclick="subirAFirestore()" disabled>
+                    🚀 Subir a Firestore
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+<!-- Firebase SDK v8 (como en tu otro uploader) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script>
+  // Config de amboss-clone (la misma que ya usabas)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+            authDomain: "bancomicina-62bfe.firebaseapp.com",
+            projectId: "bancomicina-62bfe",
+            storageBucket: "bancomicina-62bfe.appspot.com",
+            messagingSenderId: "737254665977",
+            appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
+        };
+
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+
+  // Firestore v8
+  const db = firebase.firestore();
+  // lo dejo en window por si tu código lo mira
+  window.db = db;
+</script>
+
+    <script>
+        let jsonData = null;
+        let validPath = false;
+
+        // Actualizar vista de ruta en tiempo real y escuchar cambios en todos los campos, incluido fullPath
+        ['supracategoria', 'categoria', 'subcategoria', 'questionId', 'fullPath'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', actualizarRuta);
+            }
+        });
+
+        function actualizarRuta() {
+            const fullPathInput = document.getElementById('fullPath').value.trim();
+            if (fullPathInput) {
+                const displayPath = fullPathInput.startsWith('/') ? fullPathInput : '/' + fullPathInput;
+                document.getElementById('pathDisplay').innerHTML = `Ruta: <strong>${displayPath}</strong>`;
+                validPath = true;
+                return;
+            }
+            const supra = document.getElementById('supracategoria').value || '{supracategoria}';
+            const cat = document.getElementById('categoria').value || '{categoria}';
+            const sub = document.getElementById('subcategoria').value || '{subcategoria}';
+            const qId = document.getElementById('questionId').value || '{auto-generado}';
+
+            const pathDisplay = document.getElementById('pathDisplay');
+            pathDisplay.innerHTML = `Ruta: <strong>/supracategorias/${supra}/categorias/${cat}/subcategorias/${sub}/preguntas/${qId}</strong>`;
+
+            validPath = document.getElementById('supracategoria').value &&
+                       document.getElementById('categoria').value &&
+                       document.getElementById('subcategoria').value;
+        }
+
+        function mostrarAlerta(mensaje, tipo = 'success') {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${tipo}`;
+            alert.innerHTML = mensaje;
+            container.appendChild(alert);
+            setTimeout(() => alert.remove(), 5000);
+        }
+
+        function cargarDesdeArchivo() {
+            const fileInput = document.getElementById('jsonFileInput');
+            const jsonInputTextarea = document.getElementById('jsonInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                mostrarAlerta('❌ Por favor, selecciona un archivo JSON para cargar.', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                try {
+                    const content = e.target.result;
+                    jsonInputTextarea.value = content; // Set the content to the textarea
+                    mostrarAlerta('✅ Archivo JSON cargado correctamente. Validando...', 'success');
+                    validarYVistaPrevia(); // Validate and preview the loaded JSON
+                } catch (error) {
+                    console.error('Error al leer el archivo:', error);
+                    mostrarAlerta('❌ Error al leer el archivo: ' + error.message, 'error');
+                }
+            };
+
+            reader.onerror = () => {
+                mostrarAlerta('❌ Error al cargar el archivo.', 'error');
+            };
+
+            reader.readAsText(file);
+        }
+
+        // New function: cargar y subir directamente sin vista previa
+        function cargarYSubir() {
+            const fileInput = document.getElementById('jsonFileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                mostrarAlerta('❌ Por favor, selecciona un archivo JSON para subir.', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = async (e) => {
+                try {
+                    const content = e.target.result;
+                    jsonData = JSON.parse(content);
+                    // Validate basic structure
+                    if (!jsonData.metadata || !jsonData.questionContent || !jsonData.options) {
+                        throw new Error('El JSON no tiene la estructura correcta de una pregunta');
+                    }
+                    // Directly upload
+                    await subirAFirestore();
+                } catch (error) {
+                    console.error('Error al procesar el archivo JSON:', error);
+                    mostrarAlerta('❌ Error: ' + error.message, 'error');
+                }
+            };
+
+            reader.onerror = () => {
+                mostrarAlerta('❌ Error al leer el archivo.', 'error');
+            };
+
+            reader.readAsText(file);
+        }
+
+        function validarYVistaPrevia() {
+            const jsonInput = document.getElementById('jsonInput').value.trim();
+
+            if (!jsonInput) {
+                mostrarAlerta('❌ Por favor, pega el JSON de la pregunta o carga un archivo', 'error');
+                return;
+            }
+
+            if (!validPath) {
+                mostrarAlerta('❌ Por favor, completa la ruta (supracategoría, categoría, subcategoría)', 'error');
+                return;
+            }
+
+            try {
+                jsonData = JSON.parse(jsonInput);
+
+                // Validar estructura básica
+                if (!jsonData.metadata || !jsonData.questionContent || !jsonData.options) {
+                    throw new Error('El JSON no tiene la estructura correcta de una pregunta');
+                }
+
+                // Generar vista previa
+                const previewHtml = `
+                    <div class="preview-content">
+                        <h3>
+                            Pregunta ${jsonData.metadata.questionNumber || '?'}/${jsonData.metadata.totalQuestions || '?'}
+                            ${jsonData.metadata.difficulty ? `<span class="badge badge-warning">${'⚒️'.repeat(jsonData.metadata.difficulty)}</span>` : ''}
+                        </h3>
+                        
+                        <p style="margin: 1rem 0;">
+                            <strong>Sesión:</strong> ${jsonData.metadata.sessionTitle || 'Sin título'}
+                        </p>
+
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 6px; margin: 1rem 0;">
+                            <strong>Pregunta:</strong>
+                            <p style="margin-top: 0.5rem;">${jsonData.questionContent.text.substring(0, 200)}...</p>
+                        </div>
+
+                        ${jsonData.hint.used ? `
+                            <div style="background: #fff3cd; padding: 1rem; border-radius: 6px; margin: 1rem 0; border-left: 4px solid #ffc107;">
+                                <strong>💡 Hint usado</strong>
+                                <p style="margin-top: 0.5rem;">${jsonData.hint.text.substring(0, 150)}...</p>
+                            </div>
+                        ` : ''}
+
+                        <div style="margin: 1rem 0;">
+                            <strong>Opciones (${jsonData.options.length}):</strong>
+                            <ul style="list-style: none; padding: 0; margin-top: 0.5rem;">
+                                ${jsonData.options.map(opt => `
+                                    <li style="padding: 0.5rem; margin: 0.5rem 0; background: #f8f9fa; border-left: 4px solid ${opt.isCorrect ? '#28a745' : '#6c757d'};">
+                                        <strong>${opt.letter}.</strong> ${opt.text}
+                                        ${opt.isCorrect ? '<span class="badge badge-success">Correcta</span>' : ''}
+                                        ${opt.percentage ? `<span style="color: #666; margin-left: 0.5rem;">(${opt.percentage})</span>` : ''}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+
+                        <div style="margin-top: 1rem; padding: 1rem; background: #e7f3ff; border-radius: 6px;">
+                            <strong>📊 Estadísticas:</strong>
+                            <p style="margin-top: 0.5rem;">
+                                ${jsonData.stats.totalOptions} opciones • 
+                                ${jsonData.stats.totalImages} imágenes • 
+                                ${jsonData.stats.totalLinks} enlaces
+                            </p>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('previewContent').innerHTML = previewHtml;
+                document.getElementById('previewSection').style.display = 'block';
+                document.getElementById('uploadBtn').disabled = false;
+
+                mostrarAlerta('✅ JSON válido! Vista previa generada', 'success');
+
+            } catch (error) {
+                console.error('Error al validar JSON:', error);
+                mostrarAlerta('❌ Error: ' + error.message, 'error');
+                document.getElementById('uploadBtn').disabled = true;
+            }
+        }
+
+        async function subirAFirestore() {
+            if (!jsonData || !validPath) {
+                mostrarAlerta('❌ Primero valida el JSON y la ruta', 'error');
+                return;
+            }
+
+            if (!window.db) {
+                mostrarAlerta('❌ Error crítico: Firebase no se pudo cargar. Por favor, desactiva tu bloqueador de anuncios (AdBlock, uBlock) y recarga la página.', 'error');
+                return;
+            }
+
+            const uploadBtn = document.getElementById('uploadBtn');
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<span class="loading"></span> Subiendo...';
+
+            try {
+                const fullPathInput = document.getElementById('fullPath').value.trim();
+                let docPath;
+                let dataToUpload = {
+                    ...jsonData,
+                    uploadedAt: new Date().toISOString()
+                };
+
+                if (fullPathInput) {
+                    // Remove leading slash for Firestore doc() path
+                    docPath = fullPathInput.startsWith('/') ? fullPathInput.slice(1) : fullPathInput;
+                    dataToUpload.path = { fullPath: docPath };
+                } else {
+                    const supra = document.getElementById('supracategoria').value.trim();
+                    const cat = document.getElementById('categoria').value.trim();
+                    const sub = document.getElementById('subcategoria').value.trim();
+                    let qId = document.getElementById('questionId').value.trim();
+
+                    if (!qId) {
+                        qId = `question_${jsonData.metadata.questionNumber || Date.now()}`;
+                    }
+
+                    docPath = `supracategorias/${supra}/categorias/${cat}/subcategorias/${sub}/preguntas/${qId}`;
+                    dataToUpload.path = {
+                        supracategoria: supra,
+                        categoria: cat,
+                        subcategoria: sub,
+                        questionId: qId
+                    };
+                }
+
+                // Upload using Firestore doc reference
+// Upload usando Firestore v8
+const docRef = window.db.doc(docPath);
+await docRef.set(dataToUpload);
+
+                mostrarAlerta(`
+                    ✅ <strong>¡Pregunta subida exitosamente!</strong><br>
+                    Ruta: <code>${docPath}</code>
+                `, 'success');
+
+                uploadBtn.innerHTML = '✓ Subida Exitosa';
+                setTimeout(() => {
+                    uploadBtn.innerHTML = '🚀 Subir a Firestore';
+                    uploadBtn.disabled = false;
+                }, 3000);
+
+            } catch (error) {
+                console.error('Error al subir a Firestore:', error);
+                let errorMsg = error.message;
+                if (error.code === 'unavailable' || error.message.includes('offline') || error.message.includes('Failed to get document')) {
+                    errorMsg = '<strong>Bloqueo de red detectado.</strong><br>Por favor, desactiva AdBlock/uBlock y verifica tu conexión.';
+                }
+                mostrarAlerta(`❌ Error al subir: ${errorMsg}`, 'error');
+                uploadBtn.innerHTML = '🚀 Subir a Firestore';
+                uploadBtn.disabled = false;
+            }
+        }
+
+
+
+
+        // Inicializar estado de la ruta al cargar
+        document.addEventListener('DOMContentLoaded', actualizarRuta);
+    </script>
+</body>
+</html>
+

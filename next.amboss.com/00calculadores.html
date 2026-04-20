@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subir JSON a Firestore</title>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #111827;
+      border: 1px solid #374151;
+      border-radius: 14px;
+      padding: 24px;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 24px;
+      margin-bottom: 18px;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    textarea,
+    input[type="file"] {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #4b5563;
+      background: #1f2937;
+      color: white;
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    textarea {
+      min-height: 260px;
+      resize: vertical;
+    }
+
+    #scriptBox {
+      min-height: 420px;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn:hover {
+      background: #1d4ed8;
+    }
+
+    .btn.green {
+      background: #16a34a;
+    }
+
+    .btn.green:hover {
+      background: #15803d;
+    }
+
+    .btn.gray {
+      background: #374151;
+    }
+
+    .btn.gray:hover {
+      background: #4b5563;
+    }
+
+    .preview, .status {
+      margin-top: 20px;
+      background: #0b1220;
+      border: 1px solid #374151;
+      border-radius: 10px;
+      padding: 14px;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    .status {
+      color: #d1fae5;
+    }
+
+    .error {
+      color: #fecaca;
+    }
+
+    .section-title {
+      margin: 28px 0 10px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #93c5fd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pegar JSON o subir archivo y guardar en Firestore</h1>
+
+    <div class="field">
+      <label for="jsonText">Pegar JSON</label>
+      <textarea id="jsonText" placeholder='Pegá aquí un array JSON'></textarea>
+    </div>
+
+    <div class="field">
+      <label for="jsonFile">Subir archivo JSON</label>
+      <input type="file" id="jsonFile" accept=".json,application/json" />
+    </div>
+
+    <div class="buttons">
+      <button class="btn" id="mostrarBtn">Mostrar contenido</button>
+      <button class="btn green" id="subirBtn">Subir a Firestore</button>
+    </div>
+
+    <div class="preview" id="preview">Aquí aparecerá el contenido...</div>
+    <div class="status" id="status">Estado: esperando acción.</div>
+
+    <div class="section-title">Script extractor</div>
+
+    <div class="field">
+      <label for="scriptBox">Box con el script por defecto</label>
+      <textarea id="scriptBox">async function extraerDesdeVisorCarril({
+  selectorItems = 'button[data-ds-id="MediaItem"]',
+  delayApertura = 2200,
+  delayCambio = 1600,
+  soloVisibles = true,
+  descargarJsonAlFinal = true
+} = {}) {
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  const esVisible = (el) => {
+    if (!el) return false;
+    const st = getComputedStyle(el);
+    const r = el.getBoundingClientRect();
+    return (
+      st.display !== 'none' &&
+      st.visibility !== 'hidden' &&
+      st.pointerEvents !== 'none' &&
+      r.width > 0 &&
+      r.height > 0
+    );
+  };
+
+  const textoLimpio = (el) =>
+    el?.innerText?.trim() || el?.textContent?.trim() || '';
+
+  const htmlToTextConSaltos = (el) => {
+    if (!el) return '';
+    const clon = el.cloneNode(true);
+    clon.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
+    clon.querySelectorAll('p').forEach(p => p.insertAdjacentText('afterend', '\n\n'));
+    return clon.innerText.trim();
+  };
+
+  const limpiarDataE2E = (v) =>
+    String(v || '').replace(/^search-result-media-/, '');
+
+  const normalizarUrlQxmd = (v) => {
+    const s = String(v || '').trim();
+    if (!s) return '';
+    if (/^https?:\/\/(?:www\.)?qxmd\.com\/calculate\//i.test(s)) return s;
+    if (/^https?:\/\/(?:www\.)?qxmd\.com\/.+\?embed=1/i.test(s)) return s;
+    if (/^\/\/(?:www\.)?qxmd\.com\//i.test(s)) return 'https:' + s;
+    if (/^\/calculate\//i.test(s)) return 'https://qxmd.com' + s;
+    return '';
+  };
+
+  const extraerDesdePerformance = () => {
+    try {
+      const entries = [
+        ...performance.getEntriesByType('resource'),
+        ...performance.getEntriesByType('navigation')
+      ];
+
+      const candidatos = entries
+        .map(e => e.name || '')
+        .filter(Boolean)
+        .reverse();
+
+      for (const url of candidatos) {
+        if (/https?:\/\/(?:www\.)?qxmd\.com\/calculate\//i.test(url)) {
+          return url;
+        }
+      }
+
+      for (const url of candidatos) {
+        if (/https?:\/\/(?:www\.)?qxmd\.com\/.*\?embed=1/i.test(url)) {
+          return url;
+        }
+      }
+
+      for (const url of candidatos) {
+        if (/calculate\/calculator_/i.test(url)) {
+          return url;
+        }
+      }
+    } catch (e) {}
+
+    return '';
+  };
+
+  const dispararClickReal = (el) => {
+    const r = el.getBoundingClientRect();
+    const x = r.left + r.width / 2;
+    const y = r.top + r.height / 2;
+
+    const eventos = [
+      ['pointerdown', PointerEvent],
+      ['mousedown', MouseEvent],
+      ['pointerup', PointerEvent],
+      ['mouseup', MouseEvent],
+      ['click', MouseEvent],
+    ];
+
+    for (const [type, Ctor] of eventos) {
+      el.dispatchEvent(new Ctor(type, {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        view: window,
+        clientX: x,
+        clientY: y,
+        button: 0,
+        buttons: 1,
+        pointerId: 1,
+        pointerType: 'mouse',
+        isPrimary: true
+      }));
+    }
+  };
+
+  const esperarVisor = async (timeout = 10000) => {
+    const t0 = Date.now();
+    while (Date.now() - t0 < timeout) {
+      const ok =
+        document.querySelector('#viewer-abstract') ||
+        document.querySelector('#viewer-copyright-source') ||
+        document.querySelector('[id^="viewer-"]');
+      if (ok) return true;
+      await sleep(200);
+    }
+    return false;
+  };
+
+  const obtenerHref = async (hrefAnterior = '', timeout = 6000) => {
+    const t0 = Date.now();
+
+    while (Date.now() - t0 < timeout) {
+      const canonical =
+        document.querySelector('link[rel="canonical"]')?.href || '';
+
+      const ogUrl =
+        document.querySelector('meta[property="og:url"]')?.content || '';
+
+      const itempropUrl =
+        document.querySelector('link[itemprop="url"]')?.href || '';
+
+      const anchorQxmd =
+        document.querySelector('a[href*="qxmd.com/calculate"]')?.href || '';
+
+      const perfQxmd = extraerDesdePerformance();
+
+      const candidatos = [
+        canonical,
+        ogUrl,
+        itempropUrl,
+        anchorQxmd,
+        perfQxmd
+      ]
+        .map(normalizarUrlQxmd)
+        .filter(Boolean);
+
+      const hrefValido = candidatos.find(Boolean) || '';
+
+      if (hrefValido) {
+        if (!hrefAnterior) return hrefValido;
+        if (hrefValido !== hrefAnterior) return hrefValido;
+      }
+
+      await sleep(200);
+    }
+
+    return hrefAnterior || '';
+  };
+
+  const obtenerDatosVisor = async (fallback = {}, hrefAnterior = '') => {
+    const abstractEl = document.querySelector('#viewer-abstract');
+    const copyrightEl = document.querySelector('#viewer-copyright-source');
+
+    const activoCarril =
+      document.querySelector('[aria-current="true"]') ||
+      document.querySelector('[aria-selected="true"]') ||
+      document.querySelector('[data-active="true"]') ||
+      document.querySelector('[class*="active"][data-e2e-test-id*="search-result-media"]') ||
+      document.querySelector('[class*="selected"][data-e2e-test-id*="search-result-media"]');
+
+    const dataE2E =
+      activoCarril?.getAttribute('data-e2e-test-id') ||
+      activoCarril?.closest('[data-e2e-test-id]')?.getAttribute('data-e2e-test-id') ||
+      fallback.dataE2ETestId ||
+      '';
+
+    const dataDsId =
+      activoCarril?.getAttribute('data-ds-id') ||
+      activoCarril?.closest('[data-ds-id]')?.getAttribute('data-ds-id') ||
+      fallback.dataDsId ||
+      '';
+
+    return {
+      dataE2ETestId: limpiarDataE2E(dataE2E),
+      href: await obtenerHref(hrefAnterior),
+      dataDsId,
+      viewerAbstract: htmlToTextConSaltos(abstractEl),
+      viewerCopyrightSource: textoLimpio(copyrightEl)
+    };
+  };
+
+  const obtenerThumbsCarril = () => {
+    const candidatos = [
+      '[data-e2e-test-id*="search-result-media"]',
+      '[data-ds-id="MediaItem"]',
+      'button[data-ds-id="MediaItem"]'
+    ];
+
+    let thumbs = [];
+    for (const sel of candidatos) {
+      thumbs = [...document.querySelectorAll(sel)].filter(esVisible);
+      if (thumbs.length > 1) break;
+    }
+
+    const unicos = [];
+    const seen = new Set();
+
+    for (const el of thumbs) {
+      const key =
+        el.getAttribute('data-e2e-test-id') ||
+        el.getAttribute('aria-label') ||
+        el.textContent?.trim() ||
+        Math.random().toString(36);
+
+      if (!seen.has(key)) {
+        seen.add(key);
+        unicos.push(el);
+      }
+    }
+
+    return unicos;
+  };
+
+  const irAlSiguienteEnVisor = async (thumbActual, index) => {
+    const botonesNext = [
+      'button[aria-label="Next"]',
+      'button[aria-label="Siguiente"]',
+      '[data-e2e-test-id*="next"]',
+      'button[title="Next"]'
+    ];
+
+    for (const sel of botonesNext) {
+      const btn = document.querySelector(sel);
+      if (btn && esVisible(btn)) {
+        btn.click();
+        await sleep(delayCambio);
+        return true;
+      }
+    }
+
+    const thumbs = obtenerThumbsCarril();
+    if (thumbs[index + 1]) {
+      thumbs[index + 1].scrollIntoView({ block: 'nearest', inline: 'center' });
+      await sleep(250);
+      dispararClickReal(thumbs[index + 1]);
+      await sleep(delayCambio);
+      return true;
+    }
+
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'ArrowRight',
+      code: 'ArrowRight',
+      keyCode: 39,
+      which: 39,
+      bubbles: true
+    }));
+    await sleep(delayCambio);
+    return true;
+  };
+
+  const items = [...document.querySelectorAll(selectorItems)]
+    .filter(el => !soloVisibles || esVisible(el));
+
+  if (!items.length) {
+    console.warn('No se encontraron items');
+    return [];
+  }
+
+  const resultados = [];
+  const vistos = new Set();
+  let ultimoHref = '';
+
+  const primerItem = items[0];
+  primerItem.scrollIntoView({ block: 'center', inline: 'center' });
+  await sleep(400);
+  dispararClickReal(primerItem);
+
+  const abrio = await esperarVisor();
+  if (!abrio) {
+    console.warn('No se abrió el visor');
+    return [];
+  }
+
+  await sleep(delayApertura);
+
+  for (let i = 0; i < items.length; i++) {
+    const base = items[i];
+
+    const imgEl = base.querySelector('img');
+
+const titulo =
+  imgEl?.title ||
+  imgEl?.alt ||
+  base.textContent?.trim() ||
+  `item_${i + 1}`;
+
+const thumbnailSrc = imgEl?.src || '';
+
+    const fallbackRaw =
+      base.getAttribute('data-e2e-test-id') ||
+      base.closest('[data-e2e-test-id]')?.getAttribute('data-e2e-test-id') ||
+      '';
+
+    const fallback = {
+      dataE2ETestId: limpiarDataE2E(fallbackRaw),
+      dataDsId:
+        base.getAttribute('data-ds-id') ||
+        base.closest('[data-ds-id]')?.getAttribute('data-ds-id') ||
+        ''
+    };
+
+    await sleep(700);
+
+    const datos = await obtenerDatosVisor(fallback, ultimoHref);
+    if (datos.href) ultimoHref = datos.href;
+
+    const clave = `${datos.dataE2ETestId}||${datos.href}||${titulo}`;
+    if (!vistos.has(clave)) {
+      vistos.add(clave);
+      resultados.push({
+  index: i + 1,
+  titulo,
+  thumbnailSrc,
+  ...datos
+});
+      console.log(`Guardado ${i + 1}/${items.length}`, resultados[resultados.length - 1]);
+    }
+
+    if (i < items.length - 1) {
+      await irAlSiguienteEnVisor(base, i);
+    }
+  }
+
+  window.resultadosMediaItems = resultados;
+  console.log('Proceso terminado');
+  console.log(resultados);
+
+  if (descargarJsonAlFinal) {
+    const blob = new Blob([JSON.stringify(resultados, null, 2)], {
+      type: 'application/json;charset=utf-8'
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'media_items_carril.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  return resultados;
+}
+
+await extraerDesdeVisorCarril();</textarea>
+    </div>
+
+    <div class="buttons">
+      <button class="btn gray" id="copiarScriptBtn">Copiar script</button>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+      authDomain: "bancomicina-62bfe.firebaseapp.com",
+      projectId: "bancomicina-62bfe",
+      storageBucket: "bancomicina-62bfe.appspot.com",
+      messagingSenderId: "737254665977",
+      appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+    const db = firebase.firestore();
+
+    const jsonText = document.getElementById('jsonText');
+    const jsonFile = document.getElementById('jsonFile');
+    const preview = document.getElementById('preview');
+    const statusBox = document.getElementById('status');
+    const mostrarBtn = document.getElementById('mostrarBtn');
+    const subirBtn = document.getElementById('subirBtn');
+    const scriptBox = document.getElementById('scriptBox');
+    const copiarScriptBtn = document.getElementById('copiarScriptBtn');
+
+    function setStatus(msg, isError = false) {
+      statusBox.textContent = msg;
+      statusBox.className = isError ? 'status error' : 'status';
+    }
+
+    function leerJsonActual() {
+      const contenido = jsonText.value.trim();
+      if (!contenido) throw new Error('No hay contenido en el textarea.');
+
+      const parsed = JSON.parse(contenido);
+
+      if (!Array.isArray(parsed)) {
+        throw new Error('El JSON debe ser un array de objetos.');
+      }
+
+      return parsed;
+    }
+
+    function limpiarId(valor) {
+      return String(valor || '')
+        .trim()
+        .replace(/^search-result-media-/, '')
+        .replace(/[\/\\?#\[\]]/g, '_')
+        .replace(/\s+/g, '_')
+        .slice(0, 120);
+    }
+
+    function generarDocId(item, index) {
+      return limpiarId(
+        item.dataE2ETestId ||
+        item.href ||
+        item.titulo ||
+        `item_${index + 1}`
+      ) || `item_${index + 1}`;
+    }
+
+    jsonFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        jsonText.value = evt.target.result;
+        setStatus('Archivo JSON cargado en el textarea.');
+      };
+      reader.readAsText(file, 'UTF-8');
+    });
+
+    mostrarBtn.addEventListener('click', () => {
+      try {
+        const data = leerJsonActual();
+        preview.textContent = JSON.stringify(data, null, 2);
+        setStatus(`JSON válido. Items detectados: ${data.length}`);
+      } catch (err) {
+        preview.textContent = '';
+        setStatus(`Error: ${err.message}`, true);
+      }
+    });
+
+    copiarScriptBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(scriptBox.value);
+        setStatus('Script copiado al portapapeles.');
+      } catch (err) {
+        setStatus('No se pudo copiar el script.', true);
+      }
+    });
+
+    subirBtn.addEventListener('click', async () => {
+      try {
+        const data = leerJsonActual();
+        setStatus(`Subiendo ${data.length} items a Firestore...`);
+
+        let subidos = 0;
+
+        for (let i = 0; i < data.length; i++) {
+          const item = data[i] || {};
+          const docId = generarDocId(item, i);
+
+          await db
+            .collection('bancocalc')
+            .doc(docId)
+            .set({
+              ...item,
+              dataE2ETestId: docId,
+              firestorePath: `/bancocalc/${docId}`,
+              uploadedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+          subidos++;
+          setStatus(`Subiendo... ${subidos}/${data.length}`);
+        }
+
+        setStatus(`Listo. Se subieron ${subidos} items a /bancocalc/{dataE2ETestId}`);
+      } catch (err) {
+        console.error(err);
+        setStatus(`Error al subir: ${err.message}`, true);
+      }
+    });
+  </script>
+</body>
+</html>

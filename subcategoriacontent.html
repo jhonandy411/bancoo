@@ -1,54 +1,488 @@
-<div id="dynamic-content-loader" style="padding: 20px; text-align: center;">
-  <p>Loading content from Firestore...</p>
-</div>
+<link rel="stylesheet" href="amboss-clone.css">
 
-<script>
-  (function () {
-    const docPath = '/supracategorias/Cardiología y cirugía cardiovascular/categorias/Taquicardias/subcategorias/Taquicardia supraventricular';
-    const container = document.getElementById('dynamic-content-loader');
+<body style="background-color: rgb(255, 255, 255);" class="d03e7f0e2eb62303--bodyConnectionStatus">
+  <div class="f9cf365808f534a0--page">
 
-    // Ensure Firebase is initialized (it should be from portal1.html)
-    if (typeof db !== 'undefined') {
-      console.log('Fetching content from:', docPath);
-      db.doc(docPath).get().then(doc => {
-        if (doc.exists) {
-          const data = doc.data();
-          if (data.html_completo) {
-            // Replace the loader with the rich content
-            // We use a parent wrapper to replace the loader div itself if needed, 
-            // or just update the main-content if we can access it.
-            // Since this is injected via innerHTML, we can just replace the container's parent content or itself.
+    <div class="css-1ve4fzk-StyledBox ebcgi2u0">
+      <div class="_3b339bbf8eb2ed8c--container f9cf365808f534a0--articlePageWidth">
+        <div class="f9cf365808f534a0--floatingContainer">
+          <div class="f9cf365808f534a0--floatingInner"></div>
+        </div>
+        <div style="font-size: 12px;">
+          <div
+            class="a2e0dbc7f6affd28--baseStyles _3fb038ba90024ae6--censorTradeMarks f9cf365808f534a0--articleContainer">
+            <header class="_62af53fea5b31646--header">
+              <div class="_62af53fea5b31646--headerContent">
+                <div class="_62af53fea5b31646--titleContainer">
+                  <h1 class="_62af53fea5b31646--headerTitle">Atrioventricular block</h1>
+                  <p class="_62af53fea5b31646--synonymText">(Heart block)</p>
+                </div>
+                <div class="_62af53fea5b31646--updateInfoContainer">
+                  <p class="css-1aulued-StyledText eadloo90">Last edited: Dec 18, 2023</p>
+                  <div class="css-45jk0v-StyledBox ebcgi2u0"><a color="accent"
+                      href="https://support.amboss.com/hc/en-us/articles/6365572887188-AMBOSS-Content-Policy"
+                      target="_blank" class="css-e9evth-StyledLink ewboijr0">
+                      <div class="_62af53fea5b31646--inlineFlex">Content policy<div color="inherit"
+                          class="css-cjtild-StyledIcon e1kkd7uc0"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+                            height="16" fill="none" viewBox="0 0 16 16">
+                            <g stroke="currentColor" stroke-linejoin="round" stroke-width="2">
+                              <path
+                                d="M13 9v2.667c0 .736-.597 1.333-1.333 1.333H4.333A1.333 1.333 0 0 1 3 11.667V4.333C3 3.597 3.597 3 4.333 3H7">
+                              </path>
+                              <path stroke-linecap="round" d="M10 2h4v4M8 8l6-6"></path>
+                            </g>
+                          </svg></div>
+                      </div>
+                    </a></div>
+                </div>
+              </div>
+              <div class="css-cr0e2z-StyledColumns e144tdwe1">
+                <div class="css-xbe1vp-StyledColumn e144tdwe0">
+                  <div class="css-liukhq-InlineContainer e6i75dx0">
+                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                      <div class="css-18nqx2-InlineContainer e6i75dx0">
+                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                          <button class="_2dfc3e09bcc2a51e--container" type="button">
+                            <div class="css-1ahszv4-InlineContainer e6i75dx0">
+                              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                <div color="tertiary" class="css-1eyirtp-StyledIcon e1kkd7uc0"><svg
+                                    xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                    viewBox="0 0 16 16">
+                                    <path fill="currentColor" fill-rule="evenodd"
+                                      d="M3.86 2.183a1.79 1.79 0 0 1 1.682.055l7.7 4.5C13.714 7.014 14 7.49 14 8s-.286.986-.758 1.262l-7.7 4.5a1.8 1.8 0 0 1-1.683.055C3.33 13.554 3 13.049 3 12.5v-9c0-.549.33-1.054.86-1.317"
+                                      clip-rule="evenodd"></path>
+                                  </svg></div>
+                              </div>
+                              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                <p class="css-10zfiw3-StyledText eadloo90">QBank Session</p>
+                              </div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="css-xbe1vp-StyledColumn e144tdwe0">
+                  <div class="css-1g0bb51-InlineContainer e6i75dx0">
+                    <div class="css-h0nko7-StyledInlineItem e6i75dx1"></div>
+                    <div class="css-h0nko7-StyledInlineItem e6i75dx1"></div>
+                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                      <div class="_7a37f680f120945d--checkboxContainer" role="button">
+                        <div class="css-1672r5k-StyledFormField e1uawe9k0">
+                          <div class="css-bkwbtj-StackContainer e7wwwvf0">
+                            <div class="css-10ts8ay-StackItem e7wwwvf1"><label>
+                                <div class="css-bkwbtj-StackContainer e7wwwvf0">
+                                  <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                                    <div class="css-nuxaj3-StyledCheckboxContainer eify5ws3">
+                                      <div class="css-6ye7h4-InlineContainer e6i75dx0">
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                          <div class="css-ynjq41-StyledInputContainer eify5ws0"><input
+                                              name="learned-checkbox" type="checkbox"
+                                              class="css-oww8b1-StyledRealInput eify5ws1"><span
+                                              class="css-1rvd4z6-StyledFakeInput eify5ws2">
+                                              <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg
+                                                  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                                  viewBox="0 0 16 16">
+                                                  <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2" d="m14 4-8.25 8L2 8.364">
+                                                  </path>
+                                                </svg></div>
+                                            </span></div>
+                                        </div>
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                          <div>
+                                            <p class="css-den2g6-StyledText eadloo90">Learned</p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </label></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </header>
 
-            // Find the main-content container
-            const mainContent = document.getElementById('main-content');
-            if (mainContent) {
-              mainContent.innerHTML = data.html_completo;
 
-              // Re-run any necessary scripts or styles if needed
-              // (Note: inline scripts in the fetched HTML might not run automatically depending on how it's inserted,
-              // but portal1.html usually handles this. If not, we might need a safer injection method, 
-              // but innerHTML is what was requested).
+
+
+
+
+
+            <div class="f9cf365808f534a0--articleToolbarWrapper">
+              <section class="c64ffd7459a27da8--toolbar">
+                <div></div>
+                <div class="c64ffd7459a27da8--toolbarContent">
+                  <div class="c64ffd7459a27da8--lineBreaker"></div>
+                  <div class="c64ffd7459a27da8--viewOptionsToggles" style="padding-right: 175.148px;">
+                    <div class="">
+                      <div class="css-18nqx2-InlineContainer e6i75dx0">
+                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                          <div>
+                            <div class="">
+                              <div
+                                class="aa9fea4bb80d2cb7--toolbarItemContainer aa9fea4bb80d2cb7--firstItem aa9fea4bb80d2cb7--lastItem aa9fea4bb80d2cb7--notInDropdown">
+                                <div class="aa9fea4bb80d2cb7--container aa9fea4bb80d2cb7--hoverable" role="button">
+                                  <div class="aa9fea4bb80d2cb7--innerContainer" id="personalHighlightsToggle"><button
+                                      type="button" aria-label="Toggle personal highlights"
+                                      class="css-e9wdc6-StyledButton ejph2fy0">
+                                      <div class="css-c3523d-StyledInner ejph2fy1">
+                                        <div class="css-mgid52-InlineContainer e6i75dx0">
+                                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg
+                                                xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                                viewBox="0 0 16 16">
+                                                <path fill="currentColor" fill-rule="evenodd"
+                                                  d="M14 15h-2v-3H4v3H2v-3.852a2 2 0 0 1 .297-1.049l2.42-3.932L4.7 4.602a2 2 0 0 1 1.21-1.86L11.17.478l-.026 5.674 2.536 3.922c.209.322.321.698.321 1.085zm-9.293-5h6.543L9.464 7.238A2 2 0 0 1 9.332 7H6.536a2 2 0 0 1-.115.216zm4.448-6.478L9.148 5H6.704L6.7 4.58z"
+                                                  clip-rule="evenodd"></path>
+                                              </svg></div>
+                                          </div>
+                                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">My highlighting</div>
+                                        </div>
+                                      </div>
+                                    </button></div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="c64ffd7459a27da8--absoluteRightContainer"><span><button type="button"
+                      aria-label="Save to collection" name="save_button"
+                      class="css-f83uhv-StyledPictogramButton ej9y1j50">
+                      <div class="css-mgid52-InlineContainer e6i75dx0">
+                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                          <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg
+                              xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="2"
+                                d="m13 14-5-3.333L3 14V3.333C3 2.597 3.64 2 4.429 2h7.142C12.361 2 13 2.597 13 3.333z"
+                                clip-rule="evenodd"></path>
+                            </svg></div>
+                        </div>
+                      </div>
+                    </button></span>
+                  <div class="c64ffd7459a27da8--verticalDivider"></div>
+                  <div class="c64ffd7459a27da8--itemWrapper">
+                    <div class="">
+                      <div class="_26113a8df64b36e4--buttonContainer"><button type="button"
+                          aria-label="Toggle all sections" class="css-f83uhv-StyledPictogramButton ej9y1j50">
+                          <div class="css-mgid52-InlineContainer e6i75dx0">
+                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                              <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg
+                                  xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                  viewBox="0 0 16 16">
+                                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="bevel"
+                                    stroke-width="2" d="M3 6h10M3 10h10"></path>
+                                  <path fill="currentColor" d="m8 12 3 3H5zm0-8L5 1h6z"></path>
+                                </svg></div>
+                            </div>
+                          </div>
+                        </button></div>
+                    </div>
+                    <div class="c64ffd7459a27da8--verticalDivider"></div>
+                  </div><button type="button" aria-label="Change font size"
+                    class="css-f83uhv-StyledPictogramButton ej9y1j50">
+                    <div class="css-mgid52-InlineContainer e6i75dx0">
+                      <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                        <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg
+                            xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                            <path fill="currentColor" fill-rule="evenodd"
+                              d="M8.372 13h-2.81l-.596-1.6H2.293L1.697 13H0l2.885-7.75h1.488l2.32 6.231L10.063 3h1.967L16 13h-2.282l-.848-2.134H9.22zM3.63 7.81 4.47 10H2.79zM12.15 9l-1.105-2.73L9.92 9z"
+                              clip-rule="evenodd"></path>
+                          </svg></div>
+                      </div>
+                    </div>
+                  </button>
+                  <div><button type="button" class="css-e9wdc6-StyledButton ejph2fy0">
+                      <div class="css-c3523d-StyledInner ejph2fy1">
+                        <div class="css-mgid52-InlineContainer e6i75dx0">
+                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">EN</div>
+                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                            <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg
+                                xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                viewBox="0 0 16 16">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-width="2" d="m4 6 4 4 4-4"></path>
+                              </svg></div>
+                          </div>
+                        </div>
+                      </div>
+                    </button></div>
+                </div>
+              </section>
+              <div class="c64ffd7459a27da8--toolbarDivider"></div>
+            </div>
+
+
+
+
+            <!-- Contenedor dinámico donde se insertará el contenido de Firestore -->
+            <div id="dynamic-content-loader" style="padding: 20px; text-align: left;">
+              <p>Loading content from Firestore...</p>
+            </div>
+
+          </div>
+
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+
+  <script>
+    (function () {
+      const docPath = '/supracategorias/Cardiología y cirugía cardiovascular/categorias/Taquicardias/subcategorias/Taquicardia supraventricular';
+      const container = document.getElementById('dynamic-content-loader');
+
+      // Track loaded sections to avoid reloading
+      const loadedSections = new Set();
+      let articleData = null;
+
+      // Ensure Firebase is initialized (it should be from portal1.html)
+      if (typeof db !== 'undefined') {
+        console.log('Fetching content from:', docPath);
+        db.doc(docPath).get().then(doc => {
+          if (doc.exists) {
+            const data = doc.data();
+            articleData = data;
+
+            // Check content type
+            if (data.contentType === 'sectioned' && data.sections) {
+              // New sectioned format - render with lazy loading
+              renderSectionedContent(data);
+            } else if (data.html_completo) {
+              // Legacy monolithic format
+              container.innerHTML = data.html_completo;
             } else {
-              // Fallback if main-content isn't found (e.g. standalone)
-              document.body.innerHTML = data.html_completo;
+              container.innerHTML = '<p style="color:red">Document found, but no valid content.</p>';
             }
           } else {
-            container.innerHTML = '<p style="color:red">Document found, but no HTML content.</p>';
+            container.innerHTML = '<p style="color:red">Content not found in Firestore.</p>';
           }
+        }).catch(error => {
+          console.error('Error loading dynamic content:', error);
+          container.innerHTML = '<p style="color:red">Error loading content: ' + error.message + '</p>';
+        });
+      } else {
+        container.innerHTML = '<p style="color:red">Firebase not initialized.</p>';
+      }
+
+      function renderSectionedContent(data) {
+        const { sections, sectionOrder } = data;
+
+        // Create article wrapper
+        const article = document.createElement('article');
+
+        // Render each section with collapsed content initially
+        sectionOrder.forEach(sectionId => {
+          const sectionData = sections[sectionId];
+          if (!sectionData) return;
+
+          const sectionElement = createSectionElement(sectionId, sectionData.title);
+          article.appendChild(sectionElement);
+        });
+
+        container.innerHTML = '';
+        container.appendChild(article);
+
+        // Attach click handlers for lazy loading
+        attachSectionHandlers();
+      }
+
+      function createSectionElement(sectionId, title) {
+        const section = document.createElement('div');
+        section.innerHTML = `
+          <section class="a19c2cb9aca4d5ec--container" id="${sectionId}" data-section-id="${sectionId}">
+            <div class="cebd2a302a3552c4--headerContainer" role="button" data-section-header="${sectionId}">
+                <div class="d7af962a6244a4b8--container">
+                    <div class="d7af962a6244a4b8--title">
+                        <div class="css-13j1u6m-InlineContainer e6i75dx0">
+                            <div class="css-h0nko7-StyledInlineItem e6i75dx1"></div>
+                            <div class="css-h0nko7-StyledInlineItem e6i75dx1"></div>
+                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                <h3 class="d7af962a6244a4b8--expanded">${title}</h3>
+                                <div class="d7af962a6244a4b8--reference"></div>
+                            </div>
+                            <div class="css-h0nko7-StyledInlineItem e6i75dx1"></div>
+                        </div>
+                        <div class="css-qh8u1a-StyledBox ebcgi2u0">
+                            <div class="d7af962a6244a4b8--bookmarkButton"><span><button type="button"
+                                        aria-label="Save to collection" name="save_button"
+                                        class="css-f83uhv-StyledPictogramButton ej9y1j50">
+                                        <div class="css-mgid52-InlineContainer e6i75dx0">
+                                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg
+                                                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                                        viewBox="0 0 16 16">
+                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="m13 14-5-3.333L3 14V3.333C3 2.597 3.64 2 4.429 2h7.142C12.361 2 13 2.597 13 3.333z"
+                                                            clip-rule="evenodd"></path>
+                                                    </svg></div>
+                                            </div>
+                                        </div>
+                                    </button></span></div>
+                        </div>
+                    </div>
+                    <div></div>
+                </div>
+                <div color="quaternary" class="css-2vq6ya-StyledIcon e1kkd7uc0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                        height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="2" viewBox="0 0 24 24">
+                        <path d="m6 9 6 6 6-6"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="cebd2a302a3552c4--contentContainer" data-section-content="${sectionId}" style="display: none;">
+              <div class="a19c2cb9aca4d5ec--baseStyles a19c2cb9aca4d5ec--disableImagePointerEventOnTutorial a19c2cb9aca4d5ec--anchorLinkStyles a19c2cb9aca4d5ec--content _843a18d838954f85--userHighlightsActiveOnArticle">
+                <p style="color: #999; font-style: italic;">Loading section...</p>
+              </div>
+              <div class="css-10tzyyx-StyledBox ebcgi2u0">
+                <div class="css-1ox6j4a-StyledBox ebcgi2u0">
+                    <div class="css-1isf9yl-InlineContainer e6i75dx0">
+                        <div class="css-h0nko7-StyledInlineItem e6i75dx1"><button type="button"
+                                class="css-e9wdc6-StyledButton ejph2fy0">
+                                <div class="css-c3523d-StyledInner ejph2fy1">
+                                    <div class="css-mgid52-InlineContainer e6i75dx0">
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                                    viewBox="0 0 16 16">
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="bevel"
+                                                        stroke-width="2" d="M3 6h10M3 10h10"></path>
+                                                    <path fill="currentColor" d="m8 12 3 3H5zm0-8L5 1h6z"></path>
+                                                </svg></div>
+                                        </div>
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">Collapse</div>
+                                    </div>
+                                </div>
+                            </button></div>
+                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                            <div class="css-17dkjqr-InlineContainer e6i75dx0">
+                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                    <div class="css-1yxslas-InlineContainer e6i75dx0">
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1"><button type="button"
+                                                class="css-e9wdc6-StyledButton ejph2fy0">
+                                                <div class="css-c3523d-StyledInner ejph2fy1">
+                                                    <div class="css-mgid52-InlineContainer e6i75dx0">
+                                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                            <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg
+                                                                    xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                                    fill="none" viewBox="0 0 16 16">
+                                                                    <path stroke="currentColor" stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M9 14h6M10.45 3.438a1.494 1.494 0 1 1 2.113 2.112l-7.746 7.746L2 14l.704-2.817z">
+                                                                    </path>
+                                                                </svg></div>
+                                                        </div>
+                                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">Notes</div>
+                                                    </div>
+                                                </div>
+                                            </button></div>
+                                    </div>
+                                </div>
+                                <div class="css-h0nko7-StyledInlineItem e6i75dx1"><button type="button"
+                                        class="css-e9wdc6-StyledButton ejph2fy0">
+                                        <div class="css-c3523d-StyledInner ejph2fy1">
+                                            <div class="css-mgid52-InlineContainer e6i75dx0">
+                                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">Feedback</div>
+                                            </div>
+                                        </div>
+                                    </button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+          </section>
+        `;
+        return section.firstElementChild;
+      }
+
+      function attachSectionHandlers() {
+        document.querySelectorAll('[data-section-header]').forEach(header => {
+          header.addEventListener('click', function (e) {
+            // Prevent toggling if clicking the bookmark button
+            if (e.target.closest('button[name="save_button"]')) {
+              e.stopPropagation();
+              return;
+            }
+            const sectionId = this.dataset.sectionHeader;
+            toggleSection(sectionId);
+          });
+        });
+      }
+
+      function toggleSection(sectionId) {
+        const contentContainer = document.querySelector(`[data-section-content="${sectionId}"]`);
+        const headerContainer = document.querySelector(`[data-section-header="${sectionId}"]`);
+
+        if (!contentContainer) return;
+
+        const isExpanded = contentContainer.style.display !== 'none';
+        const iconPath = headerContainer.querySelector('.css-2vq6ya-StyledIcon svg path');
+
+        if (isExpanded) {
+          // Collapse section
+          contentContainer.style.display = 'none';
+          headerContainer.classList.remove('cebd2a302a3552c4--headerContainerActive');
+          contentContainer.classList.remove('cebd2a302a3552c4--contentContainerActive');
+          // Set icon to point down
+          if (iconPath) iconPath.setAttribute('d', 'm6 9 6 6 6-6');
         } else {
-          container.innerHTML = '<p style="color:red">Content not found in Firestore.</p>';
+          // Expand section
+          contentContainer.style.display = 'block';
+          headerContainer.classList.add('cebd2a302a3552c4--headerContainerActive');
+          contentContainer.classList.add('cebd2a302a3552c4--contentContainerActive');
+          // Set icon to point up
+          if (iconPath) iconPath.setAttribute('d', 'm18 15-6-6-6 6');
+
+          // Load content if not already loaded
+          if (!loadedSections.has(sectionId)) {
+            loadSectionContent(sectionId, contentContainer);
+          }
         }
-      }).catch(error => {
-        console.error('Error loading dynamic content:', error);
-        container.innerHTML = '<p style="color:red">Error loading content: ' + error.message + '</p>';
-      });
-    } else {
-      container.innerHTML = '<p style="color:red">Firebase not initialized.</p>';
-    }
-  })();
-</script>
+      }
+
+      function loadSectionContent(sectionId, contentContainer) {
+        if (!articleData || !articleData.sections || !articleData.sections[sectionId]) {
+          contentContainer.querySelector('.a19c2cb9aca4d5ec--baseStyles').innerHTML =
+            '<p style="color:red">Section content not found.</p>';
+          return;
+        }
+
+        const sectionHTML = articleData.sections[sectionId].html;
+        contentContainer.querySelector('.a19c2cb9aca4d5ec--baseStyles').innerHTML = sectionHTML;
+        loadedSections.add(sectionId);
+
+        console.log(`✅ Loaded section: ${sectionId}`);
+      }
+    })();
+  </script>
 
 
+</body>
 
-
-<!-- 22222 -->
+<!-- 555555 -->

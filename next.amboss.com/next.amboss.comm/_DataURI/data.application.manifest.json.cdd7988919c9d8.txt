@@ -1,0 +1,2 @@
+{"name":"Amboss
+NEXT","short_name":"Amboss","icons":[{"src":"https://next.amboss.com/us/static/assets/92ea6d41e9b0c30f.png","sizes":"192x192","type":"image/png"},{"src":"https://next.amboss.com/us/static/assets/7140060055ea4e4d.png","sizes":"512x512","type":"image/png"}],"display":"standalone","theme_color":"white","background_color":"white","start_url":"https://next.amboss.com/"}

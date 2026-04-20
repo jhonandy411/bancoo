@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peer Group Comparison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: #f5f5f5;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .cards-container {
+            display: grid;
+            gap: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 30px 40px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .card-header h2 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 40px;
+        }
+
+        .percentile-label {
+            font-size: 96px;
+            font-weight: 300;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            margin-left: 0;
+            line-height: 1;
+        }
+
+        .percentile-label sup {
+            font-size: 48px;
+            font-weight: 400;
+            vertical-align: super;
+            margin-left: -10px;
+        }
+
+        .chart-container {
+            margin: 30px 0;
+            position: relative;
+        }
+
+        #gaussianCanvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .performance-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #333;
+            margin-top: 30px;
+        }
+
+        .performance-text strong {
+            font-weight: 600;
+        }
+
+        .learn-link {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 18px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .learn-link:hover {
+            text-decoration: underline;
+        }
+
+        .card-content {
+            padding: 30px 40px;
+        }
+
+        .card-content h3 {
+            font-size: 24px;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .card-content p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+
+        .info-list li strong {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="cards-container">
+            <!-- Card 1: Peer group comparison -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Peer group comparison</h2>
+                </div>
+                <div class="card-body">
+                    <div class="percentile-label">
+                        0<sup>th</sup>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="gaussianCanvas"></canvas>
+                    </div>
+                    <div class="performance-text">
+                        Your performance places you in the <strong>0th percentile</strong>, meaning you scored higher than <strong>0%</strong> of students who share your study objective <strong>USMLE Step 1</strong>.
+                    </div>
+                    <a href="#" class="learn-link">Learn how it is calculated.</a>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <script>
+        // Función para calcular la distribución normal
+        function normalDistribution(x, mean = 50, stdDev = 15) {
+            const coefficient = 1 / (stdDev * Math.sqrt(2 * Math.PI));
+            const exponent = -Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2));
+            return coefficient * Math.exp(exponent);
+        }
+
+        // Dibujar el gráfico
+        function drawGaussianChart() {
+            const canvas = document.getElementById('gaussianCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Configurar el tamaño del canvas
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = 400 * dpr;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = '400px';
+            
+            ctx.scale(dpr, dpr);
+            
+            const width = rect.width;
+            const height = 400;
+            const padding = { top: 40, right: 40, bottom: 60, left: 40 };
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+            
+            // Limpiar canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Generar datos
+            const mean = 50;
+            const stdDev = 15;
+            const points = [];
+            let maxY = 0;
+            
+            for (let x = 0; x <= 100; x += 0.5) {
+                const y = normalDistribution(x, mean, stdDev);
+                points.push({ x, y });
+                if (y > maxY) maxY = y;
+            }
+            
+            // Dibujar líneas verticales punteadas (grid)
+            ctx.strokeStyle = '#e5e5e5';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            
+            const xTicks = [0, 25, 50, 75, 100];
+            xTicks.forEach(tick => {
+                const x = padding.left + (tick / 100) * chartWidth;
+                ctx.beginPath();
+                ctx.moveTo(x, padding.top);
+                ctx.lineTo(x, padding.top + chartHeight);
+                ctx.stroke();
+            });
+            
+            // Dibujar puntos en el eje Y (sin números)
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#ccc';
+            const numYDots = 15;
+            for (let i = 0; i <= numYDots; i++) {
+                const y = padding.top + (i / numYDots) * chartHeight;
+                ctx.beginPath();
+                ctx.arc(padding.left - 5, y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Dibujar ejes
+            ctx.strokeStyle = '#d0d0d0';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([]);
+            
+            // Eje Y
+            ctx.beginPath();
+            ctx.moveTo(padding.left, padding.top);
+            ctx.lineTo(padding.left, padding.top + chartHeight);
+            ctx.stroke();
+            
+            // Eje X
+            ctx.beginPath();
+            ctx.moveTo(padding.left, padding.top + chartHeight);
+            ctx.lineTo(padding.left + chartWidth, padding.top + chartHeight);
+            ctx.stroke();
+            
+            // Dibujar etiquetas del eje X
+            ctx.fillStyle = '#b0b0b0';
+            ctx.font = '18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.textAlign = 'center';
+            
+            xTicks.forEach(tick => {
+                const x = padding.left + (tick / 100) * chartWidth;
+                ctx.fillText(tick.toString(), x, padding.top + chartHeight + 35);
+            });
+            
+            // Dibujar la curva de Gauss con relleno
+            ctx.beginPath();
+            ctx.moveTo(padding.left, padding.top + chartHeight);
+            
+            points.forEach(point => {
+                const x = padding.left + (point.x / 100) * chartWidth;
+                const y = padding.top + chartHeight - (point.y / maxY) * chartHeight;
+                ctx.lineTo(x, y);
+            });
+            
+            ctx.lineTo(padding.left + chartWidth, padding.top + chartHeight);
+            ctx.closePath();
+            
+            // Relleno con gradiente
+            const gradient = ctx.createLinearGradient(0, padding.top, 0, padding.top + chartHeight);
+            gradient.addColorStop(0, 'rgba(125, 211, 192, 0.3)');
+            gradient.addColorStop(1, 'rgba(125, 211, 192, 0.05)');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // Dibujar el contorno de la curva
+            ctx.beginPath();
+            let firstPoint = true;
+            points.forEach(point => {
+                const x = padding.left + (point.x / 100) * chartWidth;
+                const y = padding.top + chartHeight - (point.y / maxY) * chartHeight;
+                if (firstPoint) {
+                    ctx.moveTo(x, y);
+                    firstPoint = false;
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            ctx.strokeStyle = '#7dd3c0';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+        }
+
+        // Dibujar cuando cargue la página
+        window.addEventListener('load', drawGaussianChart);
+        
+        // Redibujar al cambiar el tamaño de la ventana
+        window.addEventListener('resize', drawGaussianChart);
+    </script>
+</body>
+</html>

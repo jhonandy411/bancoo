@@ -1,0 +1,2854 @@
+<link rel="stylesheet" href="amboss-clone.css" />
+<style>
+  /* Fix sidebar scrolling by locking window scroll */
+  html,
+  body {
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  /* Layout containers */
+  #app-main {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  ._6eb1c4a28c8c5a44--body {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  ._84d5ef5d71ac9056--container {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* Content scrollable area */
+  ._3419cbc970b06bec--spaceContainer {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* Add smooth transition to bottom bar to match sidebar animation */
+  ._940d78d08f86143e--bottomBar {
+    position: relative !important;
+    height: 40px !important;
+    flex-shrink: 0;
+    width: 100% !important;
+    left: auto !important;
+    bottom: auto !important;
+    display: flex !important;
+    z-index: 4;
+    background: var(--color-background-primary);
+    transition: left 0.2s ease, width 0.2s ease !important;
+    border-top: none !important;
+  }
+
+  /* Ensure button elements occupy full height and handle box-sizing */
+  ._940d78d08f86143e--buttonContainer,
+  .ecc37fb19efefaf4--container,
+  ._5f39189d887435ab--buttonWrapper,
+  ._5f39189d887435ab--buttonWrapper button,
+  .ejph2fy1 {
+    height: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Adjust left side button borders and transitions */
+  ._940d78d08f86143e--leftSideButton {
+    transition: width 0.3s ease, opacity 0.3s ease, transform 0.3s ease !important;
+    border-top: none !important;
+    border-right: 1px solid #e5e7eb !important;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    width: 368px;
+    opacity: 1;
+    overflow: hidden;
+  }
+
+  /* Match font size with Previous/Next buttons */
+  ._77ad967e8b96512c--bottomBarExitButton,
+  ._77ad967e8b96512c--bottomBarExitButton button,
+  ._77ad967e8b96512c--bottomBarExitButton a {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px !important;
+    font-weight: 700;
+    text-decoration: none;
+    color: inherit;
+    text-transform: uppercase;
+    transition: background-color 0.2s ease;
+  }
+  
+  ._77ad967e8b96512c--bottomBarExitButton a:hover {
+    background-color: #f3f4f6;
+  }
+
+  /* Gutter for sidebar - set to 0 as leftSideButton will handle space if needed, 
+     but in capture leftSideButton IS the space under sidebar */
+  ._940d78d08f86143e--sidebarGutter {
+    display: none !important;
+  }
+
+  /* Smoothly hide leftSideButton (Exit Session) when sidebar is open */
+  ._940d78d08f86143e--isNavOpen ._940d78d08f86143e--leftSideButton {
+    width: 0 !important;
+    opacity: 0 !important;
+    border-right: none !important;
+    pointer-events: none !important;
+  }
+
+  /* Ensure the footer containers fill the remaining width */
+  ._940d78d08f86143e--spacesContainer,
+  ._940d78d08f86143e--primarySpace {
+    flex-grow: 1 !important;
+    width: 100% !important;
+  }
+
+  ._5f39189d887435ab--buttonWrapper button {
+    transition: background-color 0.2s ease;
+  }
+
+  ._5f39189d887435ab--buttonWrapper button:not([disabled]):hover {
+     background-color: #f3f4f6;
+  }
+
+  /* Style for the NEXT button when an option is selected */
+  .is-next-state {
+    background-color: #007a82 !important;
+    border-radius: 0 !important;
+    border: none !important;
+    transition: background-color 0.2s ease !important;
+  }
+
+  .is-next-state:hover {
+    background-color: #005f66 !important;
+    /* Slighly darker teal */
+  }
+
+  .is-next-state .ecc37fb19efefaf4--buttonLabel,
+  .is-next-state [data-testid="chevron-right"] svg,
+  .is-next-state [data-e2e-test-id="chevron-right"] svg {
+    color: white !important;
+  }
+
+  /* Style for the SEE ANALYSIS button on the last question */
+  .see-analysis-btn {
+    background-color: rgb(4, 122, 136) !important;
+    border: 1px solid rgb(4, 122, 136) !important;
+    transition: background-color 0.2s ease !important;
+  }
+
+  .see-analysis-btn:hover {
+    background-color: rgb(3, 105, 117) !important;
+  }
+
+  .see-analysis-btn .ecc37fb19efefaf4--buttonLabel,
+  .see-analysis-btn svg {
+    color: white !important;
+  }
+
+  .see-analysis-btn svg path {
+    stroke: white !important;
+  }
+
+  /* Increase height of internal elements in bottom bar (buttons) */
+  [data-testid="bottom-bar"] .css-c3523d-StyledInner {
+    height: 32px !important;
+    /* Increased from 32px standard */
+  }
+
+  /* Disabled button styling */
+  button[disabled],
+  button[disabled] .ecc37fb19efefaf4--buttonLabel,
+  button[disabled] svg {
+    color: #9ca3af !important;
+    cursor: not-allowed !important;
+    pointer-events: none;
+  }
+  
+  button[disabled]:hover {
+    background-color: transparent !important;
+  }
+
+  /* Smooth expansion/collapse animation */
+  .rah-static {
+    display: grid !important;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .rah-static[aria-hidden="false"] {
+    grid-template-rows: 1fr;
+  }
+
+  .rah-static > div {
+    min-height: 0;
+    overflow: hidden;
+  }
+</style>
+
+<!-- Firebase SDKs are loaded in portal.html -->
+
+
+<!-- Firebase Configuration -->
+<script>
+  (function() {
+    if (firebase.apps.length === 0) {
+      const firebaseConfig = {
+        apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+        authDomain: "bancomicina-62bfe.firebaseapp.com",
+        projectId: "bancomicina-62bfe",
+        storageBucket: "bancomicina-62bfe.appspot.com",
+        messagingSenderId: "737254665977",
+        appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
+      };
+      firebase.initializeApp(firebaseConfig);
+      console.log('Firebase initialized for Qbank (new app)');
+    } else {
+      console.log('Firebase already initialized, using existing app');
+    }
+    window.db = firebase.firestore();
+  })();
+</script>
+
+<body class="d03e7f0e2eb62303--bodyConnectionStatus">
+
+
+  <main class="_67cc202be248f557--main" id="app-main">
+
+
+
+
+    <div class="_6eb1c4a28c8c5a44--body">
+      <!-- Loading Spinner (Visible initially) -->
+      <div id="initial-loader" style="display: flex; justify-content: center; align-items: center; height: 100%; width: 100%;">
+        <span data-loading-spinner data-size="30"></span>
+      </div>
+
+      <!-- Main Content (Hidden initially) -->
+      <div aria-label="Main content" class="cd71ec7927bda3fc--page" style="display: none;"
+        data-e2e-test-id='Questions based on "" (not yet seen or skipped)Page'
+        data-testid='Questions based on "" (not yet seen or skipped)Page' role="region"
+        tabindex="0">
+        <div class="_84d5ef5d71ac9056--container _84d5ef5d71ac9056--onlyOneSpaceVisible" data-testid="spaces">
+          <div
+            class="_3419cbc970b06bec--spaceContainer _3419cbc970b06bec--enableScrolling _3419cbc970b06bec--spaceContainerFlex _3419cbc970b06bec--isNavClosed"
+            data-e2e-test-id="primary-space" data-testid="primary-space">
+            <div
+              class="_3419cbc970b06bec--space _3419cbc970b06bec--enableScrolling _3419cbc970b06bec--maxWidth _3419cbc970b06bec--onlyOneSpaceVisible _3419cbc970b06bec--primarySpace _3419cbc970b06bec--questionSessionSingleSpace">
+              <div class="">
+                <div class="_77ad967e8b96512c--questionSessionMainSpace" data-e2e-test-id="questionSessionMainSpace"
+                  style="font-size: 16px">
+                  <div data-ds-id="Box" class="css-1xq0eat-StyledBox ebcgi2u0">
+                    <div class="_794840db07ea747c--flushTop _794840db07ea747c--shadow _794840db07ea747c--island">
+
+                      <div class="toolbar-right">
+                        <div class="toolbar-divider"></div>
+
+                        <button type="button" aria-label="Change font size" class="toolbar-fontsize-btn">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                            <path fill="currentColor" fill-rule="evenodd"
+                              d="M8.372 13h-2.81l-.596-1.6H2.293L1.697 13H0l2.885-7.75h1.488l2.32 6.231L10.063 3h1.967L16 13h-2.282l-.848-2.134H9.22zM3.63 7.81 4.47 10H2.79zM12.15 9l-1.105-2.73L9.92 9z"
+                              clip-rule="evenodd"></path>
+                          </svg>
+                        </button>
+                      </div>
+
+
+
+                      <hr aria-hidden="true" data-ds-id="Divider" class="css-38t5ih-HorizontalStyledDivider e6ofc1o1" />
+                      <div>
+                        <div class="">
+                          <div data-ds-id="Box" class="css-ajz3hd-StyledBox ebcgi2u0">
+                            <div class="a4f81cb8e161dbf0--contentAndMediaContainer">
+                              <div class="a4f81cb8e161dbf0--contentContainer">
+                                <div data-ds-id="Box" class="css-cspmdx-StyledBox ebcgi2u0">
+                                  <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+
+                                    <div class="css-182itqs-StackItem e7wwwvf1">
+                                      <article
+                                        class="_760ee638b575af4a--questionContent _760ee638b575af4a--relevanceSecondaryHighlightIsActive"
+                                        <!-- Question text loaded dynamically from Firestore -->
+                                      </article>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="a4f81cb8e161dbf0--mediaContainer">
+                                <div data-ds-id="Box" class="css-cspmdx-StyledBox ebcgi2u0">
+                                  <div class="_26c6d085fbfd0c71--container">
+                                    <style></style>
+                                    <div style="
+                                                  transform-origin: left top;
+                                                  transform: translateZ(0px)
+                                                    scale(1, 1);
+                                                  animation: 0.6s linear 0s 1
+                                                    normal none running
+                                                    animatedBoxAnimation_1764735538643;
+                                                ">
+                                      <div style="
+                                                    transform-origin: left top;
+                                                    transform: translateZ(0px)
+                                                      scale(1, 1);
+                                                    animation: 0.6s linear 0s 1
+                                                      normal none running
+                                                      animatedBoxAnimation_1764735538643_inner;
+                                                  ">
+                                        <div style="position: relative">
+                                          <div style="
+                                                        position: absolute;
+                                                        width: 0px;
+                                                        height: 0px;
+                                                        opacity: 0;
+                                                        pointer-events: none;
+                                                        transform: translateZ(
+                                                            0px
+                                                          )
+                                                          scale(1, 1);
+                                                        animation: 0.6s linear
+                                                          0s 1 normal forwards
+                                                          running
+                                                          animatedBoxAnimation_1764735538643_prevContent;
+                                                      "></div>
+                                        </div>
+                                        <div data-animated-box-content="true" style="
+                                                      transform: translateZ(0px)
+                                                        scale(1, 1);
+                                                      animation: 0.6s linear 0s
+                                                        1 normal none running
+                                                        animatedBoxAnimation_1764735538643_nextContent;
+                                                    ">
+                                          <div data-ds-id="Inline" class="css-d3afho-InlineContainer e6i75dx0">
+                                            <div class="css-h0nko7-StyledInlineItem e6i75dx1"></div>
+                                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                              <button class="_26c6d085fbfd0c71--mediaViewerTrigger"
+                                                data-e2e-test-id="mini-media-viewer" type="button"
+                                                style="display: none;">
+                                                <img alt="" src="" />
+                                              </button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+
+
+
+                                    <div class="_26c6d085fbfd0c71--mediaControl">
+                                      <div data-ds-id="MediaViewerBar" class="css-a07r6p-StyledMediaViewerBar ehxsh7m0">
+                                        <div data-ds-id="Inline" class="css-ga3gvh-InlineContainer e6i75dx0">
+                                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            <div data-ds-id="Box" class="css-1ah1az-StyledBox ebcgi2u0">
+                                              <p data-ds-id="Text" class="css-1u4o52q-StyledText eadloo90">CONTAINS
+                                                OVERLAY</p>
+                                            </div>
+                                          </div>
+                                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                          </div>
+                                          <div class="css-h0nko7-StyledInlineItem e6i75dx1"></div>
+                                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                          </div>
+                                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            <button data-e2e-test-id="maximize-media-icon" data-ds-id="PictogramButton"
+                                              type="button" aria-label="Enlarge view"
+                                              class="css-1tumjsi-StyledPictogramButton ej9y1j50">
+                                              <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                  <div data-e2e-test-id="maximize-2" data-testid="maximize-2"
+                                                    data-ds-id="Icon" data-variant="inherit" color="inherit"
+                                                    aria-hidden="true" class="css-cjtild-StyledIcon e1kkd7uc0">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                      fill="none" viewBox="0 0 16 16">
+                                                      <g stroke="currentColor" stroke-linejoin="round" stroke-width="2">
+                                                        <path d="M14 2 9 7m-7 7 5-5"></path>
+                                                        <path stroke-linecap="round" d="M10 2h4v4m-8 8H2v-4"></path>
+                                                      </g>
+                                                    </svg>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+
+
+
+
+
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="_6ccf46c0427cb323--toolbarSectionsContainer" data-e2e-test-id="upper-toolbar">
+                        <div class="_6ccf46c0427cb323--toolbarSectionLeft">
+                          <span tabindex="0">
+                            <div class="_6ccf46c0427cb323--underlineWrapper">
+                              <button data-e2e-test-id="key-info-btn" id="keyInfoBtn" data-ds-id="Button" type="button"
+                                class="css-e9wdc6-StyledButton ejph2fy0">
+                                <div class="css-c3523d-StyledInner ejph2fy1">
+                                  <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                      <div data-e2e-test-id="align-left" data-testid="align-left" data-ds-id="Icon"
+                                        data-variant="inherit" color="inherit" aria-hidden="true"
+                                        class="css-cjtild-StyledIcon e1kkd7uc0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                          viewBox="0 0 16 16">
+                                          <path stroke="currentColor" stroke-linecap="round" stroke-width="2"
+                                            d="M3 8h7m-7 4h10M3 4h11"></path>
+                                        </svg>
+                                      </div>
+                                    </div>
+                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                      KEY INFO
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                              <div class="_6ccf46c0427cb323--underline" style="display: none;"></div>
+                            </div>
+                          </span><span tabindex="0">
+                            <div class="_6ccf46c0427cb323--underlineWrapper">
+                              <button data-e2e-test-id="hint-btn" data-ds-id="Button" type="button"
+                                class="css-e9wdc6-StyledButton ejph2fy0">
+                                <div class="css-c3523d-StyledInner ejph2fy1">
+                                  <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                      <div data-e2e-test-id="help-circle" data-testid="help-circle" data-ds-id="Icon"
+                                        data-variant="inherit" color="inherit" aria-hidden="true"
+                                        class="css-cjtild-StyledIcon e1kkd7uc0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                          viewBox="0 0 16 16">
+                                          <g stroke="currentColor" stroke-width="2">
+                                            <circle cx="8" cy="8" r="7"></circle>
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                              d="M6.25 6.168c.141-.39.42-.718.786-.927a1.84 1.84 0 0 1 2.291.382c.274.315.424.715.423 1.128C9.75 7.917 7.949 8.5 7.949 8.5M8 11h.007">
+                                            </path>
+                                          </g>
+                                        </svg>
+                                      </div>
+                                    </div>
+                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                      ATTENDING TIP
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                              <div class="_6ccf46c0427cb323--underline" style="display: none;"></div>
+                            </div>
+                          </span><span tabindex="0">
+                            <div class="_6ccf46c0427cb323--underlineWrapper">
+                              <button data-e2e-test-id="lab-btn" data-ds-id="Button" type="button"
+                                class="css-e9wdc6-StyledButton ejph2fy0" onclick="this.nextElementSibling.style.display==='block'?exitSplitView():loadSplitView('labs.html')">
+                                <div class="css-c3523d-StyledInner ejph2fy1">
+                                  <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                      <div data-e2e-test-id="clipboard" data-testid="clipboard" data-ds-id="Icon"
+                                        data-variant="inherit" color="inherit" aria-hidden="true"
+                                        class="css-cjtild-StyledIcon e1kkd7uc0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                          viewBox="0 0 16 16">
+                                          <g stroke="currentColor" stroke-linejoin="round" stroke-width="2">
+                                            <path
+                                              d="M10.5 2h1.25c.69 0 1.25.597 1.25 1.333v9.334c0 .736-.56 1.333-1.25 1.333h-7.5C3.56 14 3 13.403 3 12.667V3.333C3 2.597 3.56 2 4.25 2H5.5">
+                                            </path>
+                                            <path stroke-linecap="round"
+                                              d="M6 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1z"
+                                              clip-rule="evenodd"></path>
+                                          </g>
+                                        </svg>
+                                      </div>
+                                    </div>
+                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                      LABS
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                              <div class="_6ccf46c0427cb323--underline" style="display: none;"></div>
+                            </div>
+                          </span>
+                        </div>
+
+
+
+
+
+                        <div class="_6ccf46c0427cb323--toolbarSection">
+                          <div class="_6ccf46c0427cb323--actionItemsContainer">
+                            <div data-ds-id="Inline" class="css-18nqx2-InlineContainer e6i75dx0">
+                              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+
+
+                                <div data-ds-id="Inline" class="css-1yxslas-InlineContainer e6i75dx0">
+                                  <div class="css-h0nko7-StyledInlineItem e6i75dx1"></div>
+                                  <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                    <span tabindex="0">
+                                      <button data-ds-id="Button" type="button" class="css-e9wdc6-StyledButton ejph2fy0"
+                                        data-toolbar-action="true">
+                                        <div class="css-c3523d-StyledInner ejph2fy1">
+                                          <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                              <div data-e2e-test-id="note" data-testid="note" data-ds-id="Icon"
+                                                data-variant="inherit" color="inherit" aria-hidden="true"
+                                                class="css-cjtild-StyledIcon e1kkd7uc0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                  fill="none" viewBox="0 0 16 16">
+                                                  <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 14h6M10.45 3.438a1.494 1.494 0 1 1 2.113 2.112l-7.746 7.746L2 14l.704-2.817z">
+                                                  </path>
+                                                </svg>
+                                              </div>
+                                            </div>
+                                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                              ADD NOTES
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </button>
+                                    </span>
+                                  </div>
+                                </div>
+
+                              </div>
+
+
+                              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                <span tabindex="0">
+                                  <button onclick="toggleMark()" data-ds-id="Button" type="button" class="css-e9wdc6-StyledButton ejph2fy0"
+                                    data-toolbar-action="true">
+                                    <div class="css-c3523d-StyledInner ejph2fy1">
+                                      <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                          <div data-e2e-test-id="flag" data-testid="flag" data-ds-id="Icon"
+                                            data-variant="inherit" color="inherit" aria-hidden="true"
+                                            class="css-cjtild-StyledIcon e1kkd7uc0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                              viewBox="0 0 16 16">
+                                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M3 10.28s.625-.72 2.5-.72S8.625 11 10.5 11s2.5-.72 2.5-.72V2.72s-.625.72-2.5.72S7.375 2 5.5 2 3 2.72 3 2.72zM3 15v-5">
+                                              </path>
+                                            </svg>
+                                          </div>
+                                        </div>
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                          MARK
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </button>
+                                </span>
+                              </div>
+
+
+
+                              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                <span tabindex="0">
+                                  <button data-ds-id="Button" type="button" class="css-e9wdc6-StyledButton ejph2fy0"
+                                    data-toolbar-action="true">
+                                    <div class="css-c3523d-StyledInner ejph2fy1">
+                                      <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                          <div data-e2e-test-id="anki" data-testid="anki" data-ds-id="Icon"
+                                            data-variant="inherit" color="inherit" aria-hidden="true"
+                                            class="css-cjtild-StyledIcon e1kkd7uc0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                              viewBox="0 0 16 16">
+                                              <path fill="currentColor"
+                                                d="m7.29 3.3 1.53 1.71c.38.43.93.67 1.49.67.08 0 .16 0 .24-.01l2.28-.28-1.16 1.9c-.35.57-.39 1.28-.11 1.89l.94 2.02-2.28-.49c-.14-.03-.28-.05-.42-.05-.49 0-.97.18-1.34.52l-1.73 1.57-.2-2.22c-.06-.67-.45-1.26-1.04-1.58L3.53 7.88l2.12-.9c.6-.26 1.04-.79 1.17-1.43zM6.71.16c-.09 0-.17.01-.26.03-.36.1-.64.39-.72.76l-.88 4.18-4 1.72c-.35.15-.59.49-.61.87s.18.74.52.93l3.77 2.05.37 4.22c.03.38.28.7.63.84.12.05.24.07.36.07.24 0 .48-.09.67-.26l3.22-2.92 4.25.92c.07.02.14.02.21.02a1 1 0 0 0 .78-.38c.24-.3.29-.7.13-1.05l-1.79-3.84 2.24-3.66a.998.998 0 0 0-.85-1.52h-.12l-4.33.52L7.46.49a.97.97 0 0 0-.75-.33">
+                                              </path>
+                                            </svg>
+                                          </div>
+                                        </div>
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                          GET ANKI CARDS
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </button>
+                                </span>
+                              </div>
+
+
+
+                            </div>
+                          </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                          <div class="_6ccf46c0427cb323--dropdownMenuContainer" style="position: relative;">
+                            <button data-e2e-test-id="question-dropdown" data-ds-id="DropdownMenu" type="button"
+                              tabindex="0" class="css-e9wdc6-StyledButton ejph2fy0" id="dropdown-trigger-btn">
+                              <div class="css-c3523d-StyledInner ejph2fy1">
+                                <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                  <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                    <div data-e2e-test-id="more-horizontal" data-testid="more-horizontal"
+                                      data-ds-id="Icon" data-variant="inherit" color="inherit" aria-hidden="true"
+                                      class="css-cjtild-StyledIcon e1kkd7uc0">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                        viewBox="0 0 16 16">
+                                        <path fill="currentColor"
+                                          d="M4 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2m4 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2m4 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2">
+                                        </path>
+                                      </svg>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div class="css-jslovt-StyledMenu e1t5eegs0" id="dropdown-menu-content"
+                              style="display: none; position: absolute; top: 100%; right: 0; z-index: 1000;">
+                              <ul role="menu" class="css-1uo4gqj-StyledUl e1t5eegs1">
+                                <li role="menuitem" class="css-11e3c5f-StyledLi e1t5eegs2">
+                                  <button tabindex="0" class="css-1l6xhu8-StyledMenuItem emlyvnc0">
+                                    <div data-ds-id="Inline" class="css-13tdq5i-InlineContainer e6i75dx0">
+                                      <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                        <div data-e2e-test-id="menuItem-folder-plus" data-testid="menuItem-folder-plus"
+                                          data-ds-id="Icon" data-variant="inherit" color="inherit"
+                                          class="css-cjtild-StyledIcon e1kkd7uc0">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                            viewBox="0 0 16 16">
+                                            <g stroke="currentColor" stroke-linejoin="round" stroke-width="2">
+                                              <path stroke-linecap="round"
+                                                d="M14 12.667A1.334 1.334 0 0 1 12.667 14H3.333A1.334 1.334 0 0 1 2 12.667V3.333A1.333 1.333 0 0 1 3.333 2H6.5l1.333 2h4.834A1.333 1.333 0 0 1 14 5.333z">
+                                              </path>
+                                              <path stroke-linecap="square" d="M8 7v4M6 9h4"></path>
+                                            </g>
+                                          </svg>
+                                        </div>
+                                      </div>
+                                      <div class="css-h0nko7-StyledInlineItem e6i75dx1">Save</div>
+                                    </div>
+                                  </button>
+                                </li>
+                                <li role="menuitem" class="css-11e3c5f-StyledLi e1t5eegs2">
+                                  <button tabindex="0" class="css-1l6xhu8-StyledMenuItem emlyvnc0">
+                                    <div data-ds-id="Inline" class="css-13tdq5i-InlineContainer e6i75dx0">
+                                      <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                        <div data-e2e-test-id="menuItem-share" data-testid="menuItem-share"
+                                          data-ds-id="Icon" data-variant="inherit" color="inherit"
+                                          class="css-cjtild-StyledIcon e1kkd7uc0">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                            viewBox="0 0 16 16">
+                                            <g stroke="currentColor" stroke-width="2">
+                                              <path stroke-linejoin="round"
+                                                d="M2 8v3.6c0 .773.56 1.4 1.25 1.4h9.5c.69 0 1.25-.627 1.25-1.4V8">
+                                              </path>
+                                              <path stroke-linejoin="bevel" d="M8 10V3"></path>
+                                              <path stroke-linecap="round" stroke-linejoin="round" d="m5 5 3-3 3 3">
+                                              </path>
+                                            </g>
+                                          </svg>
+                                        </div>
+                                      </div>
+                                      <div class="css-h0nko7-StyledInlineItem e6i75dx1">Share</div>
+                                    </div>
+                                  </button>
+                                </li>
+                                <li role="separator" class="css-lgmv8i-StyledLi-StyledLiSeparator e1t5eegs3">
+                                  <hr aria-hidden="true" data-ds-id="Divider"
+                                    class="css-38t5ih-HorizontalStyledDivider e6ofc1o1" />
+                                </li>
+                                <li role="menuitem" class="css-11e3c5f-StyledLi e1t5eegs2">
+                                  <button tabindex="0" class="css-1l6xhu8-StyledMenuItem emlyvnc0">
+                                    <div data-ds-id="Inline" class="css-13tdq5i-InlineContainer e6i75dx0">
+                                      <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                        <div data-e2e-test-id="menuItem-message-circle"
+                                          data-testid="menuItem-message-circle" data-ds-id="Icon" data-variant="inherit"
+                                          color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                            viewBox="0 0 16 16">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                              stroke-width="2"
+                                              d="M14 7.667a5.6 5.6 0 0 1-.6 2.533 5.67 5.67 0 0 1-5.067 3.133 5.6 5.6 0 0 1-2.533-.6L2 14l1.267-3.8a5.6 5.6 0 0 1-.6-2.533A5.67 5.67 0 0 1 5.8 2.6 5.6 5.6 0 0 1 8.333 2h.334A5.653 5.653 0 0 1 14 7.333z"
+                                              clip-rule="evenodd"></path>
+                                          </svg>
+                                        </div>
+                                      </div>
+                                      <div class="css-h0nko7-StyledInlineItem e6i75dx1">Give feedback</div>
+                                    </div>
+                                  </button>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+
+                          <script>
+                            document.addEventListener('DOMContentLoaded', function () {
+                              const triggerBtn = document.getElementById('dropdown-trigger-btn');
+                              const dropdownMenu = document.getElementById('dropdown-menu-content');
+
+                              if (triggerBtn && dropdownMenu) {
+                                triggerBtn.addEventListener('click', function (e) {
+                                  e.stopPropagation();
+                                  const isVisible = dropdownMenu.style.display === 'block';
+                                  dropdownMenu.style.display = isVisible ? 'none' : 'block';
+                                });
+
+                                document.addEventListener('click', function (e) {
+                                  if (!dropdownMenu.contains(e.target) && e.target !== triggerBtn) {
+                                    dropdownMenu.style.display = 'none';
+                                  }
+                                });
+                              }
+                            });
+                          </script>
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+                      </div>
+
+
+
+
+                      <div aria-hidden="true" class="rah-static rah-static--height-auto" style="height: auto; display: none;">
+                        <div>
+                          <div class="e0f0c237914d2b33--hintContainer" data-e2e-test-id="hint" name="hint">
+                          <div id="hint-used-badge" data-ds-id="Box" class="css-prohxm-StyledBox ebcgi2u0" data-shown-for="1">
+                              <div data-ds-id="Badge" color="yellow" class="css-1g35llk-BadgeContainer e9tk0bi0">
+                                <div data-ds-id="Box" class="css-b9ed8c-StyledBox ebcgi2u0">
+                                  <div data-ds-id="Inline"
+                                    class="css-1g35llk-BadgeContainer css-13tdq5i-InlineContainer e6i75dx0">
+                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                      <div data-ds-id="Icon" data-variant="inherit" color="inherit" aria-hidden="true"
+                                        class="css-cjtild-StyledIcon e1kkd7uc0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                          viewBox="0 0 16 16">
+                                          <path fill="currentColor" fill-rule="evenodd"
+                                            d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m4.737-10.324a1 1 0 0 0-1.474-1.352L6.5 9.52 4.737 7.597a1 1 0 0 0-1.474 1.351l2.5 2.728a1 1 0 0 0 1.474 0z"
+                                            clip-rule="evenodd"></path>
+                                        </svg>
+                                      </div>
+                                    </div>
+
+                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                      <span>HINT USED</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            
+                        <div style="padding: 10px 0;">
+                              <div data-ds-id="Box" class="css-1j4bo0q-StyledBox ebcgi2u0">
+                              <div data-ds-id="Inline" class="css-1fk3klm-InlineContainer e6i75dx0">
+                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                  <picture data-e2e-test-id="random-doctor-image" data-ds-id="Image"><img
+                                      class="e0f0c237914d2b33--drIcon css-1x2z75v-StyledImg esvv5850"
+                                      alt="random doctor image"
+                                      src="https://next.amboss.com/us/static/assets/7b6df07905703110.svg" /></picture>
+                                </div>
+                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                  <article class="e0f0c237914d2b33--hintText">
+                                    <!-- Hint text loaded dynamically from Firestore -->
+                                  </article>
+                                </div>
+                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                  <div></div>
+                                </div>
+                              </div>
+                            </div>
+                            <div data-ds-id="Box" class="css-vmwik3-StyledBox ebcgi2u0"
+                              style="display: flex; justify-content: flex-end; padding-right: 15px;">
+                              <button data-ds-id="Button" type="button" class="css-e9wdc6-StyledButton ejph2fy0">
+                                <div class="css-c3523d-StyledInner ejph2fy1">
+                                  <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                      <div data-e2e-test-id="message-circle" data-testid="message-circle"
+                                        data-ds-id="Icon" data-variant="inherit" color="inherit" aria-hidden="true"
+                                        class="css-cjtild-StyledIcon e1kkd7uc0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                          viewBox="0 0 16 16">
+                                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M14 7.667a5.6 5.6 0 0 1-.6 2.533 5.67 5.67 0 0 1-5.067 3.133 5.6 5.6 0 0 1-2.533-.6L2 14l1.267-3.8a5.6 5.6 0 0 1-.6-2.533A5.67 5.67 0 0 1 5.8 2.6 5.6 5.6 0 0 1 8.333 2h.334A5.653 5.653 0 0 1 14 7.333z"
+                                            clip-rule="evenodd"></path>
+                                        </svg>
+                                      </div>
+                                    </div>
+                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                      GIVE FEEDBACK
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                            </div>
+                            </div>
+                          </div>
+                        </div>
+
+
+                      
+                      
+                      </div>
+
+
+
+                      
+                      <div id="answersContainer">
+
+                      </div>
+
+
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    <div data-ds-id="Box" class="css-vmi0kt-StyledBox ebcgi2u0" style="padding: 10px 0;">
+                      <div data-testid="bottom-bar">
+                        <div data-ds-id="Columns" class="css-1ux6m6x-StyledColumns e144tdwe1">
+                          <div size="6" data-ds-id="Column" class="css-1fnx6pm-StyledColumn e144tdwe0">
+                            <div data-ds-id="Inline" class="css-18nqx2-InlineContainer e6i75dx0">
+                              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                <div data-ds-id="Inline" class="css-7eq2rl-InlineContainer e6i75dx0">
+                                  <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                    <button id="toggle-explanations-btn" onclick="toggleExplanations()" data-ds-id="Button" type="button" class="css-e9wdc6-StyledButton ejph2fy0">
+                                      <div class="css-c3523d-StyledInner ejph2fy1">
+                                        <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            <div data-e2e-test-id="collapse" data-testid="collapse" data-ds-id="Icon"
+                                              data-variant="inherit" color="inherit" aria-hidden="true"
+                                              class="css-cjtild-StyledIcon e1kkd7uc0">
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                                viewBox="0 0 16 16">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                  stroke-linejoin="bevel" stroke-width="2" d="M3 6h10M3 10h10"></path>
+                                                <path fill="currentColor" d="m8 12 3 3H5zm0-8L5 1h6z"></path>
+                                              </svg>
+                                            </div>
+                                          </div>
+                                          <div id="toggle-explanations-text" class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            SHOW ANSWER
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div size="6" data-ds-id="Column" class="css-1fnx6pm-StyledColumn e144tdwe0">
+                            <div data-ds-id="Inline" class="css-17dkjqr-InlineContainer e6i75dx0">
+                              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                <div data-ds-id="Inline" class="css-7eq2rl-InlineContainer e6i75dx0">
+                                  <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                    <button id="reset-question-btn" onclick="resetQuestion()" disabled data-e2e-test-id="reset-answer-btn" data-ds-id="Button" type="button"
+                                      class="css-e9wdc6-StyledButton ejph2fy0">
+                                      <div class="css-c3523d-StyledInner ejph2fy1">
+                                        <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            <div data-e2e-test-id="rotate-ccw" data-testid="rotate-ccw"
+                                              data-ds-id="Icon" data-variant="inherit" color="inherit"
+                                              aria-hidden="true" class="css-cjtild-StyledIcon e1kkd7uc0">
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                                viewBox="0 0 16 16">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                  stroke-linejoin="round" stroke-width="2"
+                                                  d="M2 3v4h4M3.859 5.437a4.93 4.93 0 1 1-.165 4.927"></path>
+                                              </svg>
+                                            </div>
+                                          </div>
+                                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            RESET QUESTION
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                <div data-ds-id="Inline" class="css-7eq2rl-InlineContainer e6i75dx0">
+                                  <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                    <button disabled id="hide-stats-btn" data-ds-id="Button" type="button" class="css-e9wdc6-StyledButton ejph2fy0">
+                                      <div class="css-c3523d-StyledInner ejph2fy1">
+                                        <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            <div data-e2e-test-id="eye-off" data-testid="eye-off" data-ds-id="Icon"
+                                              data-variant="inherit" color="inherit" aria-hidden="true"
+                                              class="css-cjtild-StyledIcon e1kkd7uc0">
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                                viewBox="0 0 16 16">
+                                                <path fill="currentColor" fill-rule="evenodd"
+                                                  d="m12.3 12.57 2.286 2.344L16 13.5 2.914.086 1.5 1.5l2.013 2.063c-.537.396-1.007.827-1.407 1.246a13.3 13.3 0 0 0-1.65 2.135 2 2 0 0 0 0 2.112q.079.126.176.275c.332.505.826 1.18 1.474 1.86C3.387 12.531 5.381 14 8 14c1.707 0 3.148-.623 4.3-1.43m-1.42-1.455-.868-.89a3 3 0 0 1-4.187-4.292l-.899-.92A8.6 8.6 0 0 0 3.553 6.19 11.3 11.3 0 0 0 2.155 8l.148.232c.284.432.705 1.007 1.25 1.577C4.66 10.97 6.165 12 8 12c1.078 0 2.043-.355 2.88-.884zM7.225 7.368A1 1 0 0 0 8.613 8.79zm-.016-5.323 2.146 2.146c1.231.35 2.271 1.14 3.092 2A11.3 11.3 0 0 1 13.845 8a11 11 0 0 1-.269.412l1.435 1.435a14 14 0 0 0 .533-.791 2 2 0 0 0 0-2.112 13.3 13.3 0 0 0-1.65-2.135C12.613 3.467 10.619 2 8 2q-.405.001-.79.046z"
+                                                  clip-rule="evenodd"></path>
+                                              </svg>
+                                            </div>
+                                          </div>
+                                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            HIDE STATS
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="_940d78d08f86143e--bottomBar _940d78d08f86143e--isNavOpen" data-testid="spaces-bottom-bar">
+      <div class="_940d78d08f86143e--sidebarGutter" data-testid="sidebar-gutter" style="width: 368px;"></div>
+      <div class="_940d78d08f86143e--leftSideButton">
+        <div class="_77ad967e8b96512c--bottomBarExitButton" data-e2e-test-id="exit-session-button-wrapper">
+          <a data-e2e-test-id="exit-session-button" data-ds-id="Button" class="css-1m1hh93-StyledButton ejph2fy0"
+            href="/us/analysis/Cl70aq_NhQ">
+            <div class="css-c3523d-StyledInner ejph2fy1">
+              <div data-ds-id="Inline" class="css-1iyebzw-InlineContainer e6i75dx0">
+                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                  EXIT SESSION
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+
+
+
+
+
+      <div class="_940d78d08f86143e--spacesContainer">
+        <div class="_940d78d08f86143e--space _940d78d08f86143e--primarySpace _940d78d08f86143e--splitViewClosed"
+          data-testid="primary-space">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <div class="_940d78d08f86143e--buttonContainer">
+            <div class="ecc37fb19efefaf4--container">
+
+
+
+
+
+
+              <div class="_5f39189d887435ab--buttonWrapper">
+                <button data-e2e-test-id="prev-button" data-ds-id="Button" disabled="" type="button"
+                  class="css-12n0i9h-StyledButton ejph2fy0">
+                  <div class="css-c3523d-StyledInner ejph2fy1">
+                    <div data-ds-id="Inline" class="css-1iyebzw-InlineContainer e6i75dx0">
+                      <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                        <div data-e2e-test-id="chevron-left" data-testid="chevron-left" data-ds-id="Icon"
+                          data-variant="inherit" color="inherit" aria-hidden="true"
+                          class="css-cjtild-StyledIcon e1kkd7uc0">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                            viewBox="0 0 16 16">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M10 12 6 8l4-4"></path>
+                          </svg>
+                        </div>
+                      </div>
+                      <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                        <span class="ecc37fb19efefaf4--buttonLabel">PREVIOUS</span>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+
+
+              <div class="ecc37fb19efefaf4--divider"></div>
+
+
+
+
+              <div class="_5f39189d887435ab--buttonWrapper">
+                <button data-e2e-test-id="next-button" data-ds-id="Button" type="button"
+                  class="css-xaqme7-StyledButton ejph2fy0">
+                  <div class="css-c3523d-StyledInner ejph2fy1">
+                    <div data-ds-id="Inline" class="css-1iyebzw-InlineContainer e6i75dx0">
+                      <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                        <span class="ecc37fb19efefaf4--buttonLabel">SKIP</span>
+                      </div>
+                      <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                        <div data-e2e-test-id="chevron-right" data-testid="chevron-right" data-ds-id="Icon"
+                          data-variant="inherit" color="inherit" aria-hidden="true"
+                          class="css-cjtild-StyledIcon e1kkd7uc0">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                            viewBox="0 0 16 16">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="m6 12 4-4-4-4"></path>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+
+  <script>
+    (function () {
+      // Reset selections and session history on start (UNLESS reviewing from Analytics)
+      if (sessionStorage.getItem('isFromAnalysis') !== 'true') {
+        ['userQuestionSelections', 'markedQuestions', 'answeredQuestions', 'questionStatusMap', 'previouslyAnswered', 'hintsUsed'].forEach(key => sessionStorage.removeItem(key));
+      }
+
+      // Global variables for question navigation
+      let allQuestionIds = [];
+      let currentQuestionIndex = 0;
+      let subcategoryPath = '';
+
+      // Initialize session timer
+      window.sessionStartTime = Date.now();
+      window.currentQuestionStartTime = Date.now(); // Line added
+
+      // Get the subcategory path from sessionStorage (same as subcategoriacontent.html)
+      subcategoryPath = sessionStorage.getItem('currentDocPath');
+
+      if (!subcategoryPath) {
+        console.error("❌ No subcategory path found in sessionStorage");
+        showError("No subcategory selected. Please navigate from the Library.");
+        return;
+      }
+
+      console.log("📚 Subcategory path from sessionStorage:", subcategoryPath);
+
+      // Update page title/test-id with dynamic topic name
+      if (typeof db !== "undefined") {
+        db.doc(subcategoryPath).get().then(doc => {
+          if (doc.exists) {
+            const topicName = doc.data().titulo || doc.data().title || doc.data().denominacion || doc.data().nombre || "";
+            const page = document.querySelector('.cd71ec7927bda3fc--page');
+            if (page) {
+              const fullText = `Questions based on "${topicName}" (not yet seen or skipped)Page`;
+              page.setAttribute('data-e2e-test-id', fullText);
+              page.setAttribute('data-testid', fullText);
+              page.setAttribute('aria-label', `Questions based on "${topicName}"`);
+            }
+          }
+        }).catch(err => console.error("Error fetching topic name for session page:", err));
+      }
+
+      // First, get all available questions from this subcategory
+      const questionsCollectionPath = `${subcategoryPath}/preguntas`;
+
+      console.log("🔍 Fetching all questions from:", questionsCollectionPath);
+
+      if (typeof db === "undefined") {
+        console.error("❌ Firebase db not initialized");
+        showError("Firebase not initialized");
+        return;
+      }
+
+      // Fetch all questions to get their IDs
+      db.collection(questionsCollectionPath)
+        .get()
+        .then((querySnapshot) => {
+          if (querySnapshot.empty) {
+            console.error("❌ No questions found in this subcategory");
+            showError("No questions available for this topic");
+            return;
+          }
+
+          // Extract all question IDs and sort them
+          allQuestionIds = querySnapshot.docs.map(doc => doc.id);
+
+          const isFromAnalysis = sessionStorage.getItem('isFromAnalysis') === 'true';
+          const sessionData = JSON.parse(sessionStorage.getItem('sessionAnalysisData') || '{}');
+          if (sessionData && sessionData.sessionId) {
+              console.log("📊 qbankAnalyticsSessions ID:", sessionData.sessionId);
+          }
+          const sessionIds = sessionData.questionIds;
+
+          if (isFromAnalysis && Array.isArray(sessionIds)) {
+            allQuestionIds = allQuestionIds.filter(id => sessionIds.includes(id))
+                                           .sort((a, b) => sessionIds.indexOf(a) - sessionIds.indexOf(b));
+          } else {
+            allQuestionIds.sort((a, b) => {
+              const na = Number(a), nb = Number(b);
+              if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+              return String(a).localeCompare(String(b), "es");
+            });
+
+            // Apply filters passed from Modal (status: unseen, correct, etc.)
+            const storedFilteredIds = sessionStorage.getItem('qbankFilteredIds');
+            if (storedFilteredIds) {
+              try {
+                const allowedIds = JSON.parse(storedFilteredIds);
+                if (Array.isArray(allowedIds)) {
+                  allQuestionIds = allQuestionIds.filter(id => allowedIds.includes(id));
+                }
+              } catch (e) {
+                console.error("Error parsing filtered IDs:", e);
+              }
+            }
+
+            // Apply limit from modal
+            const sessionLimit = parseInt(sessionStorage.getItem('qbankSessionLimit') || '0');
+            if (sessionLimit > 0 && sessionLimit < allQuestionIds.length) {
+              allQuestionIds = allQuestionIds.slice(0, sessionLimit);
+            }
+          }
+
+          console.log(`✅ Found ${allQuestionIds.length} questions:`, allQuestionIds);
+
+          // Determine which question to load
+          let questionId = sessionStorage.getItem('currentQuestionId');
+
+          // Only use stored ID if it exists and is valid. 
+          // If the user specifically requested "start at the beginning" behavior, we could ignore it,
+          // but usually preserving state is desired. However, to ensure "previous" is inactive at start
+          // if we are truly starting a session, we should default to 0 if the stored ID is not found.
+
+          if (questionId && allQuestionIds.includes(questionId)) {
+            // Use the specified question and find its index
+            currentQuestionIndex = allQuestionIds.indexOf(questionId);
+            console.log(`📍 Loading specified question: ${questionId} (index ${currentQuestionIndex})`);
+          } else {
+            // Default to the first question
+            currentQuestionIndex = 0;
+            questionId = allQuestionIds[0];
+            sessionStorage.setItem('currentQuestionId', questionId); // Update session immediately
+            console.log(`📍 Loading first question: ${questionId}`);
+          }
+
+          // Load the selected question
+          loadQuestion(questionId);
+
+          // Setup navigation buttons
+          setupNavigationButtons();
+          setupToolbarButtons();
+        })
+        .catch((error) => {
+          console.error("❌ Error fetching questions:", error);
+          showError("Error loading questions: " + error.message);
+        });
+
+      // Toolbar buttons setup
+      function setupToolbarButtons() {
+        // Shared helper to toggle button visual state (icon, class, underline)
+        const toggleBtnState = (btn, isActive) => {
+          btn.classList.toggle('active', isActive);
+          btn.querySelector('.css-cjtild-StyledIcon')?.setAttribute('color', isActive ? 'brand' : 'inherit');
+          const underline = btn.parentElement.querySelector('._6ccf46c0427cb323--underline');
+          if (underline) underline.style.display = isActive ? 'block' : 'none';
+        };
+
+        // Key Info Button
+        const keyInfoBtn = document.getElementById('keyInfoBtn');
+        if (keyInfoBtn) {
+          keyInfoBtn.addEventListener('click', () => {
+            const content = document.querySelector('._760ee638b575af4a--questionContent');
+            if (content) {
+              const isActive = content.classList.toggle('_760ee638b575af4a--relevanceSecondaryHighlightIsActive');
+              toggleBtnState(keyInfoBtn, isActive);
+            }
+          });
+        }
+
+        // Hint Button
+        const hintBtn = document.querySelector('[data-e2e-test-id="hint-btn"]');
+        if (hintBtn) {
+          hintBtn.addEventListener('click', () => {
+            const hintContainer = document.querySelector('.e0f0c237914d2b33--hintContainer');
+            const wrapper = hintContainer?.closest('.rah-static');
+            if (wrapper) {
+              const isHidden = wrapper.style.display === 'none';
+              wrapper.style.display = isHidden ? 'block' : 'none';
+              wrapper.setAttribute('aria-hidden', !isHidden);
+              toggleBtnState(hintBtn, isHidden);
+
+              // Badge Visibility Logic
+              const badge = document.getElementById('hint-used-badge');
+              if (badge && isHidden) { // Only check when opening
+                 const currentQId = sessionStorage.getItem('currentQuestionId');
+                 
+                 // Track hint usage
+                 let hintsUsed = JSON.parse(sessionStorage.getItem('hintsUsed') || '[]');
+                 if (!hintsUsed.includes(currentQId)) {
+                   hintsUsed.push(currentQId);
+                   sessionStorage.setItem('hintsUsed', JSON.stringify(hintsUsed));
+                 }
+
+                 if (!window.hasUserAnswered) {
+                     badge.style.display = ''; // Show
+                 } else {
+                     badge.style.display = 'none'; // Hide
+                 }
+              }
+            }
+          });
+        }
+      }
+
+      // In-memory cache for questions
+      const questionCache = new Map();
+
+      function loadQuestion(questionId) {
+        // Update index to maintain strict order sync for navigation buttons
+        const idx = allQuestionIds.indexOf(String(questionId));
+        if (idx !== -1) currentQuestionIndex = idx;
+
+        const questionPath = `${subcategoryPath}/preguntas/${questionId}`;
+        console.log("🎯 Loading question from:", questionPath);
+
+        // RESET STATE for new question
+        window.hasUserAnswered = false;
+
+        // Reset Toolbar Toggles (Key Info & Hint)
+        [document.getElementById('keyInfoBtn'), document.querySelector('[data-e2e-test-id="hint-btn"]')].forEach(btn => {
+          if (btn) {
+            btn.classList.remove('active');
+            btn.querySelector('.css-cjtild-StyledIcon')?.setAttribute('color', 'inherit');
+            const underline = btn.parentElement.querySelector('._6ccf46c0427cb323--underline');
+            if (underline) underline.style.display = 'none';
+          }
+        });
+        document.querySelector('._760ee638b575af4a--questionContent')?.classList.remove('_760ee638b575af4a--relevanceSecondaryHighlightIsActive');
+        
+        // Reset Hint Used Badge
+        const badge = document.getElementById('hint-used-badge');
+        if (badge) badge.style.display = '';
+        
+        // Hide all expandable containers instantly
+        document.querySelectorAll('.rah-static').forEach(el => {
+            el.style.display = 'none';
+            el.setAttribute('aria-hidden', 'true');
+        });
+
+        // --- TRACK TIME PER QUESTION ---
+        if (window.currentQuestionId) {
+            const timeSpent = Math.floor((Date.now() - (window.currentQuestionStartTime || Date.now())) / 1000);
+            const questionTimes = JSON.parse(sessionStorage.getItem('questionTimes') || '{}');
+            questionTimes[window.currentQuestionId] = (questionTimes[window.currentQuestionId] || 0) + timeSpent;
+            sessionStorage.setItem('questionTimes', JSON.stringify(questionTimes));
+        }
+        window.currentQuestionId = questionId;
+        window.currentQuestionStartTime = Date.now();
+        // --------------------------------
+
+        // CHECK CACHE FIRST
+        if (questionCache.has(questionId)) {
+          console.log("⚡️ Using cached question data");
+          const data = questionCache.get(questionId);
+          processQuestionData(questionId, data);
+
+          // Prefetch next question in background
+          prefetchNextQuestion(questionId);
+          return;
+        }
+
+        db.doc(questionPath)
+          .get()
+          .then((doc) => {
+            if (doc.exists) {
+              const data = doc.data();
+              console.log("✅ Question data loaded (network):", data);
+
+              // CACHE THE RESULT
+              questionCache.set(questionId, data);
+
+              processQuestionData(questionId, data);
+
+              // Prefetch next question in background
+              prefetchNextQuestion(questionId);
+            } else {
+              console.error("❌ Question not found at path:", questionPath);
+              showError("Question not found in database");
+            }
+          })
+          .catch((error) => {
+            console.error("❌ Error loading question:", error);
+            showError("Error loading question: " + error.message);
+            // Hide spinner even on error so user sees the error message
+            const loader = document.getElementById('initial-loader');
+            const content = document.querySelector('.cd71ec7927bda3fc--page');
+            if (loader) loader.style.display = 'none';
+            if (content) content.style.display = 'block';
+          });
+      }
+
+      function processQuestionData(questionId, data) {
+        // Toggle loader visibility
+        const loader = document.getElementById('initial-loader');
+        const content = document.querySelector('.cd71ec7927bda3fc--page');
+        
+        if (loader) loader.style.display = 'none';
+        if (content) content.style.display = 'block';
+
+        // Save current question ID to sessionStorage
+        sessionStorage.setItem('currentQuestionId', questionId);
+
+        // Dispatch event for sidebar to pick up
+        const event = new CustomEvent('amboss:question-loaded', { detail: { questionId: questionId } });
+        window.dispatchEvent(event);
+
+        // Populate question content
+        populateQuestionContent(data);
+
+        // Update navigation button states
+        updateNavigationButtons();
+
+        // Restore user selections
+        const savedSelections = JSON.parse(sessionStorage.getItem('userQuestionSelections') || '{}');
+        const selections = savedSelections[questionId];
+        if (selections) {
+          (Array.isArray(selections) ? selections : [selections]).forEach(letter => {
+            const container = document.querySelector(`[data-option-letter="${letter}"]`);
+            if (container) selectAnswer(letter, container.getAttribute('data-is-correct') === 'true', false);
+          });
+        } else if (sessionStorage.getItem('isFromAnalysis') === 'true') {
+          // Fetch from Firestore if reviewing from analysis and no local session data
+          const user = firebase.auth().currentUser;
+          if (user) {
+            // First check if we have the choice in the session data (passed from analysis)
+            const sessionData = JSON.parse(sessionStorage.getItem('sessionAnalysisData') || '{}');
+            if (sessionData.questionChoices && Object.prototype.hasOwnProperty.call(sessionData.questionChoices, questionId)) {
+                 const letter = sessionData.questionChoices[questionId];
+                 if (letter) {
+                    console.log(`Reviewing session: Restoring choice ${letter} for question ${questionId}`);
+                    const container = document.querySelector(`[data-option-letter="${letter}"]`);
+                    if (container) selectAnswer(letter, container.getAttribute('data-is-correct') === 'true', false);
+                 } else {
+                    console.log(`Reviewing session: No choice made for question ${questionId} in this session.`);
+                 }
+            } else {
+                // Fallback: Fetch globally saved last choice (legacy behavior)
+                window.db.collection("users").doc(user.uid).collection("qbankQuestionStats").doc(questionId).get().then(doc => {
+                  if (doc.exists && doc.data().lastChoice) {
+                    const letter = doc.data().lastChoice;
+                    const container = document.querySelector(`[data-option-letter="${letter}"]`);
+                    if (container) selectAnswer(letter, container.getAttribute('data-is-correct') === 'true', false);
+                  }
+                }).catch(e => console.error("Error fetching previous choice for review:", e));
+            }
+          }
+        }
+      }
+
+      function prefetchNextQuestion(currentId) {
+        const currentIndex = allQuestionIds.indexOf(currentId);
+        if (currentIndex !== -1 && currentIndex < allQuestionIds.length - 1) {
+          const nextId = allQuestionIds[currentIndex + 1];
+          if (!questionCache.has(nextId)) {
+            console.log("🚀 Prefetching next question:", nextId);
+            const nextPath = `${subcategoryPath}/preguntas/${nextId}`;
+            db.doc(nextPath).get().then(doc => {
+              if (doc.exists) {
+                questionCache.set(nextId, doc.data());
+              }
+            }).catch(() => { /* mute error for prefetch */ });
+          }
+        }
+      }
+
+      // Expose to window for sidebar access
+      window.loadQuestion = loadQuestion;
+
+      function setupNavigationButtons() {
+        const prevButton = document.querySelector('[data-e2e-test-id="prev-button"]');
+        const nextButton = document.querySelector('[data-e2e-test-id="next-button"]');
+
+        if (prevButton) {
+          prevButton.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+              currentQuestionIndex--;
+              const questionId = allQuestionIds[currentQuestionIndex];
+              console.log(`⬅️ Previous: Loading question ${questionId}`);
+              loadQuestion(questionId);
+            }
+          });
+        }
+
+        if (nextButton) {
+          nextButton.addEventListener('click', () => {
+            if (currentQuestionIndex < allQuestionIds.length - 1) {
+              const currentQId = allQuestionIds[currentQuestionIndex];
+              if (!window.hasUserAnswered) {
+                let prev = JSON.parse(sessionStorage.getItem('previouslyAnswered') || '[]');
+                if (!prev.includes(currentQId)) { 
+                  prev.push(currentQId); 
+                  sessionStorage.setItem('previouslyAnswered', JSON.stringify(prev));
+                  window.dispatchEvent(new CustomEvent('amboss:question-skipped', { detail: { questionId: currentQId } }));
+
+                  // Save "skip" as selection
+                  const sels = JSON.parse(sessionStorage.getItem('userQuestionSelections') || '{}');
+                  if (!sels[currentQId]) {
+                      sels[currentQId] = ['skip'];
+                      sessionStorage.setItem('userQuestionSelections', JSON.stringify(sels));
+                  }
+                  
+                  // Save to Firestore
+                  const user = firebase.auth().currentUser;
+                  if (user) {
+                    window.db.collection("users").doc(user.uid).collection("qbankQuestionStats").doc(currentQId).set({
+                      lastChoice: "skip",
+                      isCorrect: "skipped",
+                      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true }).catch(e => console.error("Error saving skip choice:", e));
+                    console.log(`✅ "skip" choice saved to Firestore for ${currentQId}`);
+                  }
+                }
+              }
+              currentQuestionIndex++;
+              const questionId = allQuestionIds[currentQuestionIndex];
+              console.log(`➡️ Next: Loading question ${questionId}`);
+              loadQuestion(questionId);
+            } else {
+               // --- GATHER DATA FOR ANALYSIS ---
+              const answeredQuestions = JSON.parse(sessionStorage.getItem('answeredQuestions') || '[]');
+              const questionStatusMap = JSON.parse(sessionStorage.getItem('questionStatusMap') || '{}');
+              const hintsUsed = JSON.parse(sessionStorage.getItem('hintsUsed') || '[]');
+              
+              let correctCount = 0;
+              let correctWithHintsCount = 0;
+              let incorrectCount = 0;
+
+              answeredQuestions.forEach(qId => {
+                const status = questionStatusMap[qId];
+                const usedHint = hintsUsed.includes(qId);
+                
+                if (status === 'correct') {
+                  correctCount++;
+                } else if (status === 'correctWithHelp') {
+                  correctWithHintsCount++;
+                } else if (status === 'incorrect') {
+                  incorrectCount++;
+                }
+              });
+              
+              const totalTimeSeconds = Math.floor((Date.now() - (window.sessionStartTime || Date.now())) / 1000);
+              const questionTimes = JSON.parse(sessionStorage.getItem('qTimes') || '{}');
+              const totalActiveSeconds = Object.values(questionTimes).reduce((a, b) => a + b, 0);
+
+              const sessionAnalysisData = {
+                totalQuestions: allQuestionIds.length,
+                questionIds: allQuestionIds,
+                answeredCount: answeredQuestions.length,
+                correctCount: correctCount,
+                correctWithHintsCount: correctWithHintsCount,
+                incorrectCount: incorrectCount,
+                totalTimeSeconds: totalTimeSeconds,
+                totalActiveSeconds: totalActiveSeconds,
+                questionTimes: questionTimes,
+                timestamp: Date.now()
+              };
+              
+              sessionStorage.setItem('sessionAnalysisData', JSON.stringify(sessionAnalysisData));
+              console.log("📊 Session data saved for analysis:", sessionAnalysisData);
+              // --------------------------------
+
+              // --- FIREBASE SAVE LOGIC ---
+              const finishSession = () => {
+                if (typeof minimizeSidebar === 'function' && typeof loadMainContent === 'function') {
+                  minimizeSidebar('sidebartoc3.html');
+                  loadMainContent('analysis.html');
+                } else {
+                  window.location.href = 'analysis.html';
+                }
+              };
+
+              const user = firebase.auth().currentUser;
+              if (user) {
+                const analyticsData = {
+                  avgTimeMs: answeredQuestions.length > 0 ? (totalActiveSeconds / answeredQuestions.length) * 1000 : 0,
+                  categoriaId: sessionStorage.getItem('currentDocPath') || 'unknown',
+                  completedCount: answeredQuestions.length,
+                  correctCount: correctCount,
+                  correctUsingHints: correctWithHintsCount,
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  incorrectCount: incorrectCount,
+                  pendingCount: allQuestionIds.length - answeredQuestions.length,
+                  questionTimeMs: totalActiveSeconds * 1000,
+                  questions: allQuestionIds.map((qId, index) => {
+                      const qData = questionCache.get(qId) || {};
+                      const status = questionStatusMap[qId] || 'pending';
+                      const qTime = questionTimes[qId] || 0;
+                      
+                      // Get user choice for this question
+                      const allSelections = JSON.parse(sessionStorage.getItem('userQuestionSelections') || '{}');
+                      const mySel = allSelections[qId];
+                      const finalChoice = Array.isArray(mySel) ? mySel[mySel.length-1] : mySel;
+
+                      return {
+                          difficultyLabel: qData.difficulty || 'Medium',
+                          difficultyValue: qData.difficultyValue || 2,
+                          index: index + 1,
+                          peerPercent: qData.peerStats ? parseFloat(qData.peerStats) : null,
+                          question: index + 1,
+                          questionId: qId,
+                          statusKey: status,
+                          timeMs: qTime * 1000,
+                          userChoice: finalChoice || null
+                      };
+                  })
+                };
+
+                db.collection('users').doc(user.uid).collection('qbankAnalyticsSessions').add(analyticsData)
+                  .then(() => {
+                    console.log("✅ Analytics saved to Firestore");
+                    finishSession();
+                  })
+                  .catch(err => {
+                    console.error("❌ Error saving analytics:", err);
+                    finishSession();
+                  });
+              } else {
+                finishSession();
+              }
+              // ---------------------------
+            }
+          });
+        }
+
+        updateNavigationButtons();
+      }
+
+      function updateNavigationButtons() {
+        const prevButton = document.querySelector('[data-e2e-test-id="prev-button"]');
+        const nextButton = document.querySelector('[data-e2e-test-id="next-button"]');
+        const nextLabel = nextButton ? nextButton.querySelector('.ecc37fb19efefaf4--buttonLabel') : null;
+
+        if (prevButton) {
+          if (currentQuestionIndex === 0) {
+            prevButton.setAttribute('disabled', '');
+            prevButton.classList.add('css-12n0i9h-StyledButton');
+            prevButton.classList.remove('css-xaqme7-StyledButton');
+          } else {
+            prevButton.removeAttribute('disabled');
+            prevButton.classList.remove('css-12n0i9h-StyledButton');
+            prevButton.classList.add('css-xaqme7-StyledButton');
+          }
+        }
+
+        if (nextButton) {
+          if (currentQuestionIndex === allQuestionIds.length - 1) {
+            nextButton.removeAttribute('disabled');
+            nextButton.classList.remove('css-12n0i9h-StyledButton');
+            nextButton.classList.add('css-xaqme7-StyledButton');
+            nextButton.classList.add('see-analysis-btn');
+            if (nextLabel) nextLabel.textContent = 'SEE ANALYSIS';
+          } else {
+            nextButton.removeAttribute('disabled');
+            nextButton.classList.remove('css-12n0i9h-StyledButton');
+            nextButton.classList.add('css-xaqme7-StyledButton');
+            nextButton.classList.remove('see-analysis-btn');
+
+            // Check if answered
+            if (window.hasUserAnswered) {
+              nextButton.classList.add('is-next-state');
+              if (nextLabel) nextLabel.textContent = 'NEXT';
+            } else {
+              nextButton.classList.remove('is-next-state');
+              if (nextLabel) nextLabel.textContent = 'SKIP';
+            }
+          }
+        }
+
+        console.log(`📊 Navigation: ${currentQuestionIndex + 1}/${allQuestionIds.length}`);
+      }
+
+      function populateQuestionContent(data) {
+        // Update question text in main article
+        let questionHtml = '';
+        if (data.questionContent && data.questionContent.textHtml) {
+          questionHtml = data.questionContent.textHtml;
+        } else if (data.questionContent && data.questionContent.text) {
+          questionHtml = `<p>${data.questionContent.text}</p>`;
+        } else if (data.questionText) {
+          questionHtml = data.questionText.includes('<') ? data.questionText : `<p>${data.questionText}</p>`;
+        }
+
+        if (questionHtml) {
+          const questionArticle = document.querySelector('._760ee638b575af4a--questionContent');
+          if (questionArticle) {
+            questionArticle.innerHTML = questionHtml;
+            console.log("✅ Question text populated");
+          }
+        }
+
+        // Update sidebar preview text
+        let previewText = '';
+        if (data.questionPreview) {
+          previewText = data.questionPreview;
+        } else if (data.questionContent && data.questionContent.text) {
+          previewText = data.questionContent.text;
+        } else if (questionHtml) {
+          previewText = stripHTML(questionHtml);
+        }
+
+        if (previewText && window.sessionStorage.getItem('currentQuestionId')) {
+          const currentQId = window.sessionStorage.getItem('currentQuestionId');
+          // Update ONLY the sidebar item for THIS question
+          const sidebarPreview = document.getElementById(`preview-${currentQId}`);
+          if (sidebarPreview) {
+            // Only update if empty or significantly different? 
+            // Actually, the sidebar loads its own data. 
+            // If we want to ensure it has the "full" text from the active load:
+            sidebarPreview.textContent = previewText.substring(0, 500);
+            console.log(`✅ Sidebar preview updated for ${currentQId}`);
+          }
+        }
+
+        // Update hint text
+        let hintHtml = '';
+
+        if (data.hint && data.hint.textHtml) {
+          // 🔹 Usa la versión rica en HTML (con links, spans, etc.)
+          hintHtml = data.hint.textHtml;
+        } else if (data.hint && data.hint.text) {
+          // 🔹 Fallback a texto plano si no hay HTML
+          hintHtml = `<p>${data.hint.text}</p>`;
+        } else if (data.hintText) {
+          // 🔹 Compatibilidad vieja
+          hintHtml = data.hintText.includes('<') ? data.hintText : `<p>${data.hintText}</p>`;
+        }
+
+        if (hintHtml) {
+          const hintArticle = document.querySelector('.e0f0c237914d2b33--hintText');
+          if (hintArticle) {
+            hintArticle.innerHTML = hintHtml;
+            console.log("✅ Hint text populated (HTML)");
+          }
+        }
+
+        // Update question media/images
+        let mediaUrl = data.mediaUrl;
+        let mediaAlt = data.mediaAlt;
+
+        if (!mediaUrl && data.questionContent && data.questionContent.images && data.questionContent.images.length > 0) {
+          mediaUrl = data.questionContent.images[0].src;
+          mediaAlt = data.questionContent.images[0].alt;
+        }
+
+        const mediaButton = document.querySelector('._26c6d085fbfd0c71--mediaViewerTrigger');
+        const mediaImg = document.querySelector('._26c6d085fbfd0c71--mediaViewerTrigger img');
+
+        if (mediaUrl && mediaButton && mediaImg) {
+          mediaImg.src = mediaUrl;
+          mediaImg.alt = mediaAlt || '';
+          mediaButton.style.display = 'block'; // Show the button
+          console.log("✅ Media image populated");
+        } else if (mediaButton) {
+          mediaButton.style.display = 'none'; // Hide if no image
+        }
+
+        // Populate answer options
+        if (data.options && Array.isArray(data.options)) {
+          populateAnswerOptions(data.options, data.correctAnswer);
+        }
+
+        // Update difficulty hammers
+        const difficulty = data.metadata?.difficulty || data.difficulty;
+        if (difficulty) {
+          updateDifficultyHammers(difficulty);
+        }
+
+        // Add AMBOSS links if available
+        if (data.ambossLinks && Array.isArray(data.ambossLinks)) {
+          addAmbossLinks(data.ambossLinks);
+        }
+        // Update toggle button state
+        updateToggleBtnState();
+        updateResetButtonState();
+      }
+
+      function populateAnswerOptions(options, correctAnswer) {
+        // Find the answer options container - this is where answers will be populated
+        const parentContainer = document.getElementById('answersContainer');
+
+        if (!parentContainer) {
+          console.warn("Answer options container (answersContainer) not found");
+          return;
+        }
+
+        // Clear all existing content (just in case)
+        parentContainer.innerHTML = '';
+
+        // 🔍 Debug: Log correctAnswer to see its format
+        console.log("📊 correctAnswer from Firestore:", correctAnswer, "Type:", typeof correctAnswer);
+
+        // Create option elements
+        options.forEach((option, index) => {
+          const optionLetter = String.fromCharCode(65 + index); // A, B, C, D, E...
+
+          // 🔍 Check multiple sources for correct answer
+          let isCorrect = false;
+
+          // Method 1: Check if option has isCorrect field
+          if (option.isCorrect === true) {
+            isCorrect = true;
+          }
+          // Method 2: Check if correctAnswer matches letter (e.g., "A", "B")
+          else if (correctAnswer === optionLetter) {
+            isCorrect = true;
+          }
+          // Method 3: Check if correctAnswer matches index (e.g., 0, 1, 2)
+          else if (correctAnswer === index) {
+            isCorrect = true;
+          }
+          // Method 4: Check if correctAnswer is 1-based (e.g., 1, 2, 3)
+          else if (correctAnswer === index + 1) {
+            isCorrect = true;
+          }
+
+          console.log(`Option ${optionLetter} (index ${index}):`, {
+            isCorrect,
+            hasIsCorrectField: option.isCorrect,
+            correctAnswerValue: correctAnswer
+          });
+
+          // Determine explanation text
+          let explanationHtml = '';
+          if (option.explanation && option.explanation.textHtml) {
+            explanationHtml = option.explanation.textHtml;
+          } else if (option.feedback) {
+            explanationHtml = option.feedback;
+          } else {
+            explanationHtml = "No explanation available.";
+          }
+
+          // Generate images HTML
+          let imagesHtml = '';
+          if (option.explanation && option.explanation.images && Array.isArray(option.explanation.images)) {
+            option.explanation.images.forEach(img => {
+              imagesHtml += `
+                    <div class="_981f8b48b6542a07--thumbnailBox" style="margin-top: 10px;">
+                        <div class="css-bkwbtj-StackContainer e19k43g30">
+                            <div class="css-1mpk5ch-StackItem e19k43g31">
+                                <button type="button" class="css-vy4fov-StyledButton ejph2fy0" title="${img.title || ''}">
+                                    <div class="css-12v0wto-StyledMediaContainer e1j158910">
+                                        <div class="css-1ax134j-StyledMedia e1j158911">
+                                            <img src="${img.src}" alt="${img.alt || ''}" class="css-1goz906-StyledImg e1j158912">
+                                            <div class="css-gfkulu-StyledOverlay e1j158913"></div>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+                            <div class="css-10ts8ay-StackItem e19k43g31">
+                                <div class="css-binj5l-Container e3i5r3f0">
+                                    <button type="button" class="css-vy4fov-StyledButton ejph2fy0" title="${img.title || ''}">
+                                        <span data-ds-id="Text" class="css-16ql1mi-StyledText-StyledTextClamped eadloo90">${img.title || 'Image'}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                  `;
+            });
+          }
+
+          // Generate Buttons HTML (Linked Article & Feedback)
+          // Using the specific HTML structure provided by the user for the linked article button
+
+          let linkedArticleHtml = '';
+          if (option.explanation && option.explanation.linkedArticle) {
+            const articleTitle = option.explanation.linkedArticle.title || 'Related Article';
+            const articleUrl = option.explanation.linkedArticle.url || '#';
+
+            linkedArticleHtml = `
+                <div class="_981f8b48b6542a07--linkedArticleButtonContainer">
+                    <div data-ds-id="Box" class="css-8wmw5x-StyledBox ebcgi2u0">
+                        <a data-e2e-test-id="linked-article" data-ds-id="Button" class="css-1i01wsi-StyledButton ejph2fy0" href="${articleUrl}" target="_blank">
+                            <div class="css-c3523d-StyledInner ejph2fy1">
+                                <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                        <div data-e2e-test-id="article" data-testid="article" data-ds-id="Icon" data-variant="inherit" color="inherit" aria-hidden="true" class="css-cjtild-StyledIcon e1kkd7uc0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                                                <path fill="currentColor" fill-rule="evenodd" d="M3 2h10v12H3zM1 2a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2zm10 4H5V4h6zM5 9h4V7H5zm0 3h5v-2H5z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                        <span class="">${articleTitle}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>`;
+          }
+
+          let buttonsHtml = `
+            <div class="_981f8b48b6542a07--belowExplanation" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;  padding-top: 10px;">
+                ${linkedArticleHtml}
+                <div class="_981f8b48b6542a07--feedbackButtonContainer">
+ <button data-ds-id="Button" type="button" class="css-e9wdc6-StyledButton ejph2fy0">
+  <div class="css-c3523d-StyledInner ejph2fy1">
+    <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+
+      <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+        <div data-e2e-test-id="message-circle"
+             data-testid="message-circle"
+             data-ds-id="Icon"
+             data-variant="inherit"
+             color="inherit"
+             aria-hidden="true"
+             class="css-cjtild-StyledIcon e1kkd7uc0">
+
+          <svg xmlns="http://www.w3.org/2000/svg"
+               width="16"
+               height="16"
+               fill="none"
+               viewBox="0 0 16 16">
+            <path stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M14 7.667a5.6 5.6 0 0 1-.6 2.533 5.67 5.67 0 0 1-5.067 3.133 5.6 5.6 0 0 1-2.533-.6L2 14l1.267-3.8a5.6 5.6 0 0 1-.6-2.533A5.67 5.67 0 0 1 5.8 2.6 5.6 5.6 0 0 1 8.333 2h.334A5.653 5.653 0 0 1 14 7.333z"
+                  clip-rule="evenodd"></path>
+          </svg>
+
+        </div>
+      </div>
+
+      <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+        GIVE FEEDBACK
+      </div>
+
+    </div>
+  </div>
+</button>
+                </div>
+            </div>
+          `;
+
+
+          const optionHTML = `
+  <div 
+    class="_981f8b48b6542a07--container _981f8b48b6542a07--pointer"
+    data-e2e-test-id="answer-theme-default"
+    data-option-letter="${optionLetter}"
+    data-is-correct="${isCorrect}"
+  >
+    <!-- Fila de respuesta -->
+    <div 
+      class="_981f8b48b6542a07--answerText" 
+      data-e2e-test-id="answer-row"
+    >
+      <!-- Letra + texto (clickable) -->
+      <div
+        aria-disabled="false"
+        class="_981f8b48b6542a07--letterAndText"
+        data-e2e-test-id="answer-${optionLetter.toLowerCase()}"
+        data-testid="answer-${optionLetter.toLowerCase()}"
+        role="button"
+        tabindex="0"
+        onclick="selectAnswer('${optionLetter}', ${isCorrect})"
+      >
+        <div
+          class="notranslate _29aad051d1626085--container"
+          data-test-id="CircledCharacter"
+        >
+          ${optionLetter}
+        </div>
+        <div class="_981f8b48b6542a07--answerContent">
+          <p>${option.text || option}</p>
+        </div>
+      </div>
+
+      <!-- Porcentaje (opcional) -->
+      <div 
+        class="_981f8b48b6542a07--answerPercentageContainer" 
+        data-testid="answer-stats"
+        style="display: none;"
+      >
+        ${option.percentage ? `<p data-ds-id="Text" class="css-1s2nong-StyledText eadloo90">${option.percentage}</p>` : ''}
+      </div>
+
+      <!-- Icono derecha (checkmark/minus - oculto por defecto) -->
+<div style="margin-right: 25px;">
+  <div data-ds-id="Box" class="css-10tzyyx-StyledBox ebcgi2u0">
+    <div
+      aria-disabled="true"
+      class="_981f8b48b6542a07--clickableIconContainer"
+      data-testid="${isCorrect ? 'checkIcon' : 'minusIcon'}"
+      role="button"
+      tabindex="-1"
+      style="display: none;"
+    >
+      <div class="_981f8b48b6542a07--icon">
+        ${isCorrect ? `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+            <path fill="currentColor" fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m3.646-10.854L6.5 10.293 4.354 8.146l-1.415 1.415L6.5 13.12l6.561-6.56z" clip-rule="evenodd"></path>
+          </svg>
+        ` : '<!-- No icon initially -->'}
+      </div>
+    </div>
+  </div>
+</div>
+
+      <!-- Strike-through Icon (New) -->
+      <div class="js-strike-through-icon-container" style="width: 64px; height: 38px; display: flex; justify-content: center; align-items: center; margin-left: auto;">
+        <div data-ds-id="Box" class="css-10tzyyx-StyledBox ebcgi2u0" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+            <div aria-disabled="false" aria-label="strikethrough answer" class="_981f8b48b6542a07--clickableIconContainer _981f8b48b6542a07--iconContainerHover" data-testid="xIcon" role="button" tabindex="0" onclick="toggleStrikeThrough(event, '${optionLetter}')">
+                <div class="_981f8b48b6542a07--icon">
+                    <div data-ds-id="Icon" data-variant="inherit" color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                            <g fill="currentColor">
+                                <path d="M12.707 4.707a1 1 0 0 0-1.414-1.414zm-9.414 6.586a1 1 0 1 0 1.414 1.414zm8-8-8 8 1.414 1.414 8-8z"></path>
+                                <path d="M4.707 3.293a1 1 0 0 0-1.414 1.414zm6.586 9.414a1 1 0 0 0 1.414-1.414zm-8-8 8 8 1.414-1.414-8-8z"></path>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wrapper de explicación (OCULTO por defecto) -->
+    <div 
+      id="explanation-wrapper-${optionLetter}"
+      class="rah-static"
+      aria-hidden="true"
+      style="display: none;"
+    >
+      <div>
+        <div
+          id="explanation-${optionLetter}"
+          class="_981f8b48b6542a07--explanationContainer"
+          data-e2e-test-id="answerExplanation"
+        >
+          <div data-ds-id="Box" class="css-zii3gr-StyledBox ebcgi2u0">
+            <div data-ds-id="Box" class="css-1e5htnt-StyledBox ebcgi2u0">
+              <div 
+                class="_981f8b48b6542a07--explanationContentMargin" 
+                name="explain"
+              >
+                <div 
+                  class="_981f8b48b6542a07--explanationContent" 
+                  data-intutorial="false"
+                >
+                  ${explanationHtml}
+                </div>
+                ${imagesHtml}
+              </div>
+            </div>
+          </div>
+
+          <!-- Zona bajo explicación (botones, etc.) -->
+          <div data-ds-id="Box" class="css-1m7ggk8-StyledBox ebcgi2u0">
+            <div data-ds-id="Box" class="css-1e5htnt-StyledBox ebcgi2u0">
+                          <div class="_981f8b48b6542a07--belowExplanation">
+                ${buttonsHtml}
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
+          parentContainer.insertAdjacentHTML('beforeend', optionHTML);
+        });
+
+        console.log(`✅ ${options.length} answer options populated`);
+      }
+
+      function updateDifficultyHammers(difficulty) {
+        // difficulty should be 1-5
+        const hammersContainer = document.querySelector('[data-e2e-test-id^="difficulty-hammers"]');
+        if (!hammersContainer) return;
+        
+        // Update the ID to match current difficulty (optional but good for consistency)
+        hammersContainer.setAttribute('data-e2e-test-id', `difficulty-hammers-${difficulty}`);
+
+        const hammerIcons = hammersContainer.querySelectorAll('[data-testid="difficulty-hammer"]');
+        hammerIcons.forEach((hammer, index) => {
+          if (index < difficulty) {
+            hammer.setAttribute('color', 'secondary');
+            hammer.classList.add('active');
+          } else {
+            hammer.setAttribute('color', 'inherit');
+            hammer.classList.remove('active');
+          }
+        });
+        console.log(`✅ Difficulty set to ${difficulty} hammers`);
+      }
+
+      function addAmbossLinks(links) {
+        // Find a suitable container for AMBOSS links
+        // We'll append to the explanation of the correct answer or a general area if needed
+        // For now, let's just log it as we might need a specific place in the UI
+        console.log("AMBOSS links processing...", links);
+      }
+
+      function stripHTML(html) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || '';
+      }
+
+      function showError(message) {
+        const mainContent = document.querySelector('._77ad967e8b96512c--questionSessionMainSpace');
+        if (mainContent) {
+          mainContent.innerHTML = `
+            <div style="padding: 40px; text-align: center;">
+              <p style="color: red; font-size: 18px;">${message}</p>
+            </div>
+          `;
+        }
+      }
+
+      // Global variable to track if user has already made a selection
+      window.hasUserAnswered = false;
+
+      // Global function for answer selection
+      window.selectAnswer = function (letter, isCorrect, showExplanation = true) {
+        // Already correctly answered? Just toggle explanation
+        const container = document.querySelector(`[data-option-letter="${letter}"]`);
+        if (container && (container.classList.contains('_981f8b48b6542a07--correctAnswer') || container.classList.contains('_981f8b48b6542a07--correctWithHelpAnswer'))) {
+          const wrapper = document.getElementById(`explanation-wrapper-${letter}`);
+          if (wrapper) {
+            const isVis = wrapper.style.display === 'block';
+            wrapper.style.display = isVis ? 'none' : 'block';
+            wrapper.setAttribute('aria-hidden', isVis ? 'true' : 'false');
+          }
+          return;
+        }
+
+        // Check if the option is struck through
+        const answerContainerToCheck = document.querySelector(`[data-testid="answer-${letter.toLowerCase()}"]`);
+        if (answerContainerToCheck && answerContainerToCheck.classList.contains('_981f8b48b6542a07--strikeThrough')) {
+          console.log(`Option ${letter} is struck through. Selection prevented.`);
+          return;
+        }
+
+        const isFirstAttempt = !window.hasUserAnswered;
+        
+        const hintWrapperInitial = document.querySelector('.e0f0c237914d2b33--hintContainer')?.closest('.rah-static');
+        let usedHelpBeforeAnswering = hintWrapperInitial && hintWrapperInitial.style.display !== 'none';
+        
+        // Recover "with help" status if reviewing from Analysis
+        if (sessionStorage.getItem('isFromAnalysis') === 'true') {
+            const statusMap = JSON.parse(sessionStorage.getItem('questionStatusMap') || '{}');
+            if (statusMap[sessionStorage.getItem('currentQuestionId')] === 'correctWithHelp') {
+                usedHelpBeforeAnswering = true;
+            }
+        }
+
+        // Save selections
+        const sels = JSON.parse(sessionStorage.getItem('userQuestionSelections') || '{}');
+        const cQId = sessionStorage.getItem('currentQuestionId');
+        if (cQId) {
+          if (!Array.isArray(sels[cQId])) sels[cQId] = sels[cQId] ? [sels[cQId]] : [];
+          if (!sels[cQId].includes(letter)) {
+             sels[cQId].push(letter);
+             sessionStorage.setItem('userQuestionSelections', JSON.stringify(sels));
+          }
+          // Save to Firestore for current user
+          const user = firebase.auth().currentUser;
+          if (user) {
+            window.db.collection("users").doc(user.uid).collection("qbankQuestionStats").doc(cQId).set({
+              lastChoice: letter,
+              isCorrect: isCorrect ? (usedHelpBeforeAnswering ? "true2" : "true") : "false",
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }).catch(e => console.error("Error saving choice:", e));
+          }
+        }
+
+        const wrapper = document.getElementById(`explanation-wrapper-${letter}`);
+        const explanationDiv = document.getElementById(`explanation-${letter}`);
+
+        // Verificar si esta explicación ya está visible
+        const isCurrentlyVisible = wrapper && wrapper.style.display === 'block';
+
+        // Si la explicación ya está abierta, solo colapsarla (sin cambiar styling)
+        if (isCurrentlyVisible && window.hasUserAnswered) {
+          wrapper.style.display = 'none';
+          wrapper.setAttribute('aria-hidden', 'true');
+          console.log(`🔽 Explicación de ${letter} colapsada (preservando colores)`);
+          return; // No hacer nada más
+        }
+
+        // Si no está visible, continuar con la lógica normal de apertura
+
+        // 1) Reset de estado visual en TODAS las opciones (solo en el primer intento)
+        if (!window.hasUserAnswered) {
+          const allOptions = document.querySelectorAll('[data-e2e-test-id="answer-row"]');
+          const allContainers = document.querySelectorAll('[data-e2e-test-id="answer-theme-default"]');
+
+          allOptions.forEach(opt => {
+            const letterContainer = opt.querySelector('[data-test-id="CircledCharacter"]');
+            if (letterContainer) {
+              letterContainer.classList.remove('_29aad051d1626085--correctWithHelp');
+              letterContainer.classList.remove('_29aad051d1626085--selected');
+              letterContainer.classList.remove('_29aad051d1626085--error');
+              letterContainer.classList.remove('_29aad051d1626085--errorInverted');
+              letterContainer.classList.remove('_29aad051d1626085--successInverted');
+            }
+          });
+
+          // Remover todas las clases de estado de los contenedores y ocultar iconos
+          allContainers.forEach(container => {
+            container.classList.remove('_981f8b48b6542a07--correctAnswer');
+            container.classList.remove('_981f8b48b6542a07--incorrectFirstChoice');
+            container.classList.remove('_981f8b48b6542a07--incorrectAnswer');
+
+            // Ocultar todos los iconos
+            const iconContainer = container.querySelector('._981f8b48b6542a07--clickableIconContainer');
+            if (iconContainer) {
+              iconContainer.style.display = 'none';
+            }
+          });
+
+          // Hide strike-through icons and show percentages
+          const strikeThroughIcons = document.querySelectorAll('.js-strike-through-icon-container');
+          strikeThroughIcons.forEach(icon => icon.style.display = 'none');
+
+          const percentageContainers = document.querySelectorAll('._981f8b48b6542a07--answerPercentageContainer');
+          percentageContainers.forEach(container => container.style.display = 'flex');
+        }
+
+        // 2) NO ocultar otras explicaciones - permitir múltiples abiertas
+
+        // 3) Marcar la opción seleccionada
+        const selectedOption = document.querySelector(
+          `[data-testid="answer-${letter.toLowerCase()}"]`
+        );
+        const selectedContainer = document.querySelector(
+          `[data-option-letter="${letter}"]`
+        );
+
+        if (selectedOption) {
+          const letterCircle = selectedOption.querySelector('[data-test-id="CircledCharacter"]');
+          if (letterCircle) {
+            if (isCorrect) {
+              // Si es correcta: círculo verde (success) o amarillo (help)
+              if (usedHelpBeforeAnswering) {
+                letterCircle.classList.add('_29aad051d1626085--correctWithHelp');
+              } else {
+                letterCircle.classList.add('_29aad051d1626085--success');
+              }
+            } else {
+              // Si es incorrecta
+              letterCircle.classList.add('_29aad051d1626085--selected');
+              if (isFirstAttempt) {
+                // Primer intento: círculo rojo invertido
+                letterCircle.classList.remove('_29aad051d1626085--selected');
+                letterCircle.classList.add('_29aad051d1626085--errorInverted');
+              } else {
+                // Intentos subsecuentes: círculo rojo con borde
+                letterCircle.classList.remove('_29aad051d1626085--selected');
+                letterCircle.classList.add('_29aad051d1626085--error');
+              }
+            }
+          }
+        }
+
+        // Si se seleccionó una respuesta incorrecta, marcar el contenedor y mostrar ícono minus
+        if (!isCorrect && selectedContainer) {
+          if (isFirstAttempt) {
+            // Primera respuesta incorrecta: fondo rosa
+            selectedContainer.classList.add('_981f8b48b6542a07--incorrectFirstChoice');
+            selectedContainer.setAttribute('data-e2e-test-id', 'answer-theme-userFirstAttemptIncorrect');
+          } else {
+            // Siguientes respuestas incorrectas: fondo blanco
+            selectedContainer.classList.add('_981f8b48b6542a07--incorrectAnswer');
+            selectedContainer.setAttribute('data-e2e-test-id', 'answer-theme-answerOptionIncorrect');
+          }
+
+          // Mostrar ícono minus rojo
+          const iconContainer = selectedContainer.querySelector('._981f8b48b6542a07--clickableIconContainer');
+          const iconDiv = selectedContainer.querySelector('._981f8b48b6542a07--icon');
+          if (iconContainer && iconDiv) {
+            iconContainer.style.display = 'flex';
+            iconContainer.setAttribute('data-testid', 'minusIcon');
+            iconDiv.classList.add('_981f8b48b6542a07--redIcon');
+            iconDiv.innerHTML = `
+        <div data-ds-id="Icon" data-variant="inherit" color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="bevel" stroke-width="2" d="M4 8h8"></path>
+          </svg>
+        </div>
+      `;
+          }
+        }
+
+        // Si se seleccionó la respuesta correcta, marcar el contenedor
+        if (isCorrect && selectedContainer) {
+          if (usedHelpBeforeAnswering) {
+            selectedContainer.classList.add('_981f8b48b6542a07--correctWithHelpAnswer');
+            selectedContainer.setAttribute('data-e2e-test-id', 'answer-theme-answerOptionCorrectWithHelp');
+          } else {
+            selectedContainer.classList.add('_981f8b48b6542a07--correctAnswer');
+            selectedContainer.setAttribute('data-e2e-test-id', 'answer-theme-answerOptionCorrect');
+          }
+        }
+
+        // 4) MOSTRAR LA RESPUESTA CORRECTA con fondo verde e ícono checkmark
+        // Ejecutar si: es el primer intento (correcto o incorrecto que luego revela) O si seleccionas la correcta después
+        const shouldMarkAllOptions = isFirstAttempt || isCorrect;
+
+        if (shouldMarkAllOptions) {
+          // Solo marcar la correcta si es correcta o si acertaste después de fallar
+          if (isCorrect) {
+            const correctContainer = document.querySelector('[data-is-correct="true"]');
+            if (correctContainer) {
+              if (usedHelpBeforeAnswering) {
+                correctContainer.classList.add('_981f8b48b6542a07--correctWithHelpAnswer');
+              } else {
+                correctContainer.classList.add('_981f8b48b6542a07--correctAnswer');
+              }
+
+              // Mostrar ícono checkmark verde u naranja
+              const iconContainer = correctContainer.querySelector('._981f8b48b6542a07--clickableIconContainer');
+              const iconDiv = correctContainer.querySelector('._981f8b48b6542a07--icon');
+              if (iconContainer) {
+                iconContainer.style.display = 'flex';
+                if (usedHelpBeforeAnswering && iconDiv) {
+                    iconDiv.classList.add('_981f8b48b6542a07--orangeIcon');
+                }
+              }
+
+              console.log('✅ Respuesta correcta marcada con fondo verde');
+            }
+          }
+
+          // 4.5) MARCAR TODAS LAS DEMÁS OPCIONES INCORRECTAS (que no fueron seleccionadas)
+          if (isCorrect || !isFirstAttempt) {
+            const allContainers = document.querySelectorAll('[data-e2e-test-id="answer-theme-default"]');
+            allContainers.forEach(container => {
+              const containerLetter = container.getAttribute('data-option-letter');
+              const isThisCorrect = container.getAttribute('data-is-correct') === 'true';
+              const isThisSelected = containerLetter === letter;
+
+              // Si no es correcta, no es la seleccionada, entonces es una incorrecta pasiva
+              if (!isThisCorrect && !isThisSelected) {
+                container.classList.add('_981f8b48b6542a07--incorrectAnswer');
+                container.setAttribute('data-e2e-test-id', 'answer-theme-answerOptionIncorrect');
+
+                // Marcar el círculo con borde rojo
+                const letterCircle = container.querySelector('[data-test-id="CircledCharacter"]');
+                if (letterCircle) {
+                  letterCircle.classList.add('_29aad051d1626085--error');
+                }
+
+                // Mostrar ícono minus rojo
+                const iconContainer = container.querySelector('._981f8b48b6542a07--clickableIconContainer');
+                const iconDiv = container.querySelector('._981f8b48b6542a07--icon');
+                if (iconContainer && iconDiv) {
+                  iconContainer.style.display = 'flex';
+                  iconContainer.setAttribute('data-testid', 'minusIcon');
+                  iconDiv.classList.add('_981f8b48b6542a07--redIcon');
+                  iconDiv.innerHTML = `
+              <div data-ds-id="Icon" data-variant="inherit" color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="bevel" stroke-width="2" d="M4 8h8"></path>
+                </svg>
+              </div>
+            `;
+                }
+              }
+            });
+          }
+        } else {
+          console.log('⏸️ Primer intento incorrecto - no se revela la respuesta correcta aún');
+        }
+
+        // 5) Mostrar explicación de la respuesta seleccionada
+        if (wrapper && explanationDiv) {
+          if (showExplanation) {
+            wrapper.style.display = 'block';
+            wrapper.setAttribute('aria-hidden', 'false');
+            
+            // Auto-select ATTENDING TIPS if correct
+            if (isCorrect) {
+               const hintBtn = document.querySelector('[data-e2e-test-id="hint-btn"]');
+               const hintWrapper = document.querySelector('.e0f0c237914d2b33--hintContainer')?.closest('.rah-static');
+               if (hintBtn && hintWrapper && hintWrapper.style.display === 'none') {
+                   hintBtn.click();
+               }
+            }
+            
+            // Apply correct with help color to explanation if applicable
+            if (isCorrect && usedHelpBeforeAnswering) {
+                explanationDiv.classList.add('_981f8b48b6542a07--correctWithHelpExplanation');
+            }
+          }
+
+          // Agregar clase según si es correcta o incorrecta
+          if (isCorrect) {
+            explanationDiv.classList.add('_981f8b48b6542a07--correctAnswerExplanation');
+          } else if (isFirstAttempt) {
+            // Solo primer intento incorrecto tiene la línea roja
+            explanationDiv.classList.add('_981f8b48b6542a07--incorrectFirstExplanation');
+          }
+
+          explanationDiv.style.display = 'block';
+          // NO aplicar borderColor inline, dejar que el CSS lo maneje mediante las clases
+        }
+
+        // Marcar que el usuario ya ha respondido
+        window.hasUserAnswered = true;
+
+        if (isCorrect) {
+          console.log("✅ Correct answer!");
+        } else {
+          console.log("❌ Incorrect answer");
+        }
+
+        // 6) Save answered state and notify sidebar
+        let answeredQuestions = JSON.parse(sessionStorage.getItem('answeredQuestions') || '[]');
+        const currentQId = sessionStorage.getItem('currentQuestionId');
+        if (currentQId && !answeredQuestions.includes(currentQId)) {
+          answeredQuestions.push(currentQId);
+          sessionStorage.setItem('answeredQuestions', JSON.stringify(answeredQuestions));
+        }
+
+        // Save correctness status specially for the sidebar
+        let questionStatusMap = JSON.parse(sessionStorage.getItem('questionStatusMap') || '{}');
+        if (currentQId) {
+          if (isCorrect) {
+            questionStatusMap[currentQId] = usedHelpBeforeAnswering ? 'correctWithHelp' : 'correct';
+          } else {
+            questionStatusMap[currentQId] = 'incorrect';
+          }
+          sessionStorage.setItem('questionStatusMap', JSON.stringify(questionStatusMap));
+        }
+
+        // Update toggle button
+        updateToggleBtnState();
+        updateResetButtonState();
+
+        // Dispatch event so sidebar updates immediately
+        window.dispatchEvent(new CustomEvent('amboss:question-answered', {
+          detail: { 
+            questionId: currentQId, 
+            isCorrect: isCorrect,
+            isWithHelp: usedHelpBeforeAnswering
+          }
+        }));
+
+        // Hide hint used badge upon answering
+        const badge = document.getElementById('hint-used-badge');
+        if (badge) badge.style.display = 'none';
+
+        // Update navigation buttons to reflect the "Answered" state (SKIP -> NEXT)
+        updateNavigationButtons();
+      };
+
+      window.toggleStrikeThrough = function (event, letter) {
+        event.stopPropagation();
+        const answerContainer = document.querySelector(`[data-testid="answer-${letter.toLowerCase()}"]`);
+        if (answerContainer) {
+          answerContainer.classList.toggle('_981f8b48b6542a07--strikeThrough');
+          answerContainer.classList.toggle('_981f8b48b6542a07--pointerNotAllowed');
+
+          const isStruck = answerContainer.classList.contains('_981f8b48b6542a07--strikeThrough');
+          answerContainer.setAttribute('aria-disabled', isStruck);
+
+          console.log(`Strike-through toggled for option ${letter}: ${isStruck}`);
+        }
+      };
+    })();
+  </script>
+
+
+
+
+  <script>
+    (function () {
+      const container = document.querySelector("._6ccf46c0427cb323--toolbarSectionsContainer");
+      const leftSection = document.querySelector("._6ccf46c0427cb323--toolbarSectionLeft");
+      const rightSection = document.querySelector("._6ccf46c0427cb323--actionItemsContainer");
+      const menuList = document.querySelector("#dropdown-menu-content .css-1uo4gqj-StyledUl");
+
+      if (!container || !leftSection || !rightSection || !menuList) return;
+
+      const originalInfo = new Map();
+      let requiredWidth = 0;
+
+      function handleResponsiveActions() {
+        // Measure the theoretical required width once
+        if (requiredWidth === 0 && menuList.dataset.actionsLocation !== "menu") {
+          requiredWidth = rightSection.offsetWidth;
+        }
+
+        const containerWidth = container.offsetWidth;
+        const leftWidth = leftSection.offsetWidth;
+        const availableWidth = containerWidth - leftWidth;
+        const threshold = 40; // Buffer space
+        
+        const shouldCollide = availableWidth < (requiredWidth || 300) + threshold;
+        const isMenu = menuList.dataset.actionsLocation === "menu";
+
+        if (shouldCollide && !isMenu) {
+          // Move from toolbar to menu
+          const buttons = rightSection.querySelectorAll('button[data-toolbar-action="true"]');
+          buttons.forEach(btn => {
+            if (!originalInfo.has(btn)) {
+              originalInfo.set(btn, { parent: btn.parentElement, className: btn.className });
+            }
+            const li = document.createElement("li");
+            li.className = "css-11e3c5f-StyledLi e1t5eegs2";
+            li.dataset.toolbarAction = "true";
+            li.setAttribute("role", "menuitem");
+            
+            btn.className = "css-1l6xhu8-StyledMenuItem emlyvnc0";
+            li.appendChild(btn);
+            menuList.insertBefore(li, menuList.firstChild);
+          });
+          menuList.dataset.actionsLocation = "menu";
+        } else if (!shouldCollide && isMenu) {
+          // Restore from menu to toolbar
+          const lis = Array.from(menuList.querySelectorAll('li[data-toolbar-action="true"]')).reverse();
+          lis.forEach(li => {
+            const btn = li.querySelector('button[data-toolbar-action="true"]');
+            if (btn) {
+              const info = originalInfo.get(btn);
+              if (info) {
+                info.parent.appendChild(btn);
+                btn.className = info.className;
+              }
+            }
+            li.remove();
+          });
+          delete menuList.dataset.actionsLocation;
+        }
+      }
+
+      // Execute on load and resize
+      window.addEventListener("load", handleResponsiveActions);
+      window.addEventListener("resize", handleResponsiveActions);
+      
+      // Listen for split view changes from parent
+      window.addEventListener('amboss:splitview-toggled', () => {
+        // Delay measurement slightly to allow CSS transitions/layout to finish
+        setTimeout(handleResponsiveActions, 100);
+      });
+
+      // Also watch for container resize using ResizeObserver if available
+      if (window.ResizeObserver) {
+        const ro = new ResizeObserver(() => handleResponsiveActions());
+        ro.observe(container);
+      }
+    })();
+  </script>
+
+  <script>
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('[data-e2e-test-id="maximize-media-icon"]');
+      if (btn) {
+        const src = document.querySelector('._26c6d085fbfd0c71--mediaViewerTrigger img')?.src;
+        const open = window.openMediaViewer2 || window.parent?.openMediaViewer2;
+        if (src && open) open('mediavisor2.html', [{ src, title: 'Image' }], 0);
+      }
+    });
+
+    // Update Exit Session button visibility when sidebar is toggled
+    (function () {
+      function updateExitButtonVisibility(visible) {
+        const bottomBar = document.querySelector('._940d78d08f86143e--bottomBar');
+        if (bottomBar) {
+          if (visible) {
+            bottomBar.classList.add('_940d78d08f86143e--isNavOpen');
+          } else {
+            bottomBar.classList.remove('_940d78d08f86143e--isNavOpen');
+          }
+        }
+      }
+
+      window.addEventListener('amboss:sidebar-toggled', function (e) {
+        updateExitButtonVisibility(e.detail.visible);
+      });
+
+      // Check initial state
+      const sidebar = document.getElementById('sidebar-wrapper');
+      if (sidebar) {
+        const isVisible = !sidebar.classList.contains('bancomicina-sidebar-hidden');
+        updateExitButtonVisibility(isVisible);
+      }
+    })();
+  </script>
+
+
+  <!-- UI Utilities for Spinner -->
+  <script src="shared/amboss-ui.js"></script>
+  <script>
+    // Initialize spinners if AmbossUI is available
+    if (typeof AmbossUI !== 'undefined' && AmbossUI.initLoadingSpinners) {
+      AmbossUI.initLoadingSpinners();
+    }
+  </script>
+  <script>
+    (function() {
+      window.toggleExplanations = function() {
+        const textSpan = document.getElementById('toggle-explanations-text');
+        if (!textSpan) return;
+        const currentText = textSpan.textContent.trim();
+
+        if (currentText === 'SHOW ANSWER') {
+           const correctContainer = document.querySelector('[data-is-correct="true"]');
+           if (correctContainer) {
+             const letter = correctContainer.getAttribute('data-option-letter');
+             selectAnswer(letter, true, true);
+           }
+        } else if (currentText === 'SHOW ALL EXPLANATIONS') {
+           document.querySelectorAll('.rah-static').forEach(el => {
+             el.style.display = 'block';
+             el.setAttribute('aria-hidden', 'false');
+           });
+        } else if (currentText === 'HIDE ALL EXPLANATIONS') {
+           document.querySelectorAll('.rah-static').forEach(el => {
+             el.style.display = 'none';
+             el.setAttribute('aria-hidden', 'true');
+           });
+        }
+        updateToggleBtnState();
+      };
+
+      window.updateToggleBtnState = function() {
+        const textSpan = document.getElementById('toggle-explanations-text');
+        if (!textSpan) return;
+
+        const correctContainer = document.querySelector('[data-is-correct="true"]');
+        const isCorrectRevealed = correctContainer && (
+            correctContainer.classList.contains('_981f8b48b6542a07--correctAnswer') || 
+            correctContainer.classList.contains('_981f8b48b6542a07--selected')
+        );
+
+        if (!window.hasUserAnswered || !isCorrectRevealed) {
+            textSpan.textContent = 'SHOW ANSWER';
+        } else {
+            const allWrappers = document.querySelectorAll('.rah-static');
+            const totalCount = allWrappers.length;
+            const visibleCount = Array.from(allWrappers).filter(el => el.style.display !== 'none').length;
+            textSpan.textContent = (visibleCount < totalCount) ? 'SHOW ALL EXPLANATIONS' : 'HIDE ALL EXPLANATIONS';
+        }
+      };
+
+      window.resetQuestion = function() {
+        const currentQId = sessionStorage.getItem('currentQuestionId');
+        if (currentQId) {
+          document.querySelectorAll('.rah-static').forEach(el => {
+            el.style.display = 'none';
+            el.setAttribute('aria-hidden', 'true');
+          });
+
+          setTimeout(() => {
+            // Clear selections
+            const sels = JSON.parse(sessionStorage.getItem('userQuestionSelections') || '{}');
+            delete sels[currentQId];
+            sessionStorage.setItem('userQuestionSelections', JSON.stringify(sels));
+
+            // Clear answered state for this question
+            let answered = JSON.parse(sessionStorage.getItem('answeredQuestions') || '[]');
+            if (answered.includes(currentQId)) {
+              let prev = JSON.parse(sessionStorage.getItem('previouslyAnswered') || '[]');
+              if (!prev.includes(currentQId)) { prev.push(currentQId); sessionStorage.setItem('previouslyAnswered', JSON.stringify(prev)); }
+            }
+            sessionStorage.setItem('answeredQuestions', JSON.stringify(answered.filter(id => id !== currentQId)));
+            
+            let statusMap = JSON.parse(sessionStorage.getItem('questionStatusMap') || '{}');
+            delete statusMap[currentQId];
+            sessionStorage.setItem('questionStatusMap', JSON.stringify(statusMap));
+
+            loadQuestion(currentQId);
+          }, 300);
+        }
+      };
+
+      window.updateResetButtonState = function() {
+        const btn = document.getElementById('reset-question-btn');
+        if (btn) {
+          btn.disabled = !window.hasUserAnswered;
+          
+          // Hide button if coming from Analysis
+          if (sessionStorage.getItem('isFromAnalysis') === 'true') {
+            const container = btn.closest('.css-h0nko7-StyledInlineItem');
+            if (container) container.style.display = 'none';
+          }
+        }
+      };
+
+      window.toggleMark = function() {
+        const currentQId = sessionStorage.getItem('currentQuestionId');
+        if (!currentQId) return;
+        
+        let markedQuestions = JSON.parse(sessionStorage.getItem('markedQuestions') || '[]');
+        const isMarked = markedQuestions.includes(currentQId);
+        
+        if (isMarked) {
+          markedQuestions = markedQuestions.filter(id => id !== currentQId);
+        } else {
+          markedQuestions.push(currentQId);
+        }
+        
+        sessionStorage.setItem('markedQuestions', JSON.stringify(markedQuestions));
+        
+        window.dispatchEvent(new CustomEvent('amboss:question-marked', {
+          detail: { questionId: currentQId, isMarked: !isMarked }
+        }));
+      };
+    })();
+  </script>
+
+  <script>
+    (function () {
+      // ========= CONFIG =========
+      const TRIGGER_SEL = '.toolbar-fontsize-btn';
+      const MIN = 0.85;
+      const MAX = 1.15;
+      const STEP = 0.05;
+      const DEFAULT = 1.00;
+
+      const TARGET_ROOT = document.documentElement;
+      const STORAGE_KEY = 'bancomicina_qbank_fontScale';
+
+      let isOpen = false;
+      let currentTrigger = null;
+
+      function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+
+      function getScale() {
+        const saved = Number(localStorage.getItem(STORAGE_KEY));
+        if (Number.isFinite(saved) && saved > 0) return clamp(saved, MIN, MAX);
+        return DEFAULT;
+      }
+
+      function setScale(v) {
+        const scale = clamp(Number(v), MIN, MAX);
+        TARGET_ROOT.style.setProperty('--qbank-font-scale', String(scale));
+        localStorage.setItem(STORAGE_KEY, String(scale));
+        updateUI(scale);
+        if (isOpen && currentTrigger) requestAnimationFrame(() => positionPopover(currentTrigger));
+      }
+
+      // ========= INJECT CSS =========
+      const style = document.createElement('style');
+      style.textContent = `
+        :root { --qbank-font-scale: ${DEFAULT}; }
+
+        /* Scope strictly to QBank main containers to avoid compounding scale on nested spans */
+        ._760ee638b575af4a--questionContent,
+        ._981f8b48b6542a07--answerContent,
+        ._981f8b48b6542a07--explanationContainer,
+        .e0f0c237914d2b33--hintText {
+          font-size: calc(1em * var(--qbank-font-scale)) !important;
+        }
+
+        #qbank-font-size-popover {
+          position: fixed; z-index: 90; background: #fff;
+          border: 1px solid rgba(15, 23, 42, 0.08); border-radius: 6px;
+          box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+          width: 112px; height: 48px; padding: 8px; box-sizing: border-box;
+          opacity: 0; visibility: hidden; pointer-events: none;
+          transition: opacity 0.1s ease, visibility 0.1s ease;
+        }
+        #qbank-font-size-popover.is-visible {
+          opacity: 1; visibility: visible; pointer-events: auto;
+        }
+        .banco-font-controls { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 100%; }
+        .banco-font-btn {
+          width: 32px; height: 32px; border: 0; background: transparent; border-radius: 4px;
+          display: flex; align-items: center; justify-content: center; cursor: pointer; color: #0f172a;
+        }
+        .banco-font-btn:hover:not([disabled]) { background: rgba(15, 23, 42, 0.06); }
+        .banco-font-btn[disabled] { opacity: 0.3; cursor: not-allowed; }
+      `;
+      document.head.appendChild(style);
+
+      // ========= CREATE POPOVER =========
+      const popover = document.createElement('div');
+      popover.id = 'qbank-font-size-popover';
+      popover.innerHTML = `
+        <div class="banco-font-controls">
+          <button data-action="dec" data-e2e-test-id="decrease-font-size-button" type="button" aria-label="Decrease font size" class="banco-font-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" fill="none" viewBox="0 0 16 16" aria-hidden="true">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="bevel" stroke-width="2" d="M4 8h8"></path>
+            </svg>
+          </button>
+
+          <button data-action="rst" data-e2e-test-id="reset-font-size-button" type="button" aria-label="Reset font size" class="banco-font-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+              <path fill="currentColor" fill-rule="evenodd" d="M8.372 13h-2.81l-.596-1.6H2.293L1.697 13H0l2.885-7.75h1.488l2.32 6.231L10.063 3h1.967L16 13h-2.282l-.848-2.134H9.22zM3.63 7.81 4.47 10H2.79zM12.15 9l-1.105-2.73L9.92 9z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+
+          <button data-action="inc" data-e2e-test-id="increase-font-size-button" type="button" aria-label="Increase font size" class="banco-font-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" fill="none" viewBox="0 0 16 16" aria-hidden="true">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="bevel" stroke-width="2" d="M4 8h8M8 4v8"></path>
+            </svg>
+          </button>
+        </div>
+      `;
+      document.body.appendChild(popover);
+
+      function updateUI(scale) {
+        popover.querySelector('[data-action="dec"]').disabled = scale <= MIN;
+        popover.querySelector('[data-action="inc"]').disabled = scale >= MAX;
+        popover.querySelector('[data-action="rst"]').disabled = Math.abs(scale - DEFAULT) < 0.001;
+      }
+
+      function positionPopover(el) {
+        const r = el.getBoundingClientRect();
+        popover.style.top = `${Math.round(r.bottom + 8)}px`;
+        popover.style.left = `${Math.round(r.left + r.width / 2 - 56)}px`;
+      }
+
+      function toggle(el) {
+        if (isOpen) {
+          popover.classList.remove('is-visible');
+          isOpen = false;
+        } else {
+          currentTrigger = el;
+          positionPopover(el);
+          popover.classList.add('is-visible');
+          isOpen = true;
+        }
+      }
+
+      document.addEventListener('click', e => {
+        const trigger = e.target.closest(TRIGGER_SEL);
+        if (trigger) { e.preventDefault(); e.stopPropagation(); toggle(trigger); return; }
+        if (isOpen && !e.target.closest('#qbank-font-size-popover')) { popover.classList.remove('is-visible'); isOpen = false; }
+      }, true);
+
+      popover.addEventListener('click', e => {
+        const btn = e.target.closest('button');
+        if (!btn || btn.disabled) return;
+        const act = btn.dataset.action;
+        if (act === 'dec') setScale(getScale() - STEP);
+        else if (act === 'inc') setScale(getScale() + STEP);
+        else if (act === 'rst') setScale(DEFAULT);
+      });
+
+      setScale(getScale());
+
+      window.addEventListener('resize', () => isOpen && currentTrigger && positionPopover(currentTrigger));
+      window.addEventListener('scroll', () => isOpen && currentTrigger && positionPopover(currentTrigger), true);
+    })();
+  </script>
+</body>
+
+
+
+  <script>
+    // Update Mark Button Icon
+    (function(){
+      const FILLED = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path fill="currentColor" d="M3 10.28s.625-.72 2.5-.72S8.625 11 10.5 11s2.5-.72 2.5-.72V2.72s-.625.72-2.5.72S7.375 2 5.5 2 3 2.72 3 2.72z"></path><path d="M3 15v-5"></path></g></svg>`;
+      const OUTLINE = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10.28s.625-.72 2.5-.72S8.625 11 10.5 11s2.5-.72 2.5-.72V2.72s-.625.72-2.5.72S7.375 2 5.5 2 3 2.72 3 2.72zM3 15v-5"></path></svg>`;
+
+      function updateMarkIcon(isMarked) {
+        const btn = document.querySelector('button[onclick="toggleMark()"]');
+        if (!btn) return;
+        const iconContainer = btn.querySelector('.css-cjtild-StyledIcon');
+        if (iconContainer) {
+           iconContainer.innerHTML = isMarked ? FILLED : OUTLINE;
+        }
+      }
+
+      window.addEventListener('amboss:question-marked', e => updateMarkIcon(e.detail.isMarked));
+      window.addEventListener('amboss:question-loaded', e => {
+         const marked = JSON.parse(sessionStorage.getItem('markedQuestions') || '[]');
+         updateMarkIcon(marked.includes(String(e.detail.questionId)));
+      });
+    })();
+  </script>
+<!-- 10999999 -->

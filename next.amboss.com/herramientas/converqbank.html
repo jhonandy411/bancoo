@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertidor Qbank a JSON</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .input-section {
+            margin-bottom: 2rem;
+        }
+
+        .input-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .input-section textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.875rem;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .input-section textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        button {
+            flex: 1;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .output-section {
+            margin-top: 2rem;
+        }
+
+        .output-section h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .json-output {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .label {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .preview-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .preview-section h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Convertidor Qbank a JSON</h1>
+            <p>Extrae y estructura preguntas del Qbank para Firestore</p>
+        </div>
+
+        <div class="content">
+            <div class="input-section">
+                <label for="htmlInput">Pega aquí el HTML completo de la pregunta del Qbank:</label>
+                <textarea id="htmlInput" placeholder="Pega el HTML de qbanksesion.html aquí..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="procesarHTML()">🔄 Convertir a JSON</button>
+                <button class="btn-secondary" onclick="copiarJSON()">📋 Copiar JSON</button>
+                <button class="btn-secondary" onclick="descargarJSON()">💾 Descargar JSON</button>
+            </div>
+
+            <div id="alertContainer"></div>
+
+            <div class="stats" id="statsContainer" style="display: none;">
+                <div class="stat-card">
+                    <div class="value" id="statOptions">0</div>
+                    <div class="label">Opciones</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value" id="statImages">0</div>
+                    <div class="label">Imágenes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value" id="statLinks">0</div>
+                    <div class="label">Enlaces</div>
+                </div>
+            </div>
+
+            <div class="output-section">
+                <h2>📄 JSON Estructurado</h2>
+                <pre class="json-output" id="jsonOutput">El JSON aparecerá aquí...</pre>
+            </div>
+
+            <div class="preview-section" id="previewSection" style="display: none;">
+                <h3>👁️ Vista Previa de la Pregunta</h3>
+                <div id="questionPreview"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let jsonData = null;
+
+        function mostrarAlerta(mensaje, tipo = 'success') {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${tipo}`;
+            alert.textContent = mensaje;
+            container.innerHTML = '';
+            container.appendChild(alert);
+            setTimeout(() => alert.remove(), 5000);
+        }
+
+        function extraerTextoLimpio(elemento) {
+            if (!elemento) return '';
+            // Clone para no modificar el DOM original
+            const clone = elemento.cloneNode(true);
+            // Remover scripts y estilos
+            clone.querySelectorAll('script, style').forEach(el => el.remove());
+            return clone.textContent.trim();
+        }
+
+        function extraerEnlaces(elemento) {
+            if (!elemento) return [];
+            const enlaces = [];
+            elemento.querySelectorAll('a[href]').forEach(link => {
+                enlaces.push({
+                    texto: link.textContent.trim(),
+                    url: link.getAttribute('href'),
+                    tipo: link.getAttribute('data-type') || 'link',
+                    learningCardId: link.getAttribute('data-learningcard-id') || null
+                });
+            });
+            return enlaces;
+        }
+
+        function extraerImagenes(elemento) {
+            if (!elemento) return [];
+            const imagenes = [];
+            elemento.querySelectorAll('img').forEach(img => {
+                imagenes.push({
+                    src: img.getAttribute('src'),
+                    alt: img.getAttribute('alt') || '',
+                    title: img.getAttribute('title') || ''
+                });
+            });
+            return imagenes;
+        }
+
+        function extraerHTMLContenido(elemento) {
+            if (!elemento) return '';
+            // Clone para limpiar pero mantener estructura HTML
+            const clone = elemento.cloneNode(true);
+            clone.querySelectorAll('script, style').forEach(el => el.remove());
+            return clone.innerHTML.trim();
+        }
+
+        function procesarHTML() {
+            const htmlInput = document.getElementById('htmlInput').value.trim();
+            
+            if (!htmlInput) {
+                mostrarAlerta('Por favor, pega el HTML de la pregunta', 'error');
+                return;
+            }
+
+            try {
+                // Crear un parser temporal
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlInput, 'text/html');
+
+                // Extraer metadata básica
+                const questionData = {
+                    metadata: {
+                        questionNumber: null,
+                        sessionTitle: null,
+                        difficulty: null,
+                        status: null,
+                        extractedAt: new Date().toISOString()
+                    },
+                    questionContent: {
+                        text: '',
+                        textHtml: '',
+                        images: []
+                    },
+                    hint: {
+                        used: false,
+                        text: '',
+                        textHtml: ''
+                    },
+                    options: [],
+                    stats: {
+                        totalOptions: 0,
+                        totalImages: 0,
+                        totalLinks: 0
+                    }
+                };
+
+                // Extraer número de pregunta y título de sesión
+                const sessionTitle = doc.querySelector('[data-testid="session-title"]');
+                if (sessionTitle) {
+                    questionData.metadata.sessionTitle = extraerTextoLimpio(sessionTitle);
+                }
+
+                const questionCount = doc.querySelector('[data-e2e-test-id="sessionQuestionCount"]');
+                if (questionCount) {
+                    const countText = extraerTextoLimpio(questionCount);
+                    const match = countText.match(/(\d+)\/(\d+)/);
+                    if (match) {
+                        questionData.metadata.questionNumber = parseInt(match[1]);
+                        questionData.metadata.totalQuestions = parseInt(match[2]);
+                    }
+                }
+
+                // Extraer dificultad (hammers)
+                const difficultyElement = doc.querySelector('[data-e2e-test-id^="difficulty-hammers"]');
+                if (difficultyElement) {
+                    const difficultyMatch = difficultyElement.getAttribute('data-e2e-test-id').match(/difficulty-hammers-(\d+)/);
+                    if (difficultyMatch) {
+                        questionData.metadata.difficulty = parseInt(difficultyMatch[1]);
+                    }
+                }
+
+                // Extraer contenido de la pregunta
+                const questionArticle = doc.querySelector('article._760ee638b575af4a--questionContent');
+                if (questionArticle) {
+                    questionData.questionContent.text = extraerTextoLimpio(questionArticle);
+                    questionData.questionContent.textHtml = extraerHTMLContenido(questionArticle);
+                }
+
+                // Extraer imagen principal de la pregunta (si existe)
+                const mainImage = doc.querySelector('img[alt*="Second-degree"], img[alt*="atrioventricular"], button[data-e2e-test-id="mini-media-viewer"] img');
+                if (mainImage) {
+                    questionData.questionContent.images.push({
+                        src: mainImage.getAttribute('src'),
+                        alt: mainImage.getAttribute('alt') || '',
+                        title: mainImage.getAttribute('title') || ''
+                    });
+                }
+
+                // Extraer hint si fue usado
+                const hintContainer = doc.querySelector('.e0f0c237914d2b33--hintContainer');
+                if (hintContainer) {
+                    questionData.hint.used = true;
+                    const hintText = hintContainer.querySelector('.e0f0c237914d2b33--hintText');
+                    if (hintText) {
+                        questionData.hint.text = extraerTextoLimpio(hintText);
+                        questionData.hint.textHtml = extraerHTMLContenido(hintText);
+                    }
+                }
+
+                // Extraer opciones de respuesta
+                const answerContainers = doc.querySelectorAll('[data-e2e-test-id="answer-row"]');
+                answerContainers.forEach((answerRow) => {
+                    const container = answerRow.closest('[data-e2e-test-id^="answer-theme-"]');
+                    if (!container) return;
+
+const option = {
+    letter: '',
+    text: '',
+    percentage: null,
+    isCorrect: false,
+    userSelected: false,
+    status: '',
+    explanation: {
+        text: '',
+        textHtml: '',
+        images: [],
+        links: [],
+        relatedArticles: [],
+        linkedArticle: null   // 👈 NUEVO CAMPO
+    }
+};
+
+                    // Extraer letra de la opción
+                    const letterElement = answerRow.querySelector('[data-test-id="CircledCharacter"]');
+                    if (letterElement) {
+                        option.letter = extraerTextoLimpio(letterElement);
+                    }
+
+                    // Extraer texto de la opción
+                    const answerContent = answerRow.querySelector('._981f8b48b6542a07--answerContent');
+                    if (answerContent) {
+                        option.text = extraerTextoLimpio(answerContent);
+                    }
+
+                    // Extraer porcentaje de respuestas
+                    const percentageElement = answerRow.querySelector('[data-testid="answer-stats"]');
+                    if (percentageElement) {
+                        const percentText = extraerTextoLimpio(percentageElement);
+                        option.percentage = percentText;
+                    }
+
+                    // Determinar estado de la respuesta
+                    const themeAttr = container.getAttribute('data-e2e-test-id');
+                    if (themeAttr.includes('userFirstAttemptCorrectWithHint')) {
+                        option.isCorrect = true;
+                        option.userSelected = true;
+                        option.status = 'correctWithHint';
+                    } else if (themeAttr.includes('answerOptionCorrect')) {
+                        option.isCorrect = true;
+                        option.status = 'correct';
+                    } else if (themeAttr.includes('answerOptionIncorrect')) {
+                        option.isCorrect = false;
+                        option.status = 'incorrect';
+                    } else if (themeAttr.includes('userIncorrect')) {
+                        option.isCorrect = false;
+                        option.userSelected = true;
+                        option.status = 'userIncorrect';
+                    }
+
+                    // Extraer explicación
+                    const explanationContainer = container.querySelector('[data-e2e-test-id="answerExplanation"]');
+                    if (explanationContainer) {
+                        const explanationContent = explanationContainer.querySelector('._981f8b48b6542a07--explanationContent');
+                        if (explanationContent) {
+                            option.explanation.text = extraerTextoLimpio(explanationContent);
+                            option.explanation.textHtml = extraerHTMLContenido(explanationContent);
+                            option.explanation.links = extraerEnlaces(explanationContent);
+                        }
+
+                        // Extraer imágenes de la explicación (thumbnails)
+                        const thumbnails = explanationContainer.querySelectorAll('[data-testid="answer-thumbnail"] img');
+                        thumbnails.forEach(img => {
+                            option.explanation.images.push({
+                                src: img.getAttribute('src'),
+                                alt: img.getAttribute('alt') || '',
+                                title: img.getAttribute('title') || ''
+                            });
+                        });
+
+// Extraer artículos relacionados
+const relatedArticle = explanationContainer.querySelector('a[data-e2e-test-id="linked-article"]');
+
+if (relatedArticle) {
+    // 1) Mantener compatibilidad con tu estructura previa
+    option.explanation.relatedArticles.push({
+        text: extraerTextoLimpio(relatedArticle),
+        url: relatedArticle.getAttribute('href')
+    });
+
+    // 2) EXTRAER título real (está en el <span>)
+    const spanTitle = relatedArticle.querySelector('span');
+    const articleTitle = spanTitle
+        ? spanTitle.textContent.trim()
+        : extraerTextoLimpio(relatedArticle);
+
+    // 3) CAMPO NUEVO → exactamente lo que usa tu renderer
+    option.explanation.linkedArticle = {
+        title: articleTitle,
+        url: relatedArticle.getAttribute('href')
+    };
+}
+}
+
+questionData.options.push(option);
+});
+
+                // Calcular estadísticas
+                questionData.stats.totalOptions = questionData.options.length;
+                questionData.stats.totalImages = questionData.questionContent.images.length +
+                    questionData.options.reduce((sum, opt) => sum + opt.explanation.images.length, 0);
+                questionData.stats.totalLinks = questionData.options.reduce((sum, opt) => sum + opt.explanation.links.length, 0);
+
+                // Guardar y mostrar resultados
+                jsonData = questionData;
+                const jsonString = JSON.stringify(questionData, null, 2);
+                document.getElementById('jsonOutput').textContent = jsonString;
+
+                // Actualizar estadísticas
+                document.getElementById('statsContainer').style.display = 'grid';
+                document.getElementById('statOptions').textContent = questionData.stats.totalOptions;
+                document.getElementById('statImages').textContent = questionData.stats.totalImages;
+                document.getElementById('statLinks').textContent = questionData.stats.totalLinks;
+
+                // Mostrar vista previa
+                mostrarVistaPrevia(questionData);
+
+                mostrarAlerta('✅ Conversión exitosa! JSON generado correctamente', 'success');
+
+            } catch (error) {
+                console.error('Error al procesar HTML:', error);
+                mostrarAlerta('❌ Error al procesar el HTML: ' + error.message, 'error');
+            }
+        }
+
+        function mostrarVistaPrevia(data) {
+            const previewSection = document.getElementById('previewSection');
+            const previewContainer = document.getElementById('questionPreview');
+            
+            let html = `
+                <div style="padding: 1rem; background: white; border-radius: 8px;">
+                    <h4 style="color: #667eea; margin-bottom: 1rem;">
+                        Pregunta ${data.metadata.questionNumber || '?'} de ${data.metadata.totalQuestions || '?'}
+                    </h4>
+                    <p style="margin-bottom: 1rem;"><strong>Dificultad:</strong> ${'⚒️'.repeat(data.metadata.difficulty || 0)}</p>
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <p>${data.questionContent.text.substring(0, 200)}...</p>
+                    </div>
+                    ${data.hint.used ? `
+                        <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #ffc107;">
+                            <strong>💡 Hint usado:</strong>
+                            <p style="margin-top: 0.5rem;">${data.hint.text.substring(0, 150)}...</p>
+                        </div>
+                    ` : ''}
+                    <div style="margin-top: 1rem;">
+                        <strong>Opciones:</strong>
+                        <ul style="margin-top: 0.5rem; list-style: none; padding: 0;">
+                            ${data.options.map(opt => `
+                                <li style="padding: 0.5rem; margin: 0.5rem 0; border-left: 4px solid ${
+                                    opt.isCorrect ? '#28a745' : opt.userSelected ? '#dc3545' : '#6c757d'
+                                }; background: #f8f9fa;">
+                                    <strong>${opt.letter}.</strong> ${opt.text}
+                                    ${opt.isCorrect ? ' ✓' : ''}
+                                    ${opt.percentage ? ` (${opt.percentage})` : ''}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            previewContainer.innerHTML = html;
+            previewSection.style.display = 'block';
+        }
+
+        function copiarJSON() {
+            if (!jsonData) {
+                mostrarAlerta('Primero debes convertir el HTML', 'error');
+                return;
+            }
+
+            const jsonString = JSON.stringify(jsonData, null, 2);
+            navigator.clipboard.writeText(jsonString).then(() => {
+                mostrarAlerta('✅ JSON copiado al portapapeles', 'success');
+            }).catch(err => {
+                mostrarAlerta('❌ Error al copiar: ' + err.message, 'error');
+            });
+        }
+
+        function descargarJSON() {
+            if (!jsonData) {
+                mostrarAlerta('Primero debes convertir el HTML', 'error');
+                return;
+            }
+
+            const jsonString = JSON.stringify(jsonData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `question_${jsonData.metadata.questionNumber || 'unknown'}_${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            mostrarAlerta('✅ JSON descargado exitosamente', 'success');
+        }
+    </script>
+</body>
+</html>

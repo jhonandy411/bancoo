@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Search Autocomplete</title>
+    <link rel="stylesheet" href="amboss-clone.css">
+
+    <style>
+        /* VARIABLES */
+        :root {
+            --font-family: Lato, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --color-text-primary: #1a1c1c;
+            --color-text-secondary: #5a7183;
+            --color-bg-app: #f2f3f5;
+            --color-bg-surface: #ffffff;
+            --color-border: #e0e6eb;
+            --color-icon: #5a7183;
+            --radius-md: 8px;
+            --color-brand-teal: #047a88;
+            /* Approximate AMBOSS teal */
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: var(--font-family);
+            background: rgba(31, 41, 55, 0.4);
+            color: var(--color-text-primary);
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding-top: 10vh;
+            gap: 16px;
+        }
+
+        /* === SEARCH INPUT CONTAINER === */
+        .search-input-container {
+            width: 747px;
+            min-height: 102px;
+            background: white;
+            border-radius: 12px;
+            padding: 10px 0 10px 24px;
+            /* 👈 Right padding removed for scrollbar edge */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Top Row: Input and Clear Button */
+        .input-row {
+            display: flex;
+            align-items: flex-start;
+            /* clave para que crezca */
+            width: 100%;
+            min-height: 40px;
+            max-height: 120px;
+            position: relative;
+            /* 👈 Anchors the absolute clear button */
+        }
+
+        .search-input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            resize: none;
+            overflow-y: auto;
+            /* 👈 scroll cuando llega al max */
+            line-height: 1.4;
+            color: #374151;
+            font-family: inherit;
+            background: transparent;
+            padding-right: 40px;
+            /* 👈 Padding to avoid text going under absolute button */
+            max-height: 120px;
+            /* 👈 mismo tope que el contenedor */
+        }
+
+        /* Custom Scrollbar for Search Input */
+        .search-input::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .search-input::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .search-input::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .search-input::-webkit-scrollbar-thumb:hover {
+            background-color: #94a3b8;
+        }
+
+        .search-input::placeholder {
+            color: #7d8b99;
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        .clear-btn {
+            position: absolute;
+            /* 👈 Taken out of flow */
+            right: 20px;
+            /* 👈 Approx position from right */
+            top: 2px;
+            /* 👈 Align top */
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #5a7183;
+            padding: 0;
+            display: none; /* 👈 Hidden by default */
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .clear-btn:hover {
+            color: #1a1c1c;
+        }
+
+        .clear-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Bottom: Submit Button (Absolute Positioned) */
+        .submit-btn {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: var(--color-brand-teal);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .submit-btn:hover {
+            background-color: #03606b;
+        }
+
+        .submit-btn svg {
+            width: 16px;
+            height: 16px;
+            color: white;
+            stroke-width: 3;
+        }
+
+
+        /* === RESULTS LIST === */
+        .results-container {
+            width: 747px;
+            background-color: #ebf0f4;
+            border-radius: var(--radius-md);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border: 4px solid white;
+        }
+
+        .section-header {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin: 4px 0 4px 12px;
+            line-height: 1.5;
+        }
+
+        .list-group {
+            background-color: var(--color-bg-surface);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            background: #fff;
+            border: none;
+            width: 100%;
+            text-align: left;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .list-item:hover {
+            background-color: #f3f6f8;
+        }
+
+        .list-item:not(:last-child) {
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .icon {
+            flex-shrink: 0;
+            width: 16px;
+            height: 16px;
+            color: var(--color-icon);
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-right {
+            margin-right: 0;
+            margin-left: auto;
+            color: var(--color-icon);
+        }
+
+        .item-text {
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #0f1317;
+            font-weight: 400;
+        }
+
+        .item-text b {
+            font-weight: 700;
+            color: #0f1317;
+        }
+
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+            font-size: 11px;
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        .shortcut {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .shortcut span.key {
+            font-weight: 700;
+            color: #3e4e5e;
+        }
+
+        @font-face {
+            font-family: Lato;
+            font-weight: 400;
+            font-style: normal;
+            src: local("Lato-Regular"), local("Lato Regular");
+        }
+
+
+
+
+
+
+
+
+
+
+
+        /* DARK MODE */
+        html.isDarkmodeActive body { background: rgba(0,0,0,0.6); }
+        html.isDarkmodeActive .search-input-container { background: #1a1c1c; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); }
+        html.isDarkmodeActive .search-input { color: #ffffff; }
+        html.isDarkmodeActive .search-input::placeholder { color: #5a7183; }
+        html.isDarkmodeActive .search-input::-webkit-scrollbar-thumb { background-color: #4b5563; }
+        html.isDarkmodeActive .results-container { background-color: #242729; border-color: #1a1c1c; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); }
+        html.isDarkmodeActive .list-item { background: #1a1c1c; color: #e0e0e0; }
+        html.isDarkmodeActive .list-item:hover { background-color: #2c2e30; }
+        html.isDarkmodeActive .list-item:not(:last-child) { border-bottom-color: #242729; }
+        html.isDarkmodeActive .item-text, html.isDarkmodeActive .item-text b { color: #e0e0e0; }
+        html.isDarkmodeActive .section-header { color: #8a9ba8; }
+        html.isDarkmodeActive .footer { color: #8a9ba8; }
+        html.isDarkmodeActive .shortcut span.key { color: #cbd5e1; }
+        html.isDarkmodeActive .list-item.active { background-color: #2c2e30; }
+    </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+            authDomain: "bancomicina-62bfe.firebaseapp.com",
+            projectId: "bancomicina-62bfe",
+            storageBucket: "bancomicina-62bfe.appspot.com",
+            messagingSenderId: "737254665977",
+            appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        async function saveToHistory(texto, type = 'magnify') {
+            const user = firebase.auth().currentUser;
+            if (user && texto) {
+                const coll = db.collection('users').doc(user.uid).collection('historial');
+                const snap = await coll.where('texto', '==', texto).get();
+                if (!snap.empty) {
+                    snap.docs[0].ref.update({
+                        fecha: firebase.firestore.FieldValue.serverTimestamp(),
+                        type: type
+                    });
+                } else {
+                    coll.add({
+                        texto: texto,
+                        type: type,
+                        fecha: firebase.firestore.FieldValue.serverTimestamp()
+                    }).catch(e => console.error("Error saving history:", e));
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+
+    <!-- INPUT BAR -->
+    <div class="search-input-container active">
+        <div class="input-row">
+            <textarea class="search-input" placeholder="Find AMBOSS content" rows="2" maxlength="300" autofocus></textarea>
+
+            <!-- Clear Search Button (X) -->
+            <button class="clear-btn" type="button" aria-label="Clear search">
+                <svg xmlns="http://www.w3.org/2000/svg"
+     width="16" height="16"
+     viewBox="0 0 16 16"
+     fill="none"
+     style="width:16px;height:16px;min-width:16px;min-height:16px;max-width:16px;max-height:16px;">
+  <path fill="currentColor" fill-rule="evenodd"
+        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m3.707-11.707a1 1 0 0 1 0 1.414L9.414 8l2.293 2.293a1 1 0 0 1-1.414 1.414L8 9.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L6.586 8 4.293 5.707a1 1 0 0 1 1.414-1.414L8 6.586l2.293-2.293a1 1 0 0 1 1.414 0"
+        clip-rule="evenodd"/>
+</svg>
+            </button>
+        </div>
+
+        <!-- Submit Search Button (Arrow) -->
+        <button class="submit-btn" aria-label="Search">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- RESULTS LIST -->
+    <div class="results-container active">
+        <div>
+            <div class="section-header">Go to</div>
+            <div class="list-group" id="go-to-list">
+                <div class="list-item">
+                    <div class="icon">
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                            <path fill="currentColor" fill-rule="evenodd"
+                                d="M3 2h10v12H3zM1 2a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2zm10 4H5V4h6zM5 9h4V7H5zm0 3h5v-2H5z"
+                                clip-rule="evenodd"></path>
+
+                        </svg>
+
+
+
+                    </div>
+                    <div class="item-text"> </div>
+                    <div class="icon icon-right"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                            fill="none" viewBox="0 0 16 16">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m6 12 4-4-4-4" />
+                        </svg></div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-header">Search for</div>
+            <div class="list-group" id="search-for-list">
+                <div class="list-item">
+                    <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            viewBox="0 0 16 16">
+                            <path
+                                d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+                        </svg></div>
+                    <div class="item-text"> </div>
+                </div>
+               
+
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="shortcut"><span class="key">⌘K</span> Open</div>
+            <div class="shortcut"><span class="key">↑↓</span> Navigate suggestions</div>
+            <div class="shortcut"><span class="key">Space</span> Use suggestion</div>
+            <div class="shortcut"><span class="key">Enter</span> Submit</div>
+        </div>
+
+    </div>
+
+
+    <script>
+        const ta = document.querySelector('.search-input');
+        const clearBtn = document.querySelector('.clear-btn');
+        const submitBtn = document.querySelector('.submit-btn');
+        const goToList = document.getElementById('go-to-list');
+        const searchForList = document.getElementById('search-for-list');
+
+        function updateClearBtn() {
+            clearBtn.style.display = ta.value.length > 0 ? 'flex' : 'none';
+        }
+
+        function createListItem(text, iconType = 'book') {
+            const iconHtml = iconType === 'book' ? 
+                `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                    <path fill="currentColor" fill-rule="evenodd" d="M3 2h10v12H3zM1 2a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2zm10 4H5V4h6zM5 9h4V7H5zm0 3h5v-2H5z" clip-rule="evenodd"></path>
+                </svg>` :
+                `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
+                </svg>`;
+
+            const rightIcon = iconType === 'book' ? 
+                `<div class="icon icon-right">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 12 4-4-4-4"></path>
+                    </svg>
+                </div>` : '';
+
+            return `
+                <div class="list-item">
+                    <div class="icon">${iconHtml}</div>
+                    <div class="item-text">${text}</div>
+                    ${rightIcon}
+                </div>`;
+        }
+
+        let lastSuccessfulSubDocs = [];
+        let lastSuccessfulExplanationDocs = [];
+        let subcategoriesCache = [];
+        let explanationCacheList = [];
+
+        async function initSearchCache() {
+            try {
+                const [subSnap, explanationSnap] = await Promise.all([
+                    db.collectionGroup('subcategorias').get(),
+                    db.collection('bancoexplanation').get()
+                ]);
+                subcategoriesCache = subSnap.docs.map(doc => ({ id: doc.id, docPath: doc.ref.path, ...doc.data() }));
+                explanationCacheList = explanationSnap.docs.map(doc => {
+                    const data = doc.data() || {};
+                    return {
+                        id: doc.id,
+                        ...data,
+                        title: data.headerTitle || data.text || data.title || doc.id
+                    };
+                });
+                console.log("Caches initialized.");
+            } catch (e) {
+                console.error("Error initializing caches:", e);
+            }
+        }
+
+        const getTitle = d => d.nombre || d.titulo || d.title || d.denominacion || d.id;
+        const getExplanationText = d => String(d?.text || '').trim();
+        const getExplanationTitle = d => d?.title || d?.headerTitle || d?.text || d?.id || '';
+        const findExplanationMatch = query =>
+            explanationCacheList.find(d => getExplanationText(d).toLowerCase().includes(query));
+        const filterExplanationMatches = query =>
+            explanationCacheList.filter(d => getExplanationText(d).toLowerCase().includes(query));
+
+        let lastSubQuery = "";
+        let lastPhrasQuery = "";
+
+        function submitSearch(term, dataObj = null) {
+             saveToHistory(term, 'magnify');
+             const data = dataObj || { title: term, id: term };
+             sessionStorage.setItem('amboss_search_data', JSON.stringify(data));
+             sessionStorage.setItem('amboss_search_query', term);
+
+             if (parent.loadMainContent) {
+                 parent.loadMainContent('results2.html');
+                 const overlay = parent.document.getElementById('sovl');
+                 if(overlay) overlay.style.display = 'none';
+             }
+        }
+
+        async function performSearch(query) {
+            query = query.trim().toLowerCase();
+            const displayQuery = ta.value.trim(); // Keep original case for display if needed, or just use query
+
+            if (!query) {
+                lastSuccessfulSubDocs = []; lastSuccessfulExplanationDocs = [];
+                lastSubQuery = ""; lastPhrasQuery = "";
+                
+                const gHeader = goToList.parentElement.querySelector('.section-header');
+                if(gHeader) gHeader.textContent = 'SEARCH HISTORY';
+                
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    db.collection('users').doc(user.uid).collection('historial')
+                        .orderBy('fecha', 'desc').limit(5).get().then(snap => {
+                            if (snap.empty) {
+                                goToList.innerHTML = createListItem('No history yet', 'magnify');
+                                return;
+                            }
+                            goToList.innerHTML = snap.docs.map(doc => createListItem(doc.data().texto, doc.data().type || 'magnify')).join('');
+                            Array.from(goToList.children).forEach((el, i) => {
+                                const d = snap.docs[i].data();
+                                el.onclick = () => {
+                                    if (d.type === 'book') {
+                                        const found = subcategoriesCache.find(s => getTitle(s) === d.texto);
+                                        if (found && parent.showSubcatFromArticles) {
+                                            parent.showSubcatFromArticles(found);
+                                            const ov = parent.document.getElementById('sovl');
+                                            if(ov) ov.style.display = 'none';
+                                            return;
+                                        }
+                                    }
+                                    ta.value = d.texto;
+                                    const q = d.texto.toLowerCase();
+                                    const matched = findExplanationMatch(q);
+                                    submitSearch(d.texto, matched);
+                                };
+                            });
+                        });
+                } else {
+                    goToList.innerHTML = createListItem('Sign in to see history', 'magnify');
+                }
+
+                searchForList.parentElement.style.display = 'none';
+                goToList.parentElement.style.display = 'block';
+                return;
+            }
+
+            const gHeader = goToList.parentElement.querySelector('.section-header');
+            if(gHeader) gHeader.textContent = 'Go to';
+            searchForList.parentElement.style.display = 'block';
+
+            let subDocs = subcategoriesCache.filter(s => getTitle(s).toLowerCase().includes(query));
+            let phrasionaryDocs = filterExplanationMatches(query);
+
+            // Persistence logic remains same
+            if (subDocs.length > 0) {
+                lastSuccessfulSubDocs = subDocs;
+                lastSubQuery = query;
+            } else if (lastSuccessfulSubDocs.length > 0 && query.length - lastSubQuery.length <= 3 && query.startsWith(lastSubQuery)) {
+                subDocs = lastSuccessfulSubDocs;
+            } else {
+                lastSuccessfulSubDocs = [];
+                lastSubQuery = "";
+            }
+
+            if (phrasionaryDocs.length > 0) {
+                lastSuccessfulExplanationDocs = phrasionaryDocs;
+                lastPhrasQuery = query;
+            } else if (lastSuccessfulExplanationDocs.length > 0 && query.length - lastPhrasQuery.length <= 3 && query.startsWith(lastPhrasQuery)) {
+                phrasionaryDocs = lastSuccessfulExplanationDocs;
+            } else {
+                lastSuccessfulExplanationDocs = [];
+                lastPhrasQuery = "";
+            }
+
+            // Render Go to
+            if (subDocs.length === 0) {
+                goToList.parentElement.style.display = 'none';
+            } else {
+                goToList.parentElement.style.display = 'block';
+                subDocs.sort((a,b) => getTitle(a).localeCompare(getTitle(b)));
+                const items = subDocs.slice(0, 5);
+                goToList.innerHTML = items.map(d => createListItem(getTitle(d), 'book')).join('');
+                Array.from(goToList.children).forEach((el, i) => {
+                    el.onclick = () => {
+                        saveToHistory(getTitle(items[i]), 'book');
+                        if (parent.showSubcatFromArticles) {
+                            parent.showSubcatFromArticles(items[i]);
+                            const overlay = parent.document.getElementById('sovl');
+                            if(overlay) overlay.style.display = 'none';
+                        }
+                    };
+                });
+            }
+
+            // Render Search for
+            if (phrasionaryDocs.length === 0) {
+                // FALLBACK: Show current input
+                searchForList.innerHTML = createListItem(displayQuery, 'magnify');
+                searchForList.firstElementChild.onclick = () => submitSearch(displayQuery);
+            } else {
+                phrasionaryDocs.sort((a,b) => getExplanationTitle(a).localeCompare(getExplanationTitle(b)));
+                const items = phrasionaryDocs.slice(0, 8);
+                searchForList.innerHTML = items.map(d => createListItem(getExplanationTitle(d), 'magnify')).join('');
+                Array.from(searchForList.children).forEach((el, index) => {
+                    el.onclick = () => submitSearch(getExplanationTitle(items[index]), items[index]);
+                });
+            }
+        }
+
+        // Init
+        updateClearBtn();
+        initSearchCache();
+
+        let currentUserInput = '';
+        ta.addEventListener('input', () => {
+             currentUserInput = ta.value;
+             ta.style.height = 'auto';
+             ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+             updateClearBtn();
+             performSearch(ta.value);
+        });
+
+        clearBtn.addEventListener('click', () => {
+            ta.value = '';
+            currentUserInput = '';
+            updateClearBtn();
+            ta.style.height = 'auto';
+            performSearch('');
+        });
+        
+        // Submit button handler
+        if(submitBtn) {
+            submitBtn.addEventListener('click', () => {
+                const val = ta.value.trim();
+                if(!val) return;
+                
+                const query = val.toLowerCase();
+                const matchedTerm = findExplanationMatch(query);
+                
+                if(matchedTerm) {
+                    submitSearch(getExplanationTitle(matchedTerm), matchedTerm);
+                } else {
+                    submitSearch(val);
+                }
+            });
+        }
+
+        // Focus listener
+        window.addEventListener('message', (e) => {
+            if (e.data === 'focus-search') {
+                ta.select();
+            }
+        });
+
+        // Keyboard Navigation
+        ta.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                const allItems = [];
+                if (goToList.parentElement.style.display !== 'none') {
+                    allItems.push(...goToList.querySelectorAll('.list-item'));
+                }
+                if (searchForList.parentElement.style.display !== 'none') {
+                    allItems.push(...searchForList.querySelectorAll('.list-item'));
+                }
+
+                if (allItems.length === 0) return;
+
+                let currentIndex = allItems.findIndex(item => item.classList.contains('active'));
+                if (currentIndex !== -1) allItems[currentIndex].classList.remove('active');
+
+                if (e.key === 'ArrowDown') {
+                    currentIndex = (currentIndex + 1) % allItems.length;
+                } else {
+                    currentIndex = (currentIndex - 1 + allItems.length) % allItems.length;
+                }
+
+                allItems[currentIndex].classList.add('active');
+                allItems[currentIndex].scrollIntoView({ block: 'nearest' });
+                
+                const newText = allItems[currentIndex].querySelector('.item-text').textContent.trim();
+                ta.value = newText;
+                
+                // Select the suffix part if it matches prefix
+                if (currentUserInput && newText.toLowerCase().startsWith(currentUserInput.toLowerCase())) {
+                    ta.setSelectionRange(currentUserInput.length, newText.length);
+                }
+
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const activeItem = document.querySelector('.list-item.active');
+                if (activeItem) {
+                    activeItem.click();
+                } else {
+                    // If no item selected, use same logic as submit button
+                    const val = ta.value.trim();
+                    if(!val) return;
+                    
+                    const query = val.toLowerCase();
+                    const matchedTerm = findExplanationMatch(query);
+                    
+                    if(matchedTerm) {
+                        submitSearch(getExplanationTitle(matchedTerm), matchedTerm);
+                    } else {
+                        submitSearch(val);
+                    }
+                }
+            } else if (e.key === ' ' && document.querySelector('.list-item.active')) {
+                // Confirm suggestion by moving cursor to end, allowing space to be appended naturally
+                ta.selectionStart = ta.selectionEnd = ta.value.length;
+            }
+        });
+
+        // Add CSS for active state
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .list-item.active { background-color: #f3f6f8; }
+        `;
+        document.head.appendChild(style);
+
+        // Initial focus and view
+        ta.select();
+        firebase.auth().onAuthStateChanged(() => performSearch(''));
+
+
+
+
+
+
+        
+
+
+    </script>
+
+
+
+
+<script src="global-shortcuts.js"></script>
+</body>
+
+</html>

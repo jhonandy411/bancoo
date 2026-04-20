@@ -1,0 +1,308 @@
+
+  <style>
+    :root {
+      --color-background-primary: #ffffff;
+      --color-background-secondary: #f6f8fb;
+      --color-divider-primary: #dde4ee;
+      --color-text-primary: #556579;
+      --color-text-secondary: #8a98aa;
+      --font-family-primary: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-family-primary);
+      font-weight: 400;
+      color: var(--color-text-primary);
+      background: var(--color-background-primary);
+    }
+
+    .page-shell {
+      width: min(1320px, calc(100% - 32px));
+      max-width: 1056px !important;
+      margin: 28px auto 48px;
+    }
+
+    .header {
+      margin-bottom: 28px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.05;
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 22px 18px;
+    }
+
+    .catalog-grid .calculator-card,
+    .catalog-grid .css-vy4fov-StyledButton,
+    .catalog-grid .css-bkwbtj-StackContainer,
+    .catalog-grid .css-1mpk5ch-StackItem,
+    .catalog-grid .css-10ts8ay-StackItem {
+      width: 100%;
+    }
+
+    .catalog-grid .css-vy4fov-StyledButton {
+      align-items: stretch;
+      text-align: left;
+      color: inherit;
+      min-width: 140px;
+      max-width: 180px;
+      transition: transform 180ms ease, filter 180ms ease;
+    }
+
+    .catalog-grid .css-vy4fov-StyledButton:hover {
+      transform: translateY(-4px);
+      filter: saturate(1.05);
+    }
+
+    .catalog-grid .css-12v0wto-StyledMediaContainer {
+      border-radius: 6px;
+    }
+
+    .catalog-grid .css-10ts8ay-StackItem {
+      margin-top: 10px;
+    }
+
+    .card-meta-line {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+    }
+
+    .card-meta-line svg {
+      flex: 0 0 15px;
+    }
+
+    .catalog-grid .css-16ql1mi-StyledText-StyledTextClamped {
+      margin: 0;
+      font-size: 1.02rem;
+      line-height: 1.35;
+      color: var(--color-text-primary);
+      font-weight: 400;
+      -webkit-line-clamp: 4;
+    }
+
+    .hidden-card {
+      display: none !important;
+    }
+
+    .actions {
+      display: flex;
+      width: 100%;
+      margin-top: 30px;
+    }
+
+    .show-more {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 20px;
+      border: 1px solid var(--color-divider-primary);
+      border-radius: 4px;
+      background: var(--color-background-secondary);
+      color: var(--color-text-primary);
+      font: inherit;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+    }
+
+    .show-more:hover {
+      background: #eef2f6;
+      border-color: #d5dee8;
+    }
+
+    .show-more[hidden] {
+      display: none;
+    }
+
+    @media (max-width: 803px) {
+      .catalog-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 619px) {
+      .catalog-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page-shell {
+        width: min(100% - 18px, 1320px);
+        margin: 12px auto 32px;
+      }
+
+      .catalog-grid {
+        gap: 18px 14px;
+      }
+    }
+
+    @media (max-width: 465px) {
+      .catalog-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 311px) {
+      .catalog-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+<body>
+  <main class="page-shell">
+    <section class="header">
+      <div class="header-copy">
+        <h1>Calculators (173)</h1>
+      </div>
+    </section>
+
+    <section class="catalog-grid" id="catalogGrid" aria-label="Calculators"></section>
+
+    <div class="actions">
+      <button class="show-more" id="showMoreButton" type="button">
+        <span>Show more</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16" aria-hidden="true">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 6 4 4 4-4" />
+        </svg>
+      </button>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+    if (!window.firebase) return;
+
+    const localFirebaseConfig = {
+      apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+      authDomain: "bancomicina-62bfe.firebaseapp.com",
+      projectId: "bancomicina-62bfe",
+      storageBucket: "bancomicina-62bfe.appspot.com",
+      messagingSenderId: "737254665977",
+      appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(localFirebaseConfig);
+    }
+
+    const db = window.db || firebase.firestore();
+    let calculators = [];
+
+    const grid = document.getElementById("catalogGrid");
+    const showMoreButton = document.getElementById("showMoreButton");
+    if (!grid || !showMoreButton) return;
+    const batchSize = 20;
+    let shownItems = 0;
+
+    const calculatorIcon = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path stroke="currentColor" stroke-width="2" d="M2 2a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"></path>
+        <g fill="currentColor">
+          <path fill-rule="evenodd" d="M4 6a1 1 0 1 1 2 0 1 1 0 0 1-2 0m6 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0M8 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2m3 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2M8 5a1 1 0 1 0 0 2 1 1 0 0 0 0-2M5 8a1 1 0 1 0 0 2 1 1 0 0 0 0-2m5 4a1 1 0 1 1 2 0 1 1 0 0 1-2 0m-5-1a1 1 0 1 0 0 2h3a1 1 0 1 0 0-2z" clip-rule="evenodd"></path>
+          <path d="M2 1h12v3H2z"></path>
+        </g>
+      </svg>
+    `;
+
+    function buildCard({ title, image }, index) {
+      const hiddenClass = index >= batchSize ? " hidden-card" : "";
+      return `
+        <button data-ds-id="MediaItem" data-index="${index}" class="css-vy4fov-StyledButton calculator-card${hiddenClass}" type="button" aria-label="${title}">
+          <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+            <div class="css-1mpk5ch-StackItem e7wwwvf1">
+              <div class="css-12v0wto-StyledMediaContainer e1xoxf6f4">
+                <div class="css-1ax134j-StyledMedia e1xoxf6f1">
+                  <picture data-ds-id="Image">
+                    <img src="${image}" alt="${title}" title="${title}" width="100%" height="100%" aria-hidden="true" loading="lazy" class="css-1goz906-StyledImg esvv5850" />
+                  </picture>
+                </div>
+                <div class="css-gfkulu-StyledOverlay e1xoxf6f2"></div>
+              </div>
+            </div>
+            <div class="css-10ts8ay-StackItem">
+              <div class="card-meta-line css-mgid52-InlineContainer e6i75dx0">
+                <div class="css-h0nko7-StyledInlineItem e6i75dx1">${calculatorIcon}</div>
+                <div class="css-h0nko7-StyledInlineItem e6i75dx1"><span>Calculator</span></div>
+              </div>
+              <p class="css-16ql1mi-StyledText-StyledTextClamped">${title}</p>
+            </div>
+          </div>
+        </button>
+      `;
+    }
+
+    function updateStatus() {
+      showMoreButton.hidden = shownItems >= calculators.length;
+    }
+
+    function showLoadingState() {
+      grid.innerHTML = '<div style="grid-column: 1 / -1; padding: 40px; text-align: center;"><span data-loading-spinner data-size="40"></span></div>';
+      showMoreButton.hidden = true;
+      if (window.AmbossUI && window.AmbossUI.initLoadingSpinners) {
+        window.AmbossUI.initLoadingSpinners();
+      }
+    }
+
+    function revealMore() {
+      const cards = [...document.querySelectorAll(".calculator-card.hidden-card")];
+      cards.slice(0, batchSize).forEach((card) => card.classList.remove("hidden-card"));
+      shownItems = document.querySelectorAll(".calculator-card:not(.hidden-card)").length;
+      updateStatus();
+    }
+
+    showMoreButton.addEventListener("click", revealMore);
+    grid.addEventListener("click", (e) => {
+      const btn = e.target.closest(".calculator-card");
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const currentIndex = Number(btn.getAttribute("data-index") || 0);
+      const opener = window.parent?.openMediaViewer2 || window.openMediaViewer2;
+      if (!opener) return;
+      const gallery = calculators.map((item) => ({ type: "image", src: item.image, title: item.title, href: item.href || "", description: item.description || "" }));
+      opener("mediavisor2.html", gallery, currentIndex);
+    });
+
+    async function loadCalculators() {
+      showLoadingState();
+      const snapshot = await db.collection("bancocalc").orderBy("index").get();
+      calculators = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          title: data.titulo || "",
+          image: data.thumbnailSrc || "",
+          href: data.href || "",
+          description: data.viewerAbstract || ""
+        };
+      });
+
+      grid.innerHTML = calculators.map(buildCard).join("");
+      shownItems = Math.min(batchSize, calculators.length);
+      updateStatus();
+    }
+
+    loadCalculators().catch(console.error);
+    })();
+  </script>
+</body>

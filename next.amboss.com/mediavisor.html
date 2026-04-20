@@ -1,0 +1,1090 @@
+
+
+
+<link rel="stylesheet" href="amboss-clone.css">
+
+<style>
+/* ===== LAYOUT GENERAL EXACTO (como captura) ===== */
+html, body { height: 100%; margin: 0; }
+body { overflow: hidden; }
+
+/* NAV arriba + layout abajo */
+.media-viewer-shell{
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 56px 1fr; /* barra superior como Amboss */
+  min-height: 0;
+}
+
+/* Sidebar + contenido */
+.media-viewer-layout{
+  height: 100%;
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  min-height: 0;
+}
+
+/* Sidebar scrolleable */
+._4a059b1ad835e912--container{
+  min-height: 0;
+  overflow: auto;
+  background: #1f232a; /* oscuro */
+}
+
+/* Columna derecha: IMPORTANTÍSIMO (referencia para bottom bar) */
+._21c86b6a1014ea14--content{
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative; /* <- bottom bar absolute se ancla acá */
+  background: #f6f7f9;
+}
+
+/* Stage ocupa lo disponible */
+#viewer-zoom-root{
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 24px;
+  padding-bottom: calc(24px + 140px); /* deja lugar para la bar (como captura) */
+  background: #f6f7f9;
+}
+
+/* NO anules el transform globalmente si querés zoom real.
+   En su lugar: hacemos que el contenido "base" escale bien. */
+#viewer-zoomable-image{
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Contenedor del “paper” blanco */
+#viewer-zoomable-image [data-e2e-test-id="fullscreen-image"]{
+  width: auto !important;
+  height: auto !important;
+  max-width: min(1100px, 100%);
+  max-height: 100%;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(0,0,0,.12);
+}
+
+/* SVG/IMG: contain */
+#viewer-zoomable-image svg,
+#viewer-zoomable-image img{
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+}
+
+/* ===== BOTTOM BAR: pegada al fondo, SOLO UNA ===== */
+.css-i2j9hs-StyledBottomBar{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 140px;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+/* contenedor central */
+.css-a0zhv4-StyledWrapper{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 2;
+}
+
+/* flechas */
+.css-1s7vfcv-StyledButton{
+  background: rgba(0,0,0,.35);
+  border-radius: 999px;
+  width: 40px;
+  height: 40px;
+}
+
+/* thumbnails */
+.css-1dplf75-StyledOuterContainer{ overflow: hidden; max-width: 520px; }
+.css-1w6q99v-StyledInnerContainer{ display: flex; gap: 12px; }
+
+.css-1mwt45n-StyledThumbnail{
+  width: 72px;
+  height: 96px;
+  border-radius: 12px;
+  background: #fff;
+  padding: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}
+
+.css-pqw2-StyledMediaContainer{ border-radius: 10px; overflow: hidden; }
+.css-1goz906-StyledImg{ object-fit: cover; }
+
+/* chevron */
+.css-fhifl-StyledToggleButtonContainer{
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.css-tvsuf5-StyledToggleButton{
+  background: rgba(40,44,52,.9);
+  border-radius: 999px;
+  width: 36px;
+  height: 36px;
+}
+
+
+
+
+
+
+</style>
+
+
+
+<nav class="_263b2693457a5c12--container" data-e2e-test-id="media-viewer-nav">
+  <div data-ds-id="Inline" class="css-1isf9yl-InlineContainer e6i75dx0">
+    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+      <div data-ds-id="Inline" class="css-1yxslas-InlineContainer e6i75dx0">
+        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+          <div data-ds-id="Inline" class="css-eeo9h7-InlineContainer e6i75dx0">
+            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+              <div aria-label="Start quiz-wrapper" role="button" tabindex="0">
+                <button data-ds-id="Button" type="button" aria-label="Start quiz" color="primary"
+                  class="css-1ilnupm-StyledButton ejph2fy0">
+                  <div class="css-c3523d-StyledInner ejph2fy1">
+                    <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                      <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                        Start quiz
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+              <div aria-label="caption-button-wrapper" role="button" tabindex="0">
+                <fieldset data-ds-id="FormFieldGroup" class="css-1895qtb-StyledFieldset eznyom90">
+                  <legend class="css-iy7tkm-ScreenReaderText e1skx7qu0"></legend>
+                  <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                    <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                      <div class="css-16xflo2-StyledContainer ed0qz3a1">
+                        <label tabindex="-1" class="css-zsjwh4-StyledContainer eet47ev4"><input type="radio"
+                            name="caption-button" class="css-uyvl5w-StyledInput eet47ev0" value="caption-button"
+                            checked="" />
+                          <div class="css-bqdic2-StyledIconContainer eet47ev3">
+                            <div data-ds-id="Icon" data-variant="inherit" class="css-10pd6gh-StyledIcon e1tsg83e0">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                viewBox="0 0 16 16">
+                                <path fill="currentColor" fill-rule="evenodd"
+                                  d="M1 4a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3zm3-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z"
+                                  clip-rule="evenodd"></path>
+                                <path fill="currentColor" fill-rule="evenodd"
+                                  d="M4 8a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1m0 3a1 1 0 0 1 1-1h4a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1"
+                                  clip-rule="evenodd"></path>
+                              </svg>
+                            </div>
+                          </div>
+                          <div class="css-iy7tkm-ScreenReaderText e1skx7qu0"></div>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+              <div aria-label="indicator-button-wrapper" role="button" tabindex="0">
+                <fieldset data-ds-id="FormFieldGroup" class="css-1895qtb-StyledFieldset eznyom90">
+                  <legend class="css-iy7tkm-ScreenReaderText e1skx7qu0"></legend>
+                  <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                    <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                      <div class="css-16xflo2-StyledContainer ed0qz3a1">
+                        <label tabindex="-1" class="css-zsjwh4-StyledContainer eet47ev4"><input type="radio"
+                            name="indicator-button" class="css-uyvl5w-StyledInput eet47ev0" value="indicator-button"
+                            checked="" />
+                          <div class="css-bqdic2-StyledIconContainer eet47ev3">
+                            <div data-ds-id="Icon" data-variant="inherit" class="css-10pd6gh-StyledIcon e1tsg83e0">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                viewBox="0 0 16 16">
+                                <g fill="currentColor" fill-rule="evenodd" clip-path="url(#a)" clip-rule="evenodd">
+                                  <path d="M4 10a2 2 0 1 0 4 0 2 2 0 0 0-4 0"></path>
+                                  <path
+                                    d="M1 4a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v2l-2 1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1l2-1v2a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3z">
+                                  </path>
+                                  <path d="m15 9-4 2H7V9h4l4-2z"></path>
+                                </g>
+                                <defs>
+                                  <clipPath id="a">
+                                    <path fill="#fff" d="M0 0h16v16H0z"></path>
+                                  </clipPath>
+                                </defs>
+                              </svg>
+                            </div>
+                          </div>
+                          <div class="css-iy7tkm-ScreenReaderText e1skx7qu0"></div>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+              <div aria-label="label-button-wrapper" role="button" tabindex="0">
+                <fieldset data-ds-id="FormFieldGroup" class="css-1895qtb-StyledFieldset eznyom90">
+                  <legend class="css-iy7tkm-ScreenReaderText e1skx7qu0"></legend>
+                  <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                    <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                      <div class="css-16xflo2-StyledContainer ed0qz3a1">
+                        <label tabindex="-1" class="css-zsjwh4-StyledContainer eet47ev4"><input type="radio"
+                            name="label-button" class="css-uyvl5w-StyledInput eet47ev0" value="label-button"
+                            checked="" />
+                          <div class="css-bqdic2-StyledIconContainer eet47ev3">
+                            <div data-ds-id="Icon" data-variant="inherit" class="css-10pd6gh-StyledIcon e1tsg83e0">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                viewBox="0 0 16 16">
+                                <g fill="currentColor" fill-rule="evenodd" clip-path="url(#a)" clip-rule="evenodd">
+                                  <path
+                                    d="M1 4a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v2l-2 1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1l2-1v2a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3z">
+                                  </path>
+                                  <path
+                                    d="M11.263 7.304A1 1 0 0 0 10.546 7H5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5.546a1 1 0 0 0 .717-.304l1.455-1.5a1 1 0 0 0 0-1.392zM10.123 9l.484.5-.485.5H6V9z">
+                                  </path>
+                                  <path d="m15 9-4 2V9l4-2z"></path>
+                                </g>
+                                <defs>
+                                  <clipPath id="a">
+                                    <path fill="#fff" d="M0 0h16v16H0z"></path>
+                                  </clipPath>
+                                </defs>
+                              </svg>
+                            </div>
+                          </div>
+                          <div class="css-iy7tkm-ScreenReaderText e1skx7qu0"></div>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+      <div data-ds-id="Inline" class="css-liukhq-InlineContainer e6i75dx0">
+        <div class="css-h0nko7-StyledInlineItem e6i75dx1"></div>
+        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+          <span tabindex="0"><button data-ds-id="PictogramButton" type="button" aria-label="Save to collection"
+              name="save_button" class="css-1kqlkol-StyledPictogramButton ej9y1j50" tabindex="0" aria-haspopup="true">
+              <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                  <div data-e2e-test-id="bookmark" data-testid="bookmark" data-ds-id="Icon" data-variant="inherit"
+                    aria-hidden="true" class="css-10pd6gh-StyledIcon e1tsg83e0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="m13 14-5-3.333L3 14V3.333C3 2.597 3.64 2 4.429 2h7.142C12.361 2 13 2.597 13 3.333z"
+                        clip-rule="evenodd"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </button></span>
+        </div>
+        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+          <span tabindex="0">
+            <div aria-label="zoom-button-wrapper" role="button" tabindex="0">
+              <button data-ds-id="PictogramButton" type="button" aria-label="zoom-button" color="tertiary"
+                id="zoom-button" class="css-1kqlkol-StyledPictogramButton ej9y1j50">
+                <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                  <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                    <div data-e2e-test-id="zoom-in" data-testid="zoom-in" data-ds-id="Icon" data-variant="inherit"
+                      aria-hidden="true" class="css-10pd6gh-StyledIcon e1tsg83e0">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path d="M6 6V4h2v2h2v2H8v2H6V8H4V6z"></path>
+                        <path fill-rule="evenodd"
+                          d="M7 0a7 7 0 1 0 4.192 12.606l3.1 3.101a1 1 0 0 0 1.415-1.414l-3.1-3.1A7 7 0 0 0 7 0M2 7a5 5 0 1 1 10 0A5 5 0 0 1 2 7"
+                          clip-rule="evenodd"></path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </span>
+        </div>
+        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+          <span tabindex="0">
+            <div aria-label="toggle-fullscreen-button-wrapper" role="button" tabindex="0">
+              <button data-ds-id="PictogramButton" type="button" aria-label="toggle-fullscreen-button" color="tertiary"
+                id="toggle-fullscreen-button" class="css-1kqlkol-StyledPictogramButton ej9y1j50">
+                <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                  <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                    <div data-e2e-test-id="minimize" data-testid="minimize" data-ds-id="Icon" data-variant="inherit"
+                      aria-hidden="true" class="css-10pd6gh-StyledIcon e1tsg83e0">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                        <path fill="currentColor"
+                          d="m4.576 10-3.293 3.293 1.414 1.414 3.293-3.293V13a1 1 0 1 0 2 0V9a1 1 0 0 0-1-1h-4a1 1 0 0 0 0 2zM13 7.99a1 1 0 1 0 0-2h-1.586l3.293-3.293-1.414-1.414L10 4.576V2.99a1 1 0 1 0-2 0v4a1 1 0 0 0 1 1z">
+                        </path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </span>
+        </div>
+        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+          <div aria-label="viewer-button-exit-wrapper" role="button" tabindex="0">
+            <button data-ds-id="PictogramButton" type="button" aria-label="viewer-button-exit" color="tertiary"
+              id="viewer-button-exit" class="css-1kqlkol-StyledPictogramButton ej9y1j50">
+              <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                  <div data-e2e-test-id="x" data-testid="x" data-ds-id="Icon" data-variant="inherit" aria-hidden="true"
+                    class="css-10pd6gh-StyledIcon e1tsg83e0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                      <g fill="currentColor">
+                        <path
+                          d="M12.707 4.707a1 1 0 0 0-1.414-1.414zm-9.414 6.586a1 1 0 1 0 1.414 1.414zm8-8-8 8 1.414 1.414 8-8z">
+                        </path>
+                        <path
+                          d="M4.707 3.293a1 1 0 0 0-1.414 1.414zm6.586 9.414a1 1 0 0 0 1.414-1.414zm-8-8 8 8 1.414-1.414-8-8z">
+                        </path>
+                      </g>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+
+
+
+
+
+
+
+<div class="media-viewer-layout">
+    <nav class="_263b2693457a5c12--container" data-e2e-test-id="media-viewer-nav">
+
+
+<figcaption class="_4a059b1ad835e912--container" data-e2e-test-id="media-viewer-sidebar">
+  <div data-ds-id="Stack" height="100%" class="css-1qx3fh9-StackContainer e7wwwvf0">
+    <div class="css-17o556n-StackItem e7wwwvf1">
+      <div data-ds-id="Box" class="css-1il176h-StyledBox ebcgi2u0">
+        <div data-ds-id="Stack" height="100%" class="css-10jh8cs-StackContainer e7wwwvf0">
+          <div class="css-17o556n-StackItem e7wwwvf1">
+            <div data-ds-id="Box" class="css-1fq6nbn-StyledBox ebcgi2u0">
+              <h4 data-ds-id="H4" class="css-d0mxqe-StyledH4 eqtv71d3">Structures in eukaryotic cells</h4>
+            </div>
+          </div>
+          <div class="css-17o556n-StackItem e7wwwvf1">
+            <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+              <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                <p data-ds-id="Text" class="css-yi9dvf-StyledText eadloo90">
+                <div class="_294ae82bb7ec21b1--abstract" id="viewer-abstract">
+                  <p>The most prominent structure of the eukaryotic cell is the nucleus, which contains chromatin (DNA).
+                    The endoplasmic reticulum (ER) surrounds the nucleus. There are two distinct types of ER: rough ER,
+                    which is covered by ribosomes, and smooth ER, which lacks ribosomes. Another part of the
+                    endomembrane system is the Golgi apparatus, which buds off exocytotic vesicles and is associated
+                    with the lysosomal system. Each eukaryotic cell contains several mitochondria. Mitochondria are
+                    surrounded by a double membrane, with the inner membrane containing many folds (cristae). The cell
+                    is stabilized by its cytoskeleton, which traverses the entire cell.</p>
+                </div>
+                </p>
+              </div>
+              <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                <p data-ds-id="Text" class="css-ckmp7v-StyledText eadloo90">
+                <div class="_294ae82bb7ec21b1--copyright" id="viewer-copyright-source">© AMBOSS</div>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="css-17o556n-StackItem e7wwwvf1">
+      <div data-ds-id="Box" class="css-1gubj5s-StyledBox ebcgi2u0">
+        <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+          <div class="css-1mpk5ch-StackItem e7wwwvf1">
+            <div data-ds-id="Inline" class="css-17dkjqr-InlineContainer e6i75dx0">
+              <div class="css-h0nko7-StyledInlineItem e6i75dx1"><button data-ds-id="Button" type="button"
+                  class="css-1s7vfcv-StyledButton ejph2fy0">
+                  <div class="css-c3523d-StyledInner ejph2fy1">
+                    <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                      <div class="css-h0nko7-StyledInlineItem e6i75dx1">Feedback</div>
+                    </div>
+                  </div>
+                </button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</figcaption>
+
+  </nav>
+
+
+
+
+
+
+
+
+
+
+    
+
+<div class="_21c86b6a1014ea14--content">
+  <div data-e2e-test-id="media-viewer-stage" id="viewer-zoom-root" class="c11fcc95672dd1fd--container">
+    <div class="c11fcc95672dd1fd--zoomableImage" data-e2e-test-id="viewer-zoomable-image"
+      data-testid="viewer-zoomable-image" id="viewer-zoomable-image" role="button" tabindex="0"
+      style="transform: translate(19px, 27px) scale(0.907029);">
+      <div data-e2e-test-id="fullscreen-image" draggable="false" style="height: 446.561px; width: 626px;">
+        <!--?xml version="1.0" encoding="utf-8"?-->
+
+
+
+
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 1139.9058838 841.8900146"
+          enable-background="new 0 0 1139.9058838 841.8900146" xmlns:ns188284="http://www.w3.org/2000/svg"
+          ns188284:xlink="http://www.w3.org/1999/xlink" class="missing-ident" data-nidents="11">
+          <g data-layer="artwork">
+            <image overflow="visible" width="4750" height="3509" transform="matrix(0.24 0 0 0.24 0 0)" data-index="0"
+              data-ext="jpeg" href="https://svg-de.amboss.com/lFxOH3G6BIIk0zFq__0__3600.jpeg"
+              xlink:href="https://svg-de.amboss.com/lFxOH3G6BIIk0zFq__0__3600.jpeg">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            </image>
+          </g>
+          <g data-layer="indicators" class="">
+            <g class="dcb15949a53ad9ea--visible" data-ident="0">
+              <g>
+                <g>
+                  <line fill="none" stroke="#000000" x1="647.1958008" y1="233.4199982" x2="774.6951294"
+                    y2="233.4199982"></line>
+
+
+
+                  <g>
+                    <path
+                      d="M647.3273926,236.0518951c-1.453186,0-2.6317749-1.1785889-2.6317749-2.631897       c0-1.4532928,1.1785889-2.631897,2.6317749-2.631897c1.4534302,0,2.631897,1.1786041,2.631897,2.631897       C649.9592896,234.8733063,648.7808228,236.0518951,647.3273926,236.0518951z">
+                    </path>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="1">
+              <g>
+                <g>
+                  <line fill="none" stroke="#000000" x1="614.9508057" y1="290.3273926" x2="774.6951294"
+                    y2="290.3273926"></line>
+                  <g>
+                    <path
+                      d="M615.0823975,292.9592896c-1.4533081,0-2.631897-1.1785889-2.631897-2.631897       c0-1.4532776,1.1785889-2.6318054,2.631897-2.6318054s2.6317139,1.1785278,2.6317139,2.6318054       C617.7141113,291.7807007,616.5357056,292.9592896,615.0823975,292.9592896z">
+                    </path>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="2">
+              <g>
+                <g>
+                  <line fill="none" stroke="#000000" x1="613.763916" y1="400.1274109" x2="774.6951294" y2="400.1274109">
+                  </line>
+                  <g>
+                    <path
+                      d="M613.8955078,402.7591858c-1.4533081,0-2.6318359-1.1784973-2.6318359-2.6317749       c0-1.4533081,1.1785278-2.631897,2.6318359-2.631897c1.4533691,0,2.631897,1.1785889,2.631897,2.631897       C616.5274048,401.5806885,615.348877,402.7591858,613.8955078,402.7591858z">
+                    </path>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="3">
+              <g>
+                <g>
+                  <line fill="none" stroke="#000000" x1="640.4008789" y1="349.1568909" x2="774.6951294"
+                    y2="349.1568909"></line>
+                  <g>
+                    <path
+                      d="M640.5324707,351.7887878c-1.4533691,0-2.6317749-1.1785889-2.6317749-2.631897       c0-1.4532776,1.1784058-2.6318054,2.6317749-2.6318054c1.4532471,0,2.6318359,1.1785278,2.6318359,2.6318054       C643.1643066,350.610199,641.9857178,351.7887878,640.5324707,351.7887878z">
+                    </path>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="4">
+              <g>
+                <g>
+                  <line fill="none" stroke="#000000" x1="627.755127" y1="464.3940125" x2="774.6951294" y2="464.3940125">
+                  </line>
+                  <g>
+                    <path
+                      d="M627.8867188,467.0257874c-1.4533081,0-2.6318359-1.1784973-2.6318359-2.6317749       c0-1.4533081,1.1785278-2.6319275,2.6318359-2.6319275c1.4533691,0,2.631897,1.1786194,2.631897,2.6319275       C630.5186157,465.84729,629.3400879,467.0257874,627.8867188,467.0257874z">
+                    </path>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="5">
+              <g>
+                <g>
+                  <line fill="none" stroke="#000000" x1="579.336792" y1="521.4844971" x2="774.6951294" y2="521.4844971">
+                  </line>
+                  <g>
+
+
+                    <circle cx="579.4683838" cy="521.4844971" r="2.6317999">
+
+
+                    </circle>
+
+                  </g>
+                </g>
+              </g>
+            </g>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <g class="dcb15949a53ad9ea--visible" data-ident="6">
+              <g>
+                <g>
+                  <line fill="none" stroke="#000000" x1="244.7830963" y1="577.6583862" x2="774.6951294"
+                    y2="576.9221191"></line>
+                  <g>
+                    <path
+                      d="M244.918396,580.2901001c-1.4533997,0.0020142-2.6335907-1.1749268-2.635498-2.6281738       c-0.0020905-1.4533081,1.1748047-2.6335449,2.6280975-2.635498c1.4533081-0.0020142,2.6334991,1.1748657,2.6354065,2.6281738       C247.5484924,579.1079102,246.3715973,580.2880859,244.918396,580.2901001z">
+                    </path>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="7">
+              <g>
+                <g>
+                  <line fill="none" stroke="#000000" x1="560.2041016" y1="632.8060303" x2="774.6951294"
+                    y2="633.0167236"></line>
+                  <g>
+                    <path
+                      d="M560.3331909,635.4381104c-1.4533691-0.0015259-2.6307983-1.1812134-2.6292725-2.6345215       c0.0014038-1.4533081,1.1810913-2.6306763,2.6344604-2.6292725c1.4532471,0.0014648,2.6306152,1.1812134,2.6292114,2.6344604       C562.9661255,634.262085,561.786499,635.4395142,560.3331909,635.4381104z">
+                    </path>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="8">
+              <g>
+                <g>
+                  <line fill="none" stroke="#000000" x1="504.8833923" y1="109.1257019" x2="774.6951294"
+                    y2="109.1257019"></line>
+                  <g>
+                    <path
+                      d="M505.0150146,111.7574997c-1.4533081,0-2.6318054-1.1784973-2.6318054-2.6317978       s1.1784973-2.6318054,2.6318054-2.6318054c1.4533997,0,2.631897,1.1785049,2.631897,2.6318054       S506.4684143,111.7574997,505.0150146,111.7574997z">
+                    </path>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="9">
+              <g>
+                <g>
+
+                  <line fill="none" stroke="#000000" x1="470.8454895" y1="173.3018036" x2="774.6951294"
+                    y2="173.3018036"></line>
+                  <g>
+                    <path
+                      d="M470.9771118,175.9335938c-1.4533997,0-2.631897-1.1784973-2.631897-2.6317902       c0-1.4533081,1.1784973-2.631897,2.631897-2.631897c1.453186,0,2.6317749,1.1785889,2.6317749,2.631897       C473.6088867,174.7550964,472.4302979,175.9335938,470.9771118,175.9335938z">
+                    </path>
+                  </g>
+                </g>
+              </g>
+            </g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="10">
+              <g>
+                <g>
+                  <line fill="none" stroke="#000000" x1="500.5217896" y1="53.1311989" x2="774.6951294" y2="53.1311989">
+                  </line>
+                  <g>
+                    <path
+                      d="M500.6532898,55.7630005c-1.4532776,0-2.6317749-1.1785011-2.6317749-2.6318016       s1.1784973-2.6317978,2.6317749-2.6317978c1.4533997,0,2.631897,1.1784973,2.631897,2.6317978       S502.1066895,55.7630005,500.6532898,55.7630005z">
+                    </path>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+          <g data-layer="quiz-labels" data-lang="de_DE" class="dcb15949a53ad9ea--hidden" data-hidden="false">
+            <g class="" data-ident="1" data-content="Raues ER"><text transform="matrix(1 0 0 1 780.7868652 298.1183472)"
+                font-family="Lato-Regular" font-size="24px">Raues ER</text></g>
+            <g class="" data-ident="10" data-content="Zytoskelett">
+              <g><text transform="matrix(1 0 0 1 780.7868652 60.2833824)" font-family="Lato-Regular"
+                  font-size="24px">Zytoskelett</text></g>
+            </g>
+            <g class="" data-ident="8" data-content="Nukleus"><text transform="matrix(1 0 0 1 780.7868652 115.6510544)"
+                font-family="Lato-Regular" font-size="24px">Nukleus</text></g>
+            <g class="" data-ident="0" data-content="Glattes ER"><text
+                transform="matrix(1 0 0 1 780.7868652 241.026062)" font-family="Lato-Regular" font-size="24px">Glattes
+                ER</text></g>
+            <g class="" data-ident="6" data-content="Mitochondrium"><text
+                transform="matrix(1 0 0 1 780.7868652 585.0040894)" font-family="Lato-Regular"
+                font-size="24px">Mitochondrium</text></g>
+            <g class="" data-ident="2" data-content="Golgi-Apparat">
+
+
+
+
+
+              <text transform="matrix(1 0 0 1 780.7868652 407.6447144)" font-family="Lato-Regular"
+                font-size="24px">Golgi-Apparat</text>
+            </g>
+            <g class="" data-ident="3" data-content="Ribosom"><text transform="matrix(1 0 0 1 780.7868652 356.4879761)"
+                font-family="Lato-Regular" font-size="24px">Ribosom</text></g>
+            <g class="" data-ident="5" data-content="Lysosom"><text transform="matrix(1 0 0 1 780.7868652 528.444519)"
+                font-family="Lato-Regular" font-size="24px">Lysosom</text></g>
+            <g class="" data-ident="7" data-content="Zellmembran"><text
+                transform="matrix(1 0 0 1 780.7868652 640.850769)" font-family="Lato-Regular"
+                font-size="24px">Zellmembran</text></g>
+            <g class="" data-ident="9" data-content="Chromatin (DNA)"><text
+                transform="matrix(1 0 0 1 780.7868652 180.3087769)" font-family="Lato-Regular"
+                font-size="24px">Chromatin (DNA)</text></g>
+            <g class="" data-ident="4" data-content="Exozytotisches Vesikel"><text
+                transform="matrix(1 0 0 1 780.7868652 471.357605)" font-family="Lato-Regular"
+                font-size="24px">Exozytotisches Vesikel</text></g>
+          </g>
+          <g data-layer="quiz-labels" data-lang="en_US" class="" data-hidden="false">
+            <g class="dcb15949a53ad9ea--visible" data-ident="1" data-content="Rough endoplasmic reticulum"><text
+                transform="matrix(1 0 0 1 780.7868652 298.1183472)" font-family="Lato-Regular" font-size="24px">Rough
+                endoplasmic reticulum</text></g>
+            <g class="mmd-ident-option-highlight dcb15949a53ad9ea--visible" data-ident="10" data-content="Cytoskeleton">
+              <g><text transform="matrix(1 0 0 1 780.7868652 60.2833824)" font-family="Lato-Regular"
+                  font-size="24px">Cytoskeleton</text></g>
+            </g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="8" data-content="Nucleus"><text
+                transform="matrix(1 0 0 1 780.7868652 115.6510544)" font-family="Lato-Regular"
+                font-size="24px">Nucleus</text></g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="0" data-content="Smooth endoplasmic reticulum"><text
+                transform="matrix(1 0 0 1 780.7868652 241.026062)" font-family="Lato-Regular" font-size="24px">Smooth
+                endoplasmic reticulum</text></g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="6" data-content="Mitochondrion"><text
+                transform="matrix(1 0 0 1 780.7868652 585.0040894)" font-family="Lato-Regular"
+                font-size="24px">Mitochondrion</text></g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="2" data-content="Golgi apparatus"><text
+                transform="matrix(1 0 0 1 780.7868652 407.6447144)" font-family="Lato-Regular" font-size="24px">Golgi
+                apparatus</text></g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="3" data-content="Ribosome"><text
+                transform="matrix(1 0 0 1 780.7868652 356.4879761)" font-family="Lato-Regular"
+                font-size="24px">Ribosome</text></g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="5" data-content="Lysosome"><text
+                transform="matrix(1 0 0 1 780.7868652 528.444519)" font-family="Lato-Regular"
+                font-size="24px">Lysosome</text></g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="7" data-content="Cell membrane"><text
+                transform="matrix(1 0 0 1 780.7868652 640.850769)" font-family="Lato-Regular" font-size="24px">Cell
+                membrane</text></g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="9" data-content="Chromatin (DNA)"><text
+                transform="matrix(1 0 0 1 780.7868652 180.3087769)" font-family="Lato-Regular"
+                font-size="24px">Chromatin (DNA)</text></g>
+            <g class="dcb15949a53ad9ea--visible" data-ident="4" data-content="Vesicle"><text
+                transform="matrix(1 0 0 1 780.7868652 471.357605)" font-family="Lato-Regular"
+                font-size="24px">Vesicle</text></g>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div>
+
+
+
+
+
+
+      <div class="e1gqglpx1 css-1bt2l70-StyledBackdrop-CustomBackdrop ekx9kl10"></div>
+      <div class="css-fhifl-StyledToggleButtonContainer e1gqglpx2">
+        <button
+          aria-label="Click to expand or collapse the thumbnail bar" class="css-tvsuf5-StyledToggleButton e1gqglpx3">
+          <div data-ds-id="Box" class="css-10tzyyx-StyledBox ebcgi2u0">
+            <div data-ds-id="Icon" data-variant="primary" class="css-ywd400-StyledIcon e1tsg83e0">
+              <svg
+                xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="m4 6 4 4 4-4"></path>
+              </svg>
+            </div>
+          </div>
+        </button>
+      </div>
+      <div class="css-a0zhv4-StyledWrapper e149a66a0">
+        <div class="css-2jn72l-StyledButtonWrapper e149a66a1"><button data-ds-id="Button" type="button"
+            aria-label="Click or use left arrow to select the previous thumbnail"
+            class="css-1s7vfcv-StyledButton ejph2fy0">
+            <div class="css-c3523d-StyledInner ejph2fy1">
+              <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                  <div data-ds-id="Icon" data-variant="secondary" class="css-c9pzln-StyledIcon e1tsg83e0"><svg
+                      xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+                      stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="m15 18-6-6 6-6"></path>
+                    </svg></div>
+                </div>
+              </div>
+            </div>
+          </button></div>
+
+
+
+
+
+        <div aria-label="thumbnails scrollable container" class="css-1dplf75-StyledOuterContainer e149a66a2">
+          <div class="css-1w6q99v-StyledInnerContainer e149a66a3">
+            <div data-ds-id="Inline" class="css-kab7xw-InlineContainer e6i75dx0">
+              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                <div role="presentation" class="css-1mwt45n-StyledThumbnail e1m1uu1j0"><button data-ds-id="MediaItem"
+                    aria-label="Size comparison of prokaryotic and eukaryotic cells"
+                    class="css-1dr81i4-StyledButton e1xoxf6f3">
+                    <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                      <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                        <div class="css-pqw2-StyledMediaContainer e1xoxf6f4">
+                          <div class="css-1ozgycm-StyledMedia e1xoxf6f1">
+                            <picture data-ds-id="Image"><img title="Size comparison of prokaryotic and eukaryotic cells"
+                                alt="Size comparison of prokaryotic and eukaryotic cells" width="100%" height="100%"
+                                aria-hidden="true"
+                                src="https://media-us.amboss.com/media/thumbs/small_56d033ee7215b.jpg"
+                                class="css-1goz906-StyledImg esvv5850"></picture>
+                          </div>
+                          <div class="css-gfkulu-StyledOverlay e1xoxf6f2"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </button></div>
+              </div>
+              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                <div role="presentation" class="css-1mwt45n-StyledThumbnail e1m1uu1j0"><button data-ds-id="MediaItem"
+                    aria-label="Structures in eukaryotic cells" class="css-1wp7nrk-StyledButton e1xoxf6f3">
+                    <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                      <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                        <div class="css-pqw2-StyledMediaContainer e1xoxf6f4">
+                          <div class="css-1ozgycm-StyledMedia e1xoxf6f1">
+                            <picture data-ds-id="Image"><img title="Structures in eukaryotic cells"
+                                alt="Structures in eukaryotic cells" width="100%" height="100%" aria-hidden="true"
+                                src="https://media-us.amboss.com/media/thumbs/small_5f563ebfa85d8.jpg"
+                                class="css-1goz906-StyledImg esvv5850"></picture>
+                          </div>
+                          <div class="css-gfkulu-StyledOverlay e1xoxf6f2"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </button></div>
+              </div>
+              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                <div role="presentation" class="css-1mwt45n-StyledThumbnail e1m1uu1j0"><button data-ds-id="MediaItem"
+                    aria-label="Organelles of eukaryotic cells" class="css-1dr81i4-StyledButton e1xoxf6f3">
+                    <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                      <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                        <div class="css-pqw2-StyledMediaContainer e1xoxf6f4">
+                          <div class="css-1ozgycm-StyledMedia e1xoxf6f1">
+                            <picture data-ds-id="Image"><img title="Organelles of eukaryotic cells"
+                                alt="Organelles of eukaryotic cells" width="100%" height="100%" aria-hidden="true"
+                                src="https://media-us.amboss.com/media/thumbs/small_5b697d8e1fbe5.jpg"
+                                class="css-1goz906-StyledImg esvv5850"></picture>
+                          </div>
+                          <div class="css-gfkulu-StyledOverlay e1xoxf6f2"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </button></div>
+              </div>
+              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                <div role="presentation" class="css-1mwt45n-StyledThumbnail e1m1uu1j0">
+  <button data-ds-id="MediaItem"
+                  aria-label="Prokaryotic cell structure" class="css-1dr81i4-StyledButton e1xoxf6f3">
+                  <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                    <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                      <div class="css-pqw2-StyledMediaContainer e1xoxf6f4">
+                        <div class="css-1ozgycm-StyledMedia e1xoxf6f1">
+                          <picture data-ds-id="Image"><img title="Prokaryotic cell structure"
+                              alt="Prokaryotic cell structure" width="100%" height="100%" aria-hidden="true"
+                              src="https://media-us.amboss.com/media/thumbs/small_5948f6bb50483.jpg"
+                              class="css-1goz906-StyledImg esvv5850"></picture>
+                        </div>
+                        <div class="css-gfkulu-StyledOverlay e1xoxf6f2"></div>
+                      </div>
+                    </div>
+                  </div></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="css-be5wp6-StyledButtonWrapper e149a66a1"><button data-ds-id="Button" type="button"
+            aria-label="Click or use right arrow to select the next thumbnail"
+            class="css-1s7vfcv-StyledButton ejph2fy0">
+            <div class="css-c3523d-StyledInner ejph2fy1">
+              <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                  <div data-ds-id="Icon" data-variant="secondary" class="css-c9pzln-StyledIcon e1tsg83e0"><svg
+                      xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+                      stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="m9 18 6-6-6-6"></path>
+                    </svg></div>
+                </div>
+              </div>
+            </div>
+          </button>
+
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+<div data-e2e-test-id="media-viewer-collection-controls" class="css-i2j9hs-StyledBottomBar e1gqglpx0">
+  <div class="e1gqglpx1 css-1bt2l70-StyledBackdrop-CustomBackdrop ekx9kl10"></div>
+  <div class="css-fhifl-StyledToggleButtonContainer e1gqglpx2">
+    
+    <button
+      aria-label="Click to expand or collapse the thumbnail bar" class="css-tvsuf5-StyledToggleButton e1gqglpx3">
+      <div data-ds-id="Box" class="css-10tzyyx-StyledBox ebcgi2u0">
+        <div data-ds-id="Icon" data-variant="primary" class="css-ywd400-StyledIcon e1tsg83e0"><svg
+            xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="m4 6 4 4 4-4"></path>
+          </svg></div>
+      </div>
+    </button>
+  
+  </div>
+  <div class="css-a0zhv4-StyledWrapper e149a66a0">
+    <div class="css-2jn72l-StyledButtonWrapper e149a66a1"><button data-ds-id="Button" type="button"
+        aria-label="Click or use left arrow to select the previous thumbnail" class="css-1s7vfcv-StyledButton ejph2fy0">
+        <div class="css-c3523d-StyledInner ejph2fy1">
+          <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+              <div data-ds-id="Icon" data-variant="secondary" class="css-c9pzln-StyledIcon e1tsg83e0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+                  stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="m15 18-6-6 6-6"></path>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </button></div>
+    <div aria-label="thumbnails scrollable container" class="css-1dplf75-StyledOuterContainer e149a66a2">
+      <div class="css-1w6q99v-StyledInnerContainer e149a66a3">
+        <div data-ds-id="Inline" class="css-kab7xw-InlineContainer e6i75dx0">
+          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+            <div role="presentation" class="css-1mwt45n-StyledThumbnail e1m1uu1j0"><button data-ds-id="MediaItem"
+                aria-label="Size comparison of prokaryotic and eukaryotic cells"
+                class="css-1dr81i4-StyledButton e1xoxf6f3">
+                <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                  <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                    <div class="css-pqw2-StyledMediaContainer e1xoxf6f4">
+                      <div class="css-1ozgycm-StyledMedia e1xoxf6f1">
+                        <picture data-ds-id="Image"><img title="Size comparison of prokaryotic and eukaryotic cells"
+                            alt="Size comparison of prokaryotic and eukaryotic cells" width="100%" height="100%"
+                            aria-hidden="true" src="https://media-us.amboss.com/media/thumbs/small_56d033ee7215b.jpg"
+                            class="css-1goz906-StyledImg esvv5850"></picture>
+                      </div>
+                      <div class="css-gfkulu-StyledOverlay e1xoxf6f2"></div>
+                    </div>
+                  </div>
+                </div>
+              </button></div>
+          </div>
+          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+            <div role="presentation" class="css-1mwt45n-StyledThumbnail e1m1uu1j0"><button data-ds-id="MediaItem"
+                aria-label="Structures in eukaryotic cells" class="css-1wp7nrk-StyledButton e1xoxf6f3">
+                <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                  <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                    <div class="css-pqw2-StyledMediaContainer e1xoxf6f4">
+                      <div class="css-1ozgycm-StyledMedia e1xoxf6f1">
+                        <picture data-ds-id="Image"><img title="Structures in eukaryotic cells"
+                            alt="Structures in eukaryotic cells" width="100%" height="100%" aria-hidden="true"
+                            src="https://media-us.amboss.com/media/thumbs/small_5f563ebfa85d8.jpg"
+                            class="css-1goz906-StyledImg esvv5850"></picture>
+                      </div>
+                      <div class="css-gfkulu-StyledOverlay e1xoxf6f2"></div>
+                    </div>
+                  </div>
+                </div>
+              </button></div>
+          </div>
+          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+            <div role="presentation" class="css-1mwt45n-StyledThumbnail e1m1uu1j0"><button data-ds-id="MediaItem"
+                aria-label="Organelles of eukaryotic cells" class="css-1dr81i4-StyledButton e1xoxf6f3">
+                <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                  <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                    <div class="css-pqw2-StyledMediaContainer e1xoxf6f4">
+                      <div class="css-1ozgycm-StyledMedia e1xoxf6f1">
+                        <picture data-ds-id="Image"><img title="Organelles of eukaryotic cells"
+                            alt="Organelles of eukaryotic cells" width="100%" height="100%" aria-hidden="true"
+                            src="https://media-us.amboss.com/media/thumbs/small_5b697d8e1fbe5.jpg"
+                            class="css-1goz906-StyledImg esvv5850"></picture>
+                      </div>
+                      <div class="css-gfkulu-StyledOverlay e1xoxf6f2"></div>
+                    </div>
+                  </div>
+                </div>
+              </button></div>
+          </div>
+          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+            <div role="presentation" class="css-1mwt45n-StyledThumbnail e1m1uu1j0"><button data-ds-id="MediaItem"
+                aria-label="Prokaryotic cell structure" class="css-1dr81i4-StyledButton e1xoxf6f3">
+                <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                  <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                    <div class="css-pqw2-StyledMediaContainer e1xoxf6f4">
+                      <div class="css-1ozgycm-StyledMedia e1xoxf6f1">
+                        <picture data-ds-id="Image"><img title="Prokaryotic cell structure"
+                            alt="Prokaryotic cell structure" width="100%" height="100%" aria-hidden="true"
+                            src="https://media-us.amboss.com/media/thumbs/small_5948f6bb50483.jpg"
+                            class="css-1goz906-StyledImg esvv5850"></picture>
+                      </div>
+                      <div class="css-gfkulu-StyledOverlay e1xoxf6f2"></div>
+                    </div>
+                  </div>
+                </div>
+              </button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="css-be5wp6-StyledButtonWrapper e149a66a1"><button data-ds-id="Button" type="button"
+        aria-label="Click or use right arrow to select the next thumbnail" class="css-1s7vfcv-StyledButton ejph2fy0">
+        <div class="css-c3523d-StyledInner ejph2fy1">
+          <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+              <div data-ds-id="Icon" data-variant="secondary" class="css-c9pzln-StyledIcon e1tsg83e0"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+                  stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="m9 18 6-6-6-6"></path>
+                </svg></div>
+            </div>
+          </div>
+        </div>
+      </button></div>
+  </div>
+</div>
+
+  </div>
+
+
+
+  
+
+</div>
+
+
+
+
+

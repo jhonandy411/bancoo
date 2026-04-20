@@ -1,0 +1,2197 @@
+
+
+
+<html lang="en-US" data-dme-installation-id="xcvxoqmgooq" data-dme-dark-mode="on">
+<script type="text/javascript" async="" src="https://bat.bing.com/bat.js"></script>
+<script type="text/javascript" async=""
+  src="https://www.googletagmanager.com/gtm.js?id=GTM-TZ9PM2H&amp;l=dataLayer"></script>
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+
+
+
+  <link rel="stylesheet" href="amboss-clone.css">
+  
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@emotion/css@11.11.2/dist/emotion-css.umd.min.js"></script>
+  <script src="shared/amboss-ui.js"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+  <!-- Firebase Configuration -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+      authDomain: "bancomicina-62bfe.firebaseapp.com",
+      projectId: "bancomicina-62bfe",
+      storageBucket: "bancomicina-62bfe.appspot.com",
+      messagingSenderId: "737254665977",
+      appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
+    };
+    firebase.initializeApp(firebaseConfig);
+    window.db = firebase.firestore(); // Explicitly expose db to window
+    console.log('Firebase initialized, db exposed to window');
+  </script>
+
+
+
+
+
+
+
+
+
+<style>
+html, body { height: 100%; }
+body { margin: 0; overflow: hidden; }  /* el body NO scrollea */
+
+
+
+
+
+    /* Efecto acordeón con CSS Grid para el submenu */
+    ._4cc9ddf83d96bbf8--container.ContextL0MenuElement__container .rah-static {
+      display: grid !important;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    ._4cc9ddf83d96bbf8--container.ContextL0MenuElement__container[data-collapsed="false"] .rah-static {
+      grid-template-rows: 1fr;
+    }
+
+    /* Asegura que el contenido interno se oculte suavemente */
+    ._4cc9ddf83d96bbf8--container.ContextL0MenuElement__container .rah-static > div {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* Animación y rotación del chevron según el estado */
+    ._4cc9ddf83d96bbf8--container.ContextL0MenuElement__container ._4cc9ddf83d96bbf8--chevron {
+      transition: transform 0.2s ease;
+    }
+
+    /* Cuando está colapsado, el chevron apunta hacia abajo */
+    ._4cc9ddf83d96bbf8--container.ContextL0MenuElement__container[data-collapsed="true"] ._4cc9ddf83d96bbf8--chevron {
+      transform: rotate(180deg);
+    }
+
+    /* Cuando está expandido, el chevron apunta hacia arriba (estado base) */
+    ._4cc9ddf83d96bbf8--container.ContextL0MenuElement__container[data-collapsed="false"] ._4cc9ddf83d96bbf8--chevron {
+      transform: rotate(0deg);
+    }
+
+    /* Hijo seleccionado: solo texto en negrita, sin cambiar fondo */
+    ._4cc9ddf83d96bbf8--secondLevelLink.bancomicina-active {
+      color: #1a1c1c;
+    }
+
+    html.isDarkmodeActive ._4cc9ddf83d96bbf8--secondLevelLink.bancomicina-active {
+      color: #ffffff !important;
+    }
+
+
+
+
+
+    #sidebar-wrapper._6eb1c4a28c8c5a44--context {
+      margin-top: 56px;
+      height: calc(100% - 56px);
+      /* ajusta según altura real del top bar */
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    /* Estado oculto de la barra lateral:
+   se desplaza hacia la izquierda y no captura clics */
+    #sidebar-wrapper._6eb1c4a28c8c5a44--context.bancomicina-sidebar-hidden {
+      transform: translateX(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Ajustar ancho de la sidebar secundaria (L1) */
+  #context-nav-l1{
+  box-sizing: content-box;
+  width: 314px;
+  max-width: 314px;
+}
+
+
+
+
+
+    /* Quitar borde visual del botón burger en el top nav clonado */
+    .bb849ffc5190dffa--topNavStartContainer .css-1xxmsbp-StyledButton.ejph2fy0 {
+      border: none;
+      box-shadow: none;
+      background: transparent;
+    }
+
+    /* Opcional: suavizar el estado de focus sin mostrar borde fuerte */
+    .bb849ffc5190dffa--topNavStartContainer .css-1xxmsbp-StyledButton.ejph2fy0:focus-visible {
+      outline: none;
+    }
+
+    /* Quitar borde visual del botón 'collections' en el top nav */
+    .bb849ffc5190dffa--topNavEndContainer .css-f83uhv-StyledPictogramButton.ej9y1j50 {
+      border: none;
+      box-shadow: none;
+      background: transparent;
+      padding: 6px !important;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Hover específico para Collections */
+    .bb849ffc5190dffa--topNavEndContainer .css-f83uhv-StyledPictogramButton.ej9y1j50:hover {
+      background-color: rgba(0, 0, 0, 0.05) !important;
+    }
+
+    /* Quitar borde de focus */
+    .bb849ffc5190dffa--topNavEndContainer .css-f83uhv-StyledPictogramButton.ej9y1j50:focus-visible {
+      outline: none;
+    }
+
+    .css-fsm7y8-StyledIcon {
+      width: 24px !important;
+      height: 24px !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .css-fsm7y8-StyledIcon > svg {
+      width: 24px !important;
+      height: 24px !important;
+    }
+    /* Estilos para modo split */
+    #main-content.split-mode {
+      display: flex !important;
+      flex-direction: row;
+      height: calc(100vh - 56px);
+      width: calc(100vw - var(--sidebar-w));
+      overflow: hidden;
+    }
+    .split-panel {
+      flex: 1;
+      height: 100%;
+      position: relative;
+    }
+    #split-left {
+      overflow: auto;
+      border-right: 1px solid rgba(0,0,0,0.1);
+    }
+    #split-right {
+      overflow: hidden;
+    }
+    /* Hide text labels in split mode to save space, except Start Quiz */
+    #split-right .eet47ev1 {
+      display: none !important;
+    }
+    #split-right label.css-ldjgno-StyledContainer.eet47ev4{ 
+      min-width: 32px !important; }
+
+    /* White theme for right split panel */
+    #split-right .topbar {
+      background: linear-gradient(to bottom, #ffffff, #f8f9fa) !important;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+    }
+
+    #split-right .viewer {
+      background: #ffffff !important;
+    }
+
+    #split-right .stage {
+      background: #f8f9fa !important;
+    }
+
+    #split-right .sidebar {
+      background: #ffffff !important;
+      border-right: 1px solid rgba(0, 0, 0, 0.1) !important;
+    }
+
+    #split-right .topbar * {
+color: rgb(15, 103, 116) 
+    }
+    
+    
+
+
+
+
+
+
+    
+
+
+
+/* No tiñas los iconos/toolbar-actions: que hereden su color original */
+#split-right .topbar .css-liukhq-InlineContainer,
+#split-right .topbar .css-liukhq-InlineContainer *{
+  color: rgb(64, 81, 94) !important;
+}
+
+
+
+
+
+    /* SOLO Start Quiz en modo split */
+#split-right .topbar .css-h0nko7-StyledInlineItem.e6i75dx1 {
+  color: #ffffff !important;
+}
+
+    /* SOLO en modo split → solo texto "Start quiz" en blanco */
+
+
+
+
+
+    
+
+    #split-right p,
+    #split-right .sidebar p {
+      color: #4a4a4a !important;
+    }
+
+    #split-right .tabbtn {
+      border: 1px solid rgba(0, 0, 0, 0.15) !important;
+      color: #1a1a1a !important;
+      background: rgba(240, 240, 240, 0.8) !important;
+    }
+
+    #split-right .tabbtn.primary {
+      background: linear-gradient(180deg, #4da6a3, #2b7f7c) !important;
+      border-color: #4da6a3 !important;
+      color: #ffffff !important;
+    }
+
+    #split-right .iconbtn {
+      border: 1px solid rgba(0, 0, 0, 0.1) !important;
+      background: rgba(240, 240, 240, 0.6) !important;
+    }
+
+    #split-right .iconbtn:hover {
+      background: rgba(230, 230, 230, 0.8) !important;
+    }
+
+    #split-right .iconbtn svg {
+      stroke: #1a1a1a !important;
+    }
+
+    #split-right .filmstrip-wrapper {
+      background: rgba(255, 255, 255, 0.95) !important;
+      border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+    }
+
+    #split-right .filmstrip-toggle-wrapper {
+      background: rgba(240, 240, 240, 0.95) !important;
+      border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    }
+
+    #split-right .filmstrip-toggle svg {
+      stroke: #1a1a1a !important;
+    }
+
+    #split-right .thumb {
+      border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    }
+
+    #split-right .thumb.active {
+      border: 1px solid rgba(0, 0, 0, 0.3) !important;
+      outline: 2px solid rgba(77, 166, 163, 0.4) !important;
+    }
+
+    #split-right .navarrow svg {
+      stroke: #1a1a1a !important;
+    }
+
+    #split-right .navarrow:hover {
+      background: rgba(230, 230, 230, 0.7) !important;
+    }
+
+
+
+
+
+
+  /* Split-right: estado INACTIVO (default) */
+#split-right .css-ldjgno-StyledContainer{
+  background: transparent !important;
+  border: 1px solid rgba(0,0,0,0.18) !important; /* gris claro */
+}
+
+/* Split-right: estado ACTIVO (cuando tu JS le pone mv-active) */
+#split-right .css-ldjgno-StyledContainer.mv-active{
+  background: rgb(231, 246, 248) !important;
+  border: 1px solid rgb(4, 122, 136) !important;
+}
+
+/* --- Table Modal Sizing & Column Balancing Overrides --- */
+#table-modal-overlay ._525e0b73ddffb195--modalContent {
+  width: fit-content !important;
+  min-width: 480px;
+  max-width: calc(100vw - 120px); /* 20px izq + 20px der */
+}
+
+#table-modal-overlay #modal-table-content table {
+  width: auto !important;
+  min-width: unset !important;
+  table-layout: auto !important;
+}
+
+#table-modal-overlay #modal-table-content table td,
+#table-modal-overlay #modal-table-content table th {
+  width: auto !important;
+  min-width: unset !important;
+  max-width: unset !important;
+  word-wrap: normal !important; /* Evita saltos de línea agresivos si hay espacio */
+  white-space: normal !important;
+}
+
+
+
+
+
+
+
+
+    
+
+    #split-right .css-ldjgno-StyledContainer .css-1dh26my-StyledText-StyledLabel {
+      color: #4a4a4a !important;
+    }
+
+    #split-right .css-ldjgno-StyledContainer .css-10pd6gh-StyledIcon {
+      color: #4a4a4a !important;
+    }
+
+    #split-right .css-ldjgno-StyledContainer.mv-active .css-1dh26my-StyledText-StyledLabel {
+      color: #2b7f7c !important;
+    }
+
+    #split-right .css-ldjgno-StyledContainer.mv-active .css-10pd6gh-StyledIcon {
+      color: #2b7f7c !important;
+    }
+
+    #split-right .feedback {
+      color: rgba(0, 0, 0, 0.4) !important;
+    }
+
+    #split-right .center-handle {
+      background: rgba(0, 0, 0, 0.08) !important;
+      border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    }
+
+    #split-right .center-handle:before {
+      background: rgba(0, 0, 0, 0.4) !important;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25) !important;
+    }
+
+
+
+
+
+
+
+            /* SOLO en modo split → topbar blanca */
+.split-mode ._263b2693457a5c12--container{
+  background-color: #ffffff !important;
+}
+
+    /* Zoom Controls Popover - White Theme for Split Mode */
+    #split-right #zoom-popover .css-18dlkqo-StyledBox {
+      background: #ffffff !important;
+      border: 1px solid rgba(0, 0, 0, 0.1) !important;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    #split-right #zoom-popover #zoom-percent,
+    #split-right #zoom-popover .css-10pd6gh-StyledIcon {
+      color: #4a4a4a !important;
+    }
+
+    #split-right #zoom-popover ._66903cf573cb5f11--separator {
+      background: rgba(0, 0, 0, 0.1) !important;
+    }
+
+    #split-right #zoom-popover .css-196i78w-StyledArrow {
+      background: #ffffff !important;
+      filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.1)) !important;
+    }
+
+    #split-right #zoom-popover .css-1kqlkol-StyledPictogramButton:hover {
+      background: rgba(0, 0, 0, 0.05) !important;
+    }
+
+    @media (max-width: 767px) {
+      #sidebar-wrapper._6eb1c4a28c8c5a44--context,
+      #main-content,
+      #main-content.split-mode {
+        margin-top: 102px !important;
+        height: calc(100% - 102px) !important;
+      }
+    }
+      /* Global Dark Mode Overrides for sub-pages */
+    html.isDarkmodeActive,
+    html.isDarkmodeActive body,
+    html.isDarkmodeActive #sidebar-wrapper,
+    html.isDarkmodeActive .d5fef2c66969dc7e--contextNavContainer,
+    html.isDarkmodeActive .home-dashboard-wrapper,
+    html.isDarkmodeActive .main-content-area,
+    html.isDarkmodeActive #main-content {
+      background-color: #121212 !important;
+      color: var(--color-text-primary) !important;
+    }
+    html.isDarkmodeActive .dashboard-card,
+    html.isDarkmodeActive .promo-card,
+    html.isDarkmodeActive .recent-articles-card {
+      background: #1e1e1e !important;
+      border-color: var(--color-divider-primary) !important;
+      color: var(--color-text-primary) !important;
+    }
+    html.isDarkmodeActive .promo-title,
+    html.isDarkmodeActive .recent-header h2,
+    html.isDarkmodeActive .article-title {
+      color: var(--color-text-primary) !important;
+    }
+    html.isDarkmodeActive .recent-divider,
+    html.isDarkmodeActive .divider {
+      background-color: #2a2a2a !important;
+    }
+    html.isDarkmodeActive .article-item {
+      border-bottom-color: #2a2a2a !important;
+    }
+    html.isDarkmodeActive .article-item:hover {
+      background-color: #252525 !important;
+    }
+    html.isDarkmodeActive .button-qbank {
+      background-color: #2c2c2c !important;
+      color: var(--color-text-primary) !important;
+      border-color: var(--color-divider-primary) !important;
+    }
+
+    /* Override para el NumberInput blanco */
+    html.isDarkmodeActive .evqo64u2 {
+      background: transparent !important;
+    }
+
+    /* Borde para el contenedor del slider/input */
+    html.isDarkmodeActive .css-nmq6mu {
+      border: 0.5px solid rgba(128, 128, 128, 0.2) !important;
+      box-shadow: none !important;
+    }
+
+    /* Color del botón Start cuando está desactivado en modo oscuro */
+    html.isDarkmodeActive .css-1mk8aer:disabled {
+      background-color: rgb(29, 102, 112, 0.5) !important;
+      opacity: 1 !important;
+    }
+
+    /* Color del botón de cerrar en modo oscuro */
+    html.isDarkmodeActive .css-1rfhjvz {
+      color: var(--color-icon-primary) !important;
+    }
+
+    /* QBANK SESSION Button Dark Mode */
+    html.isDarkmodeActive ._2dfc3e09bcc2a51e--container {
+      background: #232323 !important;
+      border: 1px solid #333 !important;
+      transition: background 0.2s ease !important;
+    }
+    html.isDarkmodeActive ._2dfc3e09bcc2a51e--container:hover {
+      background: #2c2c2c !important;
+    }
+    html.isDarkmodeActive .eadloo90 {
+      color: var(--color-text-primary) !important;
+    }
+    html.isDarkmodeActive .e1kkd7uc0 {
+      color: var(--color-background-accent) !important;
+    }
+
+    /* Library Panels Dark Mode */
+    html.isDarkmodeActive ._0aed7b478bfe4386--listItemContainer {
+      background: #1e1e1e !important;
+      border: 1px solid #2a2a2a !important;
+      box-shadow: none !important;
+    }
+    html.isDarkmodeActive .d7c682ab962c5138--container {
+      background: transparent !important;
+      border-bottom: 1px solid #2a2a2a !important;
+    }
+    html.isDarkmodeActive .d7c682ab962c5138--container:hover {
+      background: #252525 !important;
+    }
+    html.isDarkmodeActive .aa579d380db5424b--header,
+    html.isDarkmodeActive ._41674fd161680aab--header1 {
+      color: #e0e0e0 !important;
+    }
+    html.isDarkmodeActive .d7c682ab962c5138--iconWrapper {
+      color: #72848c !important;
+    }
+
+    </style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<head> 
+  
+
+
+
+</head>
+
+
+
+
+
+
+    <body>
+  <div class="bb849ffc5190dffa--topNav bb849ffc5190dffa--wrapTopNavOnSmallScreens">
+    <div class="bb849ffc5190dffa--topNavStartContainer">
+      <!-- Botón menú (burger) -->
+      <button data-ds-id="Button" type="button" aria-label="Toggle navigation menu" aria-expanded="true"
+        aria-controls="context-menu" data-testid="side-navigation-button" class="css-1xxmsbp-StyledButton ejph2fy0">
+        <div class="css-c3523d-StyledInner ejph2fy1">
+          <div data-ds-id="Inline" class="css-1iyebzw-InlineContainer e6i75dx0">
+            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+              <div data-e2e-test-id="BurgerSVG" data-testid="menu-icon" data-ds-id="Icon" data-variant="inherit"
+                color="inherit" class="css-fsm7y8-StyledIcon e1kkd7uc0">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"></path></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </button>
+
+      <!-- Logo -->
+      <div class="bb849ffc5190dffa--logoContainer">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 126 20" role="img"
+          aria-label="Go to AMBOSS Dashboard" class="_7cb2cf8f3c994e7f--logo" data-e2e-test-id="AMBOSS-logo"
+          data-testid="amboss-logo">
+          <path fill="#24A3AA" fill-rule="evenodd"
+            d="M15.019 18.462H3.949l.7-1.276h9.67zM10.953 5.687l5.605 10.223H15.08l-4.136-7.544-.73 1.333 3.405 6.211h-8.27zm7.765 11.5-7.773-14.18-.722 1.347L3.888 15.91H2.41l7.804-14.236-.73-1.332L.25 17.186h2.938L1.79 19.738h15.39l-1.399-2.552z"
+            clip-rule="evenodd"></path>
+          <path fill="#000105" fill-rule="evenodd"
+            d="M29.349 12.73h8.302l-3.784-9.095a7 7 0 0 1-.184-.49 19 19 0 0 1-.183-.579q-.091.306-.183.579a10 10 0 0 1-.184.502zm12.401 6.539h-1.035a.46.46 0 0 1-.3-.096.6.6 0 0 1-.184-.248l-2.187-5.228h-9.101l-2.174 5.228a.55.55 0 0 1-.183.242.5.5 0 0 1-.315.102H25.25l7.582-18h1.336zm11.59-4.479q.077-.202.161-.4.084-.197.187-.375L60.847 1.51q.102-.165.206-.203a.8.8 0 0 1 .283-.038h.914v18h-1.159V3.927q0-.33.039-.7L53.958 15.81q-.18.33-.515.33h-.206q-.322 0-.515-.33L45.357 3.215q.039.369.039.712V19.27H44.25v-18h.901q.18 0 .29.038t.212.203l7.352 12.518q.194.356.335.763m14.718-4.148v7.581h4.55q2.399.001 3.616-1.024t1.218-2.88q0-.853-.327-1.534a3.2 3.2 0 0 0-.942-1.157q-.615-.477-1.513-.732t-2.038-.254zm0-.954h3.935q1.257 0 2.148-.318.89-.318 1.462-.84.57-.521.84-1.183.269-.661.269-1.361 0-1.819-1.16-2.754-1.162-.935-3.584-.935h-3.91zm-1.308 9.579v-18h5.218q1.552 0 2.686.305t1.878.897q.743.591 1.109 1.443.365.853.365 1.934 0 .713-.25 1.374a4.2 4.2 0 0 1-.724 1.221 4.7 4.7 0 0 1-1.16.973q-.687.414-1.57.63 2.14.318 3.294 1.412 1.154 1.095 1.154 2.888 0 1.145-.41 2.06a4.2 4.2 0 0 1-1.193 1.552q-.781.636-1.923.974-1.14.336-2.59.337zm30.617-8.755q0-1.89-.53-3.4-.53-1.508-1.495-2.556a6.4 6.4 0 0 0-2.322-1.604q-1.358-.555-3.014-.556-1.63 0-2.982.556a6.5 6.5 0 0 0-2.328 1.604q-.977 1.048-1.514 2.556-.537 1.51-.537 3.4 0 1.905.537 3.407t1.514 2.55a6.5 6.5 0 0 0 2.328 1.598q1.351.55 2.982.55 1.657 0 3.014-.55a6.3 6.3 0 0 0 2.322-1.598q.963-1.049 1.495-2.55.53-1.502.53-3.407m1.371 0q0 2.097-.634 3.803-.634 1.707-1.785 2.914a7.9 7.9 0 0 1-2.755 1.866q-1.605.66-3.558.659-1.927 0-3.532-.659a7.9 7.9 0 0 1-2.755-1.866q-1.151-1.207-1.792-2.914-.64-1.706-.64-3.803 0-2.082.64-3.79.64-1.705 1.792-2.914a8 8 0 0 1 2.755-1.872q1.605-.665 3.532-.665 1.953 0 3.558.658a7.9 7.9 0 0 1 2.755 1.873q1.151 1.215 1.785 2.92.634 1.708.634 3.79m11.875-6.838q-.117.217-.336.217-.17 0-.435-.236a6 6 0 0 0-.72-.524 5.8 5.8 0 0 0-1.136-.53q-.681-.243-1.68-.243-1 0-1.759.28-.759.282-1.272.768a3.3 3.3 0 0 0-.779 1.125 3.5 3.5 0 0 0-.265 1.342q0 .92.395 1.52.395.602 1.042 1.023.648.422 1.471.71.822.287 1.69.568.868.282 1.69.62a6.1 6.1 0 0 1 1.471.85q.648.51 1.042 1.26.396.747.396 1.86 0 1.137-.395 2.14a5 5 0 0 1-1.144 1.745 5.4 5.4 0 0 1-1.837 1.17q-1.087.427-2.484.427-1.812 0-3.118-.632a7.3 7.3 0 0 1-2.29-1.732l.363-.563q.155-.192.362-.191.117 0 .298.153t.44.377q.26.224.622.486.363.263.842.486.48.223 1.101.377.622.153 1.412.153 1.09 0 1.943-.326a4.3 4.3 0 0 0 1.445-.888q.59-.562.901-1.336a4.4 4.4 0 0 0 .31-1.655q0-.959-.395-1.579a3.4 3.4 0 0 0-1.043-1.035 6.8 6.8 0 0 0-1.471-.697 60 60 0 0 0-1.69-.55 21 21 0 0 1-1.69-.6 5.8 5.8 0 0 1-1.471-.85 3.9 3.9 0 0 1-1.042-1.291q-.395-.773-.395-1.936 0-.908.35-1.752a4.3 4.3 0 0 1 1.023-1.489q.674-.645 1.664-1.035.991-.39 2.261-.39 1.425 0 2.558.448a6.1 6.1 0 0 1 2.066 1.367zm13.777 0q-.117.217-.336.217-.17 0-.435-.236a6 6 0 0 0-.721-.524 5.7 5.7 0 0 0-1.135-.53q-.681-.243-1.681-.243-.999 0-1.759.28-.758.282-1.271.768a3.3 3.3 0 0 0-.779 1.125 3.5 3.5 0 0 0-.266 1.342q0 .92.395 1.52.395.602 1.043 1.023.648.422 1.47.71.823.287 1.691.568.868.282 1.69.62.822.34 1.471.85.647.51 1.042 1.26.395.747.395 1.86 0 1.137-.394 2.14a5 5 0 0 1-1.144 1.745 5.4 5.4 0 0 1-1.838 1.17q-1.086.427-2.483.427-1.812 0-3.118-.632a7.3 7.3 0 0 1-2.29-1.732l.363-.563q.154-.192.362-.191.117 0 .298.153t.44.377.622.486.842.486 1.101.377 1.412.153q1.088 0 1.943-.326a4.25 4.25 0 0 0 1.444-.888 3.8 3.8 0 0 0 .901-1.336 4.4 4.4 0 0 0 .31-1.655q0-.959-.395-1.579a3.4 3.4 0 0 0-1.042-1.035 6.8 6.8 0 0 0-1.471-.697 60 60 0 0 0-1.69-.55 21 21 0 0 1-1.691-.6 5.9 5.9 0 0 1-1.47-.85 3.9 3.9 0 0 1-1.043-1.291q-.395-.773-.395-1.936 0-.908.35-1.752a4.35 4.35 0 0 1 1.023-1.489q.674-.645 1.665-1.035t2.261-.39q1.424 0 2.558.448a6.1 6.1 0 0 1 2.065 1.367z"
+            clip-rule="evenodd"></path>
+        </svg>
+      </div>
+
+
+
+
+
+      <!-- Mode switcher -->
+      <div class="bb849ffc5190dffa--modeSwitcherContainer">
+        <span>
+          <div class="e1e8f44887daa987--container">
+            <div class="e1e8f44887daa987--modeButton" data-e2e-test-id="badge" data-testid="mode-switcher-button"
+              role="button" tabindex="0">
+              <div data-ds-id="Box" class="css-b9ed8c-StyledBox ebcgi2u0">
+                <div data-ds-id="Inline" class="css-13tdq5i-InlineContainer e6i75dx0">
+                  <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                    <span data-ds-id="Text" class="css-1wj6687-StyledText eadloo90">
+                      Clinician
+                    </span>
+                  </div>
+                  <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                    <div data-ds-id="Icon" data-variant="inherit" color="inherit"
+                      class="css-cjtild-StyledIcon e1kkd7uc0">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="m4 6 4 4 4-4"></path>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </span>
+      </div>
+    </div>
+
+    <!-- Middle container: searchbar -->
+    <div class="bb849ffc5190dffa--middleContainer bb849ffc5190dffa--centeredWithPageContent">
+      <div class="bb849ffc5190dffa--searchbar">
+        <div class="df6e9ca673f823ba--searchbarContainer df6e9ca673f823ba--isNavBarVariant">
+          <div data-ds-id="Columns" class="css-e0dlqe-StyledColumns e144tdwe1">
+            <div data-ds-id="Column" class="css-1kzf5bh-StyledColumn e144tdwe0">
+              <div>
+                <div class="c984e02aea611416--container">
+                  <div class="c984e02aea611416--inputContainer">
+                    <div class="MuiAutocomplete-root MuiAutocomplete-hasClearIcon css-f7t77y"
+                      data-e2e-test-id="amboss-search-input">
+                      <div class="c984e02aea611416--textFieldWrapper">
+                        <div class="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-feqhe6">
+                          <div
+                            class="MuiInputBase-root MuiInput-root c984e02aea611416--inputRoot MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-adornedStart MuiInputBase-adornedEnd MuiAutocomplete-inputRoot css-rb2hiw">
+                            <div data-ds-id="Box" class="css-mnx7lc-StyledBox ebcgi2u0">
+                              <div data-ds-id="Icon" data-variant="tertiary" color="tertiary"
+                                class="css-1eyirtp-StyledIcon e1kkd7uc0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                  viewBox="0 0 16 16">
+                                  <path fill-rule="evenodd"
+                                    d="M6.667 1a5.667 5.667 0 1 0 3.237 10.318l3.389 3.39a1 1 0 0 0 1.414-1.415l-3.389-3.389A5.667 5.667 0 0 0 6.666 1M3 6.667a3.667 3.667 0 1 1 7.333 0 3.667 3.667 0 0 1-7.333 0"
+                                    clip-rule="evenodd"></path>
+                                </svg>
+                              </div>
+                            </div>
+
+                            <input aria-invalid="false" autocomplete="off" id="amboss-search-input"
+                              placeholder="Ask a clinical question" type="text"
+                              class="MuiInputBase-input MuiInput-input c984e02aea611416--inputField MuiInputBase-inputAdornedStart MuiInputBase-inputAdornedEnd MuiAutocomplete-input MuiAutocomplete-inputFocused css-mnn31"
+                              aria-autocomplete="both" aria-expanded="false" autocapitalize="none" spellcheck="false"
+                              role="combobox" data-hj-allow="true" value="" />
+
+                            <div class="c984e02aea611416--keyboardShortcutHint">
+                              <p data-ds-id="Text" class="css-1u86dlv-StyledText eadloo90">⌘+K</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+
+                
+              </div>
+            </div> <!-- /Column -->
+          </div> <!-- /Columns -->
+        </div> <!-- /searchbarContainer -->
+      </div> <!-- /searchbar -->
+    </div> <!-- /middleContainer -->
+
+    <!-- Right side icons -->
+    <div class="bb849ffc5190dffa--topNavEndContainer">
+      <div data-ds-id="Inline" class="css-9p6zwo-InlineContainer e6i75dx0">
+        <!-- Collections button -->
+        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+          <span tabindex="0">
+            <button data-ds-id="PictogramButton" type="button" aria-label="Go to collections"
+              data-testid="collections-button" class="css-f83uhv-StyledPictogramButton ej9y1j50">
+              <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                  <div data-e2e-test-id="lists" data-testid="lists" data-ds-id="Icon" data-variant="inherit"
+                    color="inherit" aria-hidden="true" class="css-fsm7y8-StyledIcon e1kkd7uc0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                      <path fill="currentColor"
+                        d="M4 3.667C4 3.325 4.293 3 4.714 3h8.572a.72.72 0 0 1 .66.41 1 1 0 0 0 1.824-.82A2.72 2.72 0 0 0 13.286 1H4.714C3.242 1 2 2.168 2 3.667V17a1 1 0 0 0 1.57.821l2-1.389a1 1 0 0 0-1.14-1.642l-.43.298z">
+                      </path>
+                      <path fill="currentColor" fill-rule="evenodd"
+                        d="M10.714 6C9.242 6 8 7.168 8 8.667V22a1 1 0 0 0 1.57.821l5.43-3.77 5.43 3.77A1 1 0 0 0 22 22V8.667C22 7.167 20.758 6 19.286 6zM10 8.667c0-.342.293-.667.714-.667h8.572c.42 0 .714.325.714.667v11.421l-4.43-3.076a1 1 0 0 0-1.14 0L10 20.088z"
+                        clip-rule="evenodd"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </button>
+          </span>
+        </div>
+
+        <!-- User menu -->
+        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+          <div>
+            <div aria-label="Account Menu" class="d70dcff543b0a8d8--userMenuIcon notranslate"
+              data-e2e-test-id="user-menu-icon" data-testid="user-menu-button" role="button" tabindex="0">
+              <div class="notranslate _29aad051d1626085--container _29aad051d1626085--brand"
+                data-test-id="CircledCharacter">
+                J
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sidebar-wrapper" class="_6eb1c4a28c8c5a44--context _6eb1c4a28c8c5a44--contextNavIsOpen"
+    data-e2e-test-id="context-navigation">
+
+    <nav class="d5fef2c66969dc7e--contextNavContainer" data-e2e-test-id="context-navigation-container"
+      id="context-menu">
+
+      <div class="d5fef2c66969dc7e--contextNavChild d5fef2c66969dc7e--contextNavL0">
+        <div>
+
+          <!-- Home -->
+          <div id="sidebar-item-home"
+            class="_4cc9ddf83d96bbf8--container _4cc9ddf83d96bbf8--containerHighlight ContextL0MenuElement__container">
+            <button class="_4cc9ddf83d96bbf8--header" type="button">
+              <div class="_4cc9ddf83d96bbf8--topLevel">
+
+                <div class="_4cc9ddf83d96bbf8--icon">
+                  <div data-ds-id="Icon" data-variant="inherit" color="inherit"
+                    class="css-16s79oa-StyledIcon e1kkd7uc0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+                      stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                      <path d="M9 22V12h6v10"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <div data-e2e-test-id="home-sidebar-option">Home</div>
+
+              </div>
+            </button>
+
+            <div aria-hidden="true" class="rah-static">
+              <div></div>
+            </div>
+          </div>
+
+          <!-- Drugs -->
+          <div id="sidebar-item-drugs" class="_4cc9ddf83d96bbf8--container ContextL0MenuElement__container">
+            <button class="_4cc9ddf83d96bbf8--header" type="button">
+              <div class="_4cc9ddf83d96bbf8--topLevel">
+
+                <div class="_4cc9ddf83d96bbf8--icon">
+                  <div data-ds-id="Icon" data-variant="inherit" color="inherit"
+                    class="css-16s79oa-StyledIcon e1kkd7uc0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4.222 12.707a5 5 0 0 0 7.071 7.071l4.243-4.242-7.071-7.072z"></path>
+                      <path fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="2" d="M12.707 4.222 8.465 8.464l7.07 7.072 4.244-4.243a5 5 0 1 0-7.072-7.071">
+                      </path>
+                    </svg>
+                  </div>
+                </div>
+
+                <div data-e2e-test-id="drugs-sidebar-option">Drugs</div>
+
+              </div>
+            </button>
+
+            <div aria-hidden="true" class="rah-static">
+              <div></div>
+            </div>
+          </div>
+
+          <!-- Clinical resources -->
+          <div id="sidebar-item-clinical"
+            class="_4cc9ddf83d96bbf8--container _4cc9ddf83d96bbf8--containerExpanded ContextL0MenuElement__container">
+            <button class="_4cc9ddf83d96bbf8--header" type="button">
+              <div class="_4cc9ddf83d96bbf8--topLevel">
+
+                <div class="_4cc9ddf83d96bbf8--icon">
+                  <div data-ds-id="Icon" data-variant="inherit" color="inherit"
+                    class="css-16s79oa-StyledIcon e1kkd7uc0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+                      stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M13.1 2.5h2.3v4.6c0 3.2-2.6 5.7-5.7 5.7S4 10.2 4 7.1V2.5h2.3"></path>
+                      <circle cx="17.7" cy="15" r="2.3"></circle>
+                      <path d="M17.7 17.5c0 2.2-1.8 4-4 4s-4-1.8-4-4m0 0v-4"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <div data-e2e-test-id="clinical-resources-sidebar-option">
+                  Clinical resources
+                </div>
+
+              </div>
+
+              <div class="_4cc9ddf83d96bbf8--chevronContainer" data-e2e-test-id="L0Chevron-Clinical resources">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round"
+                  stroke-linejoin="round" stroke-width="2" class="icon _4cc9ddf83d96bbf8--chevron" viewBox="0 0 24 24"
+                  role="img" aria-labelledby="chevron-menu-svg-icon-for-4"
+                  aria-describedby="chevron-menu-svg-icon-description-for-4">
+                  <desc id="chevron-menu-svg-icon-description-for-4">
+                    click to collapse submenu
+                  </desc>
+                  <title id="chevron-menu-svg-icon-for-4">collapse submenu</title>
+                  <path d="m18 15-6-6-6 6"></path>
+                </svg>
+              </div>
+            </button>
+
+            <div aria-hidden="false" class="rah-static">
+              <div>
+                <div class="_4cc9ddf83d96bbf8--secondLevelLinkContainer" data-e2e-test-id="L0SecondLevel">
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink" data-e2e-test-id="quick-guides-sidebar-option"
+                    type="button">
+                    Quick Guides
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink"
+                    data-e2e-test-id="acute-management-checklists-sidebar-option" type="button">
+                    Acute management checklists
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink" data-e2e-test-id="flowcharts-sidebar-option"
+                    type="button">
+                    Flowcharts
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink" data-e2e-test-id="calculators-sidebar-option"
+                    type="button">
+                    Calculators
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink"
+                    data-e2e-test-id="clinical-guidelines-sidebar-option" type="button">
+                    Clinical guidelines
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink" data-e2e-test-id="dot-phrases-sidebar-option"
+                    type="button">
+                    Dot Phrases
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Exams & CME -->
+          <div id="sidebar-item-exams"
+            class="_4cc9ddf83d96bbf8--container _4cc9ddf83d96bbf8--containerExpanded ContextL0MenuElement__container">
+            <button class="_4cc9ddf83d96bbf8--header" type="button">
+              <div class="_4cc9ddf83d96bbf8--topLevel">
+
+                <div class="_4cc9ddf83d96bbf8--icon">
+                  <div data-ds-id="Icon" data-variant="inherit" color="inherit"
+                    class="css-16s79oa-StyledIcon e1kkd7uc0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+                      viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2 1 8l11 6 11-6z"
+                        clip-rule="evenodd"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11v7l7 4.5 7-4.5v-7">
+                      </path>
+                      <path stroke-linecap="round" stroke-width="2" d="M23 8v8"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <div data-e2e-test-id="exams-cme-sidebar-option">
+                  Exams &amp; CME
+                </div>
+
+              </div>
+
+              <div class="_4cc9ddf83d96bbf8--chevronContainer" data-e2e-test-id="L0Chevron-Exams &amp; CME">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round"
+                  stroke-linejoin="round" stroke-width="2" class="icon _4cc9ddf83d96bbf8--chevron" viewBox="0 0 24 24"
+                  role="img" aria-labelledby="chevron-menu-svg-icon-for-5"
+                  aria-describedby="chevron-menu-svg-icon-description-for-5">
+                  <desc id="chevron-menu-svg-icon-description-for-5">
+                    click to collapse submenu
+                  </desc>
+                  <title id="chevron-menu-svg-icon-for-5">collapse submenu</title>
+                  <path d="m18 15-6-6-6 6"></path>
+                </svg>
+              </div>
+            </button>
+
+            <div aria-hidden="false" class="rah-static">
+              <div>
+                <div class="_4cc9ddf83d96bbf8--secondLevelLinkContainer" data-e2e-test-id="L0SecondLevel">
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink" data-e2e-test-id="qbank-sidebar-option"
+                    type="button" onclick="if(window.loadQbankSession) window.loadQbankSession()">
+                    Qbank
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink" data-e2e-test-id="session-history-sidebar-option"
+                    type="button">
+                    Session history
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink"
+                    data-e2e-test-id="study-plans-and-courses-sidebar-option" type="button">
+                    Study plans and courses
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink" data-e2e-test-id="study-summary-sidebar-option"
+                    type="button">
+                    Study summary
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink" data-e2e-test-id="session-analysis-sidebar-option"
+                    type="button" onclick="if(window.loadSessionAnalysis) window.loadSessionAnalysis()">
+                    Session analysis
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink"
+                    data-e2e-test-id="usmle-score-predictor-sidebar-option" type="button">
+                    USMLE score predictor
+                  </button>
+                  <a class="_4cc9ddf83d96bbf8--secondLevelLink _4cc9ddf83d96bbf8--block"
+                    data-e2e-test-id="cme-credits-sidebar-option" href="https://www.amboss.com/us/account/cme"
+                    rel="noopener noreferrer" target="_self">
+                    CME credits
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Library -->
+          <div id="sidebar-item-library"
+            class="_4cc9ddf83d96bbf8--container _4cc9ddf83d96bbf8--containerExpanded ContextL0MenuElement__container">
+            <button class="_4cc9ddf83d96bbf8--header" type="button">
+              <div class="_4cc9ddf83d96bbf8--topLevel">
+
+                <div class="_4cc9ddf83d96bbf8--icon">
+                  <div data-ds-id="Icon" data-variant="inherit" color="inherit"
+                    class="css-16s79oa-StyledIcon e1kkd7uc0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+                      stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <div data-e2e-test-id="library-sidebar-option">Library</div>
+
+              </div>
+
+              <div class="_4cc9ddf83d96bbf8--chevronContainer" data-e2e-test-id="L0Chevron-Library">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round"
+                  stroke-linejoin="round" stroke-width="2" class="icon _4cc9ddf83d96bbf8--chevron" viewBox="0 0 24 24"
+                  role="img" aria-labelledby="chevron-menu-svg-icon-for-7"
+                  aria-describedby="chevron-menu-svg-icon-description-for-7">
+                  <desc id="chevron-menu-svg-icon-description-for-7">
+                    click to collapse submenu
+                  </desc>
+                  <title id="chevron-menu-svg-icon-for-7">collapse submenu</title>
+                  <path d="m18 15-6-6-6 6"></path>
+                </svg>
+              </div>
+            </button>
+
+            <div aria-hidden="false" class="rah-static">
+              <div>
+                <div class="_4cc9ddf83d96bbf8--secondLevelLinkContainer" data-e2e-test-id="L0SecondLevel">
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink" data-e2e-test-id="articles-sidebar-option"
+                    type="button">
+                    Articles
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink" data-e2e-test-id="videos-sidebar-option"
+                    type="button">
+                    Videos
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink" data-e2e-test-id="media-library-sidebar-option"
+                    type="button">
+                    Media Library
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account & settings -->
+          <div id="sidebar-item-account"
+            class="_4cc9ddf83d96bbf8--container _4cc9ddf83d96bbf8--containerExpanded ContextL0MenuElement__container">
+            <button class="_4cc9ddf83d96bbf8--header" type="button">
+              <div class="_4cc9ddf83d96bbf8--topLevel">
+
+                <div class="_4cc9ddf83d96bbf8--icon">
+                  <div data-ds-id="Icon" data-variant="inherit" color="inherit"
+                    class="css-16s79oa-StyledIcon e1kkd7uc0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+                      stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                  </div>
+                </div>
+
+                <div data-e2e-test-id="account-settings-sidebar-option">
+                  Account &amp; settings
+                </div>
+
+              </div>
+
+              <div class="_4cc9ddf83d96bbf8--chevronContainer" data-e2e-test-id="L0Chevron-Account &amp; settings">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round"
+                  stroke-linejoin="round" stroke-width="2" class="icon _4cc9ddf83d96bbf8--chevron" viewBox="0 0 24 24"
+                  role="img" aria-labelledby="chevron-menu-svg-icon-for-9"
+                  aria-describedby="chevron-menu-svg-icon-description-for-9">
+                  <desc id="chevron-menu-svg-icon-description-for-9">
+                    click to collapse submenu
+                  </desc>
+                  <title id="chevron-menu-svg-icon-for-9">collapse submenu</title>
+                  <path d="m18 15-6-6-6 6"></path>
+                </svg>
+              </div>
+            </button>
+
+            <div aria-hidden="false" class="rah-static">
+              <div>
+                <div class="_4cc9ddf83d96bbf8--secondLevelLinkContainer" data-e2e-test-id="L0SecondLevel">
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink"
+                    data-e2e-test-id="career-study-profile-sidebar-option" type="button">
+                    Career &amp; study profile
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink"
+                    data-e2e-test-id="contact-details-settings-sidebar-option" type="button">
+                    Contact details &amp; settings
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink"
+                    data-e2e-test-id="membership-licenses-sidebar-option" type="button">
+                    Membership &amp; licenses
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink" data-e2e-test-id="invoices-sidebar-option"
+                    type="button">
+                    Invoices
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink" data-e2e-test-id="payment-info-sidebar-option"
+                    type="button">
+                    Payment info
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink" data-e2e-test-id="redeem-a-code-sidebar-option"
+                    type="button">
+                    Redeem a code
+                  </button>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink"
+                    data-e2e-test-id="activate-institutional-license-sidebar-option" type="button">
+                    Activate institutional license
+                  </button>
+                  <a class="_4cc9ddf83d96bbf8--secondLevelLink _4cc9ddf83d96bbf8--block"
+                    data-e2e-test-id="notes-more-sidebar-option"
+                    href="https://www.amboss.com/us/account/index?view=group" rel="noopener noreferrer" target="_self">
+                    Notes &amp; more
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Help & privacy -->
+          <div id="sidebar-item-help"
+            class="_4cc9ddf83d96bbf8--container _4cc9ddf83d96bbf8--containerExpanded ContextL0MenuElement__container">
+            <button class="_4cc9ddf83d96bbf8--header" type="button">
+              <div class="_4cc9ddf83d96bbf8--topLevel">
+
+                <div class="_4cc9ddf83d96bbf8--icon">
+                  <div data-ds-id="Icon" data-variant="inherit" color="inherit"
+                    class="css-16s79oa-StyledIcon e1kkd7uc0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+                      stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m.08 4h.01"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <div data-e2e-test-id="help-privacy-sidebar-option">
+                  Help &amp; privacy
+                </div>
+
+              </div>
+
+              <div class="_4cc9ddf83d96bbf8--chevronContainer" data-e2e-test-id="L0Chevron-Help &amp; privacy">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round"
+                  stroke-linejoin="round" stroke-width="2" class="icon _4cc9ddf83d96bbf8--chevron" viewBox="0 0 24 24"
+                  role="img" aria-labelledby="chevron-menu-svg-icon-for-10"
+                  aria-describedby="chevron-menu-svg-icon-description-for-10">
+                  <desc id="chevron-menu-svg-icon-description-for-10">
+                    click to collapse submenu
+                  </desc>
+                  <title id="chevron-menu-svg-icon-for-10">collapse submenu</title>
+                  <path d="m18 15-6-6-6 6"></path>
+                </svg>
+              </div>
+            </button>
+
+            <div aria-hidden="false" class="rah-static">
+              <div>
+                <div class="_4cc9ddf83d96bbf8--secondLevelLinkContainer" data-e2e-test-id="L0SecondLevel">
+                  <a class="_4cc9ddf83d96bbf8--secondLevelLink _4cc9ddf83d96bbf8--block"
+                    data-e2e-test-id="help-center-sidebar-option" href="https://support.amboss.com/hc/en-us"
+                    rel="noopener noreferrer" target="_blank">
+                    Help Center
+                  </a>
+                  <a class="_4cc9ddf83d96bbf8--secondLevelLink _4cc9ddf83d96bbf8--block"
+                    data-e2e-test-id="terms-conditions-sidebar-option" href="https://www.amboss.com/us/terms"
+                    rel="noopener noreferrer" target="_blank">
+                    Terms &amp; Conditions
+                  </a>
+                  <a class="_4cc9ddf83d96bbf8--secondLevelLink _4cc9ddf83d96bbf8--block"
+                    data-e2e-test-id="privacy-policy-sidebar-option" href="https://www.amboss.com/us/privacy"
+                    rel="noopener noreferrer" target="_blank">
+                    Privacy policy
+                  </a>
+                  <a class="_4cc9ddf83d96bbf8--secondLevelLink _4cc9ddf83d96bbf8--block"
+                    data-e2e-test-id="legal-notice-sidebar-option" href="https://www.amboss.com/us/legal/legal-notice"
+                    rel="noopener noreferrer" target="_blank">
+                    Legal notice
+                  </a>
+                  <button class="_4cc9ddf83d96bbf8--secondLevelLink" data-e2e-test-id="privacy-settings-sidebar-option"
+                    type="button">
+                    Privacy settings
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- Secondary Sidebar (L1) - Table of Contents -->
+      <div class="d5fef2c66969dc7e--contextNavChild d5fef2c66969dc7e--contextNavL1" id="context-nav-l1" style="display: none;">
+        <!-- Content will be loaded dynamically from sidebar-toc.html -->
+      </div>
+
+
+      <!-- Chevron to collapse side navigation -->
+      <div class="d5fef2c66969dc7e--chevronContainer">
+        <button id="sidebar-collapse-btn" class="_89b1e62f6131c5f4--container _89b1e62f6131c5f4--pushIconLeft"
+          data-e2e-test-id="chevron-button" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round"
+            stroke-linejoin="round" stroke-width="2" class="svg-35917296__feather svg-35917296__feather-chevron-left"
+            viewBox="0 0 24 24" role="img" aria-labelledby="chevron-left-title" aria-describedby="chevron-left-desc">
+            <desc id="chevron-left-desc">
+              Click to collapse the side navigation panel
+            </desc>
+            <title id="chevron-left-title">collapse side navigation</title>
+            <path d="m15 18-6-6 6-6"></path>
+          </svg>
+        </button>
+      </div>
+
+    </nav>
+  </div>
+
+
+
+  <main id="main-content" class="bancomicina-main"></main>
+
+
+
+
+  </div>
+
+
+
+
+  <div id="suspender_tab_manager"><template shadowrootmode="open">
+      <div><!---->
+
+
+
+        << /div>
+    </template></div>
+
+
+
+  <script>
+
+
+    // Cargar contenido en el panel principal desde un HTML externo
+    function loadMainContent(url) {
+      var main = document.getElementById('main-content');
+      if (!main) return;
+
+      // Limpiar modo split si estaba activo
+      main.classList.remove('split-mode');
+      main.innerHTML = ''; 
+
+      fetch(url)
+        .then(function (response) {
+          if (!response.ok) throw new Error('Error cargando ' + url);
+          return response.text();
+        })
+        .then(function (html) {
+          main.innerHTML = html;
+
+          // Ejecutar scripts que vengan en el HTML inyectado
+          var scripts = main.querySelectorAll('script');
+          scripts.forEach(function (oldScript) {
+            var newScript = document.createElement('script');
+            // Copiar atributos (src, type, etc.)
+            Array.from(oldScript.attributes).forEach(function (attr) {
+              newScript.setAttribute(attr.name, attr.value);
+            });
+            // Copiar contenido inline
+            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+            // Reemplazar el script viejo por el nuevo para que el navegador lo ejecute
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+          });
+        })
+        .catch(function (err) {
+          console.error('No se pudo cargar el contenido:', err);
+        });
+    }
+    window.loadMainContent = loadMainContent;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+    
+
+    // Expuesta para que articles.html pueda abrir
+    // la vista de contenido de subcategoría al hacer
+    // clic en un ítem del tercer panel.
+    window.showSubcatFromArticles = function (subcat) {
+      console.log('Loading content for subcat:', subcat);
+      
+      // Update or clear document path in sessionStorage
+      if (subcat && subcat.docPath) {
+        sessionStorage.setItem('currentDocPath', subcat.docPath);
+        console.log('Set document path:', subcat.docPath);
+        
+        // Save to recent articles
+        try {
+          const user = firebase.auth().currentUser;
+          const title = subcat.titulo || subcat.denominacion || subcat.title || subcat.nombre || 'Untitled article';
+          
+          if (user) {
+            // Use subcat.id as document ID for shorter and cleaner path
+             const docId = subcat.id || btoa(subcat.docPath).replace(/\//g, '_').replace(/\+/g, '-');
+             db.collection('users').doc(user.uid).collection('recentArticles').doc(docId).set({
+              id: subcat.id || '',
+              title: title,
+              docPath: subcat.docPath,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+          }
+
+          // Fallback to localStorage
+          const recent = JSON.parse(localStorage.getItem('recentArticles') || '[]');
+          const filtered = recent.filter(item => item.docPath !== subcat.docPath);
+          filtered.unshift({ title: title, docPath: subcat.docPath, timestamp: Date.now() });
+          localStorage.setItem('recentArticles', JSON.stringify(filtered.slice(0, 10)));
+        } catch (e) {
+          console.error('Error saving recent articles:', e);
+        }
+      } else {
+        sessionStorage.removeItem('currentDocPath');
+        console.log('Cleared document path (missing docPath)');
+      }
+      
+      // Colapsar sidebar al entrar en contenido de subcategoría
+      minimizeSidebar();
+      
+      // Limpiar selección del sidebar principal (Library icon highlight, etc)
+      if (typeof clearMainSidebarSelections === 'function') {
+        clearMainSidebarSelections();
+      }
+
+      const mainContent = document.getElementById('main-content');
+      if (!mainContent) return;
+
+      // Show loading state
+      mainContent.innerHTML = '<div style="padding: 40px; text-align: center;"><span data-loading-spinner data-size="20"></span></div>';
+      if (window.AmbossUI && window.AmbossUI.initLoadingSpinners) {
+        window.AmbossUI.initLoadingSpinners();
+      }
+
+      // 1. Check if content is already merged in the subcategory object
+      if (subcat.html_completo) {
+        console.log('Content found directly in subcategory object.');
+        mainContent.innerHTML = subcat.html_completo;
+        return;
+      }
+
+      // 2. Fallback: Try to fetch from 'articulos_contenido' (legacy/alternative method)
+      if (subcat.id) {
+        db.collection('articulos_contenido').doc(subcat.id).get()
+          .then((doc) => {
+            if (doc.exists) {
+              const data = doc.data();
+              mainContent.innerHTML = data.html_completo || '<p>No content available.</p>';
+            } else {
+              console.warn('Content not found in merged object or separate collection. ID:', subcat.id);
+              // 3. Last resort: Static file
+              loadMainContent('subcategoriacontent.html');
+            }
+          })
+          .catch((error) => {
+            console.error('Error getting content document:', error);
+            mainContent.innerHTML = '<p>Error loading content. Please try again.</p>';
+          });
+      } else {
+        loadMainContent('subcategoriacontent.html');
+      }
+    };
+
+    // Función para minimizar el sidebar (modo iconos)
+    function minimizeSidebar(sidebarUrl) {
+      sidebarUrl = sidebarUrl || 'sidebar-toc.html'; // Default to article TOC
+
+      var navChild = document.querySelector('.d5fef2c66969dc7e--contextNavChild');
+      if (navChild) {
+        navChild.classList.add('d5fef2c66969dc7e--l0Collapsed');
+      }
+
+      // Respetar el estado de visibilidad persistido
+      var sidebarWrapper = document.getElementById('sidebar-wrapper');
+      if (sidebarWrapper) {
+          const isPersistedVisible = localStorage.getItem('sidebarVisible');
+          if (isPersistedVisible === 'false') {
+              sidebarWrapper.classList.add('bancomicina-sidebar-hidden');
+              document.body.classList.add('sidebar-collapsed');
+          } else {
+              sidebarWrapper.classList.remove('bancomicina-sidebar-hidden');
+              document.body.classList.remove('sidebar-collapsed');
+          }
+      }
+      
+      // Cargar y mostrar sidebar secundaria (L1)
+      var l1Sidebar = document.getElementById('context-nav-l1');
+      if (l1Sidebar) {
+        // Check if we need to load different content
+        var currentUrl = l1Sidebar.getAttribute('data-loaded-url');
+        var currentContext = sessionStorage.getItem('currentDocPath') || '';
+        var previousContext = l1Sidebar.getAttribute('data-loaded-context');
+
+        // Si es la misma URL Y el mismo contexto (mismo artículo), usar caché
+        if (currentUrl === sidebarUrl && previousContext === currentContext && l1Sidebar.innerHTML.trim() !== '') {
+           l1Sidebar.style.display = 'block';
+           return;
+        }
+
+        // Update current loaded attributes
+        l1Sidebar.setAttribute('data-loaded-url', sidebarUrl);
+        l1Sidebar.setAttribute('data-loaded-context', currentContext);
+
+        // Cargar contenido dinámicamente
+        fetch(sidebarUrl)
+            .then(function(response) {
+              if (!response.ok) throw new Error('Error cargando ' + sidebarUrl);
+              return response.text();
+            })
+            .then(function(html) {
+              l1Sidebar.innerHTML = html;
+              l1Sidebar.style.display = 'block';
+              
+              // Ejecutar scripts que vengan en el HTML inyectado
+              var scripts = l1Sidebar.querySelectorAll('script');
+              scripts.forEach(function (oldScript) {
+                var newScript = document.createElement('script');
+                // Copiar atributos (src, type, etc.)
+                Array.from(oldScript.attributes).forEach(function (attr) {
+                  newScript.setAttribute(attr.name, attr.value);
+                });
+                // Copiar contenido inline
+                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                // Reemplazar el script viejo por el nuevo para que el navegador lo ejecute
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+              });
+            })
+            .catch(function(err) {
+              console.error('No se pudo cargar la sidebar secundaria:', err);
+              l1Sidebar.innerHTML = '<p style="padding:10px; color:red">Error loading sidebar.</p>';
+            });
+      }
+    }
+
+    // Función para restaurar el sidebar (modo normal)
+    function resetSidebar() {
+      var navChild = document.querySelector('.d5fef2c66969dc7e--contextNavChild');
+      if (navChild) {
+        navChild.classList.remove('d5fef2c66969dc7e--l0Collapsed');
+      }
+
+      // Ocultar sidebar secundaria (L1)
+      var l1Sidebar = document.getElementById('context-nav-l1');
+      if (l1Sidebar) {
+        l1Sidebar.style.display = 'none';
+      }
+    }
+
+    window.minimizeSidebar = minimizeSidebar;
+    window.resetSidebar = resetSidebar;
+
+    // Función para cargar Qbank Session con sidebar colapsada
+    window.loadQbankSession = function() {
+      console.log('Loading Qbank Session...');
+      
+      // Reset answered questions for a fresh session
+      sessionStorage.removeItem('answeredQuestions');
+      sessionStorage.removeItem('currentQuestionId');
+      sessionStorage.removeItem('qTimes');
+      console.log('🧹 Answered questions, position and timers cleared.');
+      
+      // Colapsar sidebar principal y mostrar secundaria específica de Qbank
+      minimizeSidebar('sidebar-toc2.html');
+      
+      // Cargar contenido de qbanksesion.html
+      loadMainContent('qbanksesion.html');
+    }
+
+    // Función para cargar Session Analysis con sidebar colapsada
+    window.loadSessionAnalysis = function() {
+      console.log('Loading Session Analysis...');
+      minimizeSidebar('sidebartoc3.html');
+      loadMainContent('analysis.html');
+    }
+
+    // Función para cargar Vista Dividida (Split View)
+    window.loadSplitView = function(gallery, index) {
+      console.log('Loading Split View...', gallery ? `with ${gallery.length} items` : 'no gallery data');
+      var main = document.getElementById('main-content');
+      if (!main) return;
+
+      // Check if already in split mode to avoid accumulation/nesting
+      if (main.classList.contains('split-mode')) {
+         console.log('Already in split mode, just updating right panel if needed.');
+         var splitRight = document.getElementById('split-right');
+         if(splitRight) {
+             splitRight.innerHTML = ''; // clear current right content
+             inject(typeof gallery === 'string' ? gallery : 'mediavisor2.html', splitRight);
+         }
+         return;
+      }
+
+      // 1. Capture current scroll position of main content (or window, depending on layout)
+      // Since body has overflow:hidden and main usually scrolls? 
+      // Actually per CSS: #main-content.split-mode { overflow: hidden }
+      // But before split mode, main might be scrolling if it has overflow: auto/scroll
+      // Let's try to get scrollTop from main or its first child if applicable.
+      var previousScrollTop = main.scrollTop;
+
+      // 2. Identify existing content
+      // We'll move ALL children of main into the new split-left panel
+      var existingContent = [];
+      while (main.firstChild) {
+        existingContent.push(main.firstChild);
+        main.removeChild(main.firstChild);
+      }
+
+      // 3. Set up Split Mode containers
+      main.classList.add('split-mode');
+      
+      var splitLeft = document.createElement('div');
+      splitLeft.id = 'split-left';
+      splitLeft.className = 'split-panel';
+      
+      var splitRight = document.createElement('div');
+      splitRight.id = 'split-right';
+      splitRight.className = 'split-panel';
+      
+      main.appendChild(splitLeft);
+      main.appendChild(splitRight);
+
+      // 4. Move content to Left Panel
+      if (existingContent.length > 0) {
+        existingContent.forEach(function(node) {
+          splitLeft.appendChild(node);
+        });
+        // Restore scroll position to the new container
+        splitLeft.scrollTop = previousScrollTop;
+        console.log('Moved existing content to split-left. Restored scrollTop:', previousScrollTop);
+      } else {
+        // Fallback if empty
+        inject('subcategoriacontent.html', splitLeft);
+      }
+
+      // 5. Always inject Right Panel content
+      inject(typeof gallery === 'string' ? gallery : 'mediavisor2.html', splitRight);
+
+      // 6. Highlight LABS button if applicable
+      if (gallery === 'labs.html') {
+        const labBtn = document.querySelector('[data-e2e-test-id="lab-btn"]');
+        const underline = labBtn?.nextElementSibling;
+        if (underline && underline.classList.contains('_6ccf46c0427cb323--underline')) {
+          underline.style.display = 'block';
+        }
+      }
+      
+      // Dispatch event to notify layout change
+      window.dispatchEvent(new CustomEvent('amboss:splitview-toggled', { detail: { active: true } }));
+
+      // Función auxiliar para inyectar contenido en paneles
+      function inject(url, panel) {
+        fetch(url)
+          .then(res => {
+            if (!res.ok) throw new Error('Error cargando ' + url);
+            return res.text();
+          })
+          .then(html => {
+            // Eliminar etiquetas body/html si vienen en el fragmento para evitar conflictos
+            var template = document.createElement('template');
+            template.innerHTML = html.trim();
+            panel.appendChild(template.content);
+
+            // Re-ejecutar scripts
+            var scripts = panel.querySelectorAll('script');
+            scripts.forEach(oldScript => {
+              var newScript = document.createElement('script');
+              Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+              newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+              oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+
+            // Si hay datos de galería y estamos en el panel derecho (donde va el visor), inicializarlo
+            if (url.includes('mediavisor2.html') && gallery) {
+               // Hacemos un pequeño delay para asegurar que los scripts se ejecutaron
+               setTimeout(() => {
+                 window.postMessage({
+                    type: 'INIT_GALLERY',
+                    gallery: gallery,
+                    index: index || 0
+                 }, '*'); // Enviamos a la misma ventana (self)
+               }, 100);
+            }
+          })
+          .catch(err => console.error(err));
+      }
+    }
+
+    // --- Split View Management (Unified) ---
+    // (loadSplitView is defined above)
+
+    // Utilidad genérica para colapsar/expandir elementos padre que tienen hijos
+    function initCollapsibleSidebar(options) {
+      var containers = document.querySelectorAll(options.containerSelector);
+
+      containers.forEach(function (container) {
+        var headerBtn = container.querySelector(options.headerSelector);
+        var submenuWrapper = container.querySelector(options.submenuSelector);
+
+        // Si el elemento no tiene hijos (submenu), no hacemos nada
+        if (!headerBtn || !submenuWrapper) return;
+
+        // Estado inicial: colapsado si no se definió antes
+        if (!container.hasAttribute('data-collapsed')) {
+          container.setAttribute('data-collapsed', 'true');
+        }
+
+        // Toggle genérico reutilizable
+        headerBtn.addEventListener('click', function () {
+          var isCollapsed = container.getAttribute('data-collapsed') === 'true';
+          container.setAttribute('data-collapsed', isCollapsed ? 'false' : 'true');
+        });
+      });
+    }
+
+    // Función global para limpiar TODAS las selecciones del sidebar principal (L0)
+    function clearMainSidebarSelections() {
+      document
+        .querySelectorAll('._4cc9ddf83d96bbf8--container.ContextL0MenuElement__container._4cc9ddf83d96bbf8--containerHighlight')
+        .forEach(function (el) {
+          el.classList.remove('_4cc9ddf83d96bbf8--containerHighlight');
+        });
+
+      document
+        .querySelectorAll('._4cc9ddf83d96bbf8--secondLevelLink.bancomicina-active')
+        .forEach(function (el) {
+          el.classList.remove('bancomicina-active');
+        });
+    }
+
+    // Selección de elementos del sidebar...
+    function initSidebarSelection() {
+      var containers = document.querySelectorAll('._4cc9ddf83d96bbf8--container.ContextL0MenuElement__container');
+
+      function clearAllSelections() {
+        clearMainSidebarSelections();
+      }
+
+      containers.forEach(function (container) {
+        var headerBtn = container.querySelector('button._4cc9ddf83d96bbf8--header');
+        var submenuWrapper = container.querySelector('.rah-static');
+        var secondLevelLinks = container.querySelectorAll('._4cc9ddf83d96bbf8--secondLevelLink');
+
+        var hasChildren = !!submenuWrapper && secondLevelLinks.length > 0;
+
+        // SIN hijos → se selecciona el padre
+        // SIN hijos → se selecciona el padre
+        if (!hasChildren) {
+          if (headerBtn) {
+            headerBtn.addEventListener('click', function () {
+              // Collapse other open containers when a top-level item (no children) is selected
+              containers.forEach(function(c) {
+                if (c !== container) {
+                  c.setAttribute('data-collapsed', 'true');
+                }
+              });
+
+              clearAllSelections();
+              container.classList.add('_4cc9ddf83d96bbf8--containerHighlight');
+
+              // Si es el item "Home", carga el contenido de home.html en el main content
+              if (container.id === 'sidebar-item-home') {
+                resetSidebar();
+                loadMainContent('home.html');
+              }
+            });
+          }
+          return;
+        }
+
+        // CON hijos → solo cuando se elige un hijo
+        secondLevelLinks.forEach(function (link) {
+          link.addEventListener('click', function () {
+            // Collapse other open containers when a subitem is selected
+            containers.forEach(function(c) {
+              if (c !== container) {
+                c.setAttribute('data-collapsed', 'true');
+              }
+            });
+
+            clearAllSelections();
+            container.classList.add('_4cc9ddf83d96bbf8--containerHighlight');
+            link.classList.add('bancomicina-active');
+
+            // Cargar pantallas del submenú Library
+            if (container.id === 'sidebar-item-library' &&
+              link.dataset.e2eTestId === 'articles-sidebar-option') {
+              resetSidebar();
+              loadMainContent('articles.html');
+            }
+            if (container.id === 'sidebar-item-clinical' &&
+              link.dataset.e2eTestId === 'calculators-sidebar-option') {
+              resetSidebar();
+              loadMainContent('00Bancocalculadora.html');
+            }
+          });
+        });
+      });
+    }
+
+    // Inicialización al cargar el DOM
+    document.addEventListener('DOMContentLoaded', function () {
+      try {
+        initCollapsibleSidebar({
+          containerSelector: '._4cc9ddf83d96bbf8--container.ContextL0MenuElement__container',
+          headerSelector: 'button._4cc9ddf83d96bbf8--header',
+          submenuSelector: '.rah-static'
+        });
+
+        initSidebarSelection();
+        loadMainContent('home.html');
+
+        // ============================
+        // Mostrar / ocultar barra lateral
+        // ============================
+        var sidebarWrapper = document.getElementById('sidebar-wrapper');
+        var burgerBtn = document.querySelector(
+          '.bb849ffc5190dffa--topNavStartContainer .css-1xxmsbp-StyledButton.ejph2fy0'
+        );
+        var collapseBtn = document.getElementById('sidebar-collapse-btn');
+
+        // Aplicar estado persistido inmediatamente si existe
+        const persistedVisible = localStorage.getItem('sidebarVisible');
+        if (persistedVisible !== null) {
+          // Usamos una versión simplificada aquí antes de que setSidebarVisible esté definida si es necesario,
+          // o simplemente llamamos a setSidebarVisible después de definirla.
+          // Pero como estamos dentro del DOMContentLoaded y setSidebarVisible se define justo abajo, funciona.
+        }
+
+        function setSidebarVisible(visible) {
+          if (!sidebarWrapper) return;
+
+          // Guardar estado en localStorage
+          localStorage.setItem('sidebarVisible', visible);
+
+          if (visible) {
+            sidebarWrapper.classList.remove('bancomicina-sidebar-hidden');
+            sidebarWrapper.classList.add('_6eb1c4a28c8c5a44--contextNavIsOpen');
+            sidebarWrapper.classList.remove('_6eb1c4a28c8c5a44--contextNavIsClosed');
+            document.body.classList.remove('sidebar-collapsed');
+          } else {
+            sidebarWrapper.classList.add('bancomicina-sidebar-hidden');
+            sidebarWrapper.classList.remove('_6eb1c4a28c8c5a44--contextNavIsOpen');
+            sidebarWrapper.classList.add('_6eb1c4a28c8c5a44--contextNavIsClosed');
+            document.body.classList.add('sidebar-collapsed');
+          }
+
+          if (burgerBtn) {
+            burgerBtn.setAttribute('aria-expanded', visible ? 'true' : 'false');
+          }
+          
+          // Dispatch custom event to notify other components (e.g., bottom bar in qbanksesion)
+          window.dispatchEvent(new CustomEvent('amboss:sidebar-toggled', {
+            detail: { visible: visible }
+          }));
+        }
+
+        // Aplicar el estado inicial persistido
+        if (persistedVisible !== null) {
+          setSidebarVisible(persistedVisible === 'true');
+        }
+
+        // Toggle desde el botón burger (top izquierda)
+        if (burgerBtn && sidebarWrapper) {
+          burgerBtn.addEventListener('click', function () {
+            var isHidden = sidebarWrapper.classList.contains('bancomicina-sidebar-hidden');
+            setSidebarVisible(isHidden);
+          });
+        }
+
+        // Chevron dentro del sidebar → solo colapsa
+        if (collapseBtn && sidebarWrapper) {
+          collapseBtn.addEventListener('click', function () {
+            setSidebarVisible(false);
+          });
+        }
+
+        // ============================
+        // Auto-collapse subitems on sidebar mouseleave (User Request)
+        // ============================que 
+        if (sidebarWrapper) {
+          sidebarWrapper.addEventListener('mouseleave', function () {
+             // Only collpase submenus if the sidebar is in "minimized/icon" mode
+             var navChild = document.querySelector('.d5fef2c66969dc7e--contextNavChild');
+             var isMinimized = navChild && navChild.classList.contains('d5fef2c66969dc7e--l0Collapsed');
+
+             if (isMinimized) {
+               // Collapse all L0 submenus
+               var containers = document.querySelectorAll('._4cc9ddf83d96bbf8--container.ContextL0MenuElement__container');
+               containers.forEach(function (container) {
+                 container.setAttribute('data-collapsed', 'true');
+               });
+             }
+          });
+        }
+      } catch (e) {
+        console.error('Error al inicializar colapso de sidebar:', e);
+      }
+    });
+
+    // --- Global MediaViewer Functions ---
+    window.openMediaViewer2 = function(url, gallery, index) {
+      const mv2 = document.getElementById('mv2');
+      const mv2f = document.getElementById('mv2f');
+      
+      if (!mv2 || !mv2f) return;
+
+      // 1. Hide overlay and clear iframe immediately
+      mv2.style.display = "none";
+      mv2f.src = '';
+
+      // 2. Check if split mode is active and close it first
+      const main = document.getElementById('main-content');
+      if (main && main.classList.contains('split-mode')) {
+        console.log('Split mode detected, closing before opening overlay...');
+        
+        // Find existing content in split-left
+        var splitLeft = document.getElementById('split-left');
+        var previousScrollTop = 0;
+        
+        if (splitLeft) {
+            // Capture scroll top of the split panel
+            previousScrollTop = splitLeft.scrollTop;
+            
+            // Move ALL children of split-left back to main-content
+            while(splitLeft.firstChild) {
+                main.appendChild(splitLeft.firstChild);
+            }
+        }
+
+        // Remove split wrappers
+        var splitRight = document.getElementById('split-right');
+        if (splitLeft) splitLeft.parentNode.removeChild(splitLeft);
+        if (splitRight) splitRight.parentNode.removeChild(splitRight);
+
+        // Clean up main class
+        main.classList.remove('split-mode');
+        
+        // Restore scroll position
+        main.scrollTop = previousScrollTop;
+        console.log('Split mode closed. Restored scroll position:', previousScrollTop);
+      }
+
+      // 3. Load new image and show overlay only after split is closed
+      setTimeout(function() {
+        mv2f.src = url;
+        
+        // Listen for iframe load to send gallery data
+        mv2f.onload = function() {
+          // Show overlay only when new image is loaded
+          mv2.style.display = "block";
+          document.body.style.overflow = "hidden";
+          
+          if (gallery) {
+            mv2f.contentWindow.postMessage({
+              type: 'INIT_GALLERY',
+              gallery: gallery,
+              index: index || 0
+            }, '*');
+          }
+        };
+      }, 100);
+    };
+
+    window.closeMediaViewer2 = function() {
+      const mv2 = document.getElementById('mv2');
+      const mv2f = document.getElementById('mv2f');
+      
+      // 1. Close overlay if open
+      if (mv2 && mv2f && mv2.style.display === "block") {
+        mv2f.src = "";
+        mv2.style.display = "none";
+        document.body.style.overflow = "";
+      }
+
+      // 2. Clear split mode if active
+      const main = document.getElementById('main-content');
+      if (main && main.classList.contains('split-mode')) {
+        console.log('Split mode detected, reverting...');
+        
+        // Find existing content in split-left
+        var splitLeft = document.getElementById('split-left');
+        var previousScrollTop = 0;
+        
+        if (splitLeft) {
+            // Capture scroll top of the split panel
+            previousScrollTop = splitLeft.scrollTop;
+            
+            // Move ALL children of split-left back to main-content
+            while(splitLeft.firstChild) {
+                main.appendChild(splitLeft.firstChild);
+            }
+        }
+
+        // Remove split wrappers
+        var splitRight = document.getElementById('split-right');
+        if (splitLeft) splitLeft.parentNode.removeChild(splitLeft); // remove empty split left
+        if (splitRight) splitRight.parentNode.removeChild(splitRight); // remove split right
+
+        // Clean up main class
+        main.classList.remove('split-mode');
+        
+        // Restore scroll position
+        main.scrollTop = previousScrollTop;
+        console.log('Restored main content. Top:', previousScrollTop);
+        window.dispatchEvent(new CustomEvent('amboss:splitview-toggled', { detail: { active: false } }));
+      }
+    };
+
+    // Función para salir de Vista Dividida
+    window.exitSplitView = function() {
+      console.log('Exiting Split View...');
+      const main = document.getElementById('main-content');
+      const mv2 = document.getElementById('mv2');
+      const splitRight = document.getElementById('split-right');
+      const isMedia = !!splitRight?.querySelector('.media-viewer-shell');
+
+      // 1. Revert Split Mode if active
+      if (main && main.classList.contains('split-mode')) {
+         var splitLeft = document.getElementById('split-left');
+         var previousScrollTop = 0;
+         if (splitLeft) {
+            previousScrollTop = splitLeft.scrollTop;
+            while(splitLeft.firstChild) {
+                main.appendChild(splitLeft.firstChild);
+            }
+            splitLeft.remove();
+         }
+         if (splitRight) splitRight.remove();
+         
+         main.classList.remove('split-mode');
+         main.scrollTop = previousScrollTop;
+      }
+
+      // 2. Hide/Show Overlay and Reset State
+      if (mv2) mv2.style.display = isMedia ? "block" : "none";
+      document.body.style.overflow = isMedia ? "hidden" : "";
+
+      // 3. Deactivate LABS button if it was active
+      const labBtn = document.querySelector('[data-e2e-test-id="lab-btn"]');
+      if (labBtn) {
+        const underline = labBtn.nextElementSibling;
+        if (underline && underline.classList.contains('_6ccf46c0427cb323--underline')) {
+          underline.style.display = 'none';
+        }
+      }
+      
+      window.dispatchEvent(new CustomEvent('amboss:splitview-toggled', { detail: { active: false } }));
+
+      console.log('Split view closed. Overlay:', isMedia);
+    };
+  </script>
+
+
+
+
+
+
+  <div id="mv2" style="display:none;position:fixed;inset:0;z-index:10000; background:transparent">
+    <iframe id="mv2f" style="width:100%;height:100%;border:0;background:transparent"></iframe>
+  </div>
+
+  <!-- Modal for Maximize Table (Relocated from subcategoriacontent) -->
+<div id="table-modal-overlay"
+  class="_525e0b73ddffb195--container"
+  style="display:none; z-index:20000; position:fixed; inset:0;
+         background:rgba(0,0,0,.5); align-items:center; justify-content:center;
+       ">
+             <div class="_525e0b73ddffb195--modalContent _525e0b73ddffb195--isAutoWidth _525e0b73ddffb195--isLimitedHeight"
+      data-e2e-test-id="modalContainer">
+      <div class="_525e0b73ddffb195--btnContainer">
+        <div class="_525e0b73ddffb195--extraHeaderButtons"></div>
+        <div data-e2e-test-id="exit-modal" data-testid="exit-modal" role="button" tabindex="0" class="exit-modal-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round"
+            stroke-linejoin="round" stroke-width="2" class="icon _525e0b73ddffb195--exitBtn" viewBox="0 0 24 24"
+            role="img">
+            <path d="M18 6 6 18M6 6l12 12"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="_8a09f9dd50760900--scrollableContainer">
+        <div
+          class="a19c2cb9aca4d5ec--tableModal _3fb038ba90024ae6--censorTradeMarks a2e0dbc7f6affd28--baseStyles _3fb038ba90024ae6--censorTradeMarks"
+          data-e2e-test-id="table-modal">
+          <div class="a19c2cb9aca4d5ec--fullscreenTableControlBtn">
+            <button data-e2e-test-id="minimise table quiz" name="minimise table quiz" class="btn-minimize-table">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round"
+                stroke-linejoin="round" stroke-width="2"
+                class="svg-3854175460__feather svg-3854175460__feather-minimize-2" viewBox="0 0 24 24" role="img">
+                <path d="M4 14h6v6m10-10h-6V4m0 6 7-7M3 21l7-7"></path>
+              </svg>Minimize
+            </button>
+            <button data-e2e-test-id="toggle cell table quiz" name="toggle cell table quiz" id="global-quiz-toggle-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 22 22" role="img">
+                <path fill="currentColor" fill-rule="evenodd"
+                  d="M6.8 12.1a1 1 0 1 1 0 2C3.05 14.1 0 11.005 0 7.2 0 3.387 2.987.4 6.8.4c3.75 0 6.8 3.05 6.8 6.8a1 1 0 1 1-2 0c0-2.646-2.154-4.8-4.8-4.8C4.109 2.4 2 4.509 2 7.2c0 2.748 2.109 4.9 4.8 4.9m-1-7.4a1 1 0 0 1 2 0v2.085l1.007 1.008a.999.999 0 1 1-1.414 1.414l-1.3-1.3A1 1 0 0 1 5.8 7.2zm7.3 12.486L10.914 15 17.4 8.514l2.185 2.186zM10.686 19.6H8.5v-2.185l1-1 2.186 2.185zm11.02-9.607-3.598-3.6a1.003 1.003 0 0 0-1.414 0l-9.901 9.9A1 1 0 0 0 6.5 17v3.6a1 1 0 0 0 1 1h3.6a1 1 0 0 0 .708-.293l9.899-9.9a1 1 0 0 0 0-1.414"
+                  clip-rule="evenodd"></path>
+              </svg> Start Quiz
+            </button>
+          </div>
+          <div id="modal-table-content"
+            class="a19c2cb9aca4d5ec--baseStyles a19c2cb9aca4d5ec--disableImagePointerEventOnTutorial a19c2cb9aca4d5ec--anchorLinkStyles a19c2cb9aca4d5ec--content">
+            <!-- Table content will be injected here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      window.quizModeOn = false;
+      window.currentModalTable = null;
+
+      window.openTableModal = function(originalTable) {
+        const modalOverlay = document.getElementById("table-modal-overlay");
+        const modalContent = document.getElementById("modal-table-content");
+
+        if (modalOverlay && modalContent) {
+          const clonedTable = originalTable.cloneNode(true);
+          currentModalTable = clonedTable;
+          quizModeOn = false;
+          
+          const toggleBtn = document.getElementById('global-quiz-toggle-btn');
+          if (toggleBtn) {
+            const textNode = [...toggleBtn.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
+            if (textNode) textNode.textContent = " Start Quiz";
+          }
+
+          modalContent.innerHTML = "";
+          modalContent.appendChild(clonedTable);
+          modalOverlay.style.display = "flex";
+          document.body.style.overflow = "hidden";
+        }
+      };
+
+      window.closeTableModal = function() {
+        const modalOverlay = document.getElementById("table-modal-overlay");
+        if (modalOverlay) {
+          modalOverlay.style.display = "none";
+          document.body.style.overflow = "";
+        }
+        currentModalTable = null;
+        quizModeOn = false;
+      };
+
+      window.enableTableQuiz = function() {
+        if (!currentModalTable) return;
+        const tds = currentModalTable.querySelectorAll("tbody td");
+        tds.forEach((td) => {
+          td.classList.add("_0fd30fac58084f1e--tdQuiz", "_0fd30fac58084f1e--tdHidden");
+          td.classList.remove("revealed");
+        });
+        quizModeOn = true;
+      };
+
+      window.disableTableQuiz = function() {
+        if (!currentModalTable) return;
+        const tds = currentModalTable.querySelectorAll("tbody td");
+        tds.forEach((td) => {
+          td.classList.remove("_0fd30fac58084f1e--tdQuiz", "_0fd30fac58084f1e--tdHidden", "revealed");
+        });
+        quizModeOn = false;
+      };
+
+      document.addEventListener("click", function(e) {
+        if (e.target.closest(".btn-minimize-table") || e.target.closest(".exit-modal-btn") || e.target.id === "table-modal-overlay") {
+          window.closeTableModal();
+        }
+
+        const quizBtn = e.target.closest('#global-quiz-toggle-btn');
+        if (quizBtn) {
+          const textNode = [...quizBtn.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
+          if (!quizModeOn) {
+            window.enableTableQuiz();
+            if (textNode) textNode.textContent = " FINISH QUIZ";
+          } else {
+            window.disableTableQuiz();
+            if (textNode) textNode.textContent = " Start Quiz";
+          }
+        }
+
+        if (quizModeOn && currentModalTable) {
+          const cell = e.target.closest("td");
+          if (cell && currentModalTable.contains(cell) && cell.classList.contains("_0fd30fac58084f1e--tdHidden")) {
+            // Si la celda ya está revelada y el click fue en un trigger de portal, no toggleamos (dejamos que actúe el popup)
+            const isClickingTrigger = e.target.closest("a.tooltip__link, a.api[data-type='link'], span.api.dictionary, span.api.dictionary[data-type], span.api.explanation[data-type='bonus'], span.api.extraExplanation");
+            if (isClickingTrigger && cell.classList.contains("revealed")) {
+                return;
+            }
+            cell.classList.toggle("revealed");
+          }
+        }
+      });
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- React Qbank Modal Integration -->
+  <script type="module" src="dist/qbankIntegration.bundle.js"></script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Pre-cargar el overlay de búsqueda
+    const ov = document.createElement('div');
+    ov.id = 'sovl';
+    ov.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:9999;display:none;justify-content:center';
+    ov.innerHTML = '<iframe src="search.html" style="width:100%;height:100%;border:none;background:transparent;"></iframe>';
+    const fr = ov.querySelector('iframe');
+    
+    fr.onload = () => {
+      fr.contentDocument.body.onclick = (e) => { if(e.target === fr.contentDocument.body) ov.style.display = 'none'; };
+      fr.contentWindow.addEventListener('keydown', (e) => { if(e.key === 'Escape') ov.style.display = 'none'; });
+    };
+    document.body.appendChild(ov);
+
+    const showS = () => { 
+      ov.style.display = 'flex'; 
+      fr.contentWindow.focus(); 
+      fr.contentWindow.postMessage('focus-search', '*');
+    };
+
+    const inp = document.getElementById('amboss-search-input');
+    if(inp) inp.addEventListener('click', (e) => { e.preventDefault(); inp.blur(); showS(); });
+
+    window.addEventListener('message', (e) => {
+      if (e.data === 'show-search') showS();
+      if (e.data === 'hide-search') ov.style.display = 'none';
+    });
+
+    // --- Account Menu Popup Logic ---
+    const userMenuBtn = document.querySelector('[data-testid="user-menu-button"]');
+    if (userMenuBtn) {
+      const popupOv = document.createElement('div');
+      popupOv.id = 'user-menu-popup-overlay';
+      popupOv.style.cssText = 'position:fixed;inset:0;z-index:20000;display:none;';
+      popupOv.innerHTML = `
+          <div id="user-menu-popup-container" style="position:absolute; top:60px; right:20px; width:322px; height:650px; border-radius:12px; overflow:hidden; background:transparent;">
+              <iframe src="logout.html" style="width:100%; height:100%; border:none; background:transparent;"></iframe>
+          </div>
+      `;
+      document.body.appendChild(popupOv);
+
+      userMenuBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          popupOv.style.display = (popupOv.style.display === 'block') ? 'none' : 'block';
+      });
+
+      popupOv.addEventListener('click', (e) => {
+          // Si se hace clic directamente en el overlay (el área transparente alrededor del menu)
+          if (e.target === popupOv) {
+              popupOv.style.display = 'none';
+          }
+      });
+
+      function syncThemeToIframes() {
+        const isDark = document.documentElement.classList.contains('isDarkmodeActive');
+        document.querySelectorAll('iframe').forEach(ifr => {
+          try {
+            if (ifr.contentDocument && ifr.contentDocument.documentElement) {
+              ifr.contentDocument.documentElement.classList.toggle('isDarkmodeActive', isDark);
+              ifr.contentDocument.documentElement.setAttribute('data-dme-dark-mode', isDark ? 'on' : 'off');
+            }
+          } catch (e) { /* ignore cross-origin */ }
+        });
+      }
+
+      window.addEventListener('message', (e) => {
+        if (e.data.type === 'set-theme') {
+            const theme = e.data.theme;
+            document.documentElement.setAttribute('data-dme-dark-mode', theme);
+            if (theme === 'on') {
+                document.documentElement.classList.add('isDarkmodeActive');
+            } else if (theme === 'off') {
+                document.documentElement.classList.remove('isDarkmodeActive');
+            } else if (theme === 'auto') {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.classList.toggle('isDarkmodeActive', prefersDark);
+            }
+            syncThemeToIframes();
+        }
+        if (e.data === 'close-user-menu') {
+            popupOv.style.display = 'none';
+        }
+      });
+
+      // Sync theme when any iframe finishes loading
+      document.addEventListener('load', (e) => {
+        if (e.target.tagName === 'IFRAME') syncThemeToIframes();
+      }, true);
+    }
+  });
+  </script>
+  <script src="global-shortcuts.js"></script>
+</body>
+</html>

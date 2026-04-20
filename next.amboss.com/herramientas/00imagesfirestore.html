@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firestore Uploader - Phrasionary Images</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .header h1 { font-size: 28px; margin-bottom: 10px; }
+    .header p { opacity: .9; font-size: 15px; }
+
+    .content { padding: 30px; }
+    .section { margin-bottom: 22px; }
+
+    .section-title{
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 12px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .input-group { display:flex; gap:10px; margin-bottom: 10px; }
+
+    input[type="text"]{
+      flex:1;
+      padding: 12px 15px;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: .2s;
+    }
+    input[type="text"]:focus{
+      outline:none;
+      border-color:#667eea;
+      box-shadow: 0 0 0 3px rgba(102,126,234,.12);
+    }
+
+    textarea{
+      width:100%;
+      min-height: 260px;
+      padding: 15px;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+      font-size: 13px;
+      resize: vertical;
+      transition: .2s;
+    }
+    textarea:focus{
+      outline:none;
+      border-color:#667eea;
+      box-shadow: 0 0 0 3px rgba(102,126,234,.12);
+    }
+
+    .button{
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color:white;
+      border:none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor:pointer;
+      transition: .2s;
+      box-shadow: 0 4px 15px rgba(102,126,234,.4);
+    }
+    .button:hover{ transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,.55); }
+    .button:active{ transform: translateY(0); }
+    .button:disabled{ opacity:.6; cursor:not-allowed; transform:none; box-shadow:none; }
+
+    .preview{
+      background:#f8f9fa;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 420px;
+      overflow:auto;
+    }
+    .preview-item{
+      background:white;
+      border-left:4px solid #667eea;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    .preview-item h4{ color:#2c3e50; font-size: 15px; margin-bottom: 6px; }
+    .preview-item .muted{ opacity:.65; font-size:12px; }
+    .preview-item .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .thumb{
+      width: 80px; height: 80px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid #e1e8ed;
+      background:#fff;
+    }
+    .kv{ font-size:13px; color:#444; margin-top: 6px; }
+    .kv code{ background:#eef2ff; padding:2px 6px; border-radius:6px; }
+
+    .status{
+      padding: 14px;
+      border-radius: 8px;
+      margin-top: 14px;
+      display:none;
+      white-space: pre-wrap;
+    }
+    .status.success{ background:#d4edda; border:1px solid #c3e6cb; color:#155724; display:block; }
+    .status.error{ background:#f8d7da; border:1px solid #f5c6cb; color:#721c24; display:block; }
+    .status.info{ background:#d1ecf1; border:1px solid #bee5eb; color:#0c5460; display:block; }
+
+    .firebase-config{
+      background:#fff3cd;
+      border:2px solid #ffc107;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+    .firebase-config h3{ color:#856404; font-size: 15px; margin-bottom: 8px; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🖼️ Firestore Uploader - Phrasionary Images</h1>
+      <p>Pegás <code>#extraExplanation-clones</code> y sube imágenes únicas (sin renombrar duplicados)</p>
+    </div>
+
+    <div class="content">
+      <div class="firebase-config">
+        <h3>⚠️ Configuración de Firebase requerida</h3>
+        <p style="color:#856404;">
+          Si tu proyecto cambia, reemplazá las credenciales en el JS al final.
+        </p>
+      </div>
+
+      <div class="section">
+        <label class="section-title">📁 Ruta de la colección en Firestore</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="collectionPath"
+            placeholder="Ejemplo: images o phrasionary/images"
+            value="images"
+          />
+        </div>
+        <p style="color:#666; font-size:13px;">
+          Si la ruta termina en <b>documento</b> (segments pares), se agrega <code>/items</code>.
+        </p>
+      </div>
+
+      <div class="section">
+        <label class="section-title">📋 Pega aquí el HTML de <code>#extraExplanation-clones</code></label>
+        <textarea
+          id="htmlInput"
+          placeholder="Pega aquí el HTML completo del contenedor #extraExplanation-clones..."
+        ></textarea>
+      </div>
+
+      <div class="section" style="display:flex; gap:12px;">
+        <button class="button" onclick="parseHTML()">🔍 Analizar</button>
+        <button class="button" onclick="uploadToFirestore()" id="uploadBtn" disabled>⬆️ Subir a Firestore</button>
+      </div>
+
+      <div id="statusMessage" class="status"></div>
+
+      <div class="section" id="previewSection" style="display:none;">
+        <h3 class="section-title">👁️ Vista previa (únicos)</h3>
+        <div id="preview" class="preview"></div>
+      </div>
+    </div>
+  </div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+  import { getFirestore, collection, doc, writeBatch } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+    authDomain: "bancomicina-62bfe.firebaseapp.com",
+    projectId: "bancomicina-62bfe",
+    storageBucket: "bancomicina-62bfe.appspot.com",
+    messagingSenderId: "737254665977",
+    appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  let parsedImages = [];
+  window.db = db;
+
+  function showStatus(type, message) {
+    const statusDiv = document.getElementById('statusMessage');
+    statusDiv.className = `status ${type}`;
+    statusDiv.textContent = message;
+    statusDiv.style.display = 'block';
+  }
+  window.showStatus = showStatus;
+
+  function makeSafeIdFromKey(key, fallbackId) {
+    if (!key || !key.trim()) return fallbackId;
+
+    let cleaned = key.trim();
+    cleaned = cleaned.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    cleaned = cleaned.replace(/[^\w\s:\-\(\)\.]/g, "");
+    cleaned = cleaned.replace(/\//g, "-");
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+    return cleaned || fallbackId;
+  }
+
+  // ✅ decode base64 (UTF-8)
+  function b64utf8(s) {
+    if (!s) return "";
+    try {
+      const bin = atob(String(s).trim());
+      const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+      return new TextDecoder("utf-8").decode(bytes);
+    } catch {
+      try { return atob(String(s).trim()); } catch { return String(s); }
+    }
+  }
+
+  function displayPreview(items) {
+    const preview = document.getElementById('preview');
+    const previewSection = document.getElementById('previewSection');
+    preview.innerHTML = '';
+
+    items.forEach((it, idx) => {
+      const div = document.createElement('div');
+      div.className = 'preview-item';
+
+      div.innerHTML = `
+        <div class="row">
+          <img class="thumb" src="${it.urls?.thumb || it.urls?.medium || it.urls?.big || ''}" alt="">
+          <div>
+            <h4>#${idx+1} — ${it.title || '(sin título)'} <span class="muted">(docId: ${it.id})</span></h4>
+            <div class="kv"><b>triggerId:</b> <code>${it.triggerId || ''}</code></div>
+            <div class="kv"><b>dedupeKey (bigUrl):</b> <code>${it.dedupeKey || ''}</code></div>
+            <div class="kv"><b>gallery:</b> ${it.galleryId || ''} · <b>index:</b> ${it.imageIndex ?? ''} · <b>imageId:</b> ${it.imageId || ''}</div>
+          </div>
+        </div>
+      `;
+      preview.appendChild(div);
+    });
+
+    previewSection.style.display = 'block';
+  }
+
+  window.parseHTML = function() {
+    const htmlInput = document.getElementById('htmlInput').value.trim();
+    if (!htmlInput) {
+      showStatus('error', '⚠️ Pegá el HTML primero.');
+      return;
+    }
+
+    try {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlInput;
+
+      // ✅ ahora recorremos popovers, porque ahí está el data-trigger-id
+      const popovers = tempDiv.querySelectorAll('.phrasionary_popover[data-trigger-id]');
+
+      if (!popovers.length) {
+        showStatus('error', '❌ No se encontraron .phrasionary_popover con data-trigger-id. Pegá el HTML correcto de #extraExplanation-clones.');
+        return;
+      }
+
+      parsedImages = [];
+
+      // ✅ dedupe por asset (bigUrl)
+      const seen = new Set();
+      let skipped = 0;
+      let noThumb = 0;
+
+      popovers.forEach((pop, i) => {
+        const triggerIdRaw = (pop.getAttribute('data-trigger-id') || '').trim();
+        if (!triggerIdRaw) return;
+
+        const span = pop.querySelector('span.api.thumbnail__image[data-type="image"]');
+        if (!span) { noThumb++; return; }
+
+        const img = span.querySelector('img');
+
+        const galleryId  = (span.getAttribute('data-gallery-id') || '').trim();
+        const imageIndexRaw = (span.getAttribute('data-image-index') || '').trim();
+        const imageId    = (span.getAttribute('data-image-id') || '').trim();
+
+        const titleText =
+          (span.querySelector('.thumbnail__image__title')?.textContent ||
+           img?.getAttribute('title') ||
+           '').trim();
+
+        // URLs
+        const bigUrl    = (span.getAttribute('data-source') || '').trim();      // ✅ dedupeKey
+        const thumbUrl  = (img?.getAttribute('src') || '').trim();
+        const mediumUrl =
+          (img?.getAttribute('data-medium-size-url') ||
+           span.getAttribute('data-medium-size-url') ||
+           '').trim();
+
+        const overlay   = (span.getAttribute('data-overlay') || '').trim();
+
+        // base64 attrs
+        const dataTitle       = (span.getAttribute('data-title') || '').trim();
+        const dataDescription = (span.getAttribute('data-description') || '').trim();
+        const dataAuthor      = (span.getAttribute('data-author') || '').trim();
+        const dataCopyright   = (span.getAttribute('data-copyright') || '').trim();
+
+        // ✅ dedupeKey = siempre bigUrl (si no, fallback)
+        const dedupeKey = bigUrl || thumbUrl || '';
+        if (!dedupeKey) return;
+
+        if (seen.has(dedupeKey)) { skipped++; return; }
+        seen.add(dedupeKey);
+
+        // ✅ docId = triggerId (tal como pediste)
+        const docId = makeSafeIdFromKey(triggerIdRaw, `E_${i+1}`);
+
+        parsedImages.push({
+          id: docId,                 // 👉 docId en Firestore
+          triggerId: triggerIdRaw,   // 👉 guardo el original también
+          dedupeKey,                // 👉 bigUrl original (clave de asset)
+
+          title: titleText,
+          galleryId,
+          imageIndex: imageIndexRaw ? Number(imageIndexRaw) : null,
+          imageId,
+
+          urls: {
+            big: bigUrl,
+            medium: mediumUrl,
+            thumb: thumbUrl,
+            overlay: overlay || ''
+          },
+
+          // ✅ decodificados listos para usar
+          decoded: {
+            title: b64utf8(dataTitle),
+            descriptionHtml: b64utf8(dataDescription),
+            author: b64utf8(dataAuthor),
+            copyright: b64utf8(dataCopyright)
+          },
+
+          // ✅ y dejo los base64 por si querés reconstruir luego
+          meta: {
+            dataTitleBase64: dataTitle,
+            dataDescriptionBase64: dataDescription,
+            dataAuthorBase64: dataAuthor,
+            dataCopyrightBase64: dataCopyright
+          },
+
+          createdAt: new Date().toISOString()
+        });
+      });
+
+      window.parsedImages = parsedImages;
+
+      displayPreview(parsedImages);
+      document.getElementById('uploadBtn').disabled = false;
+
+      showStatus(
+        'success',
+        `✅ Encontrados ${parsedImages.length} popups con imagen (únicos por asset).` +
+        (skipped ? `\n↩️ Ignorados ${skipped} duplicados (mismo data-source).` : '') +
+        (noThumb ? `\nℹ️ ${noThumb} popovers no tenían thumbnail__image.` : '')
+      );
+    } catch (err) {
+      console.error(err);
+      showStatus('error', `❌ Error al analizar: ${err.message}`);
+    }
+  };
+
+  async function commitInChunks(db, collectionPathSegments, items, chunkSize = 450) {
+    let done = 0;
+    const colRef = collection(db, ...collectionPathSegments);
+
+    while (done < items.length) {
+      const batch = writeBatch(db);
+      const slice = items.slice(done, done + chunkSize);
+
+      slice.forEach(item => {
+        const ref = doc(colRef, item.id);
+        batch.set(ref, item);
+      });
+
+      await batch.commit();
+      done += slice.length;
+    }
+  }
+
+  window.uploadToFirestore = async function() {
+    const collectionPathInput = document.getElementById('collectionPath').value.trim();
+    if (!collectionPathInput) {
+      showStatus('error', '⚠️ Ingresá la ruta.');
+      return;
+    }
+    if (!parsedImages.length) {
+      showStatus('error', '⚠️ No hay items. Primero analizá.');
+      return;
+    }
+
+    const uploadBtn = document.getElementById('uploadBtn');
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = '⏳ Subiendo...';
+
+    try {
+      let finalPath = collectionPathInput;
+      let segments = collectionPathInput.split('/').filter(Boolean);
+
+      if (!segments.length) {
+        showStatus('error', '❌ Ruta inválida.');
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = '⬆️ Subir a Firestore';
+        return;
+      }
+
+      // si termina en documento (segments pares) => subcolección default "items"
+      if (segments.length % 2 === 0) {
+        const defaultSubcollection = 'items';
+        finalPath = collectionPathInput.replace(/\/+$/, '') + '/' + defaultSubcollection;
+        segments = finalPath.split('/').filter(Boolean);
+
+        showStatus('info',
+          `ℹ️ "${collectionPathInput}" apunta a DOCUMENTO. Se usará "${finalPath}".`
+        );
+      }
+
+      showStatus('info', `📤 Subiendo ${parsedImages.length} imágenes a "${finalPath}"...`);
+      await commitInChunks(db, segments, parsedImages, 450);
+
+      showStatus('success', `🎉 Éxito: ${parsedImages.length} imágenes subidas a "${finalPath}".`);
+      uploadBtn.textContent = '✅ Subido';
+    } catch (err) {
+      console.error(err);
+      showStatus('error', `❌ Error al subir: ${err.message}`);
+      uploadBtn.disabled = false;
+      uploadBtn.textContent = '⬆️ Subir a Firestore';
+    }
+  };
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,4683 @@
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bancomicina</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <style>
+
+
+/* FORZAR tamaño base de 12px en TODA la app */
+html {
+  font-size: 12px !important; /* ← Base = 12px en lugar de 16px */
+  -webkit-text-size-adjust: none !important; /* Desactiva auto-scaling */
+  -moz-text-size-adjust: none !important;
+  -ms-text-size-adjust: none !important;
+  text-size-adjust: none !important;
+}
+
+body {
+  font-size: 12px !important; /* Refuerza en body */
+  line-height: 1.5;
+}
+
+/* Ahora 1rem = 12px (en lugar de 16px) */
+
+
+
+@font-face {
+  font-family:Lato-Light;
+  font-weight:300;
+  font-style:normal;
+  font-display: swap;
+   src: local('Lato Regular'), local('Lato-Regular'),
+       url('/fonts/Lato.400.normal.woff2') format('woff2');
+}
+@font-face {
+  font-family:Lato-Light;
+  font-weight:300;
+  font-style:italic;
+  font-display: swap;
+   src: local('Lato Regular'), local('Lato-Regular'),
+       url('/fonts/Lato.400.normal.woff2') format('woff2');
+}
+@font-face {
+  font-family:Lato-Regular;
+  font-weight:400;
+  font-style:normal;
+  font-display: swap;
+  src: local('Lato Regular'), local('Lato-Regular'),
+       url('/fonts/Lato.400.normal.woff2') format('woff2');
+}
+@font-face {
+  font-family:Lato;
+  font-weight:400;
+  font-style:normal;
+  font-display: swap;
+  src: local('Lato Regular'), local('Lato-Regular'),
+       url('/fonts/Lato.400.normal.woff2') format('woff2');
+}
+@font-face {
+  font-family:Lato;
+  font-weight:400;
+  font-style:italic;
+  font-display: swap;
+  src: local('Lato Regular'), local('Lato-Regular'),
+       url('/fonts/Lato.400.normal.woff2') format('woff2');
+}
+@font-face {
+  font-family:Lato;
+  font-weight:700;
+  font-style:normal;
+  font-display: swap;
+ src: local('Lato Regular'), local('Lato-Regular'),
+       url('/fonts/Lato.400.normal.woff2') format('woff2');
+}
+@font-face {
+  font-family:Lato;
+  font-weight:700;
+  font-style:italic;
+  font-display: swap;
+   src: local('Lato Regular'), local('Lato-Regular'),
+       url('/fonts/Lato.400.normal.woff2') format('woff2');
+}
+@font-face {
+  font-family:Lato;
+  font-weight:900;
+  font-style:normal;
+  font-display: swap;
+   src: local('Lato Regular'), local('Lato-Regular'),
+       url('/fonts/Lato.400.normal.woff2') format('woff2');
+}
+
+
+
+
+/* Base tipográfica → usa Lato en todo */
+html, body {
+  height: 100%;
+   margin: 0;
+  overflow: hidden; /* evita que el body/html haga scroll */
+  font-family: 'Lato', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* Cualquier zona que antes llevaba Inter: sobreescribe */
+.highlighting-bar,
+#main-content,
+#sidebar,
+#subcategoria-content {
+  font-family: 'Lato', 'Lato-Regular', 'Lato-Light', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+
+.highlighting-bar {
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial;
+}
+
+
+
+/* === HL close: igual a fav-actions === */
+#subcat-header.is-stuck .highlighting-bar .hl-right{ padding-right: 1rem; } /* alinea en X */
+#subcat-header.is-stuck .highlighting-bar .hl-close{
+  display: inline-flex !important;
+  width: 1.5rem; height: 1.5rem;           /* caja como fav */
+  align-items: center; justify-content: center;
+  color: #475569 !important;               /* color como fav */
+}
+#subcat-header.is-stuck .highlighting-bar .hl-close i{
+  font-size: 1rem;                          /* tamaño de icono como fav */
+  line-height: 1;
+}
+
+
+    /* Estilos específicos para la sidebar y el contenido principal */
+    .dashboard-container {
+        display: flex;
+  bottom: 0; 
+        height: calc(100vh - 3rem); /* Altura restante de la ventana después del header */
+        position: relative; /* Para que la sidebar fixed se posicione correctamente dentro */
+    }
+
+
+    
+
+    #sidebar {
+        width: 0; /* Inicialmente cerrada */
+        height: 100%; /* Ocupa toda la altura del contenedor padre */
+        position: relative; /* Fija la sidebar para que no afecte el flujo del main content */
+        top: 0; /* Se posiciona debajo del header */
+        left: 0;
+        background-color: white;
+        border-right: 1px solid #e5e7eb; /* gray-200 */
+        overflow-x: hidden; /* Oculta el contenido horizontalmente cuando está cerrada */
+        transition: width 0.3s ease, padding 0.3s ease; /* Transición suave para ancho y padding */
+        flex-shrink: 0; /* Evita que se encoja */
+        z-index: 150 !important; /* Asegura que esté por encima del contenido principal */
+        padding-top: 1rem; /* Espacio superior dentro de la sidebar */
+    }
+
+    /* Overlay del sidebar principal sobre cualquier otro */
+#sidebar.open {
+  width: calc(var(--sb-collapsed) + var(--subcat-width));
+  /* … */
+}
+#sidebar.collapsed:hover,
+#sidebar.collapsed.hover-expanded {
+  position: absolute; /* Sale del flujo y flota sobre el resto */
+  top: 0;
+  left: 0;
+  z-index: 70;       /* Asegúrate de que sea mayor que el secundario */
+}
+
+/* Sidebar secundario por debajo */
+#subcategoria-sidebar {
+  z-index: 140 !important;      /* Menor que el principal */
+}
+#main-content { overflow-x: clip; } /* o hidden */
+
+    
+
+   #main-content {
+    flex-grow: 1;
+    margin-left: 0;
+    width: 100%;
+    padding: 1rem 2.5rem;
+    transition: none !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;  /* ← esta línea */
+}
+
+   
+
+
+    /* Estilos para los elementos internos de la sidebar */
+    .sidebar-group {
+        margin-bottom: 0px; /* Pequeño espacio entre grupos */
+    }
+    .sidebar-group a,
+    .sidebar-group button {
+        padding-left: 12px; /* px-3 = 0.75rem = 12px */
+        padding-right: 12px;
+        display: flex;
+        align-items: center;
+        height: 40px; /* Altura de cada elemento para consistencia */
+        font-size: 1rem; /* fs-base */
+        color: #374151; /* gray-700 */
+        width: 100%; /* Asegura que los botones y enlaces ocupen todo el ancho disponible */
+        text-align: left; /* Alinea el texto a la izquierda */
+        /* Transiciones para suavizar los cambios de estado */
+        transition: background-color 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
+    }
+    .sidebar-group a i,
+    .sidebar-group button i:not(.fa-chevron-down) { /* Afecta a los iconos principales, no a la flecha */
+      transition: color 0.2s ease;
+    }
+    .sidebar-group .fa-chevron-down {
+        font-size: 0.75rem; /* text-xs = 0.75rem = 12px */
+        transition: transform 0.2s ease, color 0.2s ease; /* Transición para la rotación y color de la flecha */
+    }
+    .sidebar-group .flex.items-center span {
+        margin-left: 8px; /* space-x-2 = 0.5rem = 8px */
+    }
+
+    .sidebar-group div[id^="accordion-"] a {
+        padding-left: 48px; /* ml-8 + px-2 = 2rem + 0.5rem = 40px + 8px = 48px */
+        height: 32px; /* py-1 = 0.25rem = 4px + 0.25rem = 4px + 16px (line-height) = 24px, ajuste para que se vea más como en la imagen */
+        font-size: 0.875rem; /* text-sm = 0.875rem = 14px */
+        color: #6b7280; /* gray-600 */
+        transition: background-color 0.2s ease, color 0.2s ease, font-weight 0.2s ease;
+    }
+    .sidebar-group div[id^="accordion-"].hidden {
+        display: none;
+    }
+
+    /* Estilo para el enlace o item de submenú activo */
+    .active-link {
+        background-color: #e0f2fe; /* blue-100 */
+        color: #1d4ed8 !important; /* blue-700 */
+        font-weight: 500 !important; /* medium */
+    }
+    .active-link i {
+         color: #1d4ed8 !important; /* blue-700 */
+    }
+    /* Estilo para los botones de grupo cuando su acordeón está abierto */
+    .sidebar-group button.accordion-open {
+        background-color: #e0f2fe; /* blue-100 */
+        color: #1d4ed8; /* blue-700 */
+        font-weight: 500; /* medium */
+    }
+    .sidebar-group button.accordion-open i {
+        color: #1d4ed8; /* blue-700 */
+    }
+    .sidebar-group button.accordion-open .fa-chevron-down {
+        transform: rotate(180deg); /* Gira la flecha hacia arriba */
+    }
+
+    /* Estilos específicos para los paneles de artículos para coincidir con la imagen */
+    .articles-panel-column {
+        width: 18rem; /* 288px, para un ancho similar a la imagen */
+        flex-shrink: 0; /* Evita que los paneles se encojan */
+    }
+    #articles-panel {
+        align-items: flex-start; /* Asegura que los ítems flex no se estiren verticalmente y se ajusten a su contenido */
+    }
+    .articles-panel-list-item {
+        display: flex;
+        align-items: center;
+        /* Padding vertical aquí se anula un poco por el divide-y, pero lo dejamos por si acaso */
+        padding: 0.5rem 0.75rem; /* py-2 px-3 */
+        border-radius: 0.25rem; /* rounded */
+        color: #4b5563; /* gray-700 */
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+   /* Library: hover sin “línea blanca” debajo */
+#articles-panel .articles-panel-column > ul > li { background:#fff; }
+#articles-panel .articles-panel-column > ul > li:hover { background:#f3f4f6; }
+
+/* Oculta la divide line del item actual y del siguiente */
+#articles-panel .articles-panel-column > ul > li:hover,
+#articles-panel .articles-panel-column > ul > li:hover + li {
+  border-top-color: transparent !important;
+}
+
+/* Mantén el padding en el <a>, pero sin fondo propio */
+#articles-panel .articles-panel-column > ul > li > a {
+  display:flex; align-items:center;
+  padding:.5rem .75rem; border-radius:0;
+}
+#articles-panel .articles-panel-column > ul > li > a:hover {
+  background:transparent !important;
+}
+
+/* +2px arriba/abajo para el texto de cada item en las 3 columnas */
+#articles-panel .articles-panel-column > ul > li > a {
+  padding-top: .8rem !important;   /* antes .5rem */
+  padding-bottom: .8rem !important; /* antes .5rem */
+}
+
+    .articles-panel-list-item i {
+        margin-right: 0.5rem; /* space-x-2 */
+        color: #6b7280; /* gray-600 */
+    }
+    .articles-panel-list-item.selected {
+        background-color: #e0f2fe; /* blue-100 */
+        color: #1d4ed8; /* blue-700 */
+        font-weight: 500;
+    }
+    .articles-panel-list-item.selected i {
+        color: #1d4ed8; /* blue-700 */
+    
+    }
+
+
+
+/* Las 3 columnas del panel (título + card) comparten el mismo ancho */
+#articles-panel > .flex.flex-col {
+  width: 18rem;         /* = ancho de .articles-panel-column */
+  flex-shrink: 0;       /* que no se encoja */
+}
+
+/* Por si el título es largo, que envuelva dentro del ancho */
+#articles-panel > .flex.flex-col > h2 {
+  overflow-wrap: anywhere;  /* permite corte en cualquier punto */
+  word-break: break-word;   /* fallback */
+}
+#sidebar.collapsed .sidebar-group span {
+    display: none;
+}
+#sidebar.collapsed .sidebar-group i {
+    margin: auto;
+    justify-content: center;
+}
+#sidebar.collapsed .sidebar-group a,
+#sidebar.collapsed .sidebar-group button {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+
+
+/* Siempre oculta la flecha en colapsado, incluso cuando está en hover */
+#sidebar.collapsed .sidebar-group button .fa-chevron-down {
+  display: none !important;
+}
+
+
+
+
+/* —— TOC (subcategoria-sidebar) —— */
+#subcategoria-sidebar .toc{ padding: .25rem 0; }
+#subcategoria-sidebar .toc-section{ margin: .125rem 0; }
+
+/* Título/sección (negro, seminegrita) */
+#subcategoria-sidebar .toc-h2{
+  width:100%;
+  padding: .35rem .65rem; 
+  display:block;
+  text-align:left;
+  background:transparent;
+  border:none;
+  border-left:0 solid transparent;
+  padding:.5rem .75rem;
+  font-weight:400;
+  font-size:0.85rem;                 /* ~16px */
+  color:#111827;                  /* gray-900 */
+  border-radius:.5rem;
+  cursor:pointer;
+}
+
+#subcategoria-sidebar .toc-topic{
+  padding:.5rem .75rem;
+  font-size:1rem;
+  font-weight:600;
+  color:#111827;           /* gray-900 */
+  background:#fff;
+  position:sticky;         /* queda fijo arriba si la lista es larga */
+  top:0;
+  z-index:5;
+}
+/* Seleccionado (banda izquierda + fondo suave) */
+#subcategoria-sidebar .toc-h2.is-active{
+  /* fondo gris */
+  background: #f3f4f6;                 /* gray-100 */
+  color: #111827;                       /* gray-900 */
+  font-weight: 400;
+
+  /* sin radios para que “toque” los bordes */
+  border-radius: 0 !important;
+
+  /* hairlines arriba/abajo y borde derecho sutil SIN alterar layout */
+  box-shadow:
+    inset 2px 0 0 #9ca3af,             /* ← banda izquierda (un poco gruesa) */
+    inset 0 .5px 0 #e5e7eb,            /* borde superior fino */
+    inset 0 -.5px 0 #e5e7eb,           /* borde inferior fino */
+    inset -.5px 0 0 #e5e7eb;           /* borde derecho fino */
+
+  /* asegurá la misma altura/padding que el estado base */
+  padding: .5rem .75rem;
+}
+
+/* Hover sutil (no cambia la banda ni “salta” de color) */
+#subcategoria-sidebar .toc-h2:hover{
+  background: #f8fafc;                 /* slate-50 */
+}
+
+/* Mantener los subenlaces como están; si querés que el activo haga juego: */
+#subcategoria-sidebar .toc-a.is-active{
+  background: transparent !important;
+  color: #111827 !important;
+  font-weight: 500;
+  box-shadow: inset 3px 0 0 #9ca3af;   /* mini banda izquierda */
+}
+/* Quita el padding lateral del contenedor de la TOC */
+#subcategoria-sidebar-content{
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+/* (opcional) que el item activo no tenga esquinas redondeadas */
+#subcategoria-sidebar .toc-h2.is-active{ border-radius: 0; }
+
+
+
+
+/* Variables de anchos para sincronizar el overlay con el TOC */
+:root{
+  --sb-collapsed: 40px;      /* ya la tienes */
+  --subcat-width: 210px;     /* ya la tienes */
+  --split-left: 0px;         /* OFFSET desde la izquierda (calculado en JS) */
+  --qbank-header-offset: 3rem;
+}
+
+/* Split real, pegado al header de 3rem */
+#video-modal.split-view{
+  position: fixed;
+  z-index: 40 !important;
+  top: 3rem !important;
+  bottom: 0 !important;
+  left: var(--split-left) !important;
+  width: var(--split-w) !important;
+  height: auto !important;
+  background-color: transparent !important;
+  border-left: 1px solid rgba(229,231,235,.9);
+}
+
+/* Quita el viejo “60vw” para el área de lectura o sobrescríbelo */
+body.split-view-active .dashboard-container{
+  position: fixed;
+  top: 3rem;
+  bottom: 0;
+  left: 0;
+  width: calc(var(--split-left)); /* lo que NO ocupa el panel derecho */
+  overflow-y: auto;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#subcategoria-sidebar {
+  width: var(--subcat-width);         /* mismo ancho que la principal */
+  flex-shrink: 0;         /* no se encoja */
+  transition: transform 0.3s ease;
+}
+#subcategoria-sidebar.hidden {
+  display: none;
+}
+
+
+
+
+
+
+
+  /* 1) Mantener el ancho colapsado por defecto */
+#sidebar.collapsed {
+  width: var(--sb-collapsed);
+  padding-left: 0;
+  padding-right: 0;
+  position: relative;
+  z-index: 50; /* sobre el sub-sidebar */
+  transition: width 0.0s ease;
+}
+
+/* 2) Mostrar sólo iconos cuando está colapsada */
+#sidebar.collapsed .sidebar-group span { display: none; }
+#sidebar.collapsed .sidebar-group button i:not(.fa-chevron-down),
+#sidebar.collapsed .sidebar-group a i {
+  margin: auto;
+  justify-content: center;
+}
+
+/* 3) En hover o expansión temporal, “desplegar” provisionalmente la sidebar completa */
+#sidebar.collapsed:hover,
+#sidebar.collapsed.hover-expanded {
+  width: calc(var(--sb-collapsed) + var(--subcat-width));           /* ancho del overlay */
+  background: rgba(255,255,255,0.95) !important;
+  padding-left: 0;          /* ← sin gutter izquierdo */
+  padding-right: 0;         /* ← sin gutter derecho */
+  box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+}
+
+/* 4) Al desplegar, mostrar textos y submenús */
+#sidebar.collapsed:hover .sidebar-group span,
+#sidebar.collapsed.hover-expanded .sidebar-group span {
+  display: inline;         /* reaparecen los labels */
+}
+
+#sidebar.collapsed:hover .sidebar-group button.accordion-open i.fa-chevron-down,
+#sidebar.collapsed.hover-expanded .sidebar-group button.accordion-open i.fa-chevron-down {
+  color: inherit;
+}
+
+#sidebar.collapsed:hover .sidebar-group a,
+#sidebar.collapsed:hover .sidebar-group button,
+#sidebar.collapsed.hover-expanded .sidebar-group a,
+#sidebar.collapsed.hover-expanded .sidebar-group button {
+  justify-content: flex-start; /* Alínea a la izquierda */
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+#sidebar.collapsed:hover .sidebar-group i,
+#sidebar.collapsed.hover-expanded .sidebar-group i {
+  margin: 0; /* Quita el margin auto del ícono para que se alinee bien con el texto */
+}
+
+/* Mostrar la flecha cuando la barra se expande temporalmente */
+#sidebar.collapsed:hover .sidebar-group button .fa-chevron-down,
+#sidebar.collapsed.hover-expanded .sidebar-group button .fa-chevron-down {
+  display: inline-block !important;
+}
+
+/* Separación extra entre texto y flecha cuando el menú está desplegado */
+#sidebar.collapsed:hover .sidebar-group button.sidebar-item {
+  justify-content: space-between;
+}
+#sidebar.collapsed.hover-expanded .sidebar-group button.sidebar-item {
+  justify-content: space-between;
+}
+#sidebar.collapsed:hover .sidebar-group button.sidebar-item i.fa-chevron-down,
+#sidebar.collapsed.hover-expanded .sidebar-group button.sidebar-item i.fa-chevron-down {
+  margin-left: auto;
+  margin-right: 6px;
+}
+
+
+
+/* 5) Mantén la lógica de apertura/cierre normal intacta */
+  
+
+/* ———————————————— */
+/*  Mantener main-content fijo al pasar el ratón sobre la barra comprimida  */
+/* ———————————————— */
+
+/* Si hay un segundo sidebar, lo desplazamos también para que no empuje el main */
+#sidebar.collapsed:hover ~ #subcategoria-sidebar,
+#sidebar.collapsed.hover-expanded ~ #subcategoria-sidebar {
+  left: 40px;
+}
+
+/* El main siempre a 60px de la izquierda y ancho = 100% − 60px */
+#sidebar.collapsed:hover ~ #main-content,
+#sidebar.collapsed.hover-expanded ~ #main-content {
+  margin-left: var(--sb-collapsed) !important;
+}
+
+/* La barra ya no es sticky sola */
+#main-content .highlighting-bar { position: static; }
+
+/* El bloque entero (barra + breadcrumb) es sticky */
+#subcat-header { position: sticky; top: 0; z-index: 40; background: #fff; }
+
+/* Breadcrumb: oculto por defecto (lo refuerza por si quitas la clase hidden) */
+#breadcrumbs { display: none; }
+
+/* Cuando #subcat-header esté “stuck” le pondremos .is-stuck desde JS */
+#subcat-header.is-stuck #breadcrumbs { display: block; }
+
+/* Ajuste de scroll para que no tape summaries al anclar */
+#main-content { scroll-padding-top: 88px; }           /* ≈ alto barra + breadcrumb */
+#subcategoria-body details summary { scroll-margin-top: 88px; }
+
+
+
+
+/* Primero quita ese margin-top en split-view */
+#video-modal.split-view #toggle-thumbnails {
+  position: absolute;
+  top: auto;
+  bottom: 0;   /* que quede justo encima del carrusel */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5.5rem;
+  height: 1.5rem;
+  background-color: rgb(225, 230, 234);      /* gray-100 */
+  border-radius: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+#video-modal.split-view #toggle-thumbnails i {
+  color: #475569; /* gray-600 */
+  font-size: 0.75rem;
+}
+
+
+
+
+
+
+
+
+/* 1) Estilo para el details/summary */
+#subcategoria-body details {
+  border-bottom: 1px solid #e5e7eb;
+}
+#subcategoria-body summary {
+  list-style: none; /* quita marcador por defecto */
+  background-color: #f8f9fa;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#subcategoria-body summary::-webkit-details-marker {
+  display: none;
+}
+/* 2) Listas con viñetas */
+#subcategoria-body .texto-lista ul {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+#subcategoria-body .texto-lista > ul {
+  list-style: disc inside;
+}
+#subcategoria-body .texto-lista > ul ul {
+  list-style: circle inside;
+}
+
+
+
+
+
+
+/* 3) Galería de imágenes con captions */
+/* ===== Thumbs de IMAGEN dentro del contenido ===== */
+#subcategoria-body .galeria {
+  display: grid;
+  gap: 8px !important;                                   /* separación entre items */
+  grid-template-columns: repeat(auto-fit, minmax(70px, auto)) !important;
+}
+
+/* El <figure> aloja cuadrado + caption debajo */
+#subcategoria-body .galeria .media-thumb.image-thumb{
+  width: 70px !important;
+  height: auto !important;
+  margin: 0 !important;                                   /* el gap controla el espacio */
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;                                    /* espacio entre cuadro y caption */
+}
+
+/* El CUADRADO 60×60 */
+#subcategoria-body .galeria .media-thumb.image-thumb .thumb-box{
+  width: 70px; 
+  height: 70px;
+  border-radius: .5rem;                                   /* bordes redondeados */
+  overflow: hidden;                                       /* recorta sobrante */
+  box-shadow: 0 1px 2px rgba(0,0,0,.06);
+  background:#000;                                        /* por si hay transparencia */
+}
+
+/* La imagen rellena el cuadrado como cover */
+#subcategoria-body .galeria .media-thumb.image-thumb .thumb-box img{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block;
+}
+
+/* Caption debajo del cuadrado */
+#subcategoria-body .galeria .media-thumb.image-thumb .thumb-caption{
+  max-width: 60px;
+  font-size: 6px;
+  line-height: .5;
+  color: #111827;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Anula reglas previas más genéricas que ponían 115×115 */
+#subcategoria-body .galeria img{
+  width: auto !important;
+  height: auto !important;
+}
+
+
+
+
+
+#subcategoria-body .galeria figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+#subcategoria-body .galeria img {
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  max-width: 100%;
+  width: 115px;
+  height: 115px;
+  object-fit: cover;
+
+}
+#subcategoria-body .galeria figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Contenedor de cada thumbnail de vídeo */
+.video-thumb {
+  position: relative;
+  width: 8rem;    /* 128px, igual que las img de la galería */
+  height: 8rem;
+  flex-shrink: 0;
+  border-radius: 0.375rem; /* same rounded corners */
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+/*  Garantizar tamaño mínimo de todas las miniaturas  */
+.media-thumb {
+  min-width: 8rem;   /* ancho mínimo 128px */
+  min-height: 8rem;  /* alto mínimo 128px */
+}
+.video-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+#video-modal .media-thumb {
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  min-height: 60px !important;
+}
+#video-modal .media-thumb img {
+  width: 60px !important;
+  height: 60px !important;
+  object-fit: cover;
+}
+/* Icono de play superpuesto */
+.video-thumb .play-icon {
+    position: absolute !important;
+  left: 4px;
+  bottom: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: .2rem;
+  background: rgba(17,24,39,.75);
+  display: grid;
+  place-items: center;
+}
+.video-thumb .play-icon i {
+  font-size: 8px;
+  color: #fff;
+}
+
+
+/* Ya tenías .video-thumb y .play-icon */
+
+/* Para que el modal aparezca centrado y cubra todo */
+#video-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.9);
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
+}
+
+#video-modal > div {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+  overflow: visible !important;
+  margin: 0; /* Asegura que no haya margen por el padding anterior */
+  border-radius: 0; /* Elimina bordes redondeados */
+}
+
+
+
+/* Estilo para el modal en modo expandido */
+#video-modal.expanded {
+  display: flex;
+  flex-direction: row;
+}
+
+#video-modal.expanded > div {
+  width: 50%;
+  height: 100%;
+  position: relative;
+}
+
+#video-modal.expanded #main-content {
+  width: 50%;
+  height: 100%;
+  overflow-y: auto;
+  background: white;
+}
+
+#video-modal.expanded .dashboard-container {
+  height: 100vh;
+}
+
+#video-modal.expanded iframe {
+  height: 100% !important;
+}
+
+
+
+
+
+#video-modal.split-view {
+  /* Anula inset:0 */
+  position: fixed;
+  z-index: 40 !important;
+  top: 3rem !important; 
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 60% !important;
+  width: 40% !important;
+  height: calc(100% - 1rem) !important; /* 100% de la pantalla menos esos 4rem */
+
+ background-color: transparent !important; 
+}
+
+/* Ajusta su contenedor interno para que ocupe todo */
+#video-modal.split-view > div {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: row; /* si necesitas */
+}
+
+
+
+
+
+
+
+/* ————————————————————————
+   Evita que el carrusel desborde en split-view 
+   ———————————————————————— */
+#video-modal.split-view .absolute.inset-x-0.top-10.bottom-0.flex {
+  overflow-x: hidden !important;
+  padding-bottom: 1.75rem;
+}
+
+/* Asegura que el carrusel ocupe sólo el 100% de su contenedor */
+#video-modal.split-view #thumbnail-carousel {
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  
+  background-color: rgb(255, 255, 255) !important;
+  border-top: 1px solid #e5e7eb !important; /* border-gray-200 */
+  padding: 2rem 1.5rem 0.5rem;      
+             /* espacio arriba/abajo y a los lados */
+  box-shadow: 0 -1px 4px rgba(0,0,0,0.05); /* ligera sombra si la quieres */
+}
+
+/* Oculta la scrollbar nativa para que no se vea el riel gris */
+#video-modal.split-view #video-thumbnails {
+  overflow-x: auto;
+  scrollbar-width: none;    /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+#video-modal.split-view #video-thumbnails::-webkit-scrollbar {
+  display: none;            /* Chrome, Safari */
+}
+
+/* Espaciado uniforme entre miniaturas */
+#video-modal.split-view .media-thumb {
+  margin: 0 2px;
+}
+
+/* Opcional: quita el backdrop sobre la mitad izquierda,
+   para que el usuario pueda seguir interactuando con el contenido */
+#video-modal.split-view {
+  pointer-events: none;
+}
+/* pero que el modal y sus hijos sigan recibiendo clicks */
+#video-modal.split-view > * {
+  pointer-events: auto;
+}
+
+/* ——————————————— */
+/* Ajuste del contenido al 50% izquierdo */
+/* ——————————————— */
+body.split-view-active .dashboard-container {
+  position: fixed;      /* para que no se mueva */
+  bottom: 0;
+  left: 0;
+  width: 60vw;          /* ocupa la mitad izquierda */
+  overflow-y: auto;     /* scroll interno si hace falta */
+}
+
+body.split-view-active .dashboard-container aside#sidebar {
+  height: 100%;         /* sidebar siempre al 100% de este contenedor */
+}
+
+body.split-view-active .dashboard-container #main-content {
+  flex-grow: 1;         /* ya rellena el espacio restante del 50% */
+}
+
+
+
+
+/* Cuando esté en split-view, oculta la columna de descripción y haz que el vídeo ocupe todo el ancho */
+#video-modal.split-view .absolute.inset-x-0.top-10.bottom-0.flex > aside {
+  display: none !important;
+}
+#video-modal.split-view .absolute.inset-x-0.top-10.bottom-0.flex > div {
+  display: flex;
+    width: 100% !important;
+
+  align-items: center;
+  justify-content: center;
+}
+
+ /* Split-only: respeta el header (h-12 = 3rem) */
+ #video-modal.split-view > div.absolute.inset-x-0.top-10.bottom-0 {
+   top: 3rem !important;
+   height: calc(100% - 3rem) !important;
+ }
+
+#video-modal.split-view button span {
+  display: none !important;
+}
+
+
+/* Panel de descripción en split-view */
+#video-modal.split-view .video-desc-panel {
+  position: absolute;
+  top: 3rem;    /* coincide con h-12 (3rem) de tu header */
+  bottom: 0; left: 0;
+  width: 240px;
+  background: rgba(0,0,0,0.9);
+  color: #fff;
+  z-index: 80;               /* por encima del iframe */
+  overflow-y: auto;
+  transition: transform .3s ease;
+}
+/* Cuando no esté activo, lo desplazamos fuera de pantalla */
+#video-modal.split-view .video-desc-panel.hidden {
+  transform: translateX(-100%);
+}
+/* Ajustar el vídeo para dejar espacio */
+/* ✅ solo desplaza el vídeo cuando el panel de descripción está abierto */
+#video-modal.split-view .video-desc-panel:not(.hidden) + .absolute.inset-x-0.top-10.bottom-0.flex {
+  margin-left: 240px !important;
+}
+
+
+
+/* permite a las miniaturas “salirse” un poco */
+#video-modal > div.absolute.inset-x-0.top-10.bottom-0.flex {
+  overflow: visible !important;
+}
+
+/* Miniaturas de imagen: altura fija y ancho auto para mantener proporciones */
+#video-thumbnails .image-thumb img {
+  height: 8rem;   /* mismo alto que antes (h-32) */
+  width: auto;    /* ancho automático según proporción */
+  object-fit: cover;
+}
+#video-thumbnails {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch; /* para scroll suave en iOS */
+  scroll-behavior: smooth;
+}
+
+
+/* En split-view, que el fondo detrás de la imagen/vídeo sea blanco */
+#video-modal.split-view .w-3\/4.relative {
+  background-color: rgb(245, 246, 248) !important;
+}
+
+/* Header del modal en split-view */
+#video-modal.split-view .absolute.top-0.left-0.w-full.h-12 {
+  background-color: #fff !important;
+  border-color: #e5e7eb !important;
+  color: #000 !important;
+}
+
+/* Fondo del carrusel en split-view */
+
+
+
+
+
+
+
+.media-thumb.selected {
+  border-radius: 0.5rem;
+  border: 0.3rem solid #525354;             /* gris interior */
+  outline: 0.2rem solid rgba(255,255,255,0.8); /* blanco exterior */
+  outline-offset: -0.2rem;                   /* sin espacio entre border y outline */
+}
+
+
+/* En split-view, botones transparentes y flechas grises */
+#video-modal.split-view #scroll-left,
+#video-modal.split-view #scroll-right {
+  background-color: transparent !important;
+}
+
+#video-modal.split-view #scroll-left i,
+#video-modal.split-view #scroll-right i {
+  color: #6b7280 !important; /* gray-600 de Tailwind */
+}
+
+
+/* En modo completo (no split-view), fondo gris semitransparente en el carrusel */
+#video-modal:not(.split-view) #thumbnail-carousel {
+  background-color: rgba(55, 65, 81, 0.3) !important; /* gray-700 al 30% de opacidad */
+}
+
+
+.zoom-menu {
+  position: absolute;
+  top: 100%;
+  right: 2rem;
+  background: #1f2937;
+  /* Aumentamos el padding para más espacio interior */
+  padding: .75rem 1rem;     /* antes .25rem .5rem */
+  /* Garantizamos un tamaño mínimo */
+  min-width: 8rem;          /* 128px */
+  min-height: 2.5rem;       /* 40px */
+  border-radius: .375rem;
+  display: flex;
+  align-items: center;
+  gap: .75rem;              /* antes .5rem */
+  z-index: 30;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* Opcional: agrandar un poco los botones y el texto */
+.zoom-menu button {
+  font-size: 1rem;          /* antes .875rem */
+  padding: .25rem .5rem;    /* un poquito más grande */
+}
+.zoom-menu span {
+  font-size: 1.2rem;
+}
+.zoom-menu.hidden { display: none; }
+.zoom-menu button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.zoom-menu span {
+  color: white;
+  font-size: 1rem;
+  min-width: 2ch;
+  text-align: center;
+}
+
+
+/* 1) Clippear el zoom dentro de la zona de vídeo */
+#video-modal .w-3\/4.relative {
+  overflow: hidden;
+}
+
+/* 2) Centrar el origen del zoom */
+#modal-image {
+  transform-origin: center center;
+}
+
+/* 3) Mantener la descripción siempre por encima */
+#video-desc-panel {
+  z-index: 30;
+}
+
+
+/* Split-view: descripción con fondo blanco y texto negro */
+#video-modal.split-view .video-desc-panel {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+/* Asegúrate de que todos los elementos hijos (títulos, párrafos, etc.) hereden el color */
+#video-modal.split-view .video-desc-panel h3,
+#video-modal.split-view .video-desc-panel p {
+  color: inherit !important;
+}
+
+/* Título en split-view: más grande y en negrita */
+#video-modal.split-view .video-desc-panel h3#video-desc-title {
+  font-size: 1.25rem !important;   /* aprox. 20px */
+  font-weight: 700     !important; /* negrita */
+  margin-bottom: 0.5rem !important; /* separa un poquito del copyright */
+  display: block        !important; /* aseguramos que ocupe línea propia */
+  order: -1             !important; /* si hiciera falta reposicionarlo */
+}
+
+
+/* estilos del footer de cada details */
+.collapse-controls {
+  display: none;
+  padding: 0.75rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  font-size: 0.875rem;
+  color: #475569;
+}
+details[open] > .collapse-controls {
+  display: flex;
+}
+/* iconos un poco más grandes y espaciados */
+.collapse-controls i {
+  font-size: 0.875rem;
+}
+.collapse-controls span {
+  font-weight: 500;
+}
+
+/* Hago sticky la barra de MY HIGHLIGHTING dentro del scroll de subcategoría */
+
+/* Hace sticky la barra MY HIGHLIGHTING en todo el scroll de main-content */
+
+
+/* 1) Asegúrate de que #main-content sea el contenedor de scroll */
+#main-content {
+  
+  position: relative;
+}
+
+
+
+
+
+
+/* quita el padding-top del scroll container */
+#main-content {
+  /* preserve el padding horizontal si lo necesitas */
+  padding: 0 2.5rem !important;
+}
+
+/* quita el margin y padding superior solo de esta sección */
+#subcategoria-content {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  /* si quieres seguir teniendo padding a los lados y abajo: */
+  padding-right: 1.5rem;
+  padding-bottom: 1.5rem;
+  padding-left: 1.5rem;
+    background-color: #ffffff !important;
+
+}
+
+/* Resetea el fondo de los summary cuando el details está cerrado */
+#subcategoria-body details:not([open]) > summary {
+  background-color: transparent;
+  min-height: calc(30px * var(--content-spacing-scale));
+  padding-top: calc(.25rem * var(--content-spacing-scale));
+  padding-bottom: calc(.25rem * var(--content-spacing-scale));
+  line-height: .5; 
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+}
+
+#subcategoria-body details[open] > summary {
+  padding-top: calc(.75rem * var(--content-spacing-scale));
+  padding-bottom: calc(.7rem * var(--content-spacing-scale));
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+
+}
+
+/* Evita que el chevron ensanche la fila */
+#subcategoria-body summary svg { flex-shrink: 0; }
+.collapse-controls {
+  background-color: transparent !important;
+  border-top: none !important;
+}
+
+details[open] > summary {
+  background-color: rgb(247, 248, 249);
+}
+
+body:not(.favorites-split) #main-content:has(#subcategoria-content:not(.hidden)) {
+  background-color: #ffffff !important;
+}
+
+/* —— Estilos finos para que se vea EXACTO —— */
+
+.hl-title{
+  font-size: 13.5px;           /* muy parecido al screenshot */
+  font-weight: 600;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: #475569;              /* slate-600 */
+}
+.hl-btn{
+  padding: 2px 4px;
+  color: #475569;
+}
+.hl-btn:hover{ color:#111827; } /* hover sutil */
+/* Separadores solo cuando la barra está sticky */
+.hl-sep {
+  width: 1px;
+  height: 18px;
+  background: #e5e7eb;   /* gray-200 */
+  margin: 0 .75rem;
+  display: inline-block; /* ← antes estaba en none */
+}
+
+/* Menú de fuentes “AA” */
+#lang-menu { scrollbar-width: thin; scrollbar-color: #e5e7eb transparent; }
+#lang-menu::-webkit-scrollbar{ width: 8px; }
+#lang-menu::-webkit-scrollbar-thumb{ background-color:#e5e7eb; border-radius:9999px; }
+#lang-menu::-webkit-scrollbar-track{ background:transparent; }
+
+
+
+/* —— Escala solo del CONTENIDO —— */
+/* Variable con el porcentaje de fuente del contenido */
+#subcategoria-content {
+  --content-font-scale: 100%;
+  --content-spacing-scale: 1;
+}
+
+/* Aplico la escala SOLO a texto típico del contenido */
+#subcategoria-content p,
+#subcategoria-content li,
+#subcategoria-content figcaption,
+#subcategoria-content summary span,
+#subcategoria-content .texto-lista,
+#subcategoria-content .collapse-controls span {
+  font-size: var(--content-font-scale);
+}
+
+/* QBank: escala independiente */
+#qbank-content{
+  --qbank-font-scale: 100%;
+}
+
+#qbank-session{
+  --labs-panel-width: min(530px, 42vw);
+}
+
+.qbank-option-exp {
+  width: 100%;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #475569;
+  padding-left: 2.5rem;
+}
+
+#qbank-labs-close{
+  display: none;
+}
+
+#qbank-labs-close:not(.hidden){
+  display: flex;
+}
+
+#qbank-session .labs-panel{
+  display: none;
+  width: var(--labs-panel-width);
+  max-width: 570px;
+  flex-direction: column;
+  background: #ffffff;
+  border-left: 1px solid #e2e8f0;
+  box-shadow: -24px 0 60px rgba(15, 23, 42, 0.12);
+  z-index: 60;
+}
+
+#qbank-session.labs-open .labs-panel{
+  display: flex;
+}
+
+#qbank-session .labs-panel header{
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start !important;  /* sin espacio extra automático */
+  gap: 8px !important;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+#qbank-session .labs-panel .labs-tabs{
+  display: flex;
+  gap: 1.5rem;
+  border-bottom: 1px solid #cbd5f5;
+  padding-left: .25rem;
+  flex: 0 0 auto;   /* solo ocupa su ancho real */
+}
+
+.labs-tabs{
+  flex: 0 0 auto !important;   /* que no se expanda */
+}
+
+#qbank-session .labs-panel .labs-tab{
+  font-size: .95rem;
+  font-weight: 600;
+  color: #475569;
+  padding-bottom: .65rem;
+  border-bottom: 3px solid transparent;
+  transition: color .2s ease, border-color .2s ease;
+}
+
+#qbank-session .labs-panel .labs-tab.is-active{
+  color: #056c8d;
+  border-color: #3bb3ce;
+}
+
+#qbank-session .labs-panel .labs-tab:not(.is-active):hover{
+  color: #0f172a;
+}
+
+.labs-search{
+  margin-left: auto !important; /* se va a la derecha */
+  flex: 0 0 auto !important;
+}
+
+#qbank-session .labs-panel .labs-search{
+  display: flex;
+  padding: 0;
+  flex: 0 0 auto !important;               
+  justify-content: flex-start !important;  
+}
+.labs-search{ margin-right: 4px !important; }
+
+/* Override del search en Labs */
+#qbank-session .labs-panel .labs-search-field{
+  display: flex !important;
+  align-items: center !important;
+  gap: .5rem !important;
+  background: #f5f7fb !important;
+  border: 1px solid transparent !important;   /* SIN MARCO COLOREADO */
+  border-radius: 4px !important;
+  padding: .35rem 1rem !important;
+  width: 160px !important;                    /* ANCHO EXACTO */
+  min-width: 160px !important;
+  box-shadow: none !important;                /* evitar cualquier halo */
+}
+
+#qbank-session .labs-panel .labs-search-field i{
+  color: #64748b !important;
+  font-size: .9rem !important;
+}
+
+
+#qbank-session .labs-panel .labs-search-input{
+  border: none;
+  background: transparent;
+  font-size: .9rem;
+  color: #0f172a;
+  width: 100%;
+}
+
+#qbank-session .labs-panel .labs-search-input:focus{
+  outline: none;
+}
+
+#qbank-session .labs-panel .labs-header-actions{
+  display: flex;
+  align-items: center;
+  gap: 4px !important;
+  margin-left: 8px !important;   /* ya no ocupa todo el espacio; deja que el search empuje */
+}
+
+
+.labs-header{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+
+
+#qbank-session .labs-panel .labs-divider{
+  width: 1px;
+  height: 28px;
+  background: #e2e8f0;
+  margin-right: 2px !important;
+  margin-left: 2px !important;
+}
+
+#qbank-session .labs-panel .labs-close{
+  padding: 2px !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0f172a;
+  border: 1px solid transparent;
+  transition: color .2s ease, background-color .2s ease, border-color .2s ease;
+}
+
+#qbank-session .labs-panel .labs-close:hover{
+  background: #f1f5f9;
+  border-color: #cbd5f5;
+}
+
+#qbank-session .labs-panel main{
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem 1.75rem 2rem;
+  background: #f8fafc;
+}
+
+#qbank-session .labs-panel .labs-table{
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: .8rem;
+  color: #0f172a;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: .75rem;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -20px rgba(15, 23, 42, 0.45);
+}
+
+#qbank-session .labs-panel .labs-table thead th{
+  text-align: left;
+  font-size: .7rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #475569;
+  padding: .9rem 1rem;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+
+
+
+#qbank-session .labs-panel .labs-row{
+  border-top: 1px solid #e2e8f0;
+}
+
+#qbank-session .labs-panel .labs-row:first-of-type{
+  border-top: 0;
+}
+
+#qbank-session .labs-panel .labs-row th{
+  font-size: .75rem;
+  font-weight: 700;
+  padding: .75rem 1rem;
+  color: #0f172a;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+}
+
+#qbank-session .labs-panel .labs-row td{
+  padding: .75rem 1rem;
+  vertical-align: top;
+  color: #1e293b;
+  border-right: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+#qbank-session .labs-panel mark.labs-highlight{
+  background: #fef3c7;
+  color: inherit;
+  padding: 0;
+  border-radius: 2px;
+}
+
+#qbank-session .labs-panel .labs-row td:first-child{
+  vertical-align: middle;
+}
+
+#qbank-session .labs-panel .labs-row td:nth-child(2),
+#qbank-session .labs-panel .labs-row td:nth-child(3){
+  font-family: 'Lato', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: .78rem;
+  color: #0f172a;
+}
+
+#qbank-session .labs-panel .labs-row .indent-1{
+  padding-left: 1rem;
+}
+
+#qbank-session .labs-panel .labs-row .indent-2{
+  padding-left: 2rem;
+}
+
+#qbank-session .labs-panel .labs-row th[colspan="3"]{
+  border-right: 0;
+  text-align: left;
+}
+
+#qbank-session .labs-panel .labs-table th:last-child,
+#qbank-session .labs-panel .labs-table td:last-child{
+  border-right: 0;
+}
+
+#qbank-session .labs-panel .labs-table thead th:first-child{
+  border-top-left-radius: .75rem;
+}
+
+#qbank-session .labs-panel .labs-table thead th:last-child{
+  border-top-right-radius: .75rem;
+}
+
+#qbank-session .labs-panel .labs-table tbody tr:last-child td:first-child{
+  border-bottom-left-radius: .75rem;
+}
+
+#qbank-session .labs-panel .labs-table tbody tr:last-child td:last-child{
+  border-bottom-right-radius: .75rem;
+}
+
+#qbank-session .labs-panel .labs-meta{
+  font-size: .7rem;
+  color: #64748b;
+  margin-top: 1rem;
+  line-height: 1.4;
+}
+
+#qbank-session .labs-panel .labs-empty{
+  font-size: .8rem;
+  color: #475569;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+#qbank-session .labs-panel .labs-loading{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  padding: 2rem 1rem;
+  font-size: .8rem;
+  color: #475569;
+}
+
+#qbank-session .labs-panel .labs-spinner{
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  border: 2px solid #bae6fd;
+  border-top-color: #0ea5e9;
+  animation: labs-spin 1s linear infinite;
+}
+
+@keyframes labs-spin{
+  to { transform: rotate(360deg); }
+}
+
+#qbank-session .labs-panel .labs-close{
+  border-radius: .375rem;
+  padding: .35rem;
+  color: #64748b;
+  transition: background-color .2s ease, color .2s ease;
+}
+
+#qbank-session .labs-panel .labs-close:hover{
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+#qbank-session.labs-open{
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: 1fr auto;
+  column-gap: var(--qbank-gap);
+}
+
+#qbank-session.labs-open > .qbank-main{
+  grid-column: 1;
+  grid-row: 1 / span 1;
+  min-height: 0;
+}
+
+#qbank-session.labs-open > #qbank-nav{
+  grid-column: 1;
+  grid-row: 2;
+}
+
+#qbank-session.labs-open .labs-panel{
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: stretch;
+  margin-top: var(--qbank-header-offset);
+  height: calc(100vh - var(--qbank-header-offset));
+  max-height: calc(100vh - var(--qbank-header-offset));
+  width: 100%;
+  max-width: none;
+}
+
+#qbank-session.labs-open .labs-panel main{
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem 1.75rem 2rem;
+  background: #f8fafc;
+}
+
+
+
+@media (max-width: 1299px){
+  #qbank-session.labs-open{
+    display: flex !important;
+    flex-direction: column;
+    grid-template-columns: none;
+    grid-template-rows: none;
+  }
+  #qbank-session.labs-open > .qbank-main,
+  #qbank-session.labs-open > #qbank-nav{
+    display: none !important;
+  }
+  #qbank-session.labs-open .labs-panel{
+    width: 100%;
+    max-width: none;
+    margin-top: 0;
+    padding-top: var(--qbank-header-offset);
+    min-height: 100vh;
+    height: auto;
+    max-height: none;
+    padding-bottom: 4.5rem;
+    border-left: 0;
+    border-top: 1px solid #e2e8f0;
+    box-shadow: none;
+  }
+  #qbank-session.labs-open .labs-panel main{
+    padding: 1.25rem 1.25rem 4rem;
+  }
+  #qbank-session.labs-open #qbank-labs-close{
+    width: 100%;
+    border-radius: 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 70;
+  }
+}
+
+/* Aplica la escala a pregunta, opciones y explicación en QBank (override fuerte)
+   IMPORTANTE: NO escalar de nuevo a los hijos (*) de la explicación
+   para evitar que se aplique el zoom dos veces dentro de Explanation. */
+#qbank-content .question-text,
+#qbank-content .option-row > .flex-1,
+#qbank-content .opt-text,
+#qbank-content .opt-footer,
+#qbank-content .explicacion,
+#qbank-content .explicacion-box,
+#qbank-content #qbank-explanation,
+#qbank-content p,
+#qbank-content li,
+#qbank-content .opt-reset {
+  font-size: var(--qbank-font-scale) !important;
+}
+
+/* Si las utilidades Tailwind (text-xs, text-sm, etc.) pisan el tamaño, hereda del padre escalado */
+
+
+
+/* Líneas separadoras (hairline) más finas bajo cada título */
+@supports (border-width: .5px) {
+  #subcategoria-body details { border-bottom-width: .5px; }
+}
+@supports not (border-width: .5px) {
+  /* Fallback para navegadores que no aceptan .5px */
+  #subcategoria-body details {
+    border-bottom: none;
+    box-shadow: inset 0 -0.5px 0 0 #e5e7eb;
+  }
+}
+
+
+/* Afinar la línea superior e inferior de la barra MY HIGHLIGHTING */
+#subcat-header .highlighting-bar {
+  border-top-width: .5px !important;
+  border-bottom-width: .5px !important;
+}
+
+/* Distribución 3 columnas: izq / centro / der */
+.highlighting-bar{display:flex;align-items:center;}
+.highlighting-bar .hl-left{flex:0 0 auto;display:flex;align-items:center;gap:.25rem;}
+.highlighting-bar .hl-center{flex:0 1 auto;display:flex;justify-content:center;margin:0 auto;}
+.highlighting-bar .hl-right{flex:0 0 auto;margin-left:auto;display:flex;align-items:center;justify-content:flex-end;gap:.5rem;}
+
+#subcat-header.is-stuck .highlighting-bar .hl-right,
+#subcat-header.is-stuck .highlighting-bar .bookmark-toggle,
+
+#subcat-header.is-stuck .highlighting-bar .hl-close {
+  
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  gap: 0 !important;
+}
+
+#subcat-header.is-stuck .highlighting-bar .hl-sep {
+  margin: 0 .75rem !important; /* igual que topbar */
+}
+
+/* Back solo cuando está pegada (segunda captura) */
+.highlighting-bar .fav-back{margin-left:1rem;display:none;}
+#subcat-header.is-stuck .highlighting-bar .fav-back{display:inline-flex!important;}
+
+#subcat-header.is-stuck .highlighting-bar .fav-back{
+  position: relative; /* permite posicionar el pseudo-elemento correctamente */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 3rem;            /* misma altura que la barra */
+  min-height: 3rem;       /* asegura centrado vertical */
+}
+#subcat-header.is-stuck .highlighting-bar .fav-back::after{
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 18px;                /* mismo alto que .hl-sep */
+  background: #e5e7eb;         /* gray-200 */
+  margin-left: .75rem;         /* separación a la derecha del botón */
+  margin-right: .75rem;        /* mantiene el mismo gap que otros separadores */
+}
+
+/* Bookmark y Cerrar solo en barra pegada */
+.highlighting-bar .bookmark-toggle,
+.highlighting-bar .hl-close{display:none;}
+#subcat-header.is-stuck .highlighting-bar .bookmark-toggle,
+#subcat-header.is-stuck .highlighting-bar .hl-close{display:inline-flex!important;}
+
+
+#topbar {
+  height: 3rem !important;
+  box-sizing: border-box;
+}
+.highlighting-bar {
+  height: 3rem !important;
+  min-height: 3rem !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  box-sizing: border-box;
+}
+
+/* Base para items (enlaces y botones) */
+#sidebar .sidebar-item{
+  display:flex; align-items:center; height:40px;
+  width:100%; text-align:left; padding:0 .75rem;
+  color:#374151; /* gray-700 */
+  border-radius:.375rem;
+  transition:background-color .2s, color .2s, font-weight .2s;
+}
+
+/* Hover consistente */
+#sidebar .sidebar-item:hover{ background:#eff6ff; } /* blue-50 */
+
+/* — Estado activo unificado — */
+#sidebar .sidebar-item.is-active{
+  background:#e0f2fe;        /* blue-100 */
+  color:#1d4ed8 !important;  /* blue-700 */
+  font-weight:500 !important;
+}
+#sidebar .sidebar-item.is-active i:not(.fa-chevron-down){
+  color:#1d4ed8 !important;  /* icono principal azul */
+}
+
+/* Chevrón: solo rota cuando el grupo está “abierto” */
+#sidebar .sidebar-item.is-active .fa-chevron-down{
+  color:#1d4ed8;
+}
+#sidebar .sidebar-item.chev-open .fa-chevron-down{
+  transform:rotate(180deg);
+}
+
+/* Sub-items (los <a> dentro de acordeones) siguen con su tamaño menor */
+#sidebar div[id^="accordion-"] a.sidebar-item{
+  height:32px; font-size:.875rem; color:#6b7280;
+}
+
+
+/* ==== Sidebar: estado seleccionado EXACTO ==== */
+/* Aplica tanto a enlaces como a botones del grupo */
+#sidebar .sidebar-item.active-link,
+#sidebar .sidebar-item.is-active,
+#sidebar .sidebar-group > button.active-link {
+  /* fondo gris */
+  background-color: #f3f4f6;              /* gray-100 */
+  /* texto un poco más oscuro y fuerte */
+  color: #111827 !important;              /* gray-900 */
+  font-weight: 600 !important;
+
+  /* hairlines arriba/abajo (sin “engordar” el layout) */
+  border-radius: 0 !important;
+  border-top: .5px solid #e5e7eb;         /* gray-200 */
+  border-bottom: .5px solid #e5e7eb;      /* gray-200 */
+
+  /* banda lateral “un poco gruesa” SIN mover el contenido */
+  /* usamos inset box-shadow para no alterar el ancho */
+  box-shadow: inset 3px 0 0 0 #9ca3af;    /* gray-400 ~ 4px */
+}
+
+/* Icono del ítem seleccionado: que herede el color del texto */
+#sidebar .sidebar-item.active-link i:not(.fa-chevron-down),
+#sidebar .sidebar-item.is-active i:not(.fa-chevron-down) {
+  color: inherit !important;
+}
+
+/* Hover consistente cuando ya está seleccionado (no “salta” a azul) */
+#sidebar .sidebar-item.active-link:hover,
+#sidebar .sidebar-item.is-active:hover {
+  background-color: #f3f4f6;              /* mantiene el mismo gris */
+}
+
+/* Subitems dentro de acordeones: mantienen tipografía más pequeña
+   pero heredan el look seleccionado cuando corresponda */
+
+
+/* Colapsado: evitamos que la banda lateral “ensucie” el pill de iconos */
+#sidebar.collapsed .sidebar-item.active-link,
+#sidebar.collapsed .sidebar-item.is-active {
+  box-shadow: none;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  background-color: transparent;
+}
+
+/* —— Botones de grupo abiertos: solo rota chevron —— */
+#sidebar .sidebar-group > button.accordion-open {
+  background: transparent !important;
+  color: #374151 !important;          /* gray-700 */
+  font-weight: 400 !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* Chevron rotado */
+#sidebar .sidebar-group > button.accordion-open .fa-chevron-down {
+  transform: rotate(180deg);
+  color: #6b7280;                      /* gray-600 */
+}
+
+.toggle-icons{display:flex;align-items:center;gap:.35rem;}
+/* Acciones a la derecha en MY HIGHLIGHTING */
+.highlighting-bar .toggle-icons{margin-left:auto;display:flex;gap:.5rem;justify-content:flex-end;}
+/* Espaciador flexible entre título e iconos */
+.highlighting-bar .hl-center{flex:1 1 0;display:flex;align-items:center;justify-content:flex-start;margin:0;}
+.bookmark-toggle{display:none;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:9999px;color:#94a3b8;cursor:pointer;transition:color .2s ease;}
+.bookmark-toggle:hover{color:#1e293b;}
+.bookmark-toggle:focus-visible{outline:2px solid #38bdf8;outline-offset:2px;}
+[data-bookmarked="true"] .bookmark-toggle{color:#0f172a;}
+[data-bookmarked="true"]>.toggle-icons>.bookmark-toggle,
+.accordion-open .bookmark-toggle,
+details[open] summary .bookmark-toggle,
+details[data-bookmarked="true"] summary .bookmark-toggle{display:inline-flex;}
+#sidebar .bookmark-toggle{display:none!important;}
+
+body.favorites-split #main-content{
+  display:flex;
+  gap:0;
+  align-items:stretch;
+  overflow:hidden;
+  padding:0 !important;
+  margin:0 !important;
+  background:#e9eff6 !important;
+  box-sizing:border-box;
+  flex:1 1 auto;
+}
+/* En favoritos: si la barra MY HIGHLIGHTING está sticky, oculta la topbar del split derecho */
+body.favorites-split:has(#subcat-header.is-stuck) #fav-topbar { display: none !important; }
+body.favorites-split #favorites-view{
+  display:block;
+  width:320px;
+  flex-shrink:0;
+  padding:1.75rem;
+  background:#e9eff6;
+  border-right:1px solid #d5dbe5;
+  box-sizing:border-box;
+  margin:0 !important;
+}
+body.favorites-split #subcategoria-content{
+  flex:1;
+  display:block !important;
+  padding:0 2.5rem 2.5rem !important;
+  margin:0 !important;
+  background:#fff;
+}
+body.favorites-split #subcat-header{margin-bottom:1.5rem;}
+body.favorites-split #subcategoria-sidebar{display:none!important;}
+body.favorites-split #subcat-header .highlighting-bar{margin-left:0!important;margin-right:0!important;padding-left:0!important;padding-right:0!important;}
+body.favorites-split #favorites-view,
+body.favorites-split #subcategoria-content{height:100%;overflow-y:auto;}
+body.favorites-split .dashboard-container{
+  background:#e9eff6;
+  gap:0;
+  width:100%;
+}
+body.favorites-split #sidebar{border-right:1px solid #d5dbe5;}
+body.favorites-split #sb-switch{background:#e9eff6;border-color:#d5dbe5;}
+body.favorites-split #user-section,
+body.favorites-split{background:#e9eff6;}
+#favorites-view{display:none;}
+#favorites-view:not(.hidden){display:block;}
+body.favorites-split #favorites-view.hidden{display:none;}
+#favorites-list{display:flex;flex-direction:column;gap:.75rem;}
+.favorite-item{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.9rem 1rem;border:1px solid #e2e8f0;border-radius:.75rem;background:#fff;transition:box-shadow .2s ease,border-color .2s ease,background .2s ease;text-align:left;}
+.favorite-item:hover{box-shadow:0 8px 20px rgba(15,23,42,.08);border-color:#cbd5f5;}
+.favorite-item--active{border-color:#3b82f6;background:#eff6ff;}
+.favorite-item__meta{font-size:.75rem;line-height:1rem;color:#64748b;}
+.favorite-empty{padding:2.5rem;border:1px dashed #cbd5f5;border-radius:.75rem;background:#f8fafc;text-align:center;color:#64748b;}
+.favorite-highlight{animation:favoritePulse 1.2s ease forwards;}
+@keyframes favoritePulse{0%{box-shadow:0 0 0 0 rgba(59,130,246,.35);}100%{box-shadow:0 0 0 16px rgba(59,130,246,0);}}
+
+/* Bloque activo */
+#sidebar .sidebar-group.segment-active {
+  background:#f3f4f6;
+  box-shadow: inset 4px 0 0 #9ca3af;
+  border-top:.5px solid #e5e7eb;
+  border-bottom:.5px solid #e5e7eb;
+  border-radius:0;
+}
+#sidebar.collapsed .sidebar-group.segment-active {
+  background:transparent;
+  box-shadow:none;
+  border-color:transparent;
+}
+
+/* Mantener el bloque gris del grupo cuando algún subitem está activo */
+#sidebar .sidebar-group:has(> div[id^="accordion-"] a.sidebar-item.is-active),
+#sidebar .sidebar-group:has(> div[id^="accordion-"] a.sidebar-item.active-link) {
+  background:#f3f4f6 !important;
+  box-shadow: inset 4px 0 0 #9ca3af !important;
+  border-top:.5px solid #e5e7eb !important;
+  border-bottom:.5px solid #e5e7eb !important;
+  border-radius:0 !important;
+}
+
+
+/* Ítems principales (Home, Drugs, etc.) */
+#sidebar .sidebar-group > a.sidebar-item span,
+#sidebar .sidebar-group > button .flex.items-center > span {
+  font-size: 0.875rem; /* ≈14px */
+}
+
+
+
+/* Hover de SUBITEMS: texto negro, sin fondo */
+#sidebar div[id^="accordion-"] a.sidebar-item:hover {
+  color: #000 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Si algún subitem tiene ícono, que acompañe el color */
+#sidebar div[id^="accordion-"] a.sidebar-item:hover i {
+  color: inherit !important;
+}
+
+/* Accesibilidad: al navegar con teclado, mismo look en focus */
+#sidebar div[id^="accordion-"] a.sidebar-item:focus-visible {
+  color: #000 !important;
+  background: transparent !important;
+  outline: 2px solid #d1d5db; /* opcional, quitalo si no lo querés */
+  outline-offset: 2px;
+}
+
+/* Fondo gris al pasar el mouse por el grupo cuando su acordeón está abierto */
+#sidebar .sidebar-group:has(> div[id^="accordion-"]:not(.hidden)):hover {
+  background:#f3f4f6;               /* gris OK */
+  box-shadow: none;                  /* ← quita la banda */
+  border-top:.5px solid #e5e7eb;
+  border-bottom:.5px solid #e5e7eb;
+  border-radius:0;
+}
+
+/* Si la barra está colapsada, no pintes el hover “grande” */
+#sidebar.collapsed .sidebar-group:has(> div[id^="accordion-"]:not(.hidden)):hover {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+
+/* Fallback JS: mismo estilo pero con clase */
+#sidebar .sidebar-group.hover-open:hover {
+  background:#f3f4f6;
+  box-shadow: inset 2px 0 0 #9ca3af;
+  border-top:.5px solid #e5e7eb;
+  border-bottom:.5px solid #e5e7eb;
+  border-radius:0;
+}
+#sidebar.collapsed .sidebar-group.hover-open:hover {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+/* Subitems seleccionados: sin banda, sin fondo y sin cambio de color */
+#sidebar div[id^="accordion-"] a.sidebar-item.active-link,
+#sidebar div[id^="accordion-"] a.sidebar-item.is-active {
+  font-size: .875rem;                     /* text-sm */
+  color: #111827 !important;
+  box-shadow: inset 4px 0 0 0 #9ca3af;
+  border-top: .5px solid #e5e7eb;
+  border-bottom: .5px solid #e5e7eb;
+}
+
+
+/* Subitems seleccionados: texto negro, sin fondo ni banda */
+#sidebar div[id^="accordion-"] a.sidebar-item.active-link,
+#sidebar div[id^="accordion-"] a.sidebar-item.is-active {
+  background: transparent !important;
+  box-shadow: none !important;            
+  border-top-color: transparent !important;
+  border-bottom-color: transparent !important;
+  color: #000 !important;                 
+  font-weight: 500 !important;            
+}
+
+
+/* Subítems mucho más juntos */
+#sidebar div[id^="accordion-"] a.sidebar-item {
+  font-size: 0.75rem;   /* ≈12px */
+  line-height: 1rem;    /* ≈16px */
+  padding-top: 0.15rem; /* menos espacio arriba */
+  padding-bottom: 0.15rem; /* menos espacio abajo */
+  margin: 0; /* sin separación extra */
+}
+
+/* ===== Preset ultra-compacto tipo Amboss ===== */
+:root{
+  --subitem-font: 9px;   /* tamaño de fuente */
+  --subitem-line: 22px;   /* altura total deseada por ítem */
+  --subitem-vpad: 0px;    /* relleno vertical */
+  --subitem-gap: 0px;     /* separación entre ítems */
+}
+
+/* Quita el espaciado vertical que añade Tailwind (space-y-1) a todos los acordeones */
+#sidebar div[id^="accordion-"].space-y-1 > * + * { margin-top: var(--subitem-gap) !important; }
+
+#sidebar div[id^="accordion-"] {
+  padding-bottom: 6px; /* ajusta el valor a tu gusto */
+}
+
+/* Subitems: altura fija y muy compacta */
+#sidebar div[id^="accordion-"] a.sidebar-item{
+  font-size: var(--subitem-font);
+  line-height: var(--subitem-line);   /* controla la altura exacta */
+  padding-top: var(--subitem-vpad);
+  padding-bottom: var(--subitem-vpad);
+  margin: 0;                          /* sin margen extra entre ítems */
+  height: var(--subitem-line);        /* asegura consistencia */
+}
+
+/* Estado seleccionado: sin banda ni bordes; texto negro y semibold */
+#sidebar div[id^="accordion-"] a.sidebar-item.active-link,
+#sidebar div[id^="accordion-"] a.sidebar-item.is-active{
+  background: transparent !important;
+  box-shadow: none !important;
+  border-top-color: transparent !important;
+  border-bottom-color: transparent !important;
+  color: #000 !important;
+  font-weight: 500 !important;
+}
+
+/* Hover sutil, sin alterar la altura */
+#sidebar div[id^="accordion-"] a.sidebar-item:hover{
+  background: transparent !important;
+  color: #0f172a; /* slate-900 */
+}
+
+/* Quitar el espacio entre el header y el primer item de la sidebar */
+#sidebar{
+  padding-top: 0 !important;
+}
+#sidebar .sidebar-group:first-child{
+  margin-top: 0 !important;
+}
+
+/* — Sangría extra para los títulos (icono más separado del borde izq.) — */
+:root{ --sb-left-pad: 1.25rem; } /* prueba 1rem / 1.25rem / 1.5rem */
+
+#sidebar .sidebar-group > a.sidebar-item,
+#sidebar .sidebar-group > button.sidebar-item{
+  padding-left: var(--sb-left-pad) !important;
+}
+
+/* Si en colapsado+hover también quieres esa misma sangría: */
+#sidebar.collapsed:hover .sidebar-group > a.sidebar-item,
+#sidebar.collapsed:hover .sidebar-group > button.sidebar-item,
+#sidebar.collapsed.hover-expanded .sidebar-group > a.sidebar-item,
+#sidebar.collapsed.hover-expanded .sidebar-group > button.sidebar-item{
+  padding-left: var(--sb-left-pad) !important;
+}
+
+
+/* Library: que las líneas divisorias toquen los bordes de las cards */
+#articles-panel .articles-panel-column > ul{
+  margin-left: -1rem;   /* compensa el px-4 del contenedor */
+  margin-right: -1rem;  /* idem */
+}
+
+/* Reponemos el padding en cada item para alinear con el título de la card */
+#articles-panel .articles-panel-list-item{
+  padding-left: 1rem !important;   /* antes 0.75rem */
+  padding-right: 1rem !important;
+  border-radius: 0 !important;     /* opcional: evita “islas” redondeadas al hover */
+}
+
+
+/* Selección en las 3 columnas de materias/temas/subtemas */
+#articles-panel .articles-panel-column > ul > li.is-selected {
+  background: #f3f4f6; /* gray-100 */
+  box-shadow:
+    inset 3px 0 0 #9ca3af,         /* banda lateral gris */
+    inset 0 0.5px 0 #e5e7eb,       /* borde superior más fino */
+    inset 0 -0.5px 0 #e5e7eb,      /* borde inferior más fino */
+    inset -0.5px 0 0 #e5e7eb;      /* borde derecho más fino */
+  border-radius: 0;
+}
+
+/* Texto un poco más oscuro y semibold */
+#articles-panel .articles-panel-column > ul > li.is-selected > a {
+  color:#111827;                      /* gray-900 */
+  font-weight:600;
+}
+
+/* Quita la “divide line” del item actual y del siguiente */
+#articles-panel .articles-panel-column > ul > li.is-selected,
+#articles-panel .articles-panel-column > ul > li.is-selected + li {
+  border-top-color: transparent !important;
+}
+
+/* El contenedor mantiene esquinas */
+.articles-panel-column {
+  border-radius: 0.5rem; /* = rounded-lg */
+  overflow: hidden;      /* recorta el hover dentro de las esquinas */
+  /* sombra un poco más marcada */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06);
+  transition: box-shadow .2s ease, transform .15s ease;
+}
+
+/* leve “lift” al hover */
+#articles-panel .articles-panel-column:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+}
+
+/* Iconos de las listas del panel */
+/* Iconos de las listas del panel */
+.ap-icon{
+  width: 16px; height: 16px; display: inline-block;
+  background-size: contain; background-repeat: no-repeat;
+  margin-right: .5rem; flex-shrink: 0;
+}
+
+/* Columnas 1 (Library) y 2 (Temas): icopanel2b / icopanel2n al seleccionar */
+.ap-icon.ap2{ background-image: url('./assets/icopanel2b.png'); }
+#articles-panel > .flex:first-child li.is-selected .ap-icon.ap2,
+#panel-2 li.is-selected .ap-icon.ap2{
+  background-image: url('./assets/icopanel2n.png');
+}
+
+/* Subtemas */
+.ap-icon.ap3{ background-image: url('./assets/icopanel3.png'); }
+
+/* ——— Más separación icono–texto SOLO en las 3 listas del panel ——— */
+:root { --ap-gap: 0.95rem; } /* ~12px; súbelo/bájalo a gusto */
+
+#articles-panel .articles-panel-list-item{
+  display: flex; 
+  align-items: center;
+  gap: var(--ap-gap);           /* separación uniforme */
+}
+
+/* Evita “doble” separación si ya hay margin-right en los iconos */
+#articles-panel .articles-panel-list-item > .ap-icon { 
+  margin-right: 0 !important; 
+}
+#articles-panel .articles-panel-list-item > i {
+  margin-right: 0 !important;
+}
+
+/* Ocultar totalmente la barra principal (sin hover-expand) */
+#sidebar.force-hidden{
+  width:0 !important;
+  padding-left:0 !important;
+  padding-right:0 !important;
+  box-shadow:none !important;
+}
+#sidebar.force-hidden:hover{
+  width:0 !important;
+}
+
+/* Anima color/fondo cuando cambia .is-active */
+#subcategoria-sidebar .toc-h2{
+  transition: background-color .2s ease, color .2s ease, box-shadow .2s ease;
+}
+
+
+/* Contenedor del TOC relativo para posicionar el indicador */
+#subcategoria-sidebar .toc { position: relative; }
+
+/* Indicador vertical a la izquierda que se desplaza */
+#subcategoria-sidebar .toc-indicator{
+  position: absolute; left: 0; top: 0;
+  width: 3px; height: var(--h, 40px);
+  background: #9ca3af;
+  transform: translateY(var(--y, 0));
+  transition: transform .2s ease, height .2s ease;
+  border-radius: 2px;
+}
+
+
+/* === FULL (no split) — estilo/behaviour idéntico al split === */
+#video-modal:not(.split-view) #thumbnail-carousel{
+  position:absolute; bottom:0; left:0; right:0; z-index:10;
+  background:#fff !important;
+  border-top:1px solid #e5e7eb !important;
+  padding:2rem 1.5rem .5rem;
+  box-shadow:0 -1px 4px rgba(0,0,0,.05);
+}
+#video-modal:not(.split-view) #video-thumbnails{
+  overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none;
+}
+#video-modal:not(.split-view) #video-thumbnails::-webkit-scrollbar{ display:none; }
+#video-modal:not(.split-view) .media-thumb{ margin: 0 2px;  }
+
+#video-modal:not(.split-view) #scroll-left,
+#video-modal:not(.split-view) #scroll-right{
+  background:transparent !important;
+}
+#video-modal:not(.split-view) #scroll-left i,
+#video-modal:not(.split-view) #scroll-right i{
+  color:#6b7280 !important; /* gray-600 */
+}
+
+/* Botón flotante de toggle igual que en split */
+ #video-modal:not(.split-view) #toggle-thumbnails{
+   position:absolute; bottom: calc(env(safe-area-inset-bottom) + 8px); left:50%; transform:translateX(-50%);
+  width:5.5rem; height:1.2rem; z-index:20;
+  background:rgb(42, 43, 43); border-radius:.3rem;
+  display:flex; align-items:center; justify-content:center;
+  z-index: 100;
+  
+  
+}
+
+#video-modal:not(.split-view) #toggle-thumbnails i{ color: rgb(246, 247, 250) !important; ; font-size:.75rem; }
+
+/* Evita desbordes y deja espacio inferior como en split */
+#video-modal:not(.split-view) .absolute.inset-x-0.top-10.bottom-0.flex{
+  overflow-x:hidden !important; padding-bottom:1.96rem;
+}
+
+/* Viewer: centra y aprovecha todo el espacio disponible */
+#video-area{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+  /* Enable custom touch panning on mobile (Chrome/Safari) */
+  #video-area,
+  #modal-image{
+    touch-action: none;
+    -ms-touch-action: none; /* legacy */
+  }
+
+/* Imagen a ancho/alto del área visible, respetando proporción y centrada */
+#modal-image{
+  width: 100% !important;
+  height: calc(100% - 6rem) !important;     /* sin carrusel */
+  object-fit: contain !important;
+  display: block;
+  margin: 0 auto;
+  will-change: transform;
+}
+
+/* Iframe iguala comportamiento de altura (centra por el flex del contenedor) */
+#modal-iframe{
+  width: 100% !important;
+  height: calc(100% - 6rem) !important;     /* sin carrusel */
+}
+
+/* Cuando el carrusel está abierto, restamos más altura */
+
+
+
+
+
+/* Modo completo: carrusel gris medio translúcido (con ligero blur opcional) */
+#video-modal:not(.split-view) #thumbnail-carousel{
+  backdrop-filter: blur(2px);
+  background-color: rgba(41, 41, 41, 0.7) !important; /* gray-500 @ 50% */
+  backdrop-filter: blur(2px);
+  border-top: none !important;       /* ← quita la línea */
+  box-shadow: none !important;      
+}
+
+/* Modo completo: carrusel gris translúcido SIN línea/borde superior */
+
+
+/* Extra por si hay otras reglas heredadas */
+#video-modal #thumbnail-carousel{ border-top: none !important; }
+#video-modal #thumbnail-carousel::before{ content: none !important; }
+
+
+#thumbnail-carousel #toggle-thumbnails.in-carousel{
+   position: absolute;
+   top: .25rem;                 /* pegado al borde superior */
+   left: 50%;
+   transform: translateX(-50%);
+   bottom: auto !important;     /* anula el bottom previo */
+   z-index: 100;
+}
+
+/* ——— Viewer fijo: imagen/iframe SIEMPRE llenan el área ——— */
+#video-area { position: relative !important; }
+
+/* La imagen y el iframe ocupan todo el alto disponible del área */
+#modal-image,
+#modal-iframe{
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  transform-origin: center center;
+}
+
+/* Carrusel superpuesto (overlay) sin empujar el contenido */
+#thumbnail-carousel{
+  position: absolute !important;
+  left: 0; right: 0; bottom: 0;
+  z-index: 30;
+}
+
+/* Botón flotante para abrir/cerrar (siempre en el mismo sitio) */
+#toggle-thumbnails{
+  position: absolute !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: calc(env(safe-area-inset-bottom) + 8px) !important;
+  z-index: 40 !important;
+}
+
+/* Cuando el carrusel esté oculto, simplemente no se pinta */
+#thumbnail-carousel.hidden{ display: none !important; }
+
+
+/* ——— Split-view: carrusel translúcido ——— */
+#video-modal.split-view #thumbnail-carousel{
+  background-color: rgba(255,255,255,.85) !important; /* antes blanco sólido */
+  border-top: 1px solid rgba(229,231,235,.7) !important;
+  backdrop-filter: blur(2px);
+  box-shadow: 0 -1px 6px rgba(0,0,0,.06);
+}
+
+/* ——— Split-view: toggle con el MISMO tamaño que en full ——— */
+#video-modal.split-view #toggle-thumbnails{
+  width: 5.5rem !important;   /* igual que full */
+  height: 1.2rem !important;  /* igual que full (antes 1.5rem) */
+  line-height: 1.2rem;        /* por si el icono no queda centrado */
+}
+
+/* Si el botón está dentro del carrusel (.in-carousel), mantiene el tamaño */
+#video-modal.split-view #thumbnail-carousel #toggle-thumbnails.in-carousel{
+  width: 5.5rem !important;
+  height: 1.2rem !important;
+}
+
+/* ——— Modo video: nada debe tapar al iframe ——— */
+#video-modal.video-mode #modal-image { 
+  display: none !important; 
+  pointer-events: none !important; 
+}
+
+#video-modal.video-mode #zoom-menu,
+#video-modal.video-mode #zoom-btn {
+  display: none !important;
+}
+
+#video-modal.video-mode #modal-iframe {
+  pointer-events: auto !important;
+}
+
+
+/* Miniaturas en CONTENT (no modal) */
+#subcategoria-body .galeria{
+  grid-template-columns: repeat(auto-fit, 50px) !important;
+  gap: 4px !important;
+  justify-content: start;
+}
+#subcategoria-body .galeria figure{ width: 50px !important; }
+
+#subcategoria-body .media-thumb,
+#subcategoria-body .video-thumb{
+  width: 50px !important;
+  height: 50px !important;
+  min-width: 50px !important;
+  min-height: 50px !important;
+  border-radius: .5rem !important;   /* bordes redondeados */
+  overflow: hidden !important;
+  margin: 0 !important;              /* sin márgenes extra */
+  box-shadow: none;                   /* opcional: limpio */
+}
+
+/* Imágenes y thumbnails de video: siempre cover y heredando el radio */
+#subcategoria-body .image-thumb img,
+#subcategoria-body .video-thumb img{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: inherit !important;
+}
+
+/* Los contenedores de videos en content se generan con gap-2 (8px):
+   forzamos 4px entre miniaturas */
+#subcategoria-body .flex.flex-wrap{ gap: 4px !important; }
+
+/* Quita separación vertical extra de los videos en content */
+#subcategoria-body .video-thumb{ margin-bottom: 0 !important; }
+
+
+/* === Thumbs en CONTENT: 60x60, cover, cuadradas, redondeadas y gap 4px === */
+
+/* Galería de imágenes (grid) */
+#subcategoria-body .galeria{
+  gap: 4px !important;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 60px)) !important;
+}
+
+/* Cualquier miniatura (imagen o video) dentro del contenido */
+#subcategoria-body .media-thumb{
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  min-height: 60px !important;
+  margin: 0 !important;            /* el espaciado lo da el gap del contenedor */
+  border-radius: .5rem !important; /* bordes redondeados */
+  overflow: hidden !important;     /* recorta para el cover */
+  box-shadow: none;                /* opcional */
+}
+
+/* Imagen interna: 60x60 y cover */
+#subcategoria-body .media-thumb img{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: .5rem !important;
+  display: block;
+}
+
+/* Video thumbs en contenido (no modal) */
+#subcategoria-body .video-thumb{
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  min-height: 60px !important;
+  margin: 0 !important;
+}
+#subcategoria-body .video-thumb img{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: .5rem !important;
+}
+
+/* Si el contenedor de videos usa "flex flex-wrap gap-2", fuerza gap=4px */
+#subcategoria-body details .flex.flex-wrap.gap-2 { gap: 4px !important; }
+
+/* Por si alguna regla previa fija tamaños de galería */
+#subcategoria-body .galeria img,
+#subcategoria-body .image-thumb img { 
+  width: 60px !important; 
+  height: 60px !important; 
+}
+
+
+
+/* ======== CONTENT → Galería miniaturas 70×70 px ======== */
+/* === Galería de imágenes y videos con thumbs 70x70 === */
+#main-content #subcategoria-body .galeria{
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)) !important;
+  gap: 10px !important;
+  justify-content: start !important;
+}
+
+/* Tarjeta base (imagen o video) */
+#main-content #subcategoria-body .galeria .media-thumb{
+  width: 70px !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 4px !important;
+}
+
+/* Caja cuadrada */
+#main-content #subcategoria-body .galeria .media-thumb .thumb-box{
+  position: relative !important;
+  width: 70px !important;
+  height: 70px !important;
+  border-radius: .5rem !important;
+  overflow: hidden !important;
+  background: #000 !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,.06);
+}
+
+/* Imagen interna */
+#main-content #subcategoria-body .galeria .media-thumb .thumb-box img{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: inherit !important;
+}
+
+/* Texto de descripción */
+#main-content #subcategoria-body .galeria .media-thumb .thumb-caption{
+  max-width: 70px !important;
+  margin: 0 !important;
+  font-size: 0.6rem !important;
+  line-height: 0.85rem !important;
+  color: #111827 !important;
+  text-align: left !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  display: block !important;
+}
+
+/* — Play badge SOLO en videos — */
+#main-content #subcategoria-body .galeria .media-thumb.video-thumb .play-badge{
+  position: absolute !important;
+  left: 4px;
+  bottom: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: .2rem;
+  background: rgba(17,24,39,.75);
+  display: grid;
+  place-items: center;
+}
+#main-content #subcategoria-body .galeria .media-thumb.video-thumb .play-badge i{
+  font-size: 8px;
+  color: #fff;
+}
+
+/* Evita tamaños antiguos que agranden videos */
+#subcategoria-body .video-thumb,
+#subcategoria-body .video-thumb img{
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+
+/* Forzar Lato incluso donde se usa la clase Tailwind `font-[Inter]` */
+.font-\[Inter\]{
+  font-family: 'Lato', 'Lato-Regular', 'Lato-Light', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+/* Tamaño base del texto en content sin zoom */
+#main-content #subcategoria-body {
+  font-size: 0.9rem !important;   /* antes probablemente era 1rem */
+  line-height: 1.5 !important;    /* ajusta el interlineado para que no quede demasiado separado */
+}
+
+/* Split + UP: botón pegado abajo sin hueco */
+#video-modal.split-view #toggle-thumbnails:not(.in-carousel){
+  bottom: 0 !important;
+}
+
+
+/* Split + DOWN: botón arriba dentro del carrusel */
+#video-modal.split-view #thumbnail-carousel #toggle-thumbnails.in-carousel{
+  top: .25rem;               /* ya lo tenías, lo afirmamos aquí */
+  bottom: auto !important;   /* anula cualquier bottom heredado */
+}
+
+/* Split: que el contenedor no recorte el carrusel abajo */
+#video-modal.split-view .absolute.inset-x-0.top-10.bottom-0.flex{
+  overflow-x: hidden !important;  /* como querías */
+  overflow-y: visible !important; /* evita corte vertical */
+  padding-bottom: 0 !important;   /* sin relleno que deje hueco */
+}
+
+
+
+/* 1) El modal en split debe llegar exactamente hasta abajo */
+#video-modal.split-view{
+  bottom: 0 !important;               /* quita el hueco */
+  height: auto !important;            /* que la altura la determinen top/bottom */
+  pointer-events: auto !important;    /* por si quedó deshabilitado */
+  overflow: hidden !important;
+  border-left: 1px solid rgba(229,231,235,.9);
+}
+
+/* 2) Botón en modo UP pegado al borde inferior (sin espacio) */
+#video-modal.split-view #toggle-thumbnails:not(.in-carousel){
+  position: absolute !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: 0 !important;               /* a ras del borde inferior */
+  z-index: 200 !important;
+}
+
+/* 3) En modo DOWN: carrusel completo y botón arriba dentro del carrusel */
+#video-modal.split-view #thumbnail-carousel{
+  position: absolute !important;
+  left: 0; right: 0; bottom: 0;
+  padding: 2rem 1.5rem calc(.6rem + env(safe-area-inset-bottom)) !important;
+  overflow: visible !important;       /* que no recorte el borde inferior */
+  z-index: 150 !important;
+}
+#video-modal.split-view #thumbnail-carousel #toggle-thumbnails.in-carousel{
+  top: .25rem !important;             /* arriba, dentro del carrusel */
+  bottom: auto !important;
+  z-index: 200 !important;
+}
+
+/* 4) Evitar que el contenedor intermedio recorte por abajo en split */
+#video-modal.split-view .absolute.inset-x-0.top-10.bottom-0.flex,
+#video-modal.split-view #video-area{
+  overflow: hidden !important;
+  padding-bottom: 0 !important;
+}
+
+
+/* ——— Menú de zoom con caret superior ——— */
+.zoom-menu{
+  position: absolute;
+  top: calc(100% + 6px);   /* ↓ un poco más abajo */
+  right: 1rem;
+  background: rgb(31, 41, 55);
+  color: #fff;
+  padding: .3rem .6rem;   /* menos alta/ancha */
+  min-width: 4rem;         /* menos ancha */
+  min-height: 1.3rem;      /* menos alta */
+  border-radius: .6rem;
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  display: flex;
+  align-items: center;
+  gap: .2rem;              /* compacto */
+  z-index: 30;
+}
+
+/* Punta (caret) que apunta hacia arriba (sin cambios) */
+.zoom-menu::after{
+  content:"";
+  position: absolute;
+  left: var(--arrow-x, 50%);
+  transform: translateX(-50%) rotate(45deg);
+  top: -7px;
+  width: 14px;
+  height: 14px;
+  background: #1f2937;
+  border-left: 1px solid rgba(255,255,255,.08);
+  border-top: 1px solid rgba(255,255,255,.08);
+  box-shadow: -2px -2px 2px rgba(0,0,0,.08);
+  pointer-events: none;
+}
+.zoom-menu span,
+.zoom-menu button,
+.zoom-menu i 
+.zoom-menu .zoom-reset {
+
+  font-size: 10px;   /* ajusta tamaño del texto e íconos */
+  line-height: 1;    /* compacta la altura */
+}
+
+#video-modal.split-view .zoom-menu {
+  background: #f9fafb;       /* fondo claro */
+  color: rgb(31, 41, 55);            /* texto oscuro */
+  
+}
+#video-modal.split-view .zoom-menu span,
+#video-modal.split-view .zoom-menu button,
+#video-modal.split-view .zoom-menu i {
+  color: rgb(31, 41, 55);               /* íconos y texto oscuros */
+}
+#video-modal.split-view .zoom-menu::after{
+  background: #f9fafb;       /* mismo color que el menú */
+  border-left: none;         /* ← sin línea gris */
+  border-top: none;          /* ← sin línea gris */
+  box-shadow: none;  
+}
+
+
+.header-dark .zoom-menu{
+  border-color: rgba(255,255,255,.12);
+}
+.header-dark .zoom-menu::after{
+  border-color: rgba(255,255,255,.12);
+}
+
+
+/* Modal NO split: flechas del carrusel en blanco */
+#video-modal:not(.split-view) #scroll-left i,
+#video-modal:not(.split-view) #scroll-right i {
+  color: #fff !important;            /* blanco */
+  text-shadow: 0 1px 2px rgba(0,0,0,.35); /* (opcional) mejor contraste */
+}
+
+
+#video-modal #scroll-left,
+#video-modal #scroll-right {
+  top: calc(50% + 8px) !important;    /* apenas debajo del centro */
+  transform: translateY(-50%) !important;
+}
+
+#video-modal.split-view #scroll-left,
+#video-modal.split-view #scroll-right {
+  top: calc(50% + 8px) !important;    /* menos abajo en modo split */
+}
+
+/* Footer de cada <details>: más pequeño y separado de abajo */
+#subcategoria-body .collapse-controls{
+  padding: .35rem .8rem;           /* más compacto */
+  font-size: .6875rem;             /* ~11px */
+  margin-bottom: .75rem;           /* separa un poco del borde inferior */
+}
+
+#subcategoria-body .collapse-controls button{
+  gap: .2rem;                      /* menos separación icono–texto */
+  padding: 0;
+}
+
+#subcategoria-body .collapse-controls i{
+  font-size: .75rem;               /* iconos un poco más chicos */
+}
+
+#subcategoria-body .collapse-controls span{
+  font-size: .6875rem;             /* texto aún más pequeño */
+  letter-spacing: .02em;
+}
+
+/* Reduce la separación entre los dos botones de la derecha */
+#subcategoria-body .collapse-controls .space-x-6 > :not([hidden]) ~ :not([hidden]){
+  margin-left: .4rem !important;   /* más compacto aún */
+}
+
+/* FULL modal: un poco más de aire bajo las miniaturas del carrusel */
+#video-modal:not(.split-view) #thumbnail-carousel{
+  /* antes tenías .5rem; subimos un poco y respetamos el safe area en móviles */
+  padding-bottom: calc(.9rem + env(safe-area-inset-bottom)) !important;
+}
+
+/* Micro-aire dentro del contenedor de thumbs (opcional) */
+#video-modal:not(.split-view) #video-thumbnails{
+  padding-bottom: .25rem !important;
+}
+
+
+
+/* FULL modal (no split): borde superpuesto sin cambiar el tamaño */
+#video-modal:not(.split-view) .media-thumb{
+  position: relative;
+  overflow: hidden;
+  border-radius: .4rem;
+}
+
+#video-modal:not(.split-view) .media-thumb img{
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border: 0 !important;
+}
+
+#video-modal:not(.split-view) .media-thumb.selected{
+  border: 0 !important;
+  outline: 0 !important;
+}
+
+#video-modal:not(.split-view) .media-thumb.selected::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-sizing: border-box;
+  box-shadow:
+    inset 0 0 0 1.5px rgba(255,255,255,.85),
+    inset 0 0 0 3px #525354;
+}
+
+/* SPLIT modal: mismo marco pero invertido */
+#video-modal.split-view .media-thumb{
+  position: relative;
+  overflow: hidden;
+  border-radius: .4rem;
+}
+
+#video-modal.split-view .media-thumb img{
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border: 0 !important;
+}
+
+#video-modal.split-view .media-thumb.selected{
+  border: 0 !important;
+  outline: 0 !important;
+}
+
+#video-modal.split-view .media-thumb.selected::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-sizing: border-box;
+  /* invertido: gris fino primero, blanco grueso afuera */
+  box-shadow:
+    inset 0 0 0 1.5px #525354,
+    inset 0 0 0 3px rgba(255,255,255,.85);
+}
+
+
+
+
+
+
+
+/* —— FIX: split a base de variables, anulando el 60/40 ——————————— */
+#video-modal.split-view{
+  left: var(--split-left) !important;
+  width: var(--split-w) !important;
+  right: auto !important;     /* anula cualquier right:0 previo */
+  height: auto !important;
+}
+
+body.split-view-active .dashboard-container{
+  width: calc(var(--split-left)) !important; /* mitad izquierda real */
+}
+
+/* Qbank overlay comparte el espacio izquierdo cuando el visor está en split */
+body.split-view-active #qbank-session{
+  right: var(--split-w) !important;
+  width: calc(100vw - var(--split-w)) !important;
+}
+body.split-view-active #qbank-session .max-w-7xl{
+  max-width: none !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Sugerencia: si aún tienes algo así en tu CSS, bórralo o déjalo comentado:
+#video-modal.split-view { right:0 !important; left:60% !important; width:40% !important; }
+body.split-view-active .dashboard-container{ width:60vw; }
+*/
+
+
+#subcategoria-body .texto-lista p{margin:.5rem 0;}
+#subcategoria-body .texto-lista ul{list-style:disc; margin:.5rem 0 .5rem 1.25rem;}
+#subcategoria-body .texto-lista ol{list-style:decimal; margin:.5rem 0 .5rem 1.25rem;}
+#subcategoria-body .texto-lista li{margin:.25rem 0;}
+#subcategoria-body .texto-lista li > ul{list-style:circle; margin-top:.25rem;}
+#subcategoria-body .texto-lista strong{font-weight:700;}
+
+
+/* === TOC: subtítulos (h3) === */
+#subcategoria-sidebar .toc-sub{ margin:.125rem 0 .25rem 0; }
+#subcategoria-sidebar .toc-h3{
+  width:100%;
+  display:block;
+  text-align:left;
+  background:transparent;
+  border:none;
+  padding:.25rem .75rem .25rem 1.5rem; /* sangría bajo el h2 */
+  font-size:.7rem;                   /* ~14px */
+  color:#374151;                       /* gray-700 */
+  border-radius:.375rem;
+  cursor:pointer;
+}
+#subcategoria-sidebar .toc-h3:hover{ background:#f8fafc; }
+#subcategoria-sidebar .toc-h3.is-active{
+  background:transparent !important;
+  color:#111827 !important;
+  font-weight:500 !important;
+  box-shadow: inset 3px 0 0 #9ca3af;  /* mini banda izquierda */
+}
+
+
+/* === TOC: resaltar CONTENEDOR cuando el activo es un h2 con subtítulos === */
+#subcategoria-sidebar .toc-section{
+  transition: background-color .2s ease, box-shadow .2s ease;
+  border-radius:.5rem; /* redondeo normal cuando no está activo */
+}
+#subcategoria-sidebar .toc-section.is-active{
+  background:#f3f4f6;                 /* gris suave a todo el bloque */
+  border-radius:0 !important;
+  box-shadow:
+    inset 3px 0 0 #9ca3af,            /* banda izquierda */
+    inset 0 .5px 0 #e5e7eb,           /* hairline superior */
+    inset 0 -.5px 0 #e5e7eb,          /* hairline inferior */
+    inset -.5px 0 0 #e5e7eb;          /* borde derecho fino */
+}
+#subcategoria-sidebar .toc-section.is-active .toc-h2{
+  background:transparent !important;  /* evita doble fondo en el h2 */
+  color:#111827;
+  font-weight:500;
+}
+
+/* Subtítulo activo: solo él lleva la banda (no todo el bloque) */
+#subcategoria-sidebar .toc-h3.is-active{
+    border-radius: 0 !important;     /* ← quita la curva */
+  background:transparent !important;
+  color:#111827 !important;
+  font-weight:500 !important;
+  box-shadow: inset 3px 0 0 #9ca3af;
+}
+
+/* Opcional: enderezar también el contenedor cuando el activo es un h3 */
+#subcategoria-sidebar .toc-section:has(.toc-h3.is-active){
+  border-radius: 0 !important;
+}
+
+/* TOC: subtítulo activo con borde gris completo, igual a los títulos */
+#subcategoria-sidebar .toc-h3.is-active {
+  /* mismo fondo gris que los títulos activos */
+  background: #f3f4f6 !important;    /* ← pisa el "transparent !important" anterior */
+  color: #111827;                     /* gray-900 */
+  font-weight: normal;
+
+  /* sin radios para que “toque” los bordes */
+  border-radius: 0 !important;
+
+  /* hairlines arriba/abajo y borde derecho sutil SIN alterar layout */
+  box-shadow:
+    inset 2px 0 0 #9ca3af,            /* banda izquierda */
+    inset 0 .5px 0 #e5e7eb,           /* borde superior */
+    inset 0 -.5px 0 #e5e7eb,          /* borde inferior */
+    inset -.5px 0 0 #e5e7eb;          /* borde derecho */
+}
+
+
+/* === Sweep celeste por DETRÁS del texto, un poco más lento === */
+.flash-mark{
+  position: relative;
+  display: inline-block;
+  z-index: 0;                 /* crea stacking context para apilar detrás */
+}
+.flash-mark::after{
+  content: "";
+  position: absolute;
+  inset: 0 .06em;             /* mini margen lateral */
+  background: rgba(186,230,253,.9); /* sky-200 */
+  border-radius: .18em;
+  pointer-events: none;
+
+  /* detrás del texto */
+  z-index: -1;                /* ← clave: queda por debajo del contenido */
+  transform-origin: left center;
+  transform: scaleX(0);
+
+  /* más lento: barrido 0.8s + desvanecido 0.5s */
+  animation:
+    flash-sweep .9s cubic-bezier(.22,.61,.36,1) forwards,
+    flash-fade  .6s ease-out .8s forwards;
+}
+
+@keyframes flash-sweep { to { transform: scaleX(1); } }
+@keyframes flash-fade  { to { opacity: 0; } }
+
+
+
+/* Botón activo del selector Light/Dark/System */
+/* Botón activo del selector Light/Dark/System */
+#um-theme button.is-active {
+  background:#E6F3F5;
+  color:rgb(53,120,134);
+  border: 1.5px solid rgb(53,120,134);  /* borde teal */
+  box-shadow: none;              /* quitamos el inset */
+}
+
+/* Segmento activo estilo Amboss */
+.seg-active {
+  background: rgb(222,241,243) !important;
+  color: rgb(53,120,134) !important;
+  border: 1.5px solid rgb(53,120,134);  /* borde teal */
+  box-shadow: none !important;           /* sin doble borde */
+  font-weight: 700 !important;
+}
+
+/* Botón flotante tipo AMBOSS para contraer/expandir sidebars */
+#sb-switch{
+    transform: scale(0.7);   /* Reduce todo el bloque al 80% */
+  padding: 4px 6px;        /* Ajusta el relleno interno */
+  font-size: 0.85rem;      /* Texto más chico, si lo tuviera */
+  position: fixed;
+  top: calc(3rem + 8px);                 /* justo debajo del header */
+  left: var(--btn-left, 280px);          /* la calcula JS según ancho real */
+  width: 28px; height: 28px;
+  display:grid; place-items:center;
+  background:rgb(245, 247, 249);
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 9999px;
+  box-shadow: 0 6px 6px rgba(164, 163, 163, 0.12);
+  color:#546E7A;
+   z-index: 150 !important;                         /* por encima de las barras */
+  cursor: pointer;
+}
+#sb-switch i{ font-size: 10px; }
+
+/* Cuando las barras están ocultas, el botón se pega al borde izquierdo */
+body.bars-hidden #sb-switch{
+  left: 8px;
+}
+body.bars-hidden #sb-switch i{
+  transform: rotate(180deg);             /* chevron hacia la derecha */
+}
+
+
+
+
+/* Pequeña protección para que no tape el hover de tu sidebar colapsada */
+#sidebar.collapsed:hover + #subcategoria-sidebar ~ #sb-switch,
+#sidebar.collapsed.hover-expanded + #subcategoria-sidebar ~ #sb-switch{
+  pointer-events: none;
+}
+
+/* Oculta el botón flotante cuando las barras están ocultas */
+body.bars-hidden #sb-switch { display: none !important; }
+
+/* —— Opciones tipo AMBOSS (línea fina, círculo y botón X) —— */
+/* Lista de opciones con líneas finas */
+/* —— Opciones tipo AMBOSS (compactas) —— */
+/* Lista de opciones con líneas finas */
+.opt-list { margin: 0; padding: 0; list-style: none; }
+.opt-list > li { padding: .15rem .2rem .15rem 0; }   /* 🔽 menos padding vertical */
+.opt-list > li + li {
+  border-top: none;                 /* quita la línea gris */
+  box-shadow: inset 0 1px 0 #e5e7eb; /* simula línea interna */
+}
+
+/* Fila */
+/* —— Opciones compactas y homogéneas —— */
+/* —— Opciones compactas y homogéneas —— */
+.option-row { 
+  display: flex; 
+  align-items: center; 
+  gap: .05rem; 
+  padding-top: .05rem; 
+  padding-bottom: .05rem;   /* compacto */
+}
+.option-row:hover { background: #f9fafb; }
+
+.option-exp {
+  font-size: 12px;
+  color: #475569;
+}
+
+/* Círculo con la letra (A, B, …) */
+.opt-bullet {
+  width: 14px; height: 14px;          /* círculo se mantiene */
+  flex: 0 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #cbd5e1;          /* gris */
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 7px;                     /* 🔽 más pequeño dentro del mismo círculo */
+  line-height: 1;
+  color: #334155;                     /* slate-700 */
+  background: transparent;
+}
+
+/* Texto de la opción */
+.opt-text { 
+  color: #334155; 
+  font-size: 10px;                    /* tamaño legible pero discreto */
+  line-height: 1.2;
+}
+
+/* Texto tachado */
+.opt-text.striked {
+  text-decoration: line-through;
+  color: #94a3b8;                     /* gris apagado */
+}
+
+/* Botón X */
+.opt-x{
+  margin-left:auto;
+  width: 16px; height: 16px;          /* 🔽 más chico */
+  display:grid; place-items:center;
+  border-radius:9999px;
+  color:#64748b;
+  background:transparent;
+  border: 1px solid transparent;
+}
+.opt-x:hover{
+  background:#f1f5f9;
+  border-color:#e2e8f0;
+  color:#0f172a;
+}
+.opt-x i{ font-size: 9px; }           /* 🔽 más chico */
+
+/* Base (tal como la tienes) */
+.opt-bullet{
+  width: 14px; height: 14px;
+  flex: 0 0 14px;
+  display:flex; align-items:center; justify-content:center;
+  border: 1px solid #cbd5e1;      /* gris por defecto */
+  border-radius:9999px;
+  font-weight:600;
+  font-size:7px;
+  line-height:1;
+  color:#334155;                   /* gris por defecto */
+  background:transparent;
+}
+
+/* Estados para corrección */
+.opt-bullet.ok      { border-color:#16a34a; color:#16a34a; background:transparent; } 
+.opt-bullet.ok-solid{ border-color:#15803d; background:#15803d; color:#fff; } /* ✅ más oscuro */
+
+.opt-bullet.err     { border-color:#dc2626; color:#dc2626; background:transparent; } /* rojo contorno/letra */
+.opt-bullet.err-solid{border-color:#dc2626; background:#dc2626; color:#fff; }        /* rojo sólido (letra blanca) */
+
+
+/* Verde más oscuro (para la opción correcta) */
+/* Verde más oscuro SOLO de fondo para la opción correcta */
+.option-row.correct {
+  background-color:#dcfce7 !important; /* green-100 */
+  border-color:#22c55e !important;     /* igual que la explicación */
+}
+
+/* Barra fija SOLO en split derecho (favoritos/guardados) */
+/* Barra fija SOLO en split derecho (favoritos/guardados) */
+body.favorites-split #subcategoria-content{
+  position: relative;
+  padding-top: 0 !important;     /* la barra real ocupa su alto */
+}
+/* anula cualquier pseudo-barra previa */
+body.favorites-split #subcategoria-content::before{ content: none !important; }
+
+/* barra real con el look de la captura */
+.fav-topbar{ display: none; }     /* oculta por defecto */
+body.favorites-split .fav-topbar{
+  position: sticky;
+  top: 0;                         /* pegada al borde superior del split */
+  height: 3rem;
+  display: flex;                  /* visible solo en favorites-split */
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 .75rem;
+  background: linear-gradient(to bottom,#f8fafc,#ffffff);
+  border-bottom: 1px solid #e5e7eb;
+  z-index: 20;
+}
+
+/* íconos y separador como en la captura */
+.fav-topbar .fav-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:1.5rem; height:1.5rem; border-radius:9999px; border:0; background:transparent;
+}
+.fav-topbar .fav-btn i{ font-size:1rem; color:#475569; }           /* slate-600 */
+.fav-topbar .fav-actions{ display:inline-flex; align-items:center; gap:.75rem; }
+.fav-topbar .fav-actions i{ font-size:1.05rem; color:#475569; }     /* slate-600 */
+.fav-topbar .fav-sep{ width:1px; height:18px; background:#e5e7eb; display:inline-block; }
+
+
+
+
+
+/* Verde más claro (para la explicación) */
+.explicacion-box > div {
+  border-color:#22c55e !important;   /* green-500 */
+  background-color:#f0fdf4 !important; /* green-50 */
+}
+
+/* Texto de la opción: siempre negro (o casi) */
+/* Antes: .opt-text{ color:#111827 !important; font-size:10px; line-height:1.2; } */
+.opt-text{
+  color:#111827 !important;
+  font-size: var(--qbank-font-scale) !important;
+  line-height: 1.2;
+}
+
+
+
+/* deshabilita click en botones de tachar cuando están "disable" */
+.opt-x[aria-disabled="true"] { pointer-events: none; cursor: default; }
+
+
+/* Sin hover cuando la pregunta está respondida (locked) */
+.opt-list.locked .option-row {
+  pointer-events: none;   /* desactiva :hover y clicks */
+  cursor: default;
+}
+
+/* Footer bajo las opciones */
+.opt-footer{ margin-top:.25rem; padding-top:.25rem; }
+
+/* Línea igual a las internas (hairline) */
+.opt-divider{
+  height:1px;
+  background:#e5e7eb;     /* slate-200 */
+  width:100%;
+  margin:.25rem 0 .35rem 0;
+}
+
+/* Botón Reset */
+.opt-reset{
+  font-size:10px;
+  line-height:1;
+  padding:.35rem .55rem;
+  border:1px solid #cbd5e1;           /* slate-300 */
+  border-radius:.375rem;
+  background:#f8fafc;                 /* slate-50 */
+  color:#64748b;                      /* slate-500 */
+  opacity:.6;
+  cursor:default;
+}
+.opt-reset.enabled{
+  opacity:1;
+  cursor:pointer;
+  background:#ffffff;
+  color:#0f172a;                       /* slate-900 */
+}
+.opt-reset:disabled{ pointer-events:none; }
+
+#subcategoria-sidebar-content { scroll-behavior: smooth; }
+
+
+blockquote {
+  white-space: normal;   /* asegura saltos de línea normales */
+  overflow-wrap: break-word; /* permite cortar solo si no hay espacios */
+}
+
+
+
+
+/* ===== Tabs estilo normal ===== */
+.tabsbar {
+  position: relative;
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  border-bottom: 1px solid #e6edf3;   /* línea gris clarita */
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+
+.tab-btn {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.2;
+  color: #2e4454;
+  opacity: .92;
+  cursor: pointer;
+}
+
+.tab-btn .count {
+  font-weight: 600;
+  opacity: .9;
+}
+
+.tab-btn i {
+  font-size: 18px;
+  color: #2e4454;
+  opacity: .9;
+}
+
+.tab-btn.is-active {
+  color: #0ea5e9;           /* celeste activo */
+}
+
+.tab-btn.is-active i {
+  color: #0ea5e9;
+}
+
+.tabs-ink {
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 4px;
+  width: 0;
+  background: #0ea5e9;
+  border-radius: 2px;
+  transition: left .22s ease, width .22s ease;
+}
+
+
+/* ===== Tabs ultracompactas (versión pequeña) ===== */
+.tabsbar.tabsbar--xs {
+  gap: 12px;
+  padding-bottom: 4px;
+  border-bottom-width: 1px;
+}
+
+.tabsbar.tabsbar--xs .tab-btn {
+  font-size: 10px;       /* texto mucho más pequeño */
+  line-height: 1.05;
+  gap: 4px;
+}
+
+.tabsbar.tabsbar--xs .tab-btn i {
+  font-size: 9px;        /* icono más pequeño */
+}
+
+.tabsbar.tabsbar--xs .tab-btn .count {
+  font-weight: 600;
+  opacity: .75;
+  font-size: 10px;
+}
+
+.tabsbar.tabsbar--xs .tabs-ink {
+  height: 2px;           /* subrayado muy fino */
+  bottom: -2px;
+}
+
+
+/* === Fondo blanco para la página de resultados (Overview/Articles/Drugs/…) === */
+#main-content:has(#search-page:not(.hidden)),
+#search-page {
+  background-color: #ffffff !important;
+}
+
+/* Mostrar el contenido del grupo que esté abierto (o el grupo bajo el puntero)
+   incluso si el panel tiene la clase .hidden */
+#articles-panel > div {
+  margin-right: 2rem !important;  /* separación propia de cada panel */
+}
+
+
+
+
+
+/* Solo en móvil y SOLO cuando #subcategoria-content está visible */
+@media (max-width: 1299.98px){
+  #main-content.subcat-active{
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  #main-content.subcat-active #subcategoria-content{
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+
+
+/* Overlay móvil: solo se activa en < 640px */
+#mobile-overlay { display: none; }
+@media (max-width: 1299.98px){
+  #mobile-overlay.show {
+    position: fixed;
+    top: 3rem;   /* igual a la altura de tu header h-[3rem] */
+    left: 0; right: 0; bottom: 0;
+    background: rgba(2, 6, 23, .45); /* gris oscuro translúcido */
+    /* Debe quedar POR DEBAJO de ambas sidebars y POR ENCIMA del contenido */
+    display: block;
+  }
+}
+
+
+#results{
+  position: relative;   /* o fixed/absolute según tu layout */
+  z-index: 90;          /* > 45 del overlay móvil */
+}
+/* el header / topbar que contiene el input */
+#topbar, .site-header, #global-search-wrap {
+  position: relative;     /* crea stacking context propio */
+  z-index: 250;           /* mayor que el sidebar (60/70) y el #sb-switch (120) */
+}
+
+/* el wrapper REAL del buscador */
+#searchbox { position: relative; z-index: 255; }
+/* el dropdown */
+#search-results { position: absolute; z-index: 260; }
+#search-results.history-mode,
+#search-results.results-mode {
+  padding: 0;
+  background: linear-gradient(180deg, #f5f8fb 0%, #e8eef5 100%);
+  border: 1px solid #ccd6e3;
+  border-radius: 12px;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+}
+#search-results.history-mode .history-container,
+#search-results.results-mode .history-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  font-family: 'Lato', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+#search-results.history-mode .history-header,
+#search-results.results-mode .history-header {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #4a6684;
+}
+#search-results.history-mode .history-list,
+#search-results.results-mode .history-list {
+  background: #ffffff;
+  border: 1px solid #dfe6f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+#search-results.history-mode .history-item,
+#search-results.results-mode .history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #1f2933;
+  background: #ffffff;
+  transition: background-color 0.2s ease;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+#search-results .history-item.is-active {
+  background: #e3e9f3;
+}
+#search-results .history-item.is-active .history-icon {
+  color: #2f4c6b;
+}
+#search-results.history-mode .history-item.history-empty,
+#search-results.results-mode .history-item.history-empty {
+  cursor: default;
+  color: #64748b;
+  pointer-events: none;
+}
+#search-results.history-mode .history-item + .history-item,
+#search-results.results-mode .history-item + .history-item {
+  border-top: 1px solid #edf1f7;
+}
+#search-results.history-mode .history-item:hover,
+#search-results.results-mode .history-item:hover {
+  background: #f1f5f9;
+}
+#search-results.history-mode .history-item.history-empty:hover,
+#search-results.results-mode .history-item.history-empty:hover {
+  background: #ffffff;
+}
+#search-results.history-mode .history-icon,
+#search-results.results-mode .history-icon {
+  font-size: 12px;
+  color: #6b7f99;
+}
+#search-results.history-mode .history-footer,
+#search-results.results-mode .history-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 10px;
+  color: #5b6c7c;
+  padding: 0 2px 4px 2px;
+}
+#search-results.history-mode .history-footer span,
+#search-results.results-mode .history-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+#search-results.history-mode .history-shortcut,
+#search-results.results-mode .history-shortcut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #eef3f8;
+  border: 1px solid #d6dde7;
+  font-weight: 600;
+  color: #25364c;
+}
+
+#search-results.history-mode .history-badge,
+#search-results.results-mode .history-badge {
+  margin-left: auto;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  background: #eef3f8;
+  border: 1px solid #d6dde7;
+  font-weight: 600;
+  color: #425a78;
+}
+
+
+
+
+
+
+
+
+
+
+/* ====== VARIABLES GLOBALES ====== */
+:root{
+  --sb-collapsed: 40px;
+  --subcat-width: 210px;
+  --bars-w: calc(var(--sb-collapsed) + var(--subcat-width));
+}
+
+/* ====== OVERLAY BASE ====== */
+#mobile-overlay{ display:none; }
+#mobile-overlay.show{
+  position: fixed;
+  top: 3rem; bottom: 0; right: 0;
+  left: var(--bars-w);
+  background: rgba(2,6,23,.45);
+  z-index: 110 !important;
+  display: block !important;
+  pointer-events: auto;
+}
+/* Estados especiales del overlay */
+.toc-hidden #mobile-overlay.show{ left: var(--sb-collapsed); }
+body.bars-hidden #mobile-overlay.show{ left: 0; }
+
+/* Qbank modal: respeta el ancho ocupado por las barras laterales */
+body.qbank-open #qbank-session{
+  --qbank-offset-left: var(--bars-w);   /* barra principal + TOC visibles */
+  --qbank-gap: 0px;
+}
+
+
+
+
+
+body.toc-hidden #qbank-session {
+  --qbank-offset-left: var(--sb-collapsed);
+}
+body.bars-hidden #qbank-session,
+body.force-bars-hidden #qbank-session {
+  --qbank-offset-left: 0px;
+}
+@media (min-width: 1300px) {
+  #qbank-session { --qbank-gap: 1rem; }
+}
+@media (min-width: 1280px) {
+  #qbank-session { --qbank-gap: 3rem; }
+}
+@media (max-width: 1299.98px) {
+  #qbank-session { --qbank-offset-left: 0px; --qbank-gap: 0px; }
+}
+
+body.qbank-open #subcategoria-body .qbank-wrapper > :not(#qbank-session) {
+  display: none !important;
+}
+
+body.qbank-open #qbank-session {
+  left: 0;
+  padding-left: calc(var(--qbank-offset-left) + var(--qbank-gap));
+}
+
+#qbank-session #qbank-controls {
+  margin-left: calc(-1 * (var(--qbank-offset-left) + var(--qbank-gap)));
+  width: calc(100% + var(--qbank-offset-left) + var(--qbank-gap));
+  padding-left: calc(var(--qbank-offset-left) + var(--qbank-gap) + 2rem);
+  padding-right: calc(var(--qbank-gap) + 2rem);
+}
+
+
+
+
+.qbank-difficulty-chevrons {
+  margin-left: auto;
+  display: inline-flex;
+  gap: 0px;
+}
+
+/* Base para cada chevron — más pequeño */
+.qbank-difficulty-chevrons .on,
+.qbank-difficulty-chevrons .off {
+  position: relative;
+  width: 11px;
+  height: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+}
+
+/* Activo más oscuro */
+.qbank-difficulty-chevrons .on {
+  color: #1e293b;
+}
+
+/* Inactivo más tenue */
+.qbank-difficulty-chevrons .off {
+  opacity: 0.45;
+}
+
+/* Icono SVG reducido a 11×11 */
+.qbank-difficulty-chevrons .on::before,
+.qbank-difficulty-chevrons .off::before {
+  content: "";
+  width: 11px;
+  height: 11px;
+  display: block;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172'/%3E%3C/svg%3E") no-repeat center / contain;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+.qbank-mark-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 16px;
+  margin-left: 8px;
+  color: #0f172a;
+}
+
+
+/* ===================== <640px ===================== */
+@media (max-width: 1299.98px){
+
+  /* Estado base: solo un panel (mobile-solo) */
+  body.split-view-active.mobile-solo{
+    --split-left: 0px;
+    --split-w: 100vw;
+  }
+
+  /* Panel izquierdo (app) a pantalla completa */
+  body.split-view-active.mobile-solo .dashboard-container{
+    position: fixed;
+    top: 3rem; left: 0; right: 0; bottom: 0;
+    width: 100% !important;
+    height: auto;
+    overflow: hidden;     /* el scroll vive en #main-content */
+    background: #fff;
+    z-index: 30 !important;
+  }
+
+  /* Scroller real */
+  body.split-view-active.mobile-solo #main-content{
+    position: absolute; inset: 0;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding: 0 1rem !important;
+    background: #fff !important;
+    scroll-padding-top: 56px;
+  }
+
+  /* Afinados del contenido izquierdo */
+  body.split-view-active.mobile-solo #subcategoria-content{
+    margin-top: 0 !important; padding-top: 0 !important;
+  }
+  body.split-view-active.mobile-solo #subcat-header{
+    position: sticky; top: 0; z-index: 50; background:#fff;
+  }
+  body.split-view-active.mobile-solo #subcategoria-body > :first-child{
+    margin-top: 0 !important;
+  }
+
+  /* Sin gutter y ancho total reales */
+  body.split-view-active.mobile-solo .dashboard-container{
+    left: 0 !important; right: 0 !important; width: 100vw !important;
+  }
+  body.split-view-active.mobile-solo #main-content{
+    margin: 0 !important; width: 100% !important; max-width: none !important;
+    padding: 0 !important; box-sizing: border-box;
+  }
+  body.split-view-active.mobile-solo #main-content.sidebar-open{ margin-left: 0 !important; }
+
+  /* Ocultar barras por defecto en mobile-solo */
+  body.split-view-active.mobile-solo #sidebar,
+  body.split-view-active.mobile-solo #subcategoria-sidebar{
+    display: none !important;
+  }
+
+  /* RIGHT (modal) a pantalla completa */
+  body.split-view-active.mobile-solo #video-modal.split-view{
+    position: fixed !important;
+    top: 3rem !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    width: 100% !important; height: auto !important;
+    pointer-events: auto !important;
+  }
+  body.split-view-active.mobile-solo #video-modal.split-view > div{ position: absolute; inset: 0; }
+
+  /* Toggle de qué lado se ve */
+  body.split-view-active.mobile-solo.show-left  .dashboard-container{ display:block !important; }
+  body.split-view-active.mobile-solo.show-left  #video-modal{        display:none  !important; }
+  body.split-view-active.mobile-solo.show-right .dashboard-container{ display:none  !important; }
+  body.split-view-active.mobile-solo.show-right #video-modal{         display:flex !important; }
+
+  /* Botón flotante para alternar */
+  #mobile-split-switch{
+    position: fixed; left: 50%; transform: translateX(-50%);
+    bottom: calc(env(safe-area-inset-bottom) + 10px);
+    z-index: 300; padding: .55rem .9rem; border-radius: 9999px;
+    background: #1f2937; color: #fff; font-weight: 700; font-size: .75rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,.25); display: none;
+  }
+  body.split-view-active.mobile-solo #mobile-split-switch{ display:block; }
+
+  /* ===== Mostrar la DERECHA (imagen) con barras superpuestas ===== */
+  body.split-view-active.mobile-solo.show-right .dashboard-container{ display: contents !important; }
+  body.split-view-active.mobile-solo.show-right #main-content{ display: none !important; }
+
+  /* Barra principal colapsada fija */
+  body.split-view-active.mobile-solo.show-right #sidebar{
+    position: fixed !important; top: 3rem !important; bottom: 0 !important; left: 0 !important;
+    z-index: 120 !important; width: var(--sb-collapsed) !important;
+    padding-left: 0 !important; padding-right: 0 !important;
+    border-right: 1px solid #e5e7eb; background: #fff;
+    display: block !important;
+  }
+  /* Look colapsado: solo iconos */
+  body.split-view-active.mobile-solo.show-right #sidebar .sidebar-group span{ display: none !important; }
+  body.split-view-active.mobile-solo.show-right #sidebar .sidebar-group i{
+    margin: auto !important; justify-content: center !important;
+  }
+
+  /* TOC fijo junto a la principal (visible aunque tenga .hidden) */
+  body.split-view-active.mobile-solo.show-right #subcategoria-sidebar,
+  body.split-view-active.mobile-solo.show-right #subcategoria-sidebar.hidden{
+    position: fixed !important; top: 3rem !important; bottom: 0 !important;
+    left: var(--sb-collapsed) !important; width: var(--subcat-width) !important;
+    z-index: 120 !important; background: #fff; border-right: 1px solid #e5e7eb;
+    overflow-y: auto; display: block !important;
+  }
+  /* (tenías padding solo en show-right) */
+
+  /* Modal por debajo de las barras */
+  body.split-view-active.mobile-solo.show-right #video-modal.split-view{ z-index: 40 !important; }
+
+  /* Alternar visibilidad con .bars-hidden (ambos lados) */
+  body.split-view-active.mobile-solo.show-right.bars-hidden #sidebar,
+  body.split-view-active.mobile-solo.show-right.bars-hidden #subcategoria-sidebar{
+    display: none !important;
+  }
+
+  /* ===== Mostrar la IZQUIERDA con barras superpuestas ===== */
+  body.split-view-active.mobile-solo.show-left #sidebar{
+    display: block !important; position: fixed !important;
+    top: 3rem !important; bottom: 0 !important; left: 0 !important;
+    z-index: 120 !important; width: var(--sb-collapsed) !important;
+    border-right: 1px solid #e5e7eb; background: #fff;
+  }
+  body.split-view-active.mobile-solo.show-left #subcategoria-sidebar,
+  body.split-view-active.mobile-solo.show-left #subcategoria-sidebar.hidden{
+    display: block !important; position: fixed !important;
+    top: 3rem !important; bottom: 0 !important; left: var(--sb-collapsed) !important;
+    width: var(--subcat-width) !important; z-index: 120 !important;
+    background: #fff; border-right: 1px solid #e5e7eb; overflow-y: auto;
+  }
+  /* Overlay visible en show-left (además del modo .show base) */
+  body.split-view-active.mobile-solo.show-left #mobile-overlay{ display: block !important; }
+  body.split-view-active.mobile-solo.show-left.bars-hidden #sidebar,
+  body.split-view-active.mobile-solo.show-left.bars-hidden #subcategoria-sidebar,
+  body.split-view-active.mobile-solo.show-left.bars-hidden #mobile-overlay{
+    display: none !important;
+  }
+
+  /* ===== Hover: la barra principal flota SOBRE el TOC ===== */
+  body.split-view-active.mobile-solo.show-left  #sidebar.collapsed:hover,
+  body.split-view-active.mobile-solo.show-left  #sidebar.collapsed.hover-expanded,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed.hover-expanded{
+    position: fixed !important; top: 3rem !important; bottom: 0 !important; left: 0 !important;
+    width: calc(var(--sb-collapsed) + var(--subcat-width)) !important;
+    z-index: 140 !important; background: #fff !important;
+    box-shadow: 2px 0 12px rgba(0,0,0,.14);
+  }
+  body.split-view-active.mobile-solo.show-left  #sidebar.collapsed:hover ~ #subcategoria-sidebar,
+  body.split-view-active.mobile-solo.show-left  #sidebar.collapsed.hover-expanded ~ #subcategoria-sidebar,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover ~ #subcategoria-sidebar,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed.hover-expanded ~ #subcategoria-sidebar{
+    left: var(--sb-collapsed) !important;
+    z-index: 120 !important;
+    pointer-events: none;
+  }
+
+  /* FIX: en show-right, mostrar textos al expandir la barra principal */
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed.hover-expanded{
+    width: calc(var(--sb-collapsed) + var(--subcat-width)) !important;
+  }
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover .sidebar-group span,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed.hover-expanded .sidebar-group span{
+    display: inline !important;
+  }
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed:hover .sidebar-group i,
+  body.split-view-active.mobile-solo.show-right #sidebar.collapsed.hover-expanded .sidebar-group i{
+    margin: 0 !important; justify-content: flex-start !important;
+  }
+  body.split-view-active.mobile-solo.show-right #sidebar.open .sidebar-group span{
+    display: inline !important;
+  }
+  body.split-view-active.mobile-solo.show-right #sidebar.open .sidebar-group i{
+    margin: 0 !important; justify-content: flex-start !important;
+  }
+
+  /* === FIX TOC alignment — padding igual en ambos lados === */
+  body.split-view-active.mobile-solo #subcategoria-sidebar-content{
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    /* si querés menos alto arriba/abajo, ajustá este padding-top/bottom */
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+  }
+
+  /* Lista limpia (sin sangrías por defecto) */
+  #subcategoria-sidebar-content ul{
+    list-style: none; margin: 0; padding: 0;
+  }
+  #subcategoria-sidebar-content li{ margin: 0; }
+
+  /* Fila del TOC ocupando todo el ancho, sin padding lateral */
+  #subcategoria-sidebar-content a.toc-row{
+    display: flex; align-items: center;
+    gap: .5rem;                /* espacio entre icono y texto (no agrega sangría lateral) */
+    padding: .45rem 0 !important; /* <-- sin padding L/R */
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    border-radius: 0 !important;  /* bordes rectos, pegados a la columna */
+    text-decoration: none;
+    box-sizing: border-box;
+  }
+
+  /* Resaltado que toca los bordes de la columna */
+  #subcategoria-sidebar-content a.toc-row.is-active{
+    background: #eef2f7;
+    border-left: 3px solid #93c5fd; /* opcional; toca el borde izquierdo */
+  }
+
+  /* Icono sin “empujar” raro: ancho fijo y alineado */
+  #subcategoria-sidebar-content a.toc-row i{
+    min-width: 1rem; text-align: center;
+  }
+}
+
+
+/* Asegura que al hacer scroll el título quede justo debajo del header de 4rem */
+
+/* —— MOBILE <640 + split —— */
+@media (max-width: 1299.98px){
+  /* --- altura del switch en móvil (mantenela en sync con el botón) --- */
+  :root {
+    --switch-h: 34px;
+    --toc-px: .75rem; /* usado arriba; podés cambiarlo una sola vez aquí */
+  }
+
+  /* SWITCH VIEW full-width al fondo */
+  #mobile-split-switch{
+    position: fixed;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: env(safe-area-inset-bottom);
+    min-height: var(--switch-h);
+    transform: none !important;
+    
+     
+    align-items: center; justify-content: center; gap:.5rem;
+    padding: .55rem 1rem;
+    padding-left: calc(1rem + env(safe-area-inset-left));
+    padding-right: calc(1rem + env(safe-area-inset-right));
+    border: 0; border-radius: 0;
+    background:rgb(95, 112, 130); color:#fff; font-weight:700; font-size:.75rem; letter-spacing:.04em;
+    z-index: 400;
+    width: 100% !important;
+  
+  }
+
+  /* Flecha → cuando estás en el panel izquierdo */
+  body.split-view-active.mobile-solo.show-left #mobile-split-switch::after{
+    content: "\f061"; /* fas fa-arrow-right */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-left: .5rem;
+  }
+
+  /* Flecha ← cuando estás en el panel derecho */
+  body.split-view-active.mobile-solo.show-right #mobile-split-switch::before{
+    content: "\f060"; /* fas fa-arrow-left */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: .5rem;
+  }
+
+  /* Riel detrás del switch */
+  body.split-view-active.mobile-solo #video-modal.split-view::after{
+    content:""; position: fixed; left:0; right:0; bottom:0;
+    height: var(--switch-h);
+    background:#f1f5f9; border-top:1px solid #e5e7eb; z-index:380;
+  }
+
+  /* UP (cuando NO está dentro del carrusel) → por encima del switch */
+  #video-modal.split-view #toggle-thumbnails:not(.in-carousel){
+    position: fixed !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: calc(env(safe-area-inset-bottom) + var(--switch-h) + 2px) !important;
+    z-index: 410 !important;
+  }
+
+  /* Si el UP está dentro del carrusel */
+  #video-modal.split-view #thumbnail-carousel #toggle-thumbnails.in-carousel{
+    position: absolute !important;
+    top: .25rem !important;
+    bottom: auto !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 420 !important;
+  }
+
+  /* Que el carrusel no tape al switch */
+  body.split-view-active.mobile-solo #video-modal.split-view #thumbnail-carousel{
+    bottom: calc(var(--switch-h)) !important;
+    z-index: 350 !important;
+  }
+}
+
+/* ==== Ubicación del TOC como en la captura (ambos lados) ==== */
+
+
+@media (max-width: 1299.98px){
+  body.bars-hidden #sidebar,
+  body.bars-hidden #sb-switch,
+  body.bars-hidden #mobile-overlay {
+    display: none !important;
+  }
+}
+
+#sidebar, #subcategoria-sidebar {
+  transition: opacity .12s ease, transform .12s ease;
+}
+#sidebar.force-hidden,
+body.bars-hidden #sidebar,
+#subcategoria-sidebar.hidden {
+  opacity: 0;
+  transform: translateX(-8px);
+}
+
+/* ≥640px: mostrar barras y eliminar cualquier “invisibilidad” heredada */
+@media (min-width: 1300px){
+  body.bars-hidden #sidebar,
+  body.bars-hidden #sb-switch,
+  body.bars-hidden #mobile-overlay {
+    display: block !important;     /* evita display:none heredados */
+  }
+  body.bars-hidden #sidebar {
+    opacity: 1 !important;
+    transform: none !important;    /* que NO quede “fantasma” ocupando ancho */
+  }
+
+  /* Deja oculta la segunda barra si no tienes contenido para ella,
+     así no aparece la columna blanca vacía */
+  #subcategoria-sidebar.hidden { display: none !important; }
+}
+
+/* <640px: barras ocultas por defecto (móvil) */
+@media (max-width: 1299.98px){
+  body.bars-hidden #sidebar,
+  body.bars-hidden #subcategoria-sidebar {
+    display: none !important;
+  }
+}
+
+
+/* ——— POPUP de resaltado ——— */
+#hl-popover{
+  position: fixed;
+  display: none;                 /* se muestra por JS */
+  background:#0f172a;
+  color:#fff;
+  padding:3px 4px;               /* compacto */
+  border-radius:6px;
+  box-shadow:0 6px 16px rgba(0,0,0,.25);
+  z-index:1000;
+  transform:translate(-50%, -100%);
+  gap:2px;                       /* separación mínima entre botones */
+}
+
+/* flechita apuntando al texto */
+#hl-popover::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-5px;
+  transform:translateX(-50%);
+  border-width:5px 5px 0 5px;
+  border-style:solid;
+  border-color:#0f172a transparent transparent transparent;
+}
+
+#hl-popover .hlp-btn{
+  width:24px; height:24px;       /* botones más pequeños */
+  border-radius:9999px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border:1px solid rgba(255,255,255,.18);
+  cursor:pointer;
+}
+#hl-popover .hlp-apply{ background:rgb(56, 189, 248); border-color:transparent; }
+#hl-popover .hlp-clear{ background:transparent; }
+#hl-popover i{ font-size:12px; line-height:1; }
+
+/* Texto resaltado por el usuario */
+.my-hl{
+  background:rgb(153, 230, 255);
+  border-radius:2px;
+  padding:0;
+
+
+}
+
+/* Cuando el toggle esté OFF, quitamos TODA la apariencia del resaltado */
+#subcategoria-body.hl-hidden .my-hl{
+  background: transparent !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  outline: none !important;
+  text-shadow: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  background-image: none !important;
+  /* (opcional) si tu tema usa subrayados/efectos con pseudo-elementos */
+}
+#subcategoria-body.hl-hidden .my-hl::before,
+#subcategoria-body.hl-hidden .my-hl::after{
+  display: none !important;
+}
+
+
+
+/* === NOTES panel (limpio) === */
+.notes-card {
+  border: 1px solid #e5e7eb;
+  border-radius: .5rem;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+  margin: .5rem 1rem 1rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Toolbar superior */
+.notes-toolbar {
+  order: 1;
+  display: flex;
+  gap: .25rem;
+  padding: .35rem .5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;         /* gris suave */
+}
+
+/* Botones de formato (iconos) */
+.notes-tool {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent; /* borde transparente (no blanco) */
+  border-radius: .375rem;
+  color: #475569;
+  background: transparent;
+  cursor: pointer;
+}
+.notes-tool:hover,
+.notes-tool:focus-visible {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #0f172a;
+  outline: none;
+}
+
+/* ===== Dropdown "Formato" (ventana flotante) ===== */
+.notes-format { position: relative; }            /* contenedor del botón ¶ */
+.notes-format .notes-tool { padding: 0; }        /* mismo tamaño que los demás */
+
+/* caja flotante */
+.notes-menu {
+  position: absolute;
+  top: calc(100% + .25rem);
+  left: 0;
+  min-width: 220px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: .5rem;
+  box-shadow: 0 12px 30px rgba(2,6,23,.12), 0 4px 10px rgba(2,6,23,.06);
+  padding: .25rem;
+  z-index: 20;
+  display: none;                                  /* se muestra con .open */
+}
+.notes-menu.open { display: block; }
+
+/* cada opción del menú */
+.notes-menu-item {
+  width: 100%;
+  display: block;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: .375rem;
+  padding: .55rem .65rem;
+  color: #0f172a;
+  font-size: .92rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.notes-menu-item .subtitle {                      /* por si añades "Normal" vs tamaños */
+  display: block;
+  font-size: .78rem;
+  color: #64748b;
+  margin-top: .15rem;
+}
+
+.notes-menu-item:hover,
+.notes-menu-item:focus-visible {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  outline: none;
+}
+
+.notes-menu-item.is-active {
+  background: #eef2ff;                            /* leve señal de activo */
+  border-color: #c7d2fe;
+}
+
+/* pip/triangulito opcional */
+.notes-menu::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 14px;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-left: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e7eb;
+  transform: rotate(45deg);
+}
+
+/* Editor */
+.notes-editor {
+  order: 2;
+  flex: 1 1 auto;
+  overflow: auto;
+  min-height: 140px;
+  padding: .75rem .9rem;
+  font-size: .9rem;
+  line-height: 1.5;
+  outline: none;
+}
+.notes-empty { color: #94a3b8; }
+
+/* Footer sticky con título/contador + acciones */
+.notes-head {
+  order: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .5rem .75rem;
+  border-top: 1px solid #e5e7eb;
+  background: transparent;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+}
+
+/* Título + contador */
+.notes-title-wrap { display: flex; align-items: baseline; gap: .5rem; }
+.notes-title      { color: #94a3b8; font-weight: 600; font-size: .9rem; line-height: 1; }
+.notes-counter    { font-size: .75rem; color: #94a3b8; letter-spacing: .02em; line-height: 1; }
+.notes-counter.is-over { color: #dc2626; font-weight: 600; }
+
+/* Acciones */
+.notes-actions { display: flex; gap: .5rem; }
+
+/* Botones Cancel/Save */
+.notes-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+
+  padding: .25rem 1rem;     /* menos vertical, más horizontal */
+  min-height: 25px;
+  min-width: 70px;
+  line-height: 1.4;
+
+  font-size: .8rem;
+  font-weight: 600;
+
+  border: 1px solid #cbd5e1;   /* borde gris como la captura */
+  border-radius: .375rem;
+  background: #fff;
+  color: #334155;
+}
+.notes-btn-sm.primary {
+  background: #0ea5e9;
+  border-color: #0ea5e9;
+  color: #fff;
+}
+
+
+/* ▼ Pégalo en tu CSS (o inyecta un <style>) */
+.notes-card .notes-editor ol{
+  list-style: decimal !important;
+  margin-left: 1.25rem;   /* sangría cómoda */
+  padding-left: .75rem;
+}
+.notes-card .notes-editor ul{
+  list-style: disc !important;
+  margin-left: 1.25rem;
+  padding-left: .75rem;
+}
+.notes-card .notes-editor li{
+  display: list-item;     /* por si algún reset puso display:block */
+  margin: .2rem 0;
+}
+
+/* Separadores personalizados para sticky bar: fav y close */
+#subcat-header.is-stuck .highlighting-bar .fav-btn.fav{ position: relative; }
+#subcat-header.is-stuck .highlighting-bar .fav-btn.fav::after{
+  content: "";
+  display: inline-block;
+  width: 1px; height: 18px;
+  background: #e5e7eb;           /* mismo tono que .hl-sep */
+  margin-left: .75rem;            /* aire a la derecha del botón */
+}
+
+#subcat-header.is-stuck .highlighting-bar .hl-close{ position: relative; }
+#subcat-header.is-stuck .highlighting-bar .hl-close::before{
+  content: "";
+  display: inline-block;
+  width: 1px; height: 18px;
+  background: #e5e7eb;           /* separador a la izquierda de la X */
+  margin-right: .75rem;           /* aire antes de la línea */
+}
+
+
+
+/* Línea divisoria que acompaña al botón X */
+.highlighting-bar .hl-close::before {
+  content: "";
+  width: 1px;
+  height: 18px;
+  background: #e5e7eb;
+  margin: 0 .75rem;
+  display: none; /* por defecto oculta */
+}
+
+/* Oculta por defecto */
+.highlighting-bar .hl-sep.sticky-only {
+  display: none;
+}
+
+/* Cuando la barra está sticky, mostrar */
+#subcat-header.is-stuck .highlighting-bar .hl-sep.sticky-only {
+  display: inline-block;
+}
+
+/* Ocultar también el separador izquierdo de la X fuera de favoritos */
+body:not(.favorites-split) #subcat-header .hl-sep.sticky-only {
+  display: none !important;
+}
+
+
+/* Fuera de favoritos: spacing más compacto aunque esté sticky */
+body:not(.favorites-split) #subcat-header .highlighting-bar .hl-right {
+  gap: .35rem !important;
+}
+body:not(.favorites-split) #subcat-header .highlighting-bar .hl-sep {
+  margin: 0 .5rem !important;
+}
+
+
+body.favorites-split #subcat-header {
+  z-index: 10 !important;
+}
+
+/* Ocultar botones fav-back y close (y sus separadores adyacentes) fuera de favoritos */
+body:not(.favorites-split) #subcat-header .fav-btn[data-favonly="true"],
+body:not(.favorites-split) #subcat-header .hl-btn.hl-close[data-favonly="true"],
+body:not(.favorites-split) #subcat-header .fav-btn[data-favonly="true"] + .hl-sep,
+body:not(.favorites-split) #subcat-header .hl-btn.hl-close[data-favonly="true"] ~ .hl-sep {
+  display: none !important;
+}
+
+
+
+
+/* === QBank Setup (migrado desde JS) === */
+/* === QBank Setup (migrado desde JS, ajustado al estilo de la captura) === */
+body.qbank-setup-open { overflow: hidden; }
+#qbank-setup-modal { font-family: inherit; }
+#qbank-setup-modal .qbank-setup-card { box-shadow: 0 32px 80px rgba(15,23,42,0.35); }
+
+/* Slider */
+#qbank-setup-modal input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  background: #2F6F79; /* teal exacto del riel */
+  outline: none;
+}
+
+/* Thumb webkit */
+#qbank-setup-modal input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff; /* blanco puro */
+  border: 1px solid rgba(0,0,0,0.05); /* borde sutil */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* sombra difusa como en la captura */
+  cursor: pointer;
+}
+
+/* Thumb Firefox */
+#qbank-setup-modal input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  cursor: pointer;
+}
+
+/* resto igual */
+#qbank-setup-modal .qbank-checkbox {
+  width: 20px; height: 20px;          /* un poco más grande */
+  border-radius: 3px;                 /* menos redondeado */
+  border: 1px solid #CBD5E1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFFFFF;
+  color: #FFFFFF;
+  font-size: 12px;                    /* agranda el símbolo interno */
+}
+#qbank-setup-modal .qbank-checkbox svg {
+  width: 16px;
+  height: 16px;
+}
+
+#qbank-setup-modal .qbank-checkbox--on { background: #047A88; border-color: #047A88; }
+#qbank-setup-modal .qbank-setup-input {
+  border: 1px solid #CBD5E1; border-radius: 6px; padding: 6px 0; text-align: center;
+}
+#qbank-setup-modal button {
+  transition: background-color .2s ease, color .2s ease, opacity .2s ease;
+}
+
+/* ——— Anti-colisión: search + X arriba si falta espacio ——— */
+#qbank-session .labs-panel header{
+  flex-wrap: wrap;             /* permite salto de fila */
+  container-type: inline-size; /* activa @container por ancho del header */
+}
+
+/* Layout ancho (por defecto): tabs | ... | search [ X ] */
+#qbank-session .labs-panel .labs-tabs   { order: 1; flex: 0 1 auto; }
+#qbank-session .labs-panel .labs-search { order: 2; margin-left:auto !important; flex:0 0 auto !important; }
+#qbank-session .labs-panel .labs-header-actions,
+#qbank-session .labs-panel .labs-close  { order: 3; }  /* acciones/X quedan a la derecha de search */
+
+/* Estrecho: fuerza tabs a nueva fila, search+X siempre arriba */
+@container (max-width: 500px){
+  /* Fila superior (misma fila): search crece, acciones/X a la derecha */
+  #qbank-session .labs-panel .labs-search{
+    order: -2;                      /* antes que todo lo demás */
+    flex: 1 1 auto !important;      /* ocupa el resto de esa fila */
+    min-width: 0 !important;        /* permite encoger sin romper */
+    margin-left: 0 !important;
+    margin-right: .5rem !important; /* gap con acciones */
+    margin-bottom: .5rem !important;/* separación con la fila de tabs */
+    justify-content: flex-start !important;
+  }
+  #qbank-session .labs-panel .labs-header-actions,
+  #qbank-session .labs-panel .labs-close{
+    order: -1;                      /* junto a search en la fila superior */
+    flex: 0 0 auto !important;
+    margin-left: auto !important;   /* pegado a la derecha de esa fila */
+    margin-bottom: .5rem !important;
+  }
+
+  /* Forzar SIEMPRE que las tabs bajen a la siguiente fila */
+  #qbank-session .labs-panel .labs-tabs{
+    order: 10;                      /* después del top-row */
+    flex: 0 0 100% !important;      /* ocupa 100% => fuerza nueva fila */
+    width: 100% !important;         /* máxima especificidad para asegurar wrap */
+  }
+}
+#qbank-session .labs-panel .labs-divider{
+  order: -1 !important;   /* igual que .labs-close */
+}
+
+
+/* --- Search arriba de tabs cuando hay query --- */
+#qbank-session .labs-panel .labs-header{ flex-wrap: nowrap; }
+#qbank-session .labs-panel .labs-header.has-query{ flex-wrap: wrap; align-items:flex-start; }
+
+
+#qbank-session .labs-panel .labs-header.has-query .labs-search{
+  order:-20;
+  margin-left:0 !important;
+  margin-right:.75rem !important;  /* respiro antes del divider/X */
+  flex:1 1 auto !important;        /* crece pero deja espacio a la derecha */
+  min-width:0 !important;
+}
+#qbank-session .labs-panel .labs-header.has-query .labs-search-field{
+  width:100% !important;
+  min-width:0 !important;
+  flex:1 1 auto !important;
+}
+
+
+#qbank-session .labs-panel .labs-header.has-query .labs-header-actions{
+  order:-10; display:inline-flex; align-items:center; gap:4px; margin-left:8px !important;
+}
+#qbank-session .labs-panel .labs-header.has-query .labs-header-actions .labs-divider{ order:0; }
+#qbank-session .labs-panel .labs-header.has-query .labs-header-actions .labs-close{ order:1; }
+
+
+#qbank-session .labs-panel .labs-header.has-query .labs-tabs{
+  order: 10;              /* queda debajo */
+  width: 100%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  </style>
+
+
+<div>
+    <div class="tabsbar tabsbar--xs" id="tabsbar">
+      <button class="tab-btn is-active" data-tab="overview"><span>Overview</span></button>
+      <button class="tab-btn" data-tab="articles"><i class="fa-regular fa-file-lines"></i><span>Articles <span class="count">(1)</span></span></button>
+      <button class="tab-btn" data-tab="drugs"><i class="fa-solid fa-capsules"></i><span>Drugs <span class="count">(0)</span></span></button>
+      <button class="tab-btn" data-tab="media"><i class="fa-regular fa-image"></i><span>Media <span class="count">(4)</span></span></button>
+      <button class="tab-btn" data-tab="guidelines"><i class="fa-solid fa-layer-group"></i><span>Guidelines <span class="count">(0)</span></span></button>
+      <span class="tabs-ink" style="left: 0px; width: 43.9062px;"></span>
+    </div>
+
+    <!-- Contenido dinámico -->
+    <div id="tab-content">
+   <section class="mt-6">
+   <h3 class="font-semibold flex items-center gap-2">
+  <i class="fa-regular fa-file-lines text-slate-400"></i>
+  Articles (1)
+</h3>
+    
+            <article class="mt-3">
+              <a href="#" class="text-sky-600 no-underline hover:underline hover:decoration-solid underline-offset-2 focus-visible:underline" data-result="subcat" data-sup="Cardiología y cirugía cardiovascular" data-cat="Anatomía y fisiología cardiaca" data-sub="Generalidades">Generalidades</a><span class="ml-2 text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">
+                 Anatomía y fisiología cardiaca
+               </span>
+              
+                  <ul class="mt-2 space-y-2 list-disc pl-5">
+                    
+                      <li>
+                        <button type="button" class="text-xs text-gray-500 hover:text-sky-700 no-underline hover:underline hover:decoration-solid" data-result="subcat-hit" data-sup="Cardiología y cirugía cardiovascular" data-cat="Anatomía y fisiología cardiaca" data-sub="Generalidades" data-subheading="Basement membrane" title="Ver en subtema">
+                          <span class="font-medium">Basement membrane</span>
+                        </button>
+                        <blockquote class="mt-1 text-xs text-gray-700 border-l-2 border-gray-200 pl-3">
+                          <ul class="list-disc list-outside pl-5 space-y-1"><li class="ml-1"><strong>Definition:</strong> banda de ECM entre epitelio y <strong>tejido conectivo</strong>.</li><li class="ml-1"><strong>Functions:</strong> <strong>anchoring</strong> y <strong>diffusion barrier</strong>.</li><li class="ml-1"><strong>Structure:</strong> <strong>basal lamina</strong> (lucida: integrinas, col XVII; densa: col IV, laminina) + <strong>lamina reticularis</strong> (fibras reticulares, col III).</li><p>&gt; Basement membrane: luz visible; basal lamina: EM.<br>vancomicina <mark style="background:#dbeafe;color:#0c4a6e;padding:0 .2em;border-radius:.2em;">dique</mark></p></ul>
+                        </blockquote>
+                      </li>
+                    
+                  </ul>
+            </article>
+
+    <div class="mt-5 group">
+      <!-- header -->
+      <div class="border-t border-b border-slate-200">
+        <div class="flex items-center justify-between py-2">
+          <h4 class="font-semibold text-slate-600 text-sm">
+            Questions related to your search
+          </h4>
+          <label class="inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="toggle-qs" class="sr-only peer" checked="">
+            <span class="w-9 h-5 bg-gray-200 rounded-full peer-checked:bg-sky-500 relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-4"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- bloque que se oculta todo junto -->
+      <div class="mt-2 hidden group-has-[input:checked]:block">
+        <div id="qs-list" class="divide-y divide-slate-200"></div>
+
+        
+      </div>
+    </div>
+   </section>
+
+   <!-- ===== Media (debajo de Questions) ===== -->
+   <section class="mt-8">
+    <h3 class="font-semibold flex items-center gap-2">
+  <i class="fa-regular fa-image text-slate-400"></i>
+  Media (4)
+</h3>
+
+
+  <div class="flex gap-4 mb-3 mt-2 flex-wrap items-center">
+    
+        <button class="inline-flex items-center gap-1.5 h-8 px-3 rounded-full
+                 bg-white text-slate-700 text-[10px] font-medium
+                 border border-slate-300/70
+                 shadow-[0_1px_1px_rgba(15,23,42,.05),inset_0_1px_0_rgba(255,255,255,.9)]
+                 hover:border-sky-300 hover:text-sky-700 transition" type="button">
+          <span>Photos</span>
+          <span class="text-slate-500">(4)</span>
+        </button>
+      
+        <button class="inline-flex items-center gap-1.5 h-8 px-3 rounded-full
+                 bg-white text-slate-700 text-[10px] font-medium
+                 border border-slate-300/70
+                 shadow-[0_1px_1px_rgba(15,23,42,.05),inset_0_1px_0_rgba(255,255,255,.9)]
+                 hover:border-sky-300 hover:text-sky-700 transition" type="button">
+          <span>Illustrations</span>
+          <span class="text-slate-500">(0)</span>
+        </button>
+      
+        <button class="inline-flex items-center gap-1.5 h-8 px-3 rounded-full
+                 bg-white text-slate-700 text-[10px] font-medium
+                 border border-slate-300/70
+                 shadow-[0_1px_1px_rgba(15,23,42,.05),inset_0_1px_0_rgba(255,255,255,.9)]
+                 hover:border-sky-300 hover:text-sky-700 transition" type="button">
+          <span>Functional diag.</span>
+          <span class="text-slate-500">(0)</span>
+        </button>
+      
+  </div>
+
+      <div class="overflow-x-auto">
+        <div class="flex gap-3 pb-2 media-gallery" data-gallery="results-media">
+          
+            <article class="w-[85px]">
+             <figure class="media-thumb image-thumb block w-[85px] h-[85px] cursor-pointer
+         bg-transparent shadow-none focus:outline-none focus:ring-0" data-img-url="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0e/6a/77/5b/dique-los-reyunos.jpg" data-img-desc="Vista panorámica del dique" title="Open preview">
+  <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0e/6a/77/5b/dique-los-reyunos.jpg" alt="Vista panorámica del dique" class="w-[85px] h-[85px] object-cover rounded-lg">
+</figure>
+              <div class="mt-0.2 flex items-center gap-1 uppercase text-[8px] tracking-wide text-slate-600 truncate">
+  <i class="fa-regular fa-image text-slate-400 text-[10px]"></i>
+  PHOTO
+</div>
+<div class="mt-0.5 text-slate-800 line-clamp-2 text-[9px] leading-tight">
+  Vista panorámica del dique
+</div>
+            </article>
+          
+            <article class="w-[85px]">
+             <figure class="media-thumb image-thumb block w-[85px] h-[85px] cursor-pointer
+         bg-transparent shadow-none focus:outline-none focus:ring-0" data-img-url="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0e/6a/77/5b/dique-los-reyunos.jpg" data-img-desc="Detalle arquitectónico del dique" title="Open preview">
+  <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0e/6a/77/5b/dique-los-reyunos.jpg" alt="Detalle arquitectónico del dique" class="w-[85px] h-[85px] object-cover rounded-lg">
+</figure>
+              <div class="mt-0.2 flex items-center gap-1 uppercase text-[8px] tracking-wide text-slate-600 truncate">
+  <i class="fa-regular fa-image text-slate-400 text-[10px]"></i>
+  PHOTO
+</div>
+<div class="mt-0.5 text-slate-800 line-clamp-2 text-[9px] leading-tight">
+  Detalle arquitectónico del dique
+</div>
+            </article>
+          
+            <article class="w-[85px]">
+             <figure class="media-thumb image-thumb block w-[85px] h-[85px] cursor-pointer
+         bg-transparent shadow-none focus:outline-none focus:ring-0" data-img-url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3mf5WnyLufrodLUFoOMYlHF2V7LwSSNvdhQ&amp;s" data-img-desc="Imagen ilustrativa de insuficiencia cardíaca dique" title="Open preview">
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3mf5WnyLufrodLUFoOMYlHF2V7LwSSNvdhQ&amp;s" alt="Imagen ilustrativa de insuficiencia cardíaca dique" class="w-[85px] h-[85px] object-cover rounded-lg">
+</figure>
+              <div class="mt-0.2 flex items-center gap-1 uppercase text-[8px] tracking-wide text-slate-600 truncate">
+  <i class="fa-regular fa-image text-slate-400 text-[10px]"></i>
+  PHOTO
+</div>
+<div class="mt-0.5 text-slate-800 line-clamp-2 text-[9px] leading-tight">
+  Imagen ilustrativa de insuficiencia cardíaca dique
+</div>
+            </article>
+          
+            <article class="w-[85px]">
+             <figure class="media-thumb image-thumb block w-[85px] h-[85px] cursor-pointer
+         bg-transparent shadow-none focus:outline-none focus:ring-0" data-img-url="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0e/6a/77/5b/dique-los-reyunos.jpg" data-img-desc="Otra vista del dique" title="Open preview">
+  <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/0e/6a/77/5b/dique-los-reyunos.jpg" alt="Otra vista del dique" class="w-[85px] h-[85px] object-cover rounded-lg">
+</figure>
+              <div class="mt-0.2 flex items-center gap-1 uppercase text-[8px] tracking-wide text-slate-600 truncate">
+  <i class="fa-regular fa-image text-slate-400 text-[10px]"></i>
+  PHOTO
+</div>
+<div class="mt-0.5 text-slate-800 line-clamp-2 text-[9px] leading-tight">
+  Otra vista del dique
+</div>
+            </article>
+          
+        </div>
+      </div>
+
+      <a class="inline-flex items-center gap-1 text-sky-600 text-sm mt-2 hover:underline" href="#" data-see-all="media">
+        See all Media results (4)
+        <i class="fa-solid fa-chevron-right text-xs"></i>
+      </a>
+    
+   </section>
+
+   <section class="mt-8">
+    <h3 class="font-semibold flex items-center gap-2">
+  <i class="fa-solid fa-layer-group text-slate-400"></i>
+  Guidelines (0)
+</h3>
+    <p class="mt-2 text-sm text-gray-600">No results.</p>
+   </section>
+  </div>
+  </div>

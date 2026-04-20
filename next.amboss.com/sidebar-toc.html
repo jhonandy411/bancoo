@@ -1,0 +1,691 @@
+<style>
+  .da40ddcfaa7e54bc--section, .da40ddcfaa7e54bc--subsection {
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border-left: 4px solid transparent !important; /* Base for transition */
+  }
+  
+  /* Active state requested: Lighter background, darker borders, thick left border */
+  .da40ddcfaa7e54bc--section.bancomicina-active,
+  .da40ddcfaa7e54bc--subsection.bancomicina-active {
+    background-color: #f8f9fa !important; 
+    border-top: 1px solid #ccd4db !important;
+    border-bottom: 1px solid #ccd4db !important;
+    border-left: 4px solid #8e99a3 !important; 
+        border-right-color: transparent;
+
+    margin-right: 1px; /* Offset to avoid overlapping scrollbar or container edge */
+  }
+  
+  .isDarkmodeActive .da40ddcfaa7e54bc--section.bancomicina-active,
+  .isDarkmodeActive .da40ddcfaa7e54bc--subsection.bancomicina-active {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+    border-color: #7e838a !important;
+    border-left-color: #abb4ba !important;
+    border-right-color: transparent;
+  }
+
+  /* Hover state */
+  .da40ddcfaa7e54bc--section:hover:not(.bancomicina-active),
+  .da40ddcfaa7e54bc--subsection:hover:not(.bancomicina-active) {
+    background-color: rgba(0, 0, 0, 0.03);
+  }
+  
+  .isDarkmodeActive .da40ddcfaa7e54bc--section:hover:not(.bancomicina-active),
+  .isDarkmodeActive .da40ddcfaa7e54bc--subsection:hover:not(.bancomicina-active) {
+    background-color: rgba(255, 255, 255, 0.04);
+  }
+  
+  .da40ddcfaa7e54bc--nav {
+    padding-right: 6px;
+  }
+</style>
+
+
+
+<div class="a2e0dbc7f6affd28--baseStyles _3fb038ba90024ae6--censorTradeMarks" data-e2e-test-id="article-nav-style-applicator">
+  <nav class="da40ddcfaa7e54bc--nav" id="ARTICLE_CONTENTS_NAV_ID">
+    <div class="da40ddcfaa7e54bc--header">
+      <a class="ac38006eca9237c9--link" href="#">
+        <span class="da40ddcfaa7e54bc--link da40ddcfaa7e54bc--title" data-e2e-test-id="outline-title" id="toc-article-title">Loading...</span>
+      </a>
+    </div>
+    <ol class="da40ddcfaa7e54bc--list" data-e2e-test-id="nav-bar" id="toc-sections-list">
+      <li style="padding: 20px; text-align: center;"><span data-loading-spinner data-size="30"></span></li>
+    </ol>
+  </nav>
+</div>
+
+<script>
+(function() {
+  console.log('📚 TOC Script: Starting initialization...');
+  if (window.AmbossUI && window.AmbossUI.initLoadingSpinners) window.AmbossUI.initLoadingSpinners();
+  
+  const cleanT = (t) => typeof t === 'string'
+    ? t
+      .replace(/::(.*?)::/g, '$1')
+      .replace(/\((?:gallery\d+|message\d+)(?:\/id:?\s*[A-Za-z0-9_-]+)?\)/g, '')
+      .replace(/\s*\|\s*id:Z[\w-]+/g, '')
+      .replace(/\s*\|\s*Z[\w-]+/g, '')
+      .replace(/\s+/g, ' ')
+      .replace(/\*\*|\_\_|\#\#|\^\^|::/g, '')
+      .trim()
+    : t;
+  const fmtRefs = (t) => t.replace(/(\[\d+\])/g, '<span style="font-size:2px;color:transparent">$1</span>');
+  const getCleanText = (el) => {
+    const c = el.cloneNode(true);
+    // Remove extra elements that might interfere with text matching
+    c.querySelectorAll('.api.extraExplanation, sup[data-type="Reference"]').forEach(n => n.remove());
+    return c.innerText.trim();
+  };
+  
+  // Function to initialize TOC
+  function initializeTOC() {
+    // Get the document path from sessionStorage (same as subcategoriacontent.html)
+    const docPath = sessionStorage.getItem('currentDocPath');
+    
+    if (!docPath) {
+      console.warn('No document path found in sessionStorage for TOC');
+      document.getElementById('toc-article-title').textContent = 'No article selected';
+      document.getElementById('toc-sections-list').innerHTML = '<li style="padding: 10px; color: orange;">Please select an article from the Library</li>';
+      return false;
+    }
+
+    console.log('📚 TOC: Loading for document:', docPath);
+
+    // Ensure Firebase is initializedcrea
+    if (typeof db === "undefined") {
+      console.warn('📚 TOC: Firebase not ready yet, will retry...');
+      return false;
+    }
+
+    console.log('📚 TOC: Firebase is ready, fetching document...');
+
+    // Fetch the document from Firestore
+    db.doc(docPath)
+      .get()
+      .then((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          console.log('📚 TOC data loaded:', data);
+          
+          // Update the article title
+          const articleTitle = cleanT(data.nombre || data.denominacion || data.titulo || data.title || 'Article');
+          document.getElementById('toc-article-title').innerHTML = fmtRefs(articleTitle);
+          
+          if (data.contentType === 'sectioned' && data.sections && data.sectionOrder) {
+            renderSectionedTOC(data.sections, data.sectionOrder);
+          } else if (data.secciones && Array.isArray(data.secciones)) {
+            // ✨ NEW: Support for sequential sections format
+            renderSequentialTOC(data.secciones);
+          } else {
+            // Fallback for documents without sections
+            document.getElementById('toc-sections-list').innerHTML = '<li style="padding: 10px; color: gray;">No sections available</li>';
+          }
+        } else {
+          console.error('Document not found:', docPath);
+          document.getElementById('toc-article-title').textContent = 'Article not found';
+          document.getElementById('toc-sections-list').innerHTML = '<li style="padding: 10px; color: red;">Content not found</li>';
+        }
+      })
+      .catch((error) => {
+        console.error('Error loading TOC:', error);
+        document.getElementById('toc-sections-list').innerHTML = '<li style="padding: 10px; color: red;">Error loading TOC: ' + error.message + '</li>';
+      });
+    
+    return true;
+  }
+
+  function renderSectionedTOC(sections, sectionOrder) {
+    const listEl = document.getElementById('toc-sections-list');
+    listEl.innerHTML = ''; // Clear loading message
+
+    console.log('📚 TOC: Sections object:', sections);
+    console.log('📚 TOC: Section order:', sectionOrder);
+
+    // Handle the nested map structure - sections might have an extra level
+    // Check if sections is a map with another map inside
+    let actualSections = sections;
+    
+    // If sections has a nested structure, extract the inner map
+    const firstKey = Object.keys(sections)[0];
+    if (firstKey && typeof sections[firstKey] === 'object' && !sections[firstKey].title && !sections[firstKey].html) {
+      // This means sections has an extra nesting level
+      actualSections = sections[firstKey];
+      console.log('📚 TOC: Found nested sections structure, using:', actualSections);
+    }
+
+    sectionOrder.forEach((sectionId) => {
+      const sectionData = actualSections[sectionId];
+      
+      if (!sectionData) {
+        console.warn(`📚 TOC: Section ${sectionId} not found in sections map`);
+        return;
+      }
+
+      const sectionTitle = cleanT(sectionData.title || sectionId);
+      
+      console.log(`📚 TOC: Rendering section: ${sectionId} with title: ${sectionTitle}`);
+      
+      // Create the list item for this section
+      const li = document.createElement('li');
+      li.className = 'da40ddcfaa7e54bc--section';
+      li.setAttribute('data-e2e-test-id', sectionTitle);
+      
+      li.innerHTML = `
+        <a class="ac38006eca9237c9--link" href="#${sectionId}" onclick="scrollToSection('${sectionId}'); return false;">
+          <span class="da40ddcfaa7e54bc--link da40ddcfaa7e54bc--sectionHeading" data-e2e-test-id="outline-subtitle" style="padding-left: 16px;">${fmtRefs(sectionTitle)}</span>
+        </a>
+        <ol class="da40ddcfaa7e54bc--list"></ol>
+      `;
+      
+      // Check if this section has subsections
+      if (sectionData.subsections && sectionData.subsections.length > 0) {
+        const subsectionsList = li.querySelector('ol');
+        
+        sectionData.subsections.forEach((subsection, index) => {
+          const subsectionTitle = cleanT(subsection.title || `Subsection ${index + 1}`);
+          const subsectionId = `${sectionId}-sub-${index}`;
+          
+          console.log(`📚 TOC: Rendering subsection: ${subsectionTitle}`);
+          
+          const subsectionLi = document.createElement('li');
+          subsectionLi.className = 'da40ddcfaa7e54bc--subsection';
+          subsectionLi.innerHTML = `
+            <a class="ac38006eca9237c9--link" href="#${subsectionId}" onclick="scrollToSection('${subsectionId}'); return false;">
+<span
+  class="da40ddcfaa7e54bc--link da40ddcfaa7e54bc--subsectionHeading"
+  style="padding-left: 16px; font-size: 14px; color: #666;">
+  ${fmtRefs(subsectionTitle)}
+</span>
+            </a>
+          `;
+          
+          subsectionsList.appendChild(subsectionLi);
+        });
+      }
+      
+      listEl.appendChild(li);
+    });
+
+    console.log(`✅ TOC rendered with ${sectionOrder.length} sections`);
+    
+    // Bind scroll synchronization after rendering TOC
+    bindScrollSync();
+  }
+
+  function renderSequentialTOC(secciones) {
+    const listEl = document.getElementById('toc-sections-list');
+    listEl.innerHTML = '';
+
+    secciones.forEach((section, index) => {
+      if (!section.titulosegmento) return;
+
+      const sectionTitle = cleanT(section.titulosegmento);
+      const sectionId = `section-${index}`;
+
+      const li = document.createElement('li');
+      li.className = 'da40ddcfaa7e54bc--section';
+      
+      li.innerHTML = `
+        <a class="ac38006eca9237c9--link" href="#${sectionId}" onclick="scrollToSection('${sectionId}'); return false;">
+          <span class="da40ddcfaa7e54bc--link da40ddcfaa7e54bc--sectionHeading" style="padding-left: 16px;">${fmtRefs(sectionTitle)}</span>
+        </a>
+        <ol class="da40ddcfaa7e54bc--list"></ol>
+      `;
+      
+      const subsectionsList = li.querySelector('ol');
+      const subtituloKeys = Object.keys(section).filter(k => k.startsWith('SUBTITULO_')).sort();
+
+      subtituloKeys.forEach(key => {
+        const subTitle = cleanT(section[key]);
+        const subId = sectionId + '-' + key;
+        const subsectionLi = document.createElement('li');
+        subsectionLi.className = 'da40ddcfaa7e54bc--subsection';
+        subsectionLi.innerHTML = `
+          <a class="ac38006eca9237c9--link" href="#${subId}" onclick="scrollToSection('${subId}'); return false;">
+            <span class="da40ddcfaa7e54bc--link da40ddcfaa7e54bc--subsectionHeading" style="padding-left: 16px; font-size: 14px; color: #666;">
+              ${fmtRefs(subTitle)}
+            </span>
+          </a>
+        `;
+        subsectionsList.appendChild(subsectionLi);
+      });
+      
+      listEl.appendChild(li);
+    });
+
+    bindScrollSync();
+  }
+
+  // Track auto-scrolling to avoid highlight conflicts during manual clicks
+  let isAutoScrolling = false;
+
+  // Function to scroll to a section when clicked
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  window.scrollToSection = function(targetId) {
+    isAutoScrolling = true;
+    let targetElement = document.getElementById(targetId);
+    
+    // Update active state in TOC UI
+    document.querySelectorAll('.da40ddcfaa7e54bc--section, .da40ddcfaa7e54bc--subsection').forEach(el => {
+      el.classList.remove('bancomicina-active');
+    });
+    
+    // Find the link that was clicked to highlight its parent section LI
+    const clickedLink = document.querySelector(`a[onclick*="${targetId}"]`);
+    if (clickedLink) {
+      // Always find the top-level section LI to apply the active style
+      const sectionLi = clickedLink.closest('.da40ddcfaa7e54bc--section');
+      if (sectionLi) sectionLi.classList.add('bancomicina-active');
+    }
+
+    // If it's a subsection, we need to ensure the parent is expanded first
+    let parentId = targetId;
+    let isSubsection = false;
+    if (targetId.includes('-sub-')) {
+      parentId = targetId.split('-sub-')[0];
+      isSubsection = true;
+    } else if (targetId.includes('SUBTITULO_')) {
+      isSubsection = true;
+      // Extract section part from section-index-SUBTITULO_XXX
+      const parts = targetId.split('-');
+      if (parts.length >= 2) {
+         parentId = parts.slice(0, parts.length - 1).join('-');
+      }
+    }
+
+    const section = document.getElementById(parentId);
+    if (!section) return;
+
+    // Expand the section first if it's collapsed (only sections have headers/content containers)
+    const header = section.querySelector('[data-section-header]');
+    const contentContainer = section.querySelector('[data-section-content]');
+    const wasCollapsed = contentContainer && contentContainer.style.display === 'none';
+
+    if (wasCollapsed && header) {
+      header.click();
+    }
+
+    // Determine the scrollable container (Split mode or Normal mode)
+    const scrollContainer = document.getElementById('split-left') || document.getElementById('main-content');
+    
+    if (scrollContainer) {
+      // Delay to allow section expansion (0.3s transition in CSS + extra buffer)
+      const expansionDelay = wasCollapsed ? 400 : 50;
+      
+      setTimeout(() => {
+        let lastTargetOffset = -1;
+
+        const performScroll = (behavior = 'smooth') => {
+          // Re-measure everything each time to account for layout shifts
+          const toolbar = document.querySelector('.f9cf365808f534a0--articleToolbarWrapper');
+          const bc = document.getElementById('sticky-breadcrumbs');
+          const bcHeight = (bc && getComputedStyle(bc).opacity !== '0') ? 40 : 0;
+          const toolbarHeight = (toolbar?.offsetHeight || 66) + bcHeight;
+          const containerRect = scrollContainer.getBoundingClientRect();
+          
+          let currentTarget = document.getElementById(targetId);
+          if (isSubsection && !currentTarget) {
+            // Subsection internal search fallback
+            const tocLink = document.querySelector(`a[onclick*="${targetId}"]`);
+            // Strip bracketed numbers to ensure clean comparison with getCleanText(h)
+            const titleText = tocLink ? tocLink.innerText.replace(/\[\d+\]/g, '').trim() : null;
+            if (titleText) {
+              const headings = section.querySelectorAll('h3, h4, h5, h6, strong, p');
+              for (const h of headings) {
+                // Ignore if h is inside the section header
+                if (header && header.contains(h)) continue;
+                
+                // Check exact match or clean match (ignoring icons/references)
+                if (h.innerText.trim() === titleText || getCleanText(h) === titleText) {
+                  currentTarget = h;
+                  break;
+                }
+              }
+            }
+          }
+          
+          const finalTarget = currentTarget || section;
+          const targetRect = finalTarget.getBoundingClientRect();
+          const targetOffsetTop = targetRect.top - containerRect.top + scrollContainer.scrollTop - toolbarHeight;
+          const scrollTarget = Math.round(targetOffsetTop);
+          
+          // Only trigger a new smooth scroll if the layout has shifted > 5px
+          // This avoids the 'braking' effect of resetting smooth animations for tiny changes
+          if (lastTargetOffset === -1 || Math.abs(scrollTarget - lastTargetOffset) > 5) {
+            scrollContainer.scrollTo({
+              top: scrollTarget,
+              behavior: behavior
+            });
+            lastTargetOffset = scrollTarget;
+          }
+          return scrollTarget;
+        };
+
+        // 1. Main smooth scroll
+        performScroll('smooth');
+        
+        // 2. Single correction after most images and layout shifts are likely calculated (0.8s)
+        // We use 'smooth' again to avoid the 'jump' brake effect.
+        setTimeout(() => {
+          performScroll('smooth');
+        }, 800);
+        
+        // Finalize state after animations are likely done
+        setTimeout(() => {
+          isAutoScrolling = false;
+        }, 1500);
+
+      }, expansionDelay); 
+    } 
+    
+    
+    
+    
+    
+    else {
+      // Fallback
+      finalTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => { isAutoScrolling = false; }, 800);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    // --- EFFECT: Highlight text transiently ---
+    // Dynamic wait: triggers only when scrolling actually stops
+    const triggerHighlight = () => {
+        // 1. Inject styles if not present
+        if (!document.getElementById('toc-highlight-style')) {
+          const s = document.createElement('style');
+          s.id = 'toc-highlight-style';
+          s.innerHTML = `
+            .toc-highlight-anim {
+              background-image: linear-gradient(to right, #bae6fd, #bae6fd);
+              background-repeat: no-repeat;
+              background-size: 0% 100%;
+              transition: background-size 0.8s ease-in-out;
+              border-radius: 2px;
+              width: fit-content !important;
+              white-space: nowrap !important;
+            }
+            html.isDarkmodeActive .toc-highlight-anim {
+              background-image: linear-gradient(
+                to right,
+                rgb(37 99 235 / 0.45),
+                rgb(37 99 235 / 0.45)
+              );
+            }
+            .toc-highlight-anim.active {
+              background-size: 100% 100%;
+            }
+            .toc-highlight-anim.prepare-fade {
+              background-image: none !important;
+              background-color: #bae6fd !important;
+              transition: none !important;
+            }
+            html.isDarkmodeActive .toc-highlight-anim.prepare-fade {
+              background-color: rgb(37 99 235 / 0.45) !important;
+            }
+            .toc-highlight-anim.fading {
+              background-color: transparent !important;
+              transition: background-color 0.3s ease-out !important;
+            }
+          `;
+          document.head.appendChild(s);
+        }
+
+        // 2. Find the best text element to highlight
+        let textTarget = targetElement;
+        if (!textTarget) textTarget = document.getElementById(targetId);
+
+        if (!textTarget && typeof isSubsection !== 'undefined' && isSubsection) {
+           const tocLink = document.querySelector(`a[onclick*="${targetId}"]`);
+           // Strip bracketed numbers here too
+           const titleTextToc = tocLink ? tocLink.innerText.replace(/\[\d+\]/g, '').trim() : null;
+           
+           if (titleTextToc && typeof section !== 'undefined' && section) {
+              const headings = section.querySelectorAll('h3, h4, h5, h6, strong, p');
+              const headerEl = section.querySelector('[data-section-header]');
+              
+              for (const h of headings) {
+                 // Ignore if h is inside the section header
+                 if (headerEl && headerEl.contains(h)) continue;
+                 
+                 // Check exact match or clean match
+                 if (h.innerText.trim() === titleTextToc || getCleanText(h) === titleTextToc) {
+                    textTarget = h;
+                    break;
+                 }
+              }
+           }
+        }
+
+        if (textTarget) {
+           const closestHeader = textTarget.closest ? textTarget.closest('h1, h2, h3, h4, h5, h6') : null;
+           if (closestHeader) textTarget = closestHeader;
+
+           const specificTitle = textTarget.querySelector ? textTarget.querySelector('[data-section-title]') : null;
+           if (specificTitle) {
+             textTarget = specificTitle;
+           } else {
+             const header = textTarget.querySelector ? textTarget.querySelector('h1, h2, h3, h4, h5, h6') : null;
+             if (header) textTarget = header;
+           }
+
+           if (textTarget.querySelector('button') || textTarget.querySelector('.d7af962a6244a4b8--bookmarkButton')) {
+              const innerHeader = textTarget.querySelector('h1, h2, h3, h4, h5, h6');
+              if (innerHeader) textTarget = innerHeader;
+           }
+
+           textTarget.classList.add('toc-highlight-anim');
+           const originalWidth = textTarget.style.width;
+           const originalWhiteSpace = textTarget.style.whiteSpace;
+           
+           textTarget.style.width = 'fit-content';
+           textTarget.style.whiteSpace = 'nowrap'; 
+
+
+            requestAnimationFrame(() => {
+             requestAnimationFrame(() => {
+               textTarget.classList.add('active');
+             });
+            });
+
+           setTimeout(() => {
+             textTarget.classList.add('prepare-fade');
+             requestAnimationFrame(() => {
+                textTarget.classList.remove('active');
+                textTarget.classList.add('fading');
+                
+                setTimeout(() => {
+                  textTarget.classList.remove('toc-highlight-anim', 'prepare-fade', 'fading');
+                  textTarget.style.width = originalWidth;
+                  textTarget.style.whiteSpace = originalWhiteSpace || '';
+                }, 300);
+             });
+           }, 1100);
+        }
+    };
+
+    // Detection logic: Wait for scroll to stop
+    if (scrollContainer) {
+      let scrollEndTimer;
+      let highlightExecuted = false;
+      
+      const onScrollUpdate = () => {
+        clearTimeout(scrollEndTimer);
+        scrollEndTimer = setTimeout(() => {
+          if (!highlightExecuted) {
+            highlightExecuted = true;
+            scrollContainer.removeEventListener('scroll', onScrollUpdate);
+            triggerHighlight();
+          }
+        }, 150); // Debounce: 150ms of inactivity means scroll ended
+      };
+
+      scrollContainer.addEventListener('scroll', onScrollUpdate);
+      
+      // Safety fallback: if for some reason scroll event doesn't fire or article is tiny
+      setTimeout(() => {
+        if (!highlightExecuted) {
+          highlightExecuted = true;
+          scrollContainer.removeEventListener('scroll', onScrollUpdate);
+          triggerHighlight();
+        }
+      }, 3000); 
+    } else {
+      setTimeout(triggerHighlight, 1100);
+    }
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+  // Sync TOC selection with scroll position
+  function bindScrollSync() {
+    // We check both containers because they might exist in split view
+    const mainContainer = document.getElementById('main-content');
+    const splitContainer = document.getElementById('split-left');
+    
+    const handleScrollSync = (e) => {
+      if (isAutoScrolling) return;
+
+      const target = e ? (e.target || (splitContainer || mainContainer)) : (splitContainer || mainContainer);
+      if (!target || !target.getBoundingClientRect) return;
+
+      const tocItems = document.querySelectorAll('.da40ddcfaa7e54bc--section');
+      if (tocItems.length === 0) return;
+
+      let activeSectionId = null;
+      const toolbar = document.querySelector('.f9cf365808f534a0--articleToolbarWrapper');
+      const bc = document.getElementById('sticky-breadcrumbs');
+      const bcHeight = (bc && getComputedStyle(bc).opacity !== '0') ? 40 : 0;
+      const toolbarHeight = (toolbar?.offsetHeight || 66) + bcHeight;
+      const containerRect = target.getBoundingClientRect();
+      
+      // Threshold for activating a section (near the top of visible area)
+      const threshold = containerRect.top + toolbarHeight + 20;
+
+      tocItems.forEach(li => {
+        const link = li.querySelector('a');
+        if (!link) return;
+        const attr = link.getAttribute('href');
+        if (!attr) return;
+        const id = attr.replace('#', '');
+        const sectionEl = document.getElementById(id);
+        if (!sectionEl) return;
+
+        const rect = sectionEl.getBoundingClientRect();
+        // If the top of the section is above the threshold, it's potentially our active section
+        if (rect.top <= threshold + 10) { // Small buffer for safety
+          activeSectionId = id;
+        }
+      });
+
+      if (activeSectionId) {
+        tocItems.forEach(li => {
+          const link = li.querySelector('a');
+          const id = link?.getAttribute('href').replace('#', '');
+          if (id === activeSectionId) {
+            li.classList.add('bancomicina-active');
+          } else {
+            li.classList.remove('bancomicina-active');
+          }
+        });
+      }
+    };
+
+    if (mainContainer) {
+      mainContainer.addEventListener('scroll', handleScrollSync, { passive: true });
+    }
+    if (splitContainer) {
+      splitContainer.addEventListener('scroll', handleScrollSync, { passive: true });
+    }
+    
+    // NUEVO: Escuchar evento de expansión de secciones para recalcular la extensión del contenido
+    window.addEventListener('amboss:sections-toggled', () => {
+       console.log('📚 TOC: Recalculando posiciones por cambio masivo en secciones');
+       // Damos tiempo al navegador para procesar el layout shift
+       setTimeout(() => handleScrollSync(), 100);
+       setTimeout(() => handleScrollSync(), 500); 
+    });
+
+    // Initial check
+    setTimeout(() => {
+      handleScrollSync();
+    }, 500);
+  }
+
+  // Retry logic - try to initialize the TOC, retry if not ready
+  let retryCount = 0;
+  const maxRetries = 10;
+  
+  function tryInitialize() {
+    console.log(`📚 TOC: Initialization attempt ${retryCount + 1}/${maxRetries}`);
+    
+    if (initializeTOC()) {
+      console.log('✅ TOC: Successfully initialized');
+      return;
+    }
+    
+    retryCount++;
+    if (retryCount < maxRetries) {
+      setTimeout(tryInitialize, 200); // Retry every 200ms
+    } else {
+      console.error('❌ TOC: Failed to initialize after', maxRetries, 'attempts');
+      document.getElementById('toc-sections-list').innerHTML = '<li style="padding: 10px; color: red;">Failed to load TOC. Please refresh the page.</li>';
+    }
+  }
+  
+  // Start trying to initialize
+  tryInitialize();
+})();
+</script>
+

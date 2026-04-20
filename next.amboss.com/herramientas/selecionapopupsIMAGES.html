@@ -1,0 +1,117 @@
+// ✅ ExtraExplanation -> clonar phrasionary_popover REAL
+// + guardar el id del trigger (el.id) en cada clon como data-trigger-id
+
+const items = Array.from(document.querySelectorAll('span.api.extraExplanation'));
+console.log(`📌 Encontrados: ${items.length} span.api.extraExplanation`);
+
+let container = document.getElementById("extraExplanation-clones");
+if (container) container.remove();
+
+container = document.createElement("div");
+container.id = "extraExplanation-clones";
+
+let style = document.getElementById("extraExplanation-clones-style");
+if (style) style.remove();
+
+style = document.createElement("style");
+style.id = "extraExplanation-clones-style";
+style.textContent = `
+  #extraExplanation-clones .phrasionary_popover {
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    max-width: 100% !important;
+    pointer-events: auto !important;
+  }
+  #extraExplanation-clones [id^="DSPopover_"]{
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+`;
+document.head.appendChild(style);
+
+const insertPoint = document.querySelector("article") || document.body;
+(insertPoint.parentNode || document.body).insertBefore(container, insertPoint.nextSibling);
+
+function closePopovers() {
+  document.body.click();
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', keyCode: 27 }));
+}
+
+function getVisibleDSPopover() {
+  const pops = Array.from(document.querySelectorAll('div[id^="DSPopover_"]'));
+  return pops.find(p => p.offsetParent !== null && p.clientHeight > 20) || null;
+}
+
+function waitForDSPopover(maxAttempts = 60, interval = 120) {
+  return new Promise(resolve => {
+    let a = 0;
+    const t = setInterval(() => {
+      const pop = getVisibleDSPopover();
+      if (pop) { clearInterval(t); resolve(pop); return; }
+      if (++a >= maxAttempts) { clearInterval(t); resolve(null); }
+    }, interval);
+  });
+}
+
+function fireOpen(el) {
+  el.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true, cancelable: true, pointerType: 'mouse' }));
+  el.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, cancelable: true, view: window }));
+  el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerType: 'mouse' }));
+  el.click();
+}
+
+(async () => {
+  let ok = 0, fail = 0;
+
+  for (let i = 0; i < items.length; i++) {
+    const el = items[i];
+
+    // ✅ ESTE es el id específico (ej. Eedb4e32e...)
+    const triggerId = el.id || "";
+    const triggerSource = el.getAttribute("data-source") || "";
+    const triggerType = el.getAttribute("data-type") || "";
+
+    try {
+      closePopovers();
+      await new Promise(r => setTimeout(r, 150));
+
+      el.scrollIntoView({ behavior: "instant", block: "center" });
+      await new Promise(r => setTimeout(r, 150));
+
+      fireOpen(el);
+
+      const dsp = await waitForDSPopover(60, 120);
+      if (!dsp) throw new Error("No apareció DSPopover");
+
+      const content = dsp.querySelector('.phrasionary_popover[data-testid="phrasionary_popover"], .phrasionary_popover');
+      if (!content) throw new Error("No se encontró .phrasionary_popover");
+
+      const clone = content.cloneNode(true);
+
+      // ✅ Guardar relación 1:1 sin tocar el interior
+      clone.setAttribute("data-trigger-id", triggerId);
+      clone.setAttribute("data-trigger-index", String(i + 1));
+      if (triggerSource) clone.setAttribute("data-trigger-source", triggerSource);
+      if (triggerType) clone.setAttribute("data-trigger-type", triggerType);
+
+      container.appendChild(clone);
+
+      ok++;
+      closePopovers();
+      await new Promise(r => setTimeout(r, 120));
+    } catch (e) {
+      fail++;
+      console.warn(`⚠️ Falló #${i + 1} id=${triggerId}: ${e.message}`);
+    }
+  }
+
+  console.log(`✅ Listo: ${ok}/${items.length} · ❌ ${fail}`);
+})();

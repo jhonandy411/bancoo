@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bancomicina - Search Results</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<style>
+
+  
+  /* Layout */
+  .container {
+    max-width: 1056px;
+    padding: 20px;
+    margin: 0 auto;
+  }
+
+  .tabs-header {
+    width: 100%;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 24px;
+  }
+
+  .tabs-nav {
+    display: flex;
+    gap: 24px;
+    margin-bottom: -3px;
+  }
+
+  .tab-link-active {
+    border-bottom: 4px solid rgb(4, 122, 136);
+    color: rgb(4, 122, 136);
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 4px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tab-link {
+    border-bottom: 4px solid transparent;
+    color: #475569;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 4px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tab-link:hover {
+    color: #1f2933;
+    border-color: #d1d5db;
+  }
+
+  /* Main layout */
+  .main-row {
+    display: flex;
+    width: 100%;
+    gap: 20px;
+  }
+
+  .tab-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Headings */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 18px;
+    color: #334155;
+    margin-bottom: 16px;
+  }
+
+  /* Articles */
+  .article {
+    margin-bottom: 24px;
+  }
+
+  .article-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: rgb(4, 122, 136);
+    cursor: pointer;
+  }
+
+  .article-title:hover {
+    text-decoration: underline;
+  }
+
+  .article-list {
+    margin-top: 4px;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .article-item {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  /* Questions */
+  .questions {
+    margin: 24px 0;
+    border-top: 1px solid #e2e8f0;
+    padding: 12px 0;
+  }
+
+  .questions-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .questions-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+  }
+
+  .questions-list {
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 4px 0;
+  }
+
+  .question {
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+  }
+
+  .question:last-child {
+    border-bottom: 0;
+  }
+
+  .question-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 500;
+    color: #475569;
+    list-style: none;
+  }
+
+  .question-summary:hover {
+    color: rgb(4, 122, 136);
+  }
+
+  /* Media pills */
+  .media-filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .media-pill {
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+  }
+
+  .media-pill:hover {
+    background: #f9fafb;
+  }
+
+  /* Media grid */
+  .media-row {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 16px;
+  }
+
+  .media-item {
+    width: 128px;
+    flex-shrink: 0;
+  }
+
+  .media-thumb {
+    width: 128px;
+    height: 96px;
+    background: #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .media-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Aside */
+  .knowledge-panel {
+    width: 100%;
+    max-width: 406px;
+    margin-top: 32px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    align-self: flex-start;
+  }
+
+  .knowledge-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 12px;
+  }
+
+  .knowledge-text {
+    font-size: 16px;
+    color: #334155;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  /* Gallery */
+  .gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .gallery-item {
+    width: 86px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+  }
+
+  .gallery-thumb {
+    width: 86px;
+    height: 86px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+    transition: box-shadow .2s ease;
+  }
+
+  .gallery-item:hover .gallery-thumb {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .1);
+  }
+
+  .gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* === ICONOS EN TABS === */
+  .tabs-nav i { color: #94a3b8; }
+  .tab-link-active i { color: rgb(4, 122, 136); }
+
+  /* === TÍTULOS DE SECCIÓN === */
+  .section-title i {
+    color: #94a3b8;
+  }
+
+  /* Link "See all Article results" */
+  .section-title ~ a {
+    color: rgb(4, 122, 136);
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .section-title ~ a i {
+    color: rgb(4, 122, 136);
+  }
+
+  /* Evitar subrayado en tabs al hover */
+  .tabs-nav a,
+  .tabs-nav a:hover {
+    text-decoration: none !important;
+  }
+
+  /* === ARTÍCULOS === */
+  .article-list a {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+    text-decoration: none;
+  }
+
+  .article-list a:hover {
+    text-decoration: underline;
+  }
+
+  /* === QUESTIONS HEADER === */
+  .questions-header button {
+    color: #94a3b8;
+  }
+
+  .questions-header button:hover {
+    color: rgb(4, 122, 136);
+  }
+
+  .questions-header i {
+    font-size: 18px;
+    color: rgb(4, 122, 136);
+  }
+
+  .questions-header button {
+    padding: 0;
+    border: none;
+    background: none;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  /* === DETAILS CHEVRON ROTATION === */
+  .question summary i {
+    font-size: 12px;
+    color: #94a3b8;
+    transition: transform .2s ease;
+  }
+
+  details[open] summary i {
+    transform: rotate(180deg);
+  }
+
+  .questions>div:last-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0px;
+  }
+
+  /* === MORE + BANCO INTELLIGENCE === */
+  .questions>div:last-child button {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #64748b;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .questions>div:last-child button:hover {
+    color: #334155;
+  }
+
+  .questions>div:last-child i {
+    margin-left: 4px;
+  }
+
+  .questions>div:last-child div {
+    font-size: 12px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .questions>div:last-child .fa-robot {
+    color: #2dd4bf;
+  }
+
+  /* === MEDIA TITLES === */
+  .media-item>div:nth-child(2) {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #94a3b8;
+  }
+
+  .media-item>div:nth-child(3) {
+    font-size: 12px;
+    font-weight: 500;
+    color: #334155;
+    line-height: 1.2;
+  }
+
+  /* === LINKS VERDES === */
+  a {
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  /* === ASIDE: TÍTULOS E ICONOS === */
+  .knowledge-panel i {
+    color: #94a3b8;
+  }
+
+  /* === SUMMARY LINK === */
+  .knowledge-panel a span {
+    font-size: 16px;
+    font-weight: 700;
+    color: rgb(4, 122, 136);
+  }
+
+  .knowledge-panel a:hover span {
+    text-decoration: underline;
+  }
+
+  /* === FEEDBACK BUTTONS === */
+  .knowledge-panel button {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    transition: background .15s ease, color .15s ease;
+    cursor: pointer;
+  }
+
+  .knowledge-panel button:hover {
+    background: rgba(226, 232, 240, .5);
+    color: #475569;
+  }
+
+  .knowledge-panel button svg {
+    color: rgb(163, 178, 189);
+  }
+
+  .knowledge-panel button:hover svg {
+    color: rgb(4, 122, 136);
+  }
+
+  /* === MARGENES EQUIVALENTES A TAILWIND === */
+  section {
+    margin-top: 16px;
+  }
+
+  section+section {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  /* === LISTAS ANIDADAS === */
+  .article ul {
+    margin-top: 4px;
+  }
+
+  .article ul ul {
+    margin-left: 20px;
+    list-style: circle;
+  }
+
+  .article li {
+    margin-bottom: 4px;
+    font-size: 14px;
+    color: #475569;
+  }
+
+  .article strong {
+    color: #0f172a;
+  }
+
+  /* === EVITAR SUBRAYADOS DONDE NO DEBEN === */
+  .article-title {
+    text-decoration: none;
+  }
+
+  .article-title:hover {
+    text-decoration: underline;
+  }
+
+  /* === DIVIDERS DEL ASIDE === */
+  .knowledge-panel .divider {
+    border-top: 1px solid #e2e8f0;
+    margin: 12px 0;
+  }
+
+  /* === LINK SUMMARY (fila con icono) === */
+  .knowledge-panel .summary-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+    margin-left: -4px;
+    border-radius: 6px;
+  }
+
+ 
+
+  .knowledge-panel .summary-icon {
+    color: rgb(163, 178, 189);
+  }
+
+  .knowledge-panel .summary-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: rgb(4, 122, 136);
+  }
+
+  .knowledge-panel .summary-link:hover .summary-text {
+    text-decoration: underline;
+  }
+
+  /* === FEEDBACK ROW === */
+  .knowledge-panel .feedback {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .knowledge-panel .feedback-label {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+  }
+
+  .knowledge-panel .feedback-buttons {
+    display: flex;
+    gap: 4px;
+  }
+
+  /* === MINI LABELS DE LA GALERÍA === */
+  .knowledge-panel .gallery p {
+    width: 86px;
+    font-size: 11px;
+    color: #64748b;
+    line-height: 1.2;
+    font-weight: 500;
+  }
+
+  .knowledge-panel .gallery-item:hover p {
+    color: #334155;
+  }
+  /* === DARK MODE OVERRIDES SIMPLIFIED === */
+  html.isDarkmodeActive body { background: #121212 !important; color: #e2e8f0; }
+  html.isDarkmodeActive .knowledge-title { color: #f8fafc; }
+  html.isDarkmodeActive .tabs-header, html.isDarkmodeActive .questions, html.isDarkmodeActive .questions-list, html.isDarkmodeActive .knowledge-panel .divider { border-color: #2d3748; }
+  html.isDarkmodeActive .tab-link, html.isDarkmodeActive .article li, html.isDarkmodeActive .questions-title, html.isDarkmodeActive .question-summary, html.isDarkmodeActive .feedback-label { color: #94a3b8; }
+  html.isDarkmodeActive .section-title, html.isDarkmodeActive .knowledge-text { color: #cbd5e1; }
+  html.isDarkmodeActive .article-title { color: rgb(45, 181, 198) !important; }
+  html.isDarkmodeActive .question {border-bottom: 1px solid #2d3748;}
+  html.isDarkmodeActive mark { background: #034b46 !important; color: #fff !important; }
+  html.isDarkmodeActive .knowledge-panel, html.isDarkmodeActive .media-pill { background: #1e1e1e; border-color: #334155; color: #cbd5e1; }
+  html.isDarkmodeActive .knowledge-panel .gallery p { color: rgb(255, 255, 255, 0.7) !important; }
+  html.isDarkmodeActive .toc-link { color: rgba(255, 255, 255, 0.8) !important; }
+  html.isDarkmodeActive .article-item div { color: rgba(255, 255, 255, 0.6) !important; }
+  html.isDarkmodeActive .tab-link:hover, html.isDarkmodeActive .media-pill:hover, html.isDarkmodeActive .summary-link:hover { color: #e2e8f0; }
+</style>
+
+<body>
+  <div class="container">
+    <div class="tabs-header">
+      <nav class="tabs-nav" aria-label="Tabs">
+        <a href="#" class="tab-link-active">Overview</a>
+        <a href="#" class="tab-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+            <path fill="currentColor" fill-rule="evenodd"
+              d="M3 2h10v12H3zM1 2a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2zm10 4H5V4h6zM5 9h4V7H5zm0 3h5v-2H5z"
+              clip-rule="evenodd" />
+          </svg>
+          Articles ()
+        </a>
+        <a href="#" class="tab-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+            <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+              <path d="M2.815 8.471a3.333 3.333 0 0 0 4.714 4.714L10.714 10 6 5.286z" />
+              <path fill="currentColor"
+                d="M8.471 2.815 6 5.286 10.714 10l2.471-2.471a3.333 3.333 0 0 0-4.714-4.714" />
+            </g>
+          </svg>
+          Drugs (24)
+        </a>
+        <a href="#" class="tab-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M2 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" />
+            <path fill="currentColor" fill-rule="evenodd" d="M5.5 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3" />
+            <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="m14 11-4-4-7 7" />
+          </svg>
+          Media ()
+        </a>
+        <a href="#" class="tab-link">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+            <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+              <path d="m8 1.5-7 3 7 3 7-3z" />
+              <path d="m1 8 7 3 7-3M1 11.5l7 3 7-3" />
+            </g>
+          </svg>
+          Guidelines (0)
+        </a>
+      </nav>
+    </div>
+
+    <!-- Spinner container -->
+    <div id="loading-spinner-wrapper" style="padding:40px; text-align: center;">
+      <span data-loading-spinner></span>
+    </div>
+
+    <!-- Main content (hidden initially) -->
+    <div class="main-row" style="visibility: hidden;">
+      <div id="tab-content" class="tab-content">
+        <section>
+          <h3 class="section-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+              <path fill="currentColor" fill-rule="evenodd"
+                d="M3 2h10v12H3zM1 2a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2zm10 4H5V4h6zM5 9h4V7H5zm0 3h5v-2H5z"
+                clip-rule="evenodd" />
+            </svg>
+            Articles ()
+          </h3>
+
+          <div class="questions">
+            <div class="questions-header">
+              <span class="questions-title">Questions related to your search</span>
+              <button>
+                <i class="fa-solid fa-toggle-on"></i>
+              </button>
+            </div>
+
+            <div class="questions-list">
+              <details class="question">
+                <summary class="question-summary">
+                  What is noninfective endocarditis?
+                  <i class="fa-solid fa-chevron-down"></i>
+                </summary>
+              </details>
+
+              <details class="question">
+                <summary class="question-summary">
+                  How does infective endocarditis develop?
+                  <i class="fa-solid fa-chevron-down"></i>
+                </summary>
+              </details>
+
+              <details class="question">
+                <summary class="question-summary">
+                  What are the cardiac manifestations of infective endocarditis?
+                  <i class="fa-solid fa-chevron-down"></i>
+                </summary>
+              </details>
+            </div>
+
+            <div>
+              <button>More <i class="fa-solid fa-chevron-down"></i></button>
+              <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16" role="img"
+                  aria-label="AMBOSS Intelligence" height="16" width="16">
+                  <path fill="#40515E"
+                    d="M7.796 4.213c0-.205.307-.205.41 0L9.33 6.566l.102.102 2.354 1.126c.204 0 .204.306 0 .409L9.433 9.329l-.102.102-1.126 2.354c0 .204-.307.204-.41 0L6.67 9.43l-.103-.102-2.353-1.126c-.205 0-.205-.307 0-.41l2.353-1.125s.01-.008.103-.102z">
+                  </path>
+                  <path fill="#40515E" fill-rule="evenodd"
+                    d="M7 .577a2 2 0 0 1 2 0l4.928 2.846a2 2 0 0 1 1 1.731v5.691l-.004.133a2 2 0 0 1-.996 1.599L9 15.423l-.117.062a2 2 0 0 1-1.766 0L7 15.423l-4.928-2.846a2 2 0 0 1-.996-1.599l-.004-.133V5.154a2 2 0 0 1 .887-1.661l.113-.07zM3.072 5.154v5.691L8 13.69l4.928-2.845V5.154L8 2.309z"
+                    clip-rule="evenodd"></path>
+                </svg>
+                BANCO Intelligence
+              </div>
+            </div>
+          </div>
+
+          <a href="#">See all Article results () <i class="fa-solid fa-chevron-right"></i></a>
+        </section>
+
+        <section>
+          <h3 class="section-title">
+            <i class="fa-regular fa-image"></i>
+            Media ()
+          </h3>
+
+          <div class="media-filters">
+            <button class="media-pill">Photos (8)</button>
+            <button class="media-pill">Imaging (4)</button>
+            <button class="media-pill">Illustrations (2)</button>
+            <button class="media-pill">Videos (2)</button>
+            <button class="media-pill"><i class="fa-solid fa-chevron-down"></i></button>
+          </div>
+
+          <div class="media-row"></div>
+
+          <a href="#">See all Media results () <i class="fa-solid fa-chevron-right"></i></a>
+        </section>
+      </div>
+
+
+
+<div style="width: 406px; flex: 0 0 406px;">
+  <aside class="knowledge-panel" style="visibility: hidden; pointer-events: none;">
+        <h2 class="knowledge-title"></h2>
+        <p class="knowledge-text"></p>
+
+        <div class="gallery"></div>
+
+        <div class="divider"></div>
+
+        <div class="mb-3">
+          <a href="#" class="summary-link">
+            <div class="summary-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+                stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M4 2h16v20H4zm12 4H8m6 4H8"></path>
+                <path d="M8 14h8v4H8z"></path>
+              </svg>
+            </div>
+            <span class="summary-text"></span>
+          </a>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="feedback">
+          <span class="feedback-label">Is this helpful?</span>
+          <div class="feedback-buttons">
+            <button title="Yes" aria-label="Yes">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                <path fill="currentColor"
+                  d="M10 5.02H9a1 1 0 0 0 1 1zm0-2.4h1zM8 1V0a1 1 0 0 0-.938.653zM6 6.4l-.938-.347A1 1 0 0 0 5 6.4zM6 13H5a1 1 0 0 0 1 1zm6.914 0 .011-1h-.01zm1.226-1.02.988.153zM15 6.4l-.988-.153zm-1.226-1.38v1h.011zM6 13v1a1 1 0 0 0 1-1zm0-7h1a1 1 0 0 0-1-1zm5-.98v-2.4H9v2.4zm0-2.4c0-.863-.438-1.546-1.018-1.982C9.417.213 8.7 0 8 0v2c.315 0 .598.1.78.236.166.126.22.253.22.384zM7.062.653l-2 5.4 1.876.694 2-5.4zM5 6.4V13h2V6.4zM6 14h6.914v-2H6zm6.903 0a2.22 2.22 0 0 0 2.225-1.867l-1.976-.306c-.013.084-.097.174-.227.173zm2.225-1.868.86-5.58-1.976-.304-.86 5.58zm.86-5.579a2.18 2.18 0 0 0-.527-1.785l-1.496 1.329c.04.045.055.1.047.15zm-.527-1.785a2.24 2.24 0 0 0-1.698-.748l.022 2c.074 0 .14.03.18.077zm-1.687-.748H10v2h3.774zM6 12H3.6v2H6zm-2.4 0a.83.83 0 0 1-.509-.155.3.3 0 0 1-.082-.092c-.01-.017-.009-.024-.009-.026H1C1 13.184 2.39 14 3.6 14zm-.6-.273V7.273H1v4.454zm0-4.454c0-.002 0-.01.009-.026a.3.3 0 0 1 .082-.092c.1-.08.277-.155.509-.155V5C2.39 5 1 5.816 1 7.273zM3.6 7H6V5H3.6zM5 6v7h2V6z">
+                </path>
+              </svg>
+            </button>
+
+            <button title="No" aria-label="No">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                <path fill="currentColor"
+                  d="M6 10.98h1a1 1 0 0 0-1-1zm0 2.4H5zM8 15v1a1 1 0 0 0 .937-.65zm2.014-5.4.937.35a1 1 0 0 0 .063-.35zm0-6.6h1a1 1 0 0 0-1-1zM3.1 3l-.011 1h.01zM1.874 4.02l-.989-.153zm-.86 5.58.988.153zm1.226 1.38v-1h-.011zM10.014 3V2a1 1 0 0 0-1 1zm0 7h-1a1 1 0 0 0 1 1zM5 10.98v2.4h2v-2.4zm0 2.4c0 .863.438 1.546 1.018 1.982C6.583 15.787 7.3 16 8 16v-2c-.315 0-.598-.1-.78-.236-.166-.126-.22-.253-.22-.384zm3.937 1.97 2.014-5.4-1.874-.7-2.014 5.4zm2.077-5.75V3h-2v6.6zm-1-7.6H3.1v2h6.914zM3.11 2A2.22 2.22 0 0 0 .885 3.867l1.977.306C2.875 4.09 2.959 4 3.089 4zM.885 3.868l-.86 5.58 1.977.304.86-5.58zm-.86 5.579c-.1.646.096 1.298.528 1.785l1.495-1.329a.18.18 0 0 1-.046-.15zm.528 1.785a2.24 2.24 0 0 0 1.698.748l-.022-2a.24.24 0 0 1-.18-.077zm1.687.748H6v-2H2.24zM10.014 4h2.4V2h-2.4zm2.4 0c.232 0 .409.076.509.155a.3.3 0 0 1 .082.092c.01.017.009.024.009.026h2c0-1.457-1.39-2.273-2.6-2.273zm.6.273v4.454h2V4.273zm0 4.454c0 .002 0 .01-.009.026a.3.3 0 0 1-.082.092.83.83 0 0 1-.51.155v2c1.211 0 2.6-.816 2.6-2.273zm-.6.273h-2.4v2h2.4zm-1.4 1V3h-2v7z">
+                </path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      </div>
+
+
+
+
+
+
+    </div>
+  </div>
+
+  <script>
+    // Initialize spinners if AmbossUI is available
+    if (window.parent && window.parent.AmbossUI && window.parent.AmbossUI.initLoadingSpinners) {
+      window.parent.AmbossUI.initLoadingSpinners();
+    } else if (window.AmbossUI && window.AmbossUI.initLoadingSpinners) {
+      window.AmbossUI.initLoadingSpinners();
+    }
+
+    document.querySelectorAll('.tabs-nav a').forEach(a => {
+      a.onclick = (e) => {
+        e.preventDefault();
+        const active = document.querySelector('.tab-link-active');
+        if (active) active.className = 'tab-link';
+        a.className = 'tab-link-active';
+      };
+    });
+
+    (function () {
+      const storedData = sessionStorage.getItem('amboss_search_data');
+      if (storedData) {
+        try {
+          const data = JSON.parse(storedData);
+          const titleEl = document.querySelector('.knowledge-title');
+          const textEl = document.querySelector('.knowledge-text');
+
+          const db = window.db || (window.parent && window.parent.db);
+          const fixDriveThumb = (url, size = 'w1000') => {
+            const raw = (url || '').trim();
+            if (!raw) return '';
+            const match = raw.match(/(?:\/file\/d\/|id=)([^\/&?]+)/);
+            return match ? `https://drive.google.com/thumbnail?id=${match[1]}&sz=${size}` : raw;
+          };
+          
+          // Array para rastrear todas las promesas
+          const allPromises = [];
+          
+          if (titleEl) {
+            const nTitle = data.title || data.phrasionaryTitle || data.synonym || data.nombre || data.titulo || data.denominacion || data.id || '';
+            if (nTitle) titleEl.textContent = nTitle;
+
+            const mediaRow = document.querySelector('.media-row');
+            if (mediaRow && nTitle) {
+              mediaRow.innerHTML = '';
+              
+              const renderImages = (qs) => {
+                const sec = mediaRow.closest('section');
+                if (sec) sec.style.display = qs.empty ? 'none' : 'block';
+                if (qs.empty) return;
+
+                const docsData = qs.docs.map(doc => {
+                  const d = doc.data();
+                  const thumbSrc = fixDriveThumb(d.urls?.small || d.urls?.thumb || d.urls?.medium || d.urls?.big || '', 'w1000');
+                  const fullSrc = fixDriveThumb(d.urls?.big || d.urls?.medium || d.urls?.small || d.urls?.thumb || d.dedupeKey || '', 'w2000');
+                  const t = d.textoimagen || d.textoimagen1 || d.title || d.meta?.title || d.decoded?.title || '';
+                  const type = (d.type || 'IMAGE').toUpperCase();
+                  return { src: fullSrc || thumbSrc, thumbSrc: thumbSrc || fullSrc, title: t, type };
+                }).filter(item => item.src);
+
+                mediaRow.innerHTML = docsData.map((item, idx) => `
+                  <div class="media-item" data-index="${idx}" style="cursor:pointer;">
+                    <div class="media-thumb">
+                      <img src="${item.thumbSrc}" alt="${item.title}">
+                    </div>
+                    <div><i class="fa-regular fa-image"></i> ${item.type}</div>
+                    <div>${item.title}</div>
+                  </div>
+                `).join('');
+
+                // Click listener for Media items
+                mediaRow.onclick = (e) => {
+                  const itemEl = e.target.closest('.media-item');
+                  if (!itemEl) return;
+                  const idx = parseInt(itemEl.dataset.index);
+                  const item = docsData[idx];
+                  const targetUrl = `mediavisor2.html?src=${encodeURIComponent(item.src)}&title=${encodeURIComponent(item.title)}`;
+                  const gallery = docsData.map(d => ({ src: d.src, title: d.title }));
+
+                  if (window.parent && window.parent.openMediaViewer2) {
+                    window.parent.openMediaViewer2(targetUrl, gallery, idx);
+                  } else if (window.openMediaViewer2) {
+                    window.openMediaViewer2(targetUrl, gallery, idx);
+                  }
+                };
+
+                const c = docsData.length;
+                if (sec) {
+                  const mt = sec.querySelector('.section-title'), sa = Array.from(sec.querySelectorAll('a')).find(a => a.innerText.includes('Media'));
+                  if (mt) mt.innerHTML = `<i class="fa-regular fa-image"></i> Media (${c})`;
+                  if (sa) sa.innerHTML = `See all Media results (${c}) <i class="fa-solid fa-chevron-right"></i>`;
+                }
+                const mb = Array.from(document.querySelectorAll('.tabs-nav a')).find(a => a.innerText.includes('Media'));
+                if (mb) mb.innerHTML = mb.innerHTML.replace(/Media \(\d*\)/, `Media (${c})`);
+              };
+
+
+              if (typeof db !== "undefined") {
+                const searchTermsList = new Set();
+                if (nTitle) searchTermsList.add(nTitle);
+                if (data.synonym && Array.isArray(data.synonym)) data.synonym.forEach(s => searchTermsList.add(s));
+                const rawQuery = sessionStorage.getItem('amboss_search_query');
+                if (rawQuery) searchTermsList.add(rawQuery);
+
+                const variations = new Set();
+                searchTermsList.forEach(t => {
+                  if (!t || typeof t !== 'string') return;
+                  const term = t.trim();
+                  if (!term) return;
+
+                  // Full variations
+                  variations.add(term);
+                  variations.add(term.toLowerCase());
+                  variations.add(term.toUpperCase());
+                  variations.add(term.charAt(0).toUpperCase() + term.slice(1)); // Sentence Case
+                  variations.add(term.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')); // Title Case
+
+                  // Prefix variations (First few words)
+                  const words = term.split(/[\s-]/).filter(w => w.length > 3); // words longer than 3 chars
+                  if (words.length > 0) {
+                     const p1 = words[0];
+                     variations.add(p1);
+                     variations.add(p1.toLowerCase());
+                     variations.add(p1.charAt(0).toUpperCase() + p1.slice(1));
+                     
+                     if (words.length > 1) {
+                        const p2 = words[0] + " " + words[1];
+                        variations.add(p2);
+                        variations.add(p2.toLowerCase());
+                        variations.add(p2.charAt(0).toUpperCase() + p2.slice(1));
+                     }
+                  }
+                });
+                
+                const uniqueTerms = Array.from(variations).filter(t => t && t.length > 0);
+                const queries = [];
+                
+                uniqueTerms.forEach(term => {
+                  // Search in 'title'
+                  queries.push(
+                    db.collection('bancoimagenes')
+                    .where('title', '>=', term)
+                    .where('title', '<=', term + '\uf8ff')
+                    .get().then(qs => qs.docs).catch(() => [])
+                  );
+
+                  // Search in 'textoimagen1'
+                  queries.push(
+                    db.collection('bancoimagenes')
+                    .where('textoimagen1', '>=', term)
+                    .where('textoimagen1', '<=', term + '\uf8ff')
+                    .get().then(qs => qs.docs).catch(() => [])
+                  );
+
+                  // Search in 'synonym' array
+                  queries.push(
+                    db.collection('bancoimagenes')
+                    .where('synonym', 'array-contains', term)
+                    .get().then(qs => qs.docs).catch(() => [])
+                  );
+                });
+
+                const imagePromise = Promise.all(queries).then(results => {
+                  const allDocs = results.flat();
+                  const uniqueDocs = [];
+                  const seenIds = new Set();
+                  
+                  allDocs.forEach(doc => {
+                    if (!seenIds.has(doc.id)) {
+                      seenIds.add(doc.id);
+                      uniqueDocs.push(doc);
+                    }
+                  });
+                  
+                  renderImages({ empty: uniqueDocs.length === 0, docs: uniqueDocs });
+                }).catch(err => console.error("Error fetching images:", err));
+
+                allPromises.push(imagePromise);
+              }
+            }
+          }
+
+          if (textEl) {
+            const newText = data.definition || data.descripcion || data.description || data.definicion || '';
+            if (newText) textEl.innerHTML = newText;
+          }
+
+          const galleryEl = document.querySelector('.knowledge-panel .gallery');
+          if (galleryEl) {
+            if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+              const renderKnowledgeGallery = (items) => {
+                galleryEl.style.display = items.length ? 'flex' : 'none';
+                if (!items.length) {
+                  galleryEl.innerHTML = '';
+                  return;
+                }
+
+                galleryEl.innerHTML = items.map((img, idx) => `
+                   <div class="gallery-item" data-index="${idx}" style="cursor:pointer;">
+                     <div class="gallery-thumb">
+                       <img src="${img.thumbSrc || img.src || ''}" alt="${img.alt || img.title || ''}" style="width:100%;height:100%;object-fit:cover;">
+                     </div>
+                     <p>${img.title || img.alt || ''}</p>
+                   </div>
+                 `).join('');
+
+                galleryEl.onclick = (e) => {
+                  const itemEl = e.target.closest('.gallery-item');
+                  if (!itemEl) return;
+                  const idx = parseInt(itemEl.dataset.index);
+                  const item = items[idx];
+                  const src = item.src || item.thumbSrc || '';
+                  const title = item.title || item.alt || '';
+                  const targetUrl = `mediavisor2.html?src=${encodeURIComponent(src)}&title=${encodeURIComponent(title)}`;
+                  const gallery = items.map(img => ({ src: img.src || img.thumbSrc || '', title: img.title || img.alt || '' }));
+
+                  if (window.parent && window.parent.openMediaViewer2) {
+                    window.parent.openMediaViewer2(targetUrl, gallery, idx);
+                  } else if (window.openMediaViewer2) {
+                    window.openMediaViewer2(targetUrl, gallery, idx);
+                  }
+                };
+              };
+
+              if (typeof db !== "undefined") {
+                const galleryPromise = Promise.all(
+                  data.images.map(async (img) => {
+                    const imageId = String(img.imageId || img.id || '').trim();
+                    if (!imageId) {
+                      return {
+                        ...img,
+                        src: img.url || '',
+                        thumbSrc: img.url || ''
+                      };
+                    }
+
+                    try {
+                      const doc = await db.collection('bancoimagenes').doc(imageId).get();
+                      if (!doc.exists) {
+                        return {
+                          ...img,
+                          src: img.url || '',
+                          thumbSrc: img.url || ''
+                        };
+                      }
+
+                      const d = doc.data() || {};
+                      const thumbSrc = fixDriveThumb(d.urls?.small || d.urls?.thumb || d.urls?.medium || d.urls?.big || img.url || '', 'w1000');
+                      const fullSrc = fixDriveThumb(d.urls?.big || d.urls?.medium || d.urls?.small || d.urls?.thumb || img.url || '', 'w2000');
+
+                      const preferredText = d.textoimagen || d.textoimagen1 || d.title || img.title || img.alt || '';
+                      return {
+                        ...img,
+                        title: preferredText,
+                        alt: preferredText,
+                        src: fullSrc || thumbSrc || img.url || '',
+                        thumbSrc: thumbSrc || fullSrc || img.url || ''
+                      };
+                    } catch (err) {
+                      console.error('Error fetching gallery image:', imageId, err);
+                      return {
+                        ...img,
+                        src: img.url || '',
+                        thumbSrc: img.url || ''
+                      };
+                    }
+                  })
+                ).then(renderKnowledgeGallery).catch(err => {
+                  console.error('Error rendering knowledge gallery:', err);
+                  renderKnowledgeGallery(data.images.map(img => ({
+                    ...img,
+                    src: img.url || '',
+                    thumbSrc: img.url || ''
+                  })));
+                });
+
+                allPromises.push(galleryPromise);
+              } else {
+                renderKnowledgeGallery(data.images.map(img => ({
+                  ...img,
+                  src: img.url || '',
+                  thumbSrc: img.url || ''
+                })));
+              }
+            } else {
+              galleryEl.style.display = 'none';
+            }
+          }
+
+
+          const summaryLinkEl = document.querySelector('.knowledge-panel .summary-link');
+          if (summaryLinkEl) {
+            const summaryTextEl = summaryLinkEl.querySelector('.summary-text');
+            const summaryContainer = summaryLinkEl.parentElement;
+
+            if (data.article && (data.article.href || data.article.fullUrl) && data.article.title) {
+              if (summaryContainer) summaryContainer.style.display = 'block';
+              if (data.article.href) summaryLinkEl.href = data.article.href;
+              else if (data.article.fullUrl) summaryLinkEl.href = data.article.fullUrl;
+
+              if (summaryTextEl) summaryTextEl.textContent = data.article.title;
+            } else {
+              if (summaryContainer) summaryContainer.style.display = 'none';
+            }
+          }
+
+          const tabContent = document.getElementById('tab-content');
+          const section = tabContent ? tabContent.querySelector('section') : null;
+          if (section) {
+            section.querySelectorAll('.article').forEach(el => el.remove());
+            const count = (data.articles && Array.isArray(data.articles)) ? data.articles.length : 0;
+            const sectionTitleEl = section.querySelector('.section-title');
+            if (sectionTitleEl) sectionTitleEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M3 2h10v12H3zM1 2a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2zm10 4H5V4h6zM5 9h4V7H5zm0 3h5v-2H5z" clip-rule="evenodd" /></svg> Articles (${count})`;
+            
+            const seeAllArticles = Array.from(section.querySelectorAll('a')).find(a => a.textContent.includes('See all Article results'));
+            if (seeAllArticles) seeAllArticles.innerHTML = `See all Article results (${count}) <i class="fa-solid fa-chevron-right"></i>`;
+
+            if (data.articles && Array.isArray(data.articles)) {
+              let insertPoint = sectionTitleEl;
+              data.articles.forEach((rawPath, index) => {
+                const path = rawPath.startsWith('/') ? rawPath.substring(1) : rawPath;
+                const name = path.split('/').pop().replace(/_/g, ' ');
+                const article = document.createElement('article');
+                article.className = 'article';
+                article.innerHTML = `
+                      <div>
+                        <span class="article-title" style="cursor: pointer; color: #047a88;">${name}</span>
+                      </div>
+                      <ul class="article-list">
+                         <li class="article-item"><span>•</span><a href="#" class="toc-link" data-path="${path}">Summary</a></li>
+                      </ul>
+                    `;
+
+                const titleSpan = article.querySelector('.article-title');
+                const articleList = article.querySelector('.article-list');
+
+                if (titleSpan) {
+                  titleSpan.onclick = () => {
+                    if (parent.showSubcatFromArticles) {
+                        parent.showSubcatFromArticles({ docPath: path, title: name });
+                    } else {
+                        sessionStorage.setItem('currentDocPath', path);
+                        if (parent.loadMainContent) parent.loadMainContent('subcategoriacontent.html');
+                    }
+                  };
+                }
+
+                const query = sessionStorage.getItem('amboss_search_query')?.toLowerCase() || "";
+                const highlightText = (text, query) => {
+                  if (!query) return text;
+                  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                  return text.replace(regex, '<mark style="background: #d0f1e8;">$1</mark>');
+                };
+                if (typeof db !== "undefined") {
+                  const articlePromise = db.doc(path).get().then(doc => {
+                    if (doc.exists) {
+                      const art = doc.data();
+                      if (art.sections && art.sectionOrder) {
+                        const filteredOrder = art.sectionOrder.filter(sid => {
+                          const sec = art.sections[sid];
+                          const inSec = (sec.title + " " + (sec.html || "")).toLowerCase().includes(query);
+                          const inSub = sec.subsections?.some(sub => (sub.title + " " + (sub.html || "")).toLowerCase().includes(query));
+                          return inSec || inSub;
+                        });
+
+                        articleList.innerHTML = filteredOrder.map(sid => {
+                          const sec = art.sections[sid];
+                          return `
+<li class="article-item" style="margin-bottom: 12px; display: flex; flex-direction: column;">
+                                             <div style="display: flex; align-items: baseline;">
+                                             <span style="margin-right: 8px;">•</span>
+                                             <a href="#" class="toc-link" data-path="${path}" data-sid="${sid}" style="font-weight: 500; font-size: 15px;">${sec.title || sid}</a>
+                                           </div>
+                                           ${(sec.subsections || []).some(sub => (sub.title + " " + (sub.html || "")).toLowerCase().includes(query)) ? `
+                                               <ul style="list-style: none; padding-left: 0px; margin-top: 2px;">
+                                                   ${sec.subsections.map((sub, sIdx) => {
+                                                       if (!(sub.title + " " + (sub.html || "")).toLowerCase().includes(query)) return '';
+                                                       const text = (sub.html || "").replace(/<[^>]*>/g, '');
+                                                       const idx = text.toLowerCase().indexOf(query);
+                                                       let snippet = "";
+                                                       if (idx === -1) {
+                                                           snippet = text.substring(0, 160);
+                                                       } else {
+                                                           const start = Math.max(0, idx - 40);
+                                                           snippet = (start > 0 ? "..." : "") + text.substring(start, start + 160);
+                                                       }
+                                                       const subId = `${sid}-sub-${sIdx}`;
+                                                       return `
+                                                       <li style="margin-bottom: 8px;">
+                                                           <div style="display: flex; align-items: baseline;">
+                                                               <span style="font-size: 8px; margin-right: 8px;">○</span>
+                                                               <span class="toc-link" data-path="${path}" data-sid="${subId}" style="font-size: 14px; font-weight: 500; color: #333; cursor: pointer;">${sub.title}</span>
+                                                           </div>
+                                                           <div style="padding-left: 18px; font-size: 13px; color: #666; line-height: 1.4;">
+                                                               <span>${highlightText(snippet, query)}${snippet.length > 2 ? '...' : ''}</span>
+                                                           </div>
+                                                       </li>`;
+                                                   }).join('')}
+                                               </ul>
+                                           ` : `
+                                               <div style="padding-left: 18px; font-size: 13px; color: #666; line-height: 1.4; margin-top: 4px;">
+                                                   <span>${highlightText((() => {
+                                                       const text = (sec.html || "").replace(/<[^>]*>/g, '');
+                                                       const idx = text.toLowerCase().indexOf(query);
+                                                       if (idx === -1) return text.substring(0, 160) + "...";
+                                                       const start = Math.max(0, idx - 40);
+                                                       return (start > 0 ? "..." : "") + text.substring(start, start + 160) + "...";
+                                                   })(), query)}</span>
+                                               </div>
+                                           `}
+                                         </li>`;
+                        }).join('');
+
+                        articleList.querySelectorAll('.toc-link').forEach(link => {
+                          link.onclick = (e) => {
+                            e.preventDefault();
+                            const p = link.dataset.path;
+                            const sid = link.dataset.sid;
+                            if (sid) sessionStorage.setItem('targetSectionId', sid);
+                            if (parent.showSubcatFromArticles) {
+                                parent.showSubcatFromArticles({ docPath: p, title: name });
+                            } else {
+                                sessionStorage.setItem('currentDocPath', p);
+                                if (parent.loadMainContent) parent.loadMainContent('subcategoriacontent.html');
+                            }
+                          };
+                        });
+                      }
+                    }
+                  });
+                  
+                  allPromises.push(articlePromise);
+                }
+
+                if (insertPoint) {
+                  insertPoint.after(article);
+                  insertPoint = article;
+                  if (index === 0 && data.articles.length > 1) {
+                    const q = document.querySelector('.questions');
+                    if (q) { insertPoint.after(q); insertPoint = q; }
+                  }
+                }
+              });
+            }
+
+            const tabs = document.querySelectorAll('.tabs-nav a');
+            const articlesTab = Array.from(tabs).find(a => a.textContent.includes('Articles'));
+            if (articlesTab) articlesTab.innerHTML = articlesTab.innerHTML.replace(/Articles \(\d*\)/, `Articles (${count})`);
+          }
+          
+          // Helper to manage panel visibility
+          const updatePanelVisibility = () => {
+             const row = document.querySelector('.main-row');
+             const spin = document.getElementById('loading-spinner-wrapper');
+             if (row) row.style.visibility = 'visible';
+             if (spin) spin.style.display = 'none';
+
+             // Show knowledge panel only if it has content (derived from phrasionaryTerms)
+             const hasContent = data.description || data.definition || data.descripcion || data.definicion || (data.images && Array.isArray(data.images) && data.images.length > 0) || (data.article && (data.article.href || data.article.fullUrl));
+             
+             const panel = document.querySelector('.knowledge-panel');
+             if (panel) {
+               if (hasContent) {
+                 panel.style.visibility = 'visible';
+                 panel.style.pointerEvents = 'auto';
+               } else {
+                 panel.style.visibility = 'hidden';
+                 panel.style.pointerEvents = 'none';
+               }
+             }
+          };
+
+          // Esperar a que todas las promesas se resuelvan antes de mostrar el contenido
+          Promise.all(allPromises).then(() => {
+            updatePanelVisibility();
+          }).catch(err => {
+            console.error("Error loading data:", err);
+            updatePanelVisibility();
+          });
+          
+        } catch (e) {
+          console.error("Error parsing search data:", e);
+          // Si hay error, mostrar el contenido de todos modos
+          const row = document.querySelector('.main-row');
+          const spin = document.getElementById('loading-spinner-wrapper');
+          if (row) row.style.visibility = 'visible';
+          if (spin) spin.style.display = 'none';
+        }
+      } else {
+        // Si no hay datos, mostrar el contenido vacío
+        const row = document.querySelector('.main-row');
+        const spin = document.getElementById('loading-spinner-wrapper');
+        if (row) row.style.visibility = 'visible';
+        if (spin) spin.style.display = 'none';
+
+
+      }
+    })();
+  </script>
+<script src="global-shortcuts.js"></script>
+</body>
+
+</html>

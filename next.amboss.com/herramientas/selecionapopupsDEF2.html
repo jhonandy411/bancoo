@@ -1,0 +1,556 @@
+/* ============================
+   POPUPS CLONER + UPLOADER (TODO JUNTO)
+   Pegalo en la consola de la página (misma pestaña donde están los popups)
+   ============================ */
+
+(async () => {
+  // ====== Seleccionar TODOS los tipos de elementos con popups ======
+  const tooltipLinks = document.querySelectorAll('a.api.tooltip__link');
+  const dictionarySpans = document.querySelectorAll('span.api.dictionary');
+  const plainApiLinks = document.querySelectorAll('a.api:not(.tooltip__link)');
+  const allElements = [...tooltipLinks, ...dictionarySpans, ...plainApiLinks];
+
+  let processedCount = 0;
+  let failedLinks = [];
+
+  console.log('📊 Encontrados:');
+  console.log(`   - ${tooltipLinks.length} enlaces tooltip (a.api.tooltip__link)`);
+  console.log(`   - ${dictionarySpans.length} términos dictionary (span.api.dictionary)`);
+  console.log(`   - ${plainApiLinks.length} enlaces API simples (a.api)`);
+  console.log(`   - ${allElements.length} TOTAL\n`);
+
+  // ====== Firebase config (TU MISMO CONFIG) ======
+  const firebaseConfig = {
+    apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+    authDomain: "bancomicina-62bfe.firebaseapp.com",
+    projectId: "bancomicina-62bfe",
+    storageBucket: "bancomicina-62bfe.appspot.com",
+    messagingSenderId: "737254665977",
+    appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
+  };
+
+  // ====== Helpers ======
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  function createResultsWindow() {
+    const win = window.open('', 'AMBOSS_POPUPS_CLONED', 'width=1300,height=900,scrollbars=yes,resizable=yes');
+    if (!win) throw new Error('Popup bloqueado. Permití pop-ups para este sitio y reintentá.');
+
+    const doc = win.document;
+    doc.open();
+    doc.write(
+      '<!doctype html>' +
+      '<html lang="es"><head>' +
+      '<meta charset="utf-8"/>' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1"/>' +
+      '<title>📚 Popups clonados</title>' +
+      '<style>' +
+      'body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:#0f1414;color:#e8f0ef;}' +
+      '#all-popups-container{margin:32px auto;max-width:1200px;padding:24px;background:#121818;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.35)}' +
+      'h2{margin:0 0 18px 0;text-align:center;font-size:28px}' +
+      '.sub{margin:0 0 22px 0;text-align:center;color:rgba(232,240,239,.7)}' +
+      '</style>' +
+      '</head><body>' +
+      '<div id="all-popups-container">' +
+      '<h2>📚 Todos los Popups Clonados</h2>' +
+      '<p class="sub">Ventana de salida (solo lectura). Podés imprimir/guardar como PDF desde acá.</p>' +
+      '</div>' +
+      '</body></html>'
+    );
+    doc.close();
+    return { win, doc, container: doc.getElementById('all-popups-container') };
+  }
+
+  function openUploaderWindowWithPrefill(popupsHTML) {
+    const win = window.open('', 'AMBOSS_FIRESTORE_UPLOADER', 'width=1500,height=950,scrollbars=yes,resizable=yes');
+    if (!win) throw new Error('Popup bloqueado. Permití pop-ups y reintentá.');
+    const doc = win.document;
+
+    const injectedPopups = JSON.stringify(popupsHTML || '');
+    const injectedConfig = JSON.stringify(firebaseConfig);
+
+    doc.open();
+    doc.write(
+      '<!doctype html><html lang="es"><head>' +
+      '<meta charset="utf-8"/>' +
+      '<meta name="viewport" content="width=device-width,initial-scale=1"/>' +
+      '<title>🔥 Firestore Uploader (Popups)</title>' +
+      '<style>' +
+      '*{box-sizing:border-box}' +
+      'body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:18px}' +
+      '.container{max-width:1500px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)}' +
+      '.header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;padding:22px;text-align:center}' +
+      '.content{padding:22px;display:grid;grid-template-columns: 1fr 1fr;gap:16px}' +
+      '.card{border:2px solid #e1e8ed;border-radius:12px;padding:14px;background:#fff}' +
+      '.title{font-weight:700;color:#2c3e50;margin:0 0 10px 0}' +
+      'input, textarea{width:100%;border:2px solid #e1e8ed;border-radius:10px;padding:12px;font-size:14px}' +
+      'textarea{min-height:420px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:12px;resize:vertical}' +
+      '.row{display:flex;gap:10px;align-items:center}' +
+      '.btn{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;color:#fff;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);box-shadow:0 4px 15px rgba(102,126,234,.35)}' +
+      '.btn:disabled{opacity:.6;cursor:not-allowed}' +
+      '.status{margin-top:10px;padding:12px;border-radius:10px;display:none}' +
+      '.status.success{display:block;background:#d4edda;border:1px solid #c3e6cb;color:#155724}' +
+      '.status.error{display:block;background:#f8d7da;border:1px solid #f5c6cb;color:#721c24}' +
+      '.status.info{display:block;background:#d1ecf1;border:1px solid #bee5eb;color:#0c5460}' +
+      '.preview{max-height:520px;overflow:auto;background:#f8f9fa;border-radius:10px;border:2px solid #e1e8ed;padding:12px}' +
+      '.item{background:#fff;border-left:4px solid #667eea;border-radius:10px;padding:12px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.06)}' +
+      '.item h4{margin:0 0 6px 0;color:#2c3e50}' +
+      '.muted{opacity:.65;font-size:12px}' +
+      '.tag{display:inline-block;padding:3px 8px;border-radius:8px;font-weight:700;font-size:12px;margin-right:8px;background:#e3f2fd;color:#1976d2}' +
+      '.def{white-space:pre-wrap;color:#444;font-size:13px;line-height:1.4;margin-top:8px}' +
+      '@media (max-width: 1100px){.content{grid-template-columns:1fr}}' +
+      '</style></head><body>' +
+
+      '<div class="container">' +
+      '<div class="header"><h2 style="margin:0">🔥 Firestoreee Medical Terms Uploader</h2>' +
+      '<div style="opacity:.9;margin-top:6px">Auto-prefill desde Popups clonados</div></div>' +
+
+      '<div class="content">' +
+      '<div class="card">' +
+      '<div class="title">📁 Ruta colección Firestore</div>' +
+      '<input id="collectionPath" value="phrasionaryTerms" />' +
+      '<div style="height:10px"></div>' +
+      '<div class="title">📋 HTML (autopaste)</div>' +
+      '<textarea id="htmlInput" placeholder="Aquí debe quedar el HTML de .cloned-popup-wrapper"></textarea>' +
+      '<div style="height:12px"></div>' +
+      '<div class="row">' +
+      '<button class="btn" id="analyzeBtn">🔍 Analizar</button>' +
+      '<button class="btn" id="uploadBtn" disabled>⬆️ Subir</button>' +
+      '</div>' +
+      '<div id="statusMessage" class="status"></div>' +
+      '</div>' +
+
+      '<div class="card">' +
+      '<div class="title">👁️ Vista previa</div>' +
+      '<div id="preview" class="preview"></div>' +
+      '</div>' +
+
+      '</div></div>' +
+
+      // ====== Script parse (NO module) ======
+      '<script>' +
+      'window.__INJECTED_POPUPS_HTML__=' + injectedPopups + ';' +
+
+      'function showStatus(type,msg){' +
+      ' var el=document.getElementById("statusMessage");' +
+      ' el.className="status "+type;' +
+      ' el.textContent=msg;' +
+      ' el.style.display="block";' +
+      '}' +
+      'window.showStatus=showStatus;' +
+
+      'function makeSafeIdFromTitle(title,fallbackId){' +
+      ' if(!title||!title.trim()) return fallbackId;' +
+      ' var cleaned=title.trim();' +
+      ' cleaned=cleaned.normalize("NFD").replace(/[\\u0300-\\u036f]/g,"");' +
+      ' cleaned=cleaned.replace(/[^\\w\\s:\\-\\(\\)]/g,"");' +
+      ' cleaned=cleaned.replace(/\\//g,"-");' +
+      ' cleaned=cleaned.replace(/\\s+/g," ").trim();' +
+      ' return cleaned||fallbackId;' +
+      '}' +
+
+      'function uniqueId(baseId,used){' +
+      ' if(!used.has(baseId)){used.add(baseId);return baseId;}' +
+      ' var i=2;' +
+      ' while(used.has(baseId+"-"+i)) i++;' +
+      ' var finalId=baseId+"-"+i;' +
+      ' used.add(finalId);' +
+      ' return finalId;' +
+      '}' +
+
+      'function displayPreview(terms){' +
+      ' var preview=document.getElementById("preview");' +
+      ' preview.innerHTML="";' +
+      ' terms.forEach(function(t){' +
+      '   var div=document.createElement("div"); div.className="item";' +
+      '   var typeLabel = (t.type==="🔗")?"Tooltip Link":(t.type==="📖")?"Dictionary":(t.type==="📄")?"API Link":"Unknown";' +
+      '   var html = "";' +
+      '   html += "<h4><span class=\\"tag\\">"+t.type+" "+typeLabel+"</span> #"+t.index+": "+(t.title||"")+' +
+      '           " <span class=\\"muted\\">(docId: "+t.id+")</span></h4>";' +
+      '   if(t.abbreviation) html += "<div class=\\"muted\\"><b>Abreviación:</b> "+t.abbreviation+"</div>";' +
+      '   if(t.synonym) html += "<div class=\\"muted\\"><b>Sinónimo:</b> "+t.synonym+"</div>";' +
+      '   var def=(t.definition||"");' +
+      '   var shortDef = def.length>420 ? (def.slice(0,420)+"...") : def;' +
+      '   html += "<div class=\\"def\\">"+ shortDef.replace(/</g,"&lt;").replace(/>/g,"&gt;") +"</div>";' +
+      '   if(t.images && t.images.length) html += "<div class=\\"muted\\" style=\\"margin-top:6px\\"><b>📷 Imágenes:</b> "+t.images.length+"</div>";' +
+      '   if(t.article && t.article.title) html += "<div class=\\"muted\\"><b>📄 Artículo:</b> "+t.article.title+"</div>";' +
+      '   div.innerHTML = html;' +
+      '   preview.appendChild(div);' +
+      ' });' +
+      '}' +
+
+      'window.parsedTerms=[];' +
+
+      'window.parseHTML=function(){' +
+      ' var html=(document.getElementById("htmlInput").value||"").trim();' +
+      ' if(!html){ showStatus("error","⚠️ No hay HTML para analizar"); return; }' +
+      ' var temp=document.createElement("div"); temp.innerHTML=html;' +
+      ' var popups=temp.querySelectorAll(".cloned-popup-wrapper");' +
+      ' if(!popups.length){ showStatus("error","❌ No se encontraron .cloned-popup-wrapper"); return; }' +
+      ' var usedIds=new Set();' +
+      ' var terms=[];' +
+      ' popups.forEach(function(popup,i){' +
+      '   var dataIndexRaw=popup.getAttribute("data-index");' +
+      '   var index=dataIndexRaw?parseInt(dataIndexRaw,10):(i+1);' +
+      '   var type=popup.getAttribute("data-type")||"";' +
+
+      '   var strong=popup.querySelector("strong");' +
+      '   var fullTitle=strong?strong.textContent:("Term "+index);' +
+      '   var tooltipTitle=fullTitle.replace(/^#\\d+\\s*[🔗📖📄❓]\\s*/u,"").replace(/\\uFFFD/g,"").trim();' +
+
+      '   var headerTitleEl=popup.querySelector("._704b81c021ed2ef9--header p.css-v4r7ym-StyledText");' +
+      '   var headerTitle=headerTitleEl?headerTitleEl.textContent.trim():"";' +
+
+      '   var phrasionaryRoot=popup.querySelector("._704b81c021ed2ef9--phrasionaryContainer")||popup;' +
+      '   var definition="";' +
+      '   var nodes=phrasionaryRoot.querySelectorAll(".css-den2g6-StyledText");' +
+      '   if(nodes && nodes.length){' +
+      '     var parts=[];' +
+      '     nodes.forEach(function(el){ var t=(el.textContent||"").trim(); if(t) parts.push(t); });' +
+      '     definition=parts.join("\\n\\n");' +
+      '   }' +
+      '   if(!definition){' +
+      '     var clone=phrasionaryRoot.cloneNode(true);' +
+      '     clone.querySelectorAll("._704b81c021ed2ef9--header,._704b81c021ed2ef9--thumbnailContainer,._704b81c021ed2ef9--linksContainer,script,style").forEach(function(n){n.remove();});' +
+      '     definition=(clone.innerText||"").replace(/\\n{3,}/g,"\\n\\n").trim();' +
+      '   }' +
+
+      '   var articleLink=popup.querySelector("a[href^=\\"/us/article/\\"]");' +
+      '   var articleHref=articleLink?articleLink.getAttribute("href"):"";' +
+      '   var articleTitle=articleLink?articleLink.textContent.trim():"";' +
+
+      '   var mainTitle = ((type==="🔗") && articleTitle) ? articleTitle : (tooltipTitle || headerTitle || fullTitle);' +
+
+      '   var images=[];' +
+      '   popup.querySelectorAll("img[src^=\\"https://media-us.amboss.com\\"]").forEach(function(img){' +
+      '     images.push({url:img.getAttribute("src"), alt:img.getAttribute("alt")||"", title:img.getAttribute("title")||""});' +
+      '   });' +
+
+      '   var abbrevEl=popup.querySelector("._704b81c021ed2ef9--translation");' +
+      '   var abbreviation=abbrevEl?abbrevEl.textContent.replace("Abbreviation:","").replace("Abbreviations:","").trim():"";' +
+
+      '   var synonymEl=popup.querySelector("._704b81c021ed2ef9--synonyms");' +
+      '   var synonym=synonymEl?synonymEl.textContent.trim():"";' +
+
+      '   var baseId=makeSafeIdFromTitle(mainTitle,"term_"+index);' +
+      '   var id=uniqueId(baseId,usedIds);' +
+
+      '   terms.push({' +
+      '     id:id,index:index,type:type,title:mainTitle,tooltipTitle:tooltipTitle,phrasionaryTitle:headerTitle,' +
+      '     definition:definition,abbreviation:abbreviation,synonym:synonym,' +
+      '     article:{href:articleHref,title:articleTitle,fullUrl:articleHref?("https://next.amboss.com"+articleHref):""},' +
+      '     images:images,createdAt:new Date().toISOString()' +
+      '   });' +
+      ' });' +
+
+      ' window.parsedTerms=terms;' +
+      ' displayPreview(terms);' +
+      ' document.getElementById("uploadBtn").disabled=false;' +
+      ' showStatus("success","✅ Analizados: "+terms.length);' +
+      '};' +
+      '</script>' +
+
+      // ====== Firebase module: upload ======
+      '<script type="module">' +
+      'import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";' +
+      'import { getFirestore, collection, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";' +
+
+      'const firebaseConfig=' + injectedConfig + ';' +
+      'const app=initializeApp(firebaseConfig);' +
+      'const db=getFirestore(app);' +
+
+      'async function commitInChunks(collectionPathSegments, terms, chunkSize){' +
+      '  chunkSize = chunkSize || 450;' +
+      '  let done=0;' +
+      '  const colRef=collection(db, ...collectionPathSegments);' +
+      '  while(done<terms.length){' +
+      '    const batch=writeBatch(db);' +
+      '    const slice=terms.slice(done, done+chunkSize);' +
+      '    slice.forEach(t => batch.set(doc(colRef, t.id), t));' +
+      '    await batch.commit();' +
+      '    done += slice.length;' +
+      '  }' +
+      '}' +
+
+      'window.uploadToFirestore = async function(){' +
+      '  const collectionPathInput=(document.getElementById("collectionPath").value||"").trim();' +
+      '  if(!collectionPathInput){ window.showStatus("error","⚠️ Ruta vacía"); return; }' +
+      '  if(!window.parsedTerms || !window.parsedTerms.length){ window.showStatus("error","⚠️ Primero analizá"); return; }' +
+      '  const btn=document.getElementById("uploadBtn");' +
+      '  btn.disabled=true; btn.textContent="⏳ Subiendo...";' +
+      '  try{' +
+      '    let finalPath=collectionPathInput;' +
+      '    let segments=collectionPathInput.split("/").filter(Boolean);' +
+      '    if(segments.length % 2 === 0){' +
+      '      finalPath=collectionPathInput.replace(/\\/+$/,"") + "/terms";' +
+      '      segments=finalPath.split("/").filter(Boolean);' +
+      '      window.showStatus("info","ℹ️ Ruta era DOCUMENTO. Usando subcolección: "+finalPath);' +
+      '    } else {' +
+      '      window.showStatus("info","📤 Subiendo a: "+finalPath);' +
+      '    }' +
+      '    await commitInChunks(segments, window.parsedTerms, 450);' +
+      '    window.showStatus("success","🎉 Subidos: "+window.parsedTerms.length+" a \\""+finalPath+"\\"");' +
+      '    btn.textContent="✅ Subido";' +
+      '  } catch(e){' +
+      '    console.error(e);' +
+      '    window.showStatus("error","❌ Error: "+e.message);' +
+      '    btn.disabled=false; btn.textContent="⬆️ Subir";' +
+      '  }' +
+      '};' +
+
+      'document.getElementById("analyzeBtn").addEventListener("click", () => window.parseHTML());' +
+      'document.getElementById("uploadBtn").addEventListener("click", () => window.uploadToFirestore());' +
+
+      'window.addEventListener("load", () => {' +
+      '  const html = window.__INJECTED_POPUPS_HTML__ || "";' +
+      '  document.getElementById("htmlInput").value = html;' +
+      '  setTimeout(() => window.parseHTML(), 250);' +
+      '});' +
+      '</script>' +
+
+      '</body></html>'
+    );
+    doc.close();
+    win.focus();
+    return win;
+  }
+
+  async function preloadAllPopups() {
+    console.log('🔄 PRECARGANDO todos los popups...');
+    for (let i = 0; i < allElements.length; i++) {
+      const element = allElements[i];
+      element.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true, cancelable: true, view: window }));
+      element.click();
+      await sleep(300);
+      document.body.click();
+      await sleep(150);
+      if ((i + 1) % 20 === 0) console.log(`   Precargados: ${i + 1}/${allElements.length}`);
+    }
+    console.log('✅ Precarga completada. Esperando 3 segundos...\n');
+    await sleep(3000);
+  }
+
+  function waitForPopupWithContent(maxAttempts = 40) {
+    return new Promise((resolve) => {
+      let attempts = 0;
+
+      const checkInterval = setInterval(() => {
+        let popup = null;
+
+        popup = document.querySelector('[data-testid="phrasionary_popover"]');
+
+        if (!popup || popup.offsetParent === null) {
+          popup = document.querySelector('.b6e399fab83dc243--phrasionary_popover');
+        }
+
+        if (!popup || popup.offsetParent === null) {
+          const popovers = document.querySelectorAll('[id^="DSPopover_"]');
+          for (let p of popovers) {
+            if (p.offsetParent !== null && p.clientHeight > 0) { popup = p; break; }
+          }
+        }
+
+        if (!popup || popup.offsetParent === null) {
+          const tooltips = document.querySelectorAll('[role="tooltip"], [role="dialog"]');
+          for (let t of tooltips) {
+            if (t.offsetParent !== null && t.clientHeight > 50 && t.textContent.trim().length > 10) { popup = t; break; }
+          }
+        }
+
+        if (!popup || popup.offsetParent === null) {
+          const commonPopups = document.querySelectorAll('.popover, .tooltip, [class*="popup"], [class*="Popover"]');
+          for (let p of commonPopups) {
+            if (p.offsetParent !== null && p.clientHeight > 50 && p.textContent.trim().length > 10) { popup = p; break; }
+          }
+        }
+
+        if (popup && popup.offsetParent !== null && popup.clientHeight > 0) {
+          const textContent = popup.textContent.trim();
+          const hasContent = textContent.length > 20;
+          const isLoading = popup.querySelector('[class*="loading"], [class*="spinner"], .loader');
+          const hasLinks = popup.querySelectorAll('a').length > 0;
+          const hasParagraphs = popup.querySelectorAll('p, div').length > 2;
+
+          if (hasContent && !isLoading && (hasLinks || hasParagraphs)) {
+            clearInterval(checkInterval);
+            resolve(popup);
+            return;
+          }
+        }
+
+        attempts++;
+        if (attempts >= maxAttempts) {
+          clearInterval(checkInterval);
+          resolve(popup);
+        }
+      }, 150);
+    });
+  }
+
+  function closePopups() {
+    document.body.click();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', keyCode: 27 }));
+    document.querySelectorAll('a.api[aria-expanded="true"]').forEach(link => link.setAttribute('aria-expanded', 'false'));
+    document.querySelectorAll('span.api.dictionary[aria-expanded="true"]').forEach(span => span.setAttribute('aria-expanded', 'false'));
+  }
+
+  function getElementText(element) {
+    return element.textContent.trim()
+      || element.getAttribute('data-phrasegroup-id')
+      || element.getAttribute('data-title')
+      || 'Unknown';
+  }
+
+  function getElementType(element) {
+    if (element.classList.contains('dictionary')) return '📖';
+    if (element.classList.contains('tooltip__link')) return '🔗';
+    if (element.tagName === 'A' && element.classList.contains('api')) return '📄';
+    return '❓';
+  }
+
+  function getColorScheme(element) {
+    if (element.classList.contains('dictionary')) {
+      return { border: '#9b59b6', bg: '#f3e5f5', text: '#6a1b9a', rgba: '155, 89, 182' };
+    }
+    if (element.classList.contains('tooltip__link')) {
+      return { border: '#2ecc71', bg: '#d5f4e6', text: '#27ae60', rgba: '46, 204, 113' };
+    }
+    return { border: '#3498db', bg: '#e3f2fd', text: '#1976d2', rgba: '52, 152, 219' };
+  }
+
+  async function clonePopup(element, index, targetDoc, container) {
+    try {
+      const elementText = getElementText(element);
+      const elementType = getElementType(element);
+      const colors = getColorScheme(element);
+
+      closePopups();
+      await sleep(300);
+
+      element.scrollIntoView({ behavior: 'instant', block: 'center' });
+      await sleep(250);
+
+      element.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true, cancelable: true, view: window }));
+      await sleep(200);
+
+      element.click();
+
+      const popup = await waitForPopupWithContent(40);
+      if (!popup) {
+        console.warn(`⚠️ #${index + 1}: No se encontró popup para ${elementType} "${elementText}"`);
+        failedLinks.push({ index: index + 1, text: elementText, type: elementType });
+        return false;
+      }
+
+      await sleep(800);
+
+      const importedPopup = targetDoc.importNode(popup, true);
+
+      const wrapper = targetDoc.createElement('div');
+      wrapper.className = 'cloned-popup-wrapper';
+      wrapper.setAttribute('data-index', index + 1);
+      wrapper.setAttribute('data-type', elementType);
+      wrapper.style.cssText =
+        'display:block !important;position:relative !important;margin:25px 0 !important;padding:20px !important;' +
+        `border:3px solid ${colors.border} !important;border-radius:10px !important;background:#ffffff !important;` +
+        `box-shadow:0 4px 12px rgba(${colors.rgba}, .3) !important;page-break-inside: avoid !important;color:#111 !important;`;
+
+      const title = targetDoc.createElement('div');
+      title.innerHTML = `<strong style="color:${colors.text};">#${index + 1} ${elementType} ${elementText}</strong>`;
+      title.style.cssText =
+        `margin:0 0 15px 0 !important;font-weight:bold !important;font-size:16px !important;` +
+        `padding:10px 15px !important;background:${colors.bg} !important;border-radius:6px !important;` +
+        `border-left:5px solid ${colors.border} !important;color:#2c3e50 !important;`;
+      wrapper.appendChild(title);
+
+      importedPopup.style.cssText =
+        'display:block !important;position:relative !important;opacity:1 !important;visibility:visible !important;' +
+        'transform:none !important;max-width:100% !important;left:auto !important;right:auto !important;' +
+        'top:auto !important;bottom:auto !important;pointer-events:auto !important;';
+
+      importedPopup.querySelectorAll('*').forEach(el => {
+        if (el.style) {
+          if (el.style.display === 'none') el.style.display = 'block';
+          el.style.visibility = 'visible';
+          el.style.opacity = '1';
+        }
+      });
+
+      wrapper.appendChild(importedPopup);
+      container.appendChild(wrapper);
+
+      console.log(`✅ #${index + 1} ${elementType} Clonado: "${elementText}"`);
+      processedCount++;
+      return true;
+
+    } catch (error) {
+      console.error(`❌ #${index + 1} Error:`, error);
+      failedLinks.push({ index: index + 1, text: getElementText(element), error: error.message });
+      return false;
+    }
+  }
+
+  async function processAllLinks() {
+    const startTime = Date.now();
+
+    console.log(`🚀 INICIANDO PROCESO COMPLETO\n${'='.repeat(60)}\n`);
+
+    const out = createResultsWindow();
+    out.win.focus();
+
+    await preloadAllPopups();
+
+    console.log(`📋 Clonando popups...\n${'='.repeat(60)}\n`);
+
+    for (let i = 0; i < allElements.length; i++) {
+      await clonePopup(allElements[i], i, out.doc, out.container);
+      await sleep(700);
+
+      if ((i + 1) % 10 === 0) {
+        console.log(`\n📈 Progreso: ${i + 1}/${allElements.length} (${Math.round((i + 1) / allElements.length * 100)}%)\n`);
+      }
+    }
+
+    const totalTime = Math.round((Date.now() - startTime) / 1000);
+
+    // Resumen final en ventana resultados
+    const summaryDiv = out.doc.createElement('div');
+    summaryDiv.style.cssText =
+      'margin-top:40px !important;padding:25px !important;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%) !important;' +
+      'color:white !important;border-radius:12px !important;text-align:center !important;font-size:16px !important;' +
+      'box-shadow:0 6px 20px rgba(102,126,234,.4) !important;';
+    summaryDiv.innerHTML =
+      '<h3 style="margin:0 0 15px 0;font-size:24px;">🎉 Proceso Completado</h3>' +
+      `<p style="margin:8px 0;font-size:18px;"><strong>⏱️ Tiempo total:</strong> ${Math.floor(totalTime / 60)}m ${totalTime % 60}s</p>` +
+      `<p style="margin:8px 0;font-size:18px;"><strong>✅ Exitosos:</strong> ${processedCount}/${allElements.length} (${Math.round(processedCount / allElements.length * 100)}%)</p>` +
+      `<p style="margin:8px 0;font-size:18px;"><strong>❌ Fallidos:</strong> ${failedLinks.length}</p>`;
+    out.container.appendChild(summaryDiv);
+
+    if (failedLinks.length > 0) {
+      const failedDiv = out.doc.createElement('div');
+      failedDiv.style.cssText =
+        'margin-top:20px !important;padding:20px !important;background:#fff3cd !important;border:2px solid #ffc107 !important;' +
+        'border-radius:8px !important;color:#856404 !important;';
+      failedDiv.innerHTML =
+        '<h4 style="margin:0 0 10px 0;color:#856404;">⚠️ Elementos que no pudieron clonarse:</h4>' +
+        '<ul style="margin:10px 0;padding-left:20px;">' +
+        failedLinks.map(f => `<li>#${f.index} ${(f.type || '')}: "${f.text}"</li>`).join('') +
+        '</ul>';
+      out.container.appendChild(failedDiv);
+    }
+
+    console.log(`\n🎉 COMPLETADO EN ${totalTime}s | ✅ ${processedCount}/${allElements.length} | ❌ ${failedLinks.length}`);
+
+    // ====== ABRIR UPLOADER + PREFILL ======
+    const wrappersHTML = [...out.doc.querySelectorAll('.cloned-popup-wrapper')]
+      .map(n => n.outerHTML)
+      .join('\n');
+
+    const payload = '<div id="all-popups-container">' + wrappersHTML + '</div>';
+    openUploaderWindowWithPrefill(payload);
+    alert('✅ Proceso completado. Presiona OK para abrir el Convertidor.');
+    window.open('CONVERTTIDOR2TRABAJO.html', '_blank');
+  }
+
+  await processAllLinks();
+})();

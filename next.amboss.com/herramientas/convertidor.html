@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Convertidor HTML - Amboss Clone</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        opacity: 0.9;
+        font-size: 16px;
+      }
+
+      .content {
+        padding: 30px;
+      }
+
+      .section {
+        margin-bottom: 30px;
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section-title::before {
+        content: "";
+        width: 4px;
+        height: 20px;
+        background: #667eea;
+        border-radius: 2px;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 300px;
+        padding: 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        resize: vertical;
+        transition: border-color 0.3s;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      button {
+        flex: 1;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-secondary {
+        background: #f5f5f5;
+        color: #333;
+      }
+
+      .btn-secondary:hover {
+        background: #e0e0e0;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 32px;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 5px;
+      }
+
+      .stat-label {
+        font-size: 14px;
+        color: #666;
+      }
+
+      .preview {
+        background: #f9f9f9;
+        border: 2px dashed #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        min-height: 200px;
+        max-height: 500px;
+        overflow-y: auto;
+      }
+
+      .preview:empty::before {
+        content: "La vista previa aparecerá aquí...";
+        color: #999;
+        font-style: italic;
+      }
+
+      .icon {
+        width: 20px;
+        height: 20px;
+      }
+
+      .alert {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: none;
+      }
+
+      .alert.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .alert.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .alert.show {
+        display: block;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🔄 Convertidor HTML Amboss</h1>
+        <p>
+          Convierte código HTML extenso a formato limpio manteniendo el diseño
+        </p>
+      </div>
+
+      <div class="content">
+        <div id="alert" class="alert"></div>
+
+        <div class="section">
+          <div class="section-title">📝 Código HTML Original</div>
+          <textarea
+            id="inputHtml"
+            placeholder="Pega aquí tu código HTML extenso..."
+          ></textarea>
+        </div>
+
+        <div class="button-group">
+          <button class="btn-primary" onclick="convertirHTML()">
+            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+              />
+            </svg>
+            Generar HTML Limpio
+          </button>
+          <button class="btn-secondary" onclick="limpiarCampos()">
+            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            Limpiar
+          </button>
+        </div>
+
+        <div class="stats" id="stats" style="display: none">
+          <div class="stat-card">
+            <div class="stat-value" id="originalSize">0</div>
+            <div class="stat-label">Tamaño Original (KB)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="cleanSize">0</div>
+            <div class="stat-label">Tamaño Limpio (KB)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="reduction">0%</div>
+            <div class="stat-label">Reducción</div>
+          </div>
+        </div>
+
+        <div class="section" id="outputSection" style="display: none">
+          <div class="section-title">✨ Código HTML Limpio</div>
+          <textarea id="outputHtml" readonly></textarea>
+          <div class="button-group">
+            <button class="btn-primary" onclick="descargarHTML()">
+              <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Descargar HTML
+            </button>
+            <button class="btn-secondary" onclick="copiarAlPortapapeles()">
+              <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                <path
+                  d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
+                />
+              </svg>
+              Copiar al Portapapeles
+            </button>
+          </div>
+
+          <div class="section-title" style="margin-top: 30px">
+            📊 JSON Estructurado por Secciones
+          </div>
+          <div
+            id="sectionInfo"
+            style="
+              background: #e3f2fd;
+              padding: 10px;
+              border-radius: 6px;
+              margin-bottom: 10px;
+              color: #1976d2;
+              font-weight: 600;
+            "
+          ></div>
+
+
+
+
+
+
+          <textarea id="outputJson" readonly></textarea>
+          <div class="button-group">
+            <button class="btn-primary" onclick="descargarJSON()">
+              <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Descargar JSON
+            </button>
+            <button class="btn-secondary" onclick="copiarJSON()">
+              <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                <path
+                  d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
+                />
+              </svg>
+              Copiar JSON
+            </button>
+          </div>
+
+
+
+          <!-- === Fix popups panel (pegar HTML clonado) === -->
+<div id="popup-fixer" style="margin-top:18px; padding:14px; border:1px solid #e5e7eb; border-radius:12px; background:#fafafa;">
+  <div style="font-weight:700; margin-bottom:10px;">🧩 Reemplazar href de popups usando HTML clonado</div>
+
+  <textarea id="popupsPaste" placeholder="Pegá acá el HTML que contiene #all-popups-container (Todos los Popups Clonados)..."
+    style="width:100%; min-height:180px; padding:10px; border:1px solid #d1d5db; border-radius:10px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size:12px; background:white;"></textarea>
+
+  <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
+    <button id="btnReplacePopups"
+      style="padding:10px 14px; border-radius:10px; border:0; cursor:pointer; background:#2563eb; color:white; font-weight:700;">
+      Reemplazar popups
+    </button>
+    <span id="replacePopupsStatus" style="color:#64748b; font-size:12px;"></span>
+  </div>
+</div>
+
+
+
+          
+
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function convertirHTML() {
+        const input = document.getElementById("inputHtml").value.trim();
+
+        if (!input) {
+          mostrarAlerta(
+            "Por favor, pega código HTML en el campo de entrada.",
+            "error"
+          );
+          return;
+        }
+
+        try {
+          // Limpiar el HTML manteniendo la estructura
+          let cleanHTML = limpiarHTML(input);
+
+          // Parsear secciones y generar JSON
+          const structuredData = parseSections(cleanHTML, input);
+
+          // Mostrar resultado HTML limpio
+          document.getElementById("outputHtml").value = cleanHTML;
+
+          // Mostrar resultado JSON
+          document.getElementById("outputJson").value = JSON.stringify(
+            structuredData,
+            null,
+            2
+          );
+
+          document.getElementById("outputSection").style.display = "block";
+
+          // Calcular estadísticas
+          const originalSize = (new Blob([input]).size / 1024).toFixed(2);
+          const cleanSize = (new Blob([cleanHTML]).size / 1024).toFixed(2);
+          const jsonSize = (
+            new Blob([JSON.stringify(structuredData)]).size / 1024
+          ).toFixed(2);
+          const reduction = (
+            ((originalSize - cleanSize) / originalSize) *
+            100
+          ).toFixed(1);
+
+          document.getElementById("originalSize").textContent = originalSize;
+          document.getElementById("cleanSize").textContent = cleanSize;
+          document.getElementById("reduction").textContent = reduction + "%";
+          document.getElementById("stats").style.display = "grid";
+
+          // Mostrar información de secciones
+          const sectionCount = structuredData.sectionOrder
+            ? structuredData.sectionOrder.length
+            : 0;
+          document.getElementById(
+            "sectionInfo"
+          ).textContent = `📑 ${sectionCount} secciones | JSON: ${jsonSize} KB`;
+
+          mostrarAlerta(
+            "✅ HTML convertido y secciones extraídas exitosamente",
+            "success"
+          );
+        } catch (error) {
+          mostrarAlerta("❌ Error al convertir: " + error.message, "error");
+        }
+      }
+
+      function limpiarHTML(html) {
+        console.log(
+          "Iniciando limpieza. Tamaño original:",
+          html.length,
+          "caracteres"
+        );
+
+        // PASO 1: Extraer solo el contenido dentro de <article>
+        const articleMatch = html.match(
+          /<article[\s\S]*?>([\s\S]*)<\/article>/i
+        );
+        if (articleMatch) {
+          console.log(
+            "Etiqueta <article> encontrada. Extrayendo solo su contenido..."
+          );
+          html = articleMatch[1]; // Contenido dentro de <article>
+          console.log(
+            "Contenido extraído de <article>:",
+            html.length,
+            "caracteres"
+          );
+        } else {
+          console.log(
+            "No se encontró etiqueta <article>. Se procesará todo el HTML."
+          );
+        }
+
+        // Limpiar SOLO atributos innecesarios, MANTENER todas las clases CSS
+        let clean = html;
+
+        // ELIMINAR TODO EL SEGMENTO SUPERIOR
+        // Incluye: portales, navegación, búsqueda, menú lateral, breadcrumbs, etc.
+        // Desde <div class="amboss-ds-portal" hasta antes de <div class="_6eb1c4a28c8c5a44--focus
+        const topSegmentPattern =
+          /<div class="amboss-ds-portal"[\s\S]*?(?=<div class="_6eb1c4a28c8c5a44--focus)/i;
+        clean = clean.replace(topSegmentPattern, "");
+
+        console.log(
+          "Después de eliminar segmento superior:",
+          clean.length,
+          "caracteres"
+        );
+
+        // ELIMINAR SOLO EL SCRIPT DE window.__GLOBAL_STATE_OVERRIDES__ (NO TODO EL FINAL)
+        const overridesScriptPattern =
+          /<script>\s*window\.__GLOBAL_STATE_OVERRIDES__[\s\S]*?<\/script>/i;
+        clean = clean.replace(overridesScriptPattern, "");
+
+        // ELIMINAR SCRIPTS DE ASSETS DE AMBOSS (type="module" src="https://next.amboss.com/us/static/assets/...")
+        const ambossAssetsPattern =
+          /<script[^>]+src="https:\/\/next\.amboss\.com\/us\/static\/assets\/[^"]+"[^>]*><\/script>\s*/gi;
+        clean = clean.replace(ambossAssetsPattern, "");
+
+        // ELIMINAR BLOQUE DE LA EXTENSIÓN "suspender_tab_manager"
+        const tabManagerPattern =
+          /<div id="suspender_tab_manager"[\s\S]*?<\/template>\s*<\/div>\s*/i;
+        clean = clean.replace(tabManagerPattern, "");
+
+        // ELIMINAR BLOQUE CON style="all: initial !important" (otro injerto de extensión)
+        const allInitialPattern =
+          /<div style="all:\s*initial\s*!important"[\s\S]*?<\/template>\s*<\/div>\s*/i;
+        clean = clean.replace(allInitialPattern, "");
+
+        console.log(
+          "Después de eliminar segmento inferior:",
+          clean.length,
+          "caracteres"
+        );
+
+        // Lista de atributos data-* a eliminar
+        const dataAttrsToRemove = [
+          "data-e2e-test-id",
+          "data-testid",
+          "data-phrasegroup-id",
+          "data-learningcard-id",
+          "data-lxid",
+          "data-section-id",
+          "data-sxid",
+          "data-content",
+          "data-page",
+          "data-eid",
+          "data-ref-index",
+          "data-anker",
+          "data-title",
+          "data-source",
+          "data-qxids",
+          "data-ds-id",
+          "data-variant",
+          "data-table-maximize",
+          "data-table-start-quiz",
+          "data-table-ref",
+          "data-table",
+          "data-gallery-id",
+          "data-image-index",
+          "data-image-id",
+          "data-overlay",
+          "data-description",
+          "data-author",
+          "data-copyright",
+          "data-medium-size-url",
+        ];
+
+        // Eliminar cada atributo data-* de la lista
+        dataAttrsToRemove.forEach((attr) => {
+          const regex = new RegExp(`\\s+${attr}="[^"]*"`, "gi");
+          clean = clean.replace(regex, "");
+        });
+
+        console.log("Después de eliminar data-*:", clean.length, "caracteres");
+
+        // Eliminar IDs generados automáticamente
+        clean = clean.replace(/\s+id="[LEYZ][a-f0-9]+"/gi, "");
+
+        // Eliminar atributos aria-* innecesarios
+        clean = clean.replace(/\s+aria-labelledby="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-haspopup="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-describedby="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-controls="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-expanded="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-checked="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-disabled="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-hidden="[^"]*"/gi, "");
+
+        // Eliminar tabindex y role innecesarios
+        clean = clean.replace(/\s+tabindex="[^"]*"/gi, "");
+        clean = clean.replace(/\s+role="region"/gi, "");
+        clean = clean.replace(/\s+role="group"/gi, "");
+
+        // Eliminar translate="no"
+        clean = clean.replace(/\s+translate="no"/gi, "");
+
+        console.log(
+          "Después de eliminar otros atributos:",
+          clean.length,
+          "caracteres"
+        );
+
+        // ===== ELIMINAR CONTENEDORES EXTERNOS Y NAVEGACIÓN INNECESARIA =====
+
+        // Eliminar todo el contenedor principal _6eb1c4a28c8c5a44--focus (main-content)
+        clean = clean.replace(
+          /<div[^>]*class="[^"]*_6eb1c4a28c8c5a44--focus[^"]*"[^>]*id="main-content"[^>]*>[\s]*<div[^>]*class="[^"]*_6eb1c4a28c8c5a44--notifications[^"]*"[^>]*><\/div>[\s]*<div[^>]*class="[^"]*_6eb1c4a28c8c5a44--body[^"]*"[^>]*>[\s]*<div[^>]*class="[^"]*cd71ec7927bda3fc--page[^"]*"[^>]*>[\s]*<div[^>]*class="[^"]*_84d5ef5d71ac9056--container[^"]*"[^>]*>[\s]*<div[^>]*class="[^"]*_3419cbc970b06bec--spaceContainer[^"]*"[^>]*>[\s]*<div[^>]*class="[^"]*_3419cbc970b06bec--space[^"]*"[^>]*>[\s]*<div[^>]*class="[^"]*_3419cbc970b06bec--spaceWrapper[^"]*"[^>]*>[\s]*/gi,
+          ""
+        );
+
+        // Eliminar divs de notificaciones
+        clean = clean.replace(
+          /<div[^>]*class="[^"]*_6eb1c4a28c8c5a44--notifications[^"]*"[^>]*><\/div>/gi,
+          ""
+        );
+
+        console.log(
+          "Después de eliminar contenedores externos:",
+          clean.length,
+          "caracteres"
+        );
+
+        // ===== ELIMINAR WRAPPER DE TABLAS (table-wrapper + botones) =====
+        // Ejemplo de origen:
+        // <div class="table-wrapper api table-wrapper-wide">
+        //   <div class="table-control-container ...">[botones]</div>
+        //   <table ...>...</table>
+        // </div>
+        //
+        // Queremos dejar solo: <table ...>...</table>
+        const tableWrapperPattern =
+          /<div[^>]*class="[^"]*table-wrapper[^"]*"[^>]*>\s*<div[^>]*class="[^"]*table-control-container[^"]*"[^>]*>[\s\S]*?<\/div>\s*(<table[^>]*>[\s\S]*?<\/table>)\s*<\/div>/gi;
+
+        const beforeTables = clean.length;
+        clean = clean.replace(tableWrapperPattern, "$1");
+        console.log(
+          "Después de desempaquetar table-wrapper:",
+          beforeTables,
+          "→",
+          clean.length,
+          "caracteres"
+        );
+
+        // ===== ELIMINAR CONTENIDO DE TRACKING Y ANALYTICS AL FINAL =====
+
+        // Eliminar iframes ocultos (HotJar, tracking genérico, etc.)
+        const hiddenIframesPattern =
+          /<iframe[^>]*(?:display:\s*none|visibility:\s*hidden|width:\s*[01]px|height:\s*[01]px)[^>]*>(?:<\/iframe>|\s*<\/iframe>)/gi;
+        clean = clean.replace(hiddenIframesPattern, "");
+
+        // Eliminar tracking pixels (img de 1x1)
+        const trackingPixelsPattern =
+          /<img[^>]*(?:height="[01]"|width="[01]"|display:\s*none|visibility:\s*hidden)[^>]*(?:src="https?:\/\/(?:t\.co|analytics\.twitter\.com|bat\.bing\.com)[^"]*")[^>]*>/gi;
+        clean = clean.replace(trackingPixelsPattern, "");
+
+        // Patrón más general para cualquier img con display:none o tamaño 0/1
+        const hiddenImagesPattern =
+          /<img[^>]*(?:style="[^"]*(?:display:\s*none|visibility:\s*hidden)[^"]*"|(?:width|height)="[01]")[^>]*>/gi;
+        clean = clean.replace(hiddenImagesPattern, "");
+
+        // Eliminar divs de HubSpot web interactives
+        const hubspotPattern =
+          /<div[^>]*(?:id="hs-web-interactives-[^"]*"|class="go\d+")[^>]*>[\s\S]*?<\/div>\s*/gi;
+        clean = clean.replace(hubspotPattern, "");
+
+        // Eliminar div batBeacon (Bing tracking)
+        const batBeaconPattern =
+          /<div[^>]*id="batBeacon\d+"[^>]*>[\s\S]*?<\/div>\s*/gi;
+        clean = clean.replace(batBeaconPattern, "");
+
+        console.log(
+          "Después de eliminar tracking y analytics:",
+          clean.length,
+          "caracteres"
+        );
+
+        // Eliminar líneas vacías múltiples (pero mantener estructura)
+        clean = clean.replace(/\n\s*\n\s*\n/g, "\n\n");
+
+        // AGREGAR el link al CSS al inicio si no existe
+        if (
+          !clean.includes('rel="stylesheet"') &&
+          !clean.includes("amboss-clone.css")
+        ) {
+          clean = '<link rel="stylesheet" href="amboss-clone.css">\n' + clean;
+        }
+
+        console.log(
+          "Limpieza completada. Tamaño final:",
+          clean.length,
+          "caracteres"
+        );
+
+        return clean.trim();
+      }
+
+      function parseSections(cleanHTML, originalHTML) {
+        // Extraer metadata del HTML original
+        const metadata = extractMetadata(originalHTML);
+
+        const sections = {};
+        const sectionOrder = [];
+
+        // Patrón para encontrar secciones
+        const sectionRegex =
+          /<section[^>]*class="[^"]*a19c2cb9aca4d5ec--container[^"]*"[^>]*id="([^"]+)"[^>]*>([\s\S]*?)<\/section>/g;
+
+        let match;
+        while ((match = sectionRegex.exec(cleanHTML)) !== null) {
+          const sectionId = match[1];
+          let sectionHTML = match[2];
+
+          // Usar DOM parser para manipular el HTML de forma segura
+          const tempDiv = document.createElement("div");
+          tempDiv.innerHTML = sectionHTML;
+
+          // EXTRAER EL TÍTULO ANTES DE HACER CUALQUIER LIMPIEZA
+          // Buscar el h3 en el DOM original completo
+          const firstH3 = tempDiv.querySelector("h3");
+          const title = firstH3 ? firstH3.textContent.trim() : sectionId;
+
+          // LÓGICA DE LIMPIEZA Y DESEMPAQUETADO
+          let contentRoot = tempDiv;
+
+          // 1. Desempaquetar el contenedor externo redundante si existe
+          const outerWrapper = tempDiv.querySelector(
+            ".cebd2a302a3552c4--contentContainer"
+          );
+          if (outerWrapper) {
+            // Si existe el wrapper, trabajamos con su contenido directamente
+            // Esto elimina el div <div class="cebd2a302a3552c4--contentContainer ...">
+            contentRoot = outerWrapper;
+          }
+
+          // 2. Desempaquetar el contenedor interno redundante si existe (baseStyles)
+          // Este contenedor ya existe en el DOM de destino, por lo que incluirlo causa doble anidación.
+          const innerWrapper = contentRoot.querySelector(
+            ".a19c2cb9aca4d5ec--baseStyles"
+          );
+          if (innerWrapper) {
+            contentRoot = innerWrapper;
+          }
+
+          // 3. ELIMINAR EL HEADER INTERNO (ahora buscamos dentro de contentRoot)
+          const headerContainer = contentRoot.querySelector(
+            ".cebd2a302a3552c4--headerContainer"
+          );
+          if (headerContainer) {
+            headerContainer.remove();
+          }
+
+          // 4. ELIMINAR EL FOOTER INTERNO (ahora buscamos dentro de contentRoot)
+          const footerContainer = contentRoot.querySelector(
+            ".css-10tzyyx-StyledBox.ebcgi2u0"
+          );
+          if (footerContainer) {
+            footerContainer.remove();
+          }
+
+          // 5. EXTRAER SUBSECCIONES (todos los h3 DESPUÉS del primero)
+          const allH3s = contentRoot.querySelectorAll("h3");
+          const subsections = [];
+          
+          // Recorrer todos los h3 del contentRoot limpio
+          // TODOS estos h3 son subsecciones (el título ya lo extrajimos antes)
+          for (let i = 0; i < allH3s.length; i++) {
+            const h3Element = allH3s[i];
+            const subsectionTitle = h3Element.textContent.trim();
+            
+            // Recolectar el contenido HTML entre este h3 y el siguiente h3 (o hasta el final)
+            let subsectionHTML = "";
+            let currentNode = h3Element.nextSibling;
+            const nextH3 = allH3s[i + 1];
+            
+            while (currentNode && currentNode !== nextH3) {
+              if (currentNode.nodeType === Node.ELEMENT_NODE) {
+                subsectionHTML += currentNode.outerHTML;
+              } else if (currentNode.nodeType === Node.TEXT_NODE && currentNode.textContent.trim()) {
+                subsectionHTML += currentNode.textContent;
+              }
+              currentNode = currentNode.nextSibling;
+            }
+            
+            subsections.push({
+              title: subsectionTitle,
+              html: subsectionHTML.trim()
+            });
+          }
+
+          // Obtener el HTML limpio del contentRoot
+          const cleanSectionHTML = contentRoot.innerHTML.trim();
+
+          sections[sectionId] = {
+            title: title,
+            html: cleanSectionHTML,
+            subsections: subsections.length > 0 ? subsections : undefined
+          };
+
+          sectionOrder.push(sectionId);
+        }
+
+        return {
+          ...metadata,
+          sections: sections,
+          sectionOrder: sectionOrder,
+          generatedAt: new Date().toISOString(),
+        };
+      }
+
+      function extractMetadata(html) {
+        // Extraer título
+        const titleMatch = html.match(
+          /<h1[^>]*class="[^"]*_62af53fea5b31646--headerTitle[^"]*"[^>]*>([^<]+)<\/h1>/
+        );
+        const titulo = titleMatch ? titleMatch[1].trim() : "Sin título";
+
+        // Extraer sinónimos
+        const synonymMatch = html.match(
+          /<p[^>]*class="[^"]*_62af53fea5b31646--synonymText[^"]*"[^>]*>([^<]+)<\/p>/
+        );
+        const sinonimos = synonymMatch ? synonymMatch[1].trim() : "";
+
+        // Extraer fecha de última edición
+        const dateMatch = html.match(/Last edited:\s*([^<]+)</);
+        const lastEdited = dateMatch ? dateMatch[1].trim() : "";
+
+        return {
+          titulo,
+          sinonimos,
+          lastEdited,
+        };
+      }
+
+      function descargarHTML() {
+        const content = document.getElementById("outputHtml").value;
+        const blob = new Blob([content], { type: "text/html" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "contenido_limpio_" + Date.now() + ".html";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        mostrarAlerta("📥 Archivo descargado exitosamente", "success");
+      }
+
+      function copiarAlPortapapeles() {
+        const output = document.getElementById("outputHtml");
+        output.select();
+        document.execCommand("copy");
+
+        mostrarAlerta("📋 HTML copiado al portapapeles", "success");
+      }
+
+      function copiarJSON() {
+        const output = document.getElementById("outputJson");
+        output.select();
+        document.execCommand("copy");
+
+        mostrarAlerta("📋 JSON copiado al portapapeles", "success");
+      }
+
+      function descargarJSON() {
+        const content = document.getElementById("outputJson").value;
+        const blob = new Blob([content], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "contenido_secciones_" + Date.now() + ".json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        mostrarAlerta("📥 JSON descargado exitosamente", "success");
+      }
+
+      function limpiarCampos() {
+        document.getElementById("inputHtml").value = "";
+        document.getElementById("outputHtml").value = "";
+        document.getElementById("outputJson").value = "";
+        document.getElementById("outputSection").style.display = "none";
+        document.getElementById("stats").style.display = "none";
+        document.getElementById("alert").classList.remove("show");
+      }
+
+      function mostrarAlerta(mensaje, tipo) {
+        const alert = document.getElementById("alert");
+        alert.textContent = mensaje;
+        alert.className = "alert " + tipo + " show";
+
+        setTimeout(() => {
+          alert.classList.remove("show");
+        }, 5000);
+      }
+
+
+
+
+      // === Popups href replacer ===
+
+// Normaliza títulos si algún día querés mapear por title (opcional)
+function _norm(s) {
+  return (s || "").toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+// Extrae mapa anchor -> href correcto ("/us/article/<id>#<anchor>")
+// desde el HTML pegado del contenedor de popups clonados
+function buildPopupHrefMap(pastedHtml) {
+  const doc = new DOMParser().parseFromString(pastedHtml || "", "text/html");
+  const map = new Map();
+
+  // 1) Link directo dentro del popup: /us/article/<id>#<anchor>
+  doc.querySelectorAll('a._6af23b33c298d7c2--articleLink[href]').forEach(a => {
+    const href = a.getAttribute("href") || "";
+    const m = href.match(/\/us\/article\/([^?#]+)#([A-Za-z0-9]+)/);
+    if (m) {
+      const articleId = m[1];
+      const anchor = m[2];
+      map.set(anchor, `/us/article/${articleId}#${anchor}`);
+    }
+  });
+
+  // 2) Botón Split view (trae JSON en "sv=" con {anchor,id})
+  doc.querySelectorAll('a[data-e2e-test-id="split-view-button"][href]').forEach(a => {
+    const href = a.getAttribute("href") || "";
+    const qs = href.split("?")[1] || "";
+    const params = new URLSearchParams(qs);
+    const sv = params.get("sv");
+    if (!sv) return;
+
+    try {
+      const arr = JSON.parse(decodeURIComponent(sv));
+      (arr || []).forEach(o => {
+        if (o && o.anchor && o.id) {
+          map.set(o.anchor, `/us/article/${o.id}#${o.anchor}`);
+        }
+      });
+    } catch (e) {}
+  });
+
+  // (Opcional) También guardo un mapeo por title si te sirve a futuro
+  doc.querySelectorAll(".cloned-popup-wrapper").forEach(w => {
+    const title = (w.querySelector('[data-e2e-test-id="phrasonary-title"]')?.textContent || "").trim();
+    const href = w.querySelector('a._6af23b33c298d7c2--articleLink[href]')?.getAttribute("href") || "";
+    if (title && href) map.set(`title:${_norm(title)}`, href);
+  });
+
+  return map;
+}
+
+// Recorre cualquier JSON (objetos/arrays/strings) y reemplaza hrefs por anchor
+function replaceHrefsDeep(node, map, makeFullUrlAbsolute = true, base = "https://next.amboss.com") {
+  if (typeof node === "string") {
+    // Reemplaza cualquier /us/article/...#ANCHOR por el href correcto según ANCHOR
+    return node.replace(/\/us\/article\/[^"#?]+#([A-Za-z0-9]+)/g, (m, anchor) => {
+      const fixed = map.get(anchor);
+      return fixed ? fixed : m;
+    });
+  }
+
+  if (Array.isArray(node)) {
+    return node.map(x => replaceHrefsDeep(x, map, makeFullUrlAbsolute, base));
+  }
+
+  if (node && typeof node === "object") {
+    // Procesa hijos primero
+    for (const k of Object.keys(node)) {
+      node[k] = replaceHrefsDeep(node[k], map, makeFullUrlAbsolute, base);
+    }
+
+    // Si el objeto tiene href / fullUrl, los corrige puntualmente
+    if (typeof node.href === "string") {
+      const m = node.href.match(/#([A-Za-z0-9]+)/);
+      if (m && map.get(m[1])) node.href = map.get(m[1]);
+    }
+
+    if (typeof node.fullUrl === "string") {
+      const m = node.fullUrl.match(/#([A-Za-z0-9]+)/);
+      if (m && map.get(m[1])) {
+        const fixed = map.get(m[1]); // relativo
+        node.fullUrl = makeFullUrlAbsolute
+          ? (fixed.startsWith("http") ? fixed : (base + fixed))
+          : fixed;
+      }
+    }
+
+    return node;
+  }
+
+  return node;
+}
+
+// Click handler
+document.getElementById("btnReplacePopups")?.addEventListener("click", () => {
+  const statusEl = document.getElementById("replacePopupsStatus");
+  const popupsHtml = document.getElementById("popupsPaste")?.value || "";
+
+  const map = buildPopupHrefMap(popupsHtml);
+  if (!map.size) {
+    if (statusEl) statusEl.textContent = "❌ No encontré hrefs válidos en el HTML pegado.";
+    return;
+  }
+
+const outEl =
+  document.getElementById("outputJson") ||
+  document.getElementById("jsonOutput");
+
+if (!outEl) {
+  if (statusEl) statusEl.textContent = "❌ No encontré el textarea del JSON (id='outputJson').";
+  return;
+}
+
+  let data;
+  try {
+    data = JSON.parse(outEl.value);
+  } catch (e) {
+    if (statusEl) statusEl.textContent = "❌ El contenido del output no es JSON válido.";
+    return;
+  }
+
+  const updated = replaceHrefsDeep(data, map, true, "https://next.amboss.com");
+  outEl.value = JSON.stringify(updated, null, 2);
+
+  if (statusEl) statusEl.textContent = `✅ Reemplazados hrefs usando ${map.size} referencias de popups.`;
+});
+
+
+
+
+    </script>
+  </body>
+</html>
+
+<!-- 3333333 -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

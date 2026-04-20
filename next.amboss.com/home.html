@@ -1,0 +1,396 @@
+<link rel="stylesheet" href="amboss-clone.css">
+
+<!DOCTYPE html>
+
+
+
+<style>
+    /* Estilos globales para la página home */
+
+    .home-dashboard-wrapper {
+        background-color: #f1f4f6;
+        min-height: 100%;
+        width: 100%;
+        padding: 50px;
+        box-sizing: border-box;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 24px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    .dashboard-card {
+
+        background: #ffffff;
+
+        border-radius: 12px;
+
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.02);
+
+        border: 1px solid #eef1f3;
+
+        overflow: hidden;
+
+    }
+
+    /* Card Izquierda: Recently viewed */
+
+    .recent-articles-card {
+
+        width: 540px;
+
+    }
+
+    .recent-header {
+
+        padding: 20px 20px;
+
+    }
+
+    .recent-header h2 {
+
+        margin: 0;
+
+        font-size: 16px;
+
+        font-weight: 700;
+
+        color: #1a1c1c;
+
+    }
+
+    .recent-divider {
+
+        height: 1px;
+
+        background-color: #eef1f3;
+
+        width: 100%;
+
+    }
+
+    .article-list {
+
+        margin: 0;
+
+        padding: 0;
+
+        list-style: none;
+
+    }
+
+    .article-item {
+
+        display: flex;
+
+        align-items: center;
+
+        padding: 17px 32px;
+
+        border-bottom: 1px solid #eef1f3;
+
+        text-decoration: none;
+
+        transition: background-color 0.15s;
+
+    }
+
+    .article-item:last-child {
+
+        border-bottom: none;
+
+    }
+
+    .article-item:hover {
+
+        background-color: #f9fafb;
+
+    }
+
+    .article-icon-container {
+
+        margin-right: 18px;
+
+        color: #667c8a;
+
+        display: flex;
+
+        align-items: center;
+
+    }
+
+    .article-title {
+
+        font-size: 15px;
+
+        color: #40515e;
+
+        font-weight: 500;
+
+    }
+
+    /* Card Derecha: Board Exams and CME */
+
+    .promo-card {
+
+        width: 330px;
+
+        padding: 40px 32px;
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        text-align: left;
+
+    }
+
+    .nejm-logo-wrap {
+
+        margin-bottom: 35px;
+
+        width: 100%;
+
+    }
+
+    .nejm-logo-wrap svg {
+
+        width: 180px;
+
+        height: auto;
+
+    }
+
+    .promo-title {
+
+        font-size: 22px;
+
+        font-weight: 800;
+
+        color: #1a1c1c;
+
+        margin: 0 0 16px 0;
+
+        line-height: 1.2;
+
+        letter-spacing: -0.01em;
+
+    }
+
+    .promo-text {
+
+        font-size: 15px;
+
+        line-height: 1.6;
+
+        color: #667c8a;
+
+        margin: 0 0 32px 0;
+
+    }
+
+    .button-qbank {
+
+        display: inline-block;
+
+        padding: 12px 22px;
+
+        border: 1.5px solid #c2cbd2;
+
+        border-radius: 4px;
+
+        background-color: #ffffff;
+
+        color: #40515e;
+
+        font-size: 12px;
+
+        font-weight: 700;
+
+        text-decoration: none;
+
+        transition: all 0.2s;
+
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+    }
+
+    .button-qbank:hover {
+
+        background-color: #f9fafb;
+
+        border-color: #90a1ad;
+
+        color: #1a1c1c;
+
+    }
+
+    /* Card Max (Ancha) */
+
+    .max-card {
+
+        width: 894px;
+        /* Suma de anchos + gap (540 + 330 + 24) */
+
+        padding: 40px 32px;
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        text-align: left;
+
+    }
+
+    .max-card-text {
+
+        font-size: 18px;
+
+        color: #40515e;
+
+        margin-bottom: 8px;
+
+    }
+
+
+
+</style>
+
+
+
+<body>
+
+
+
+
+
+
+
+
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+
+
+
+
+
+
+    <div class="home-dashboard-wrapper">
+
+        <!-- Primer Card: Recently viewed articles -->
+
+        <div class="dashboard-card recent-articles-card">
+
+            <div class="recent-header">
+
+                <h2>Recently viewed articles</h2>
+
+            </div>
+
+            <div class="recent-divider"></div>
+
+            <div class="article-list" id="recent-articles-list">
+                <div style="padding: 32px; text-align: center;">
+                    <span data-loading-spinner data-size="20"></span>
+                </div>
+            </div>
+
+            <script>
+                (function () {
+                    const listEl = document.getElementById('recent-articles-list');
+                    if (!listEl) return;
+
+                    // Initialize spinners if AmbossUI is available
+                    if (window.parent && window.parent.AmbossUI && window.parent.AmbossUI.initLoadingSpinners) {
+                        window.parent.AmbossUI.initLoadingSpinners();
+                    } else if (window.AmbossUI && window.AmbossUI.initLoadingSpinners) {
+                        window.AmbossUI.initLoadingSpinners();
+                    }
+
+                    function renderArticles(recent) {
+if (recent.length === 0) {
+  listEl.innerHTML = `
+    <div style="padding:20px; color:#667c8a; font-size:14px; text-align:left;">
+      <div>Your recently viewed articles will appear here.</div>
+
+      <div style="margin-top:16px;">
+        <a href="#" class="button-qbank" onclick="event.preventDefault();document.querySelector('button:has([data-e2e-test-id=library-sidebar-option])')?.click();setTimeout(()=>document.querySelector('[data-e2e-test-id=articles-sidebar-option]')?.click(),100)">Go to library</a> 
+      </div>
+    </div>
+  `;
+  return;
+}
+                        listEl.innerHTML = '';
+                        recent.forEach(item => {
+                            const a = document.createElement('a');
+                            a.href = '#';
+                            a.className = 'article-item';
+                            a.onclick = function (e) {
+                                e.preventDefault();
+                                if (window.parent && window.parent.showSubcatFromArticles) window.parent.showSubcatFromArticles(item);
+                            };
+                            a.innerHTML = `<div class="article-icon-container"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M4 2h16v20H4zm12 4H8m6 4H8"></path><path d="M8 14h8v4H8z"></path></svg></div><span class="article-title">${item.title}</span>`;
+                            listEl.appendChild(a);
+                        });
+                    }
+
+                    // Try Firebase first
+                    firebase.auth().onAuthStateChanged(user => {
+                        if (user) {
+                            firebase.firestore().collection('users').doc(user.uid).collection('recentArticles')
+                                .orderBy('timestamp', 'desc').limit(10).onSnapshot(snap => {
+                                    renderArticles(snap.docs.map(doc => doc.data()));
+                                }, () => renderArticles(JSON.parse(localStorage.getItem('recentArticles') || '[]')));
+                        } else {
+                            renderArticles(JSON.parse(localStorage.getItem('recentArticles') || '[]'));
+                        }
+                    });
+                })();
+            </script>
+
+        </div>
+
+        <!-- Segundo Card: Board Exams and CME -->
+
+        <div class="dashboard-card promo-card">
+
+            <div class="nejm-logo-wrap">
+
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 202 66" role="img">
+
+                    <path fill="#1A1C1C"
+                        d="m36.97 56.48-8.003-11.42v11.42h-4.582v-24h4.582v11.2l7.53-11.2h5.272l-8.253 11.673 8.692 12.326zm18-.001V45.604c0-2.107-.364-2.872-1.418-2.872-.908 0-2.183.907-4.076 2.947l-.582.619v10.181h-4.36V39.57h4.36v2.802c2.04-2.22 3.713-3.128 5.854-3.128q4.584-.002 4.583 4.8V56.48h-4.365zm16.034.473c-4.837 0-8.508-3.852-8.508-8.948s3.67-8.906 8.508-8.906 8.509 3.851 8.509 8.906-3.671 8.948-8.509 8.948m0-14.4c-2.182 0-4 2.475-4 5.452 0 2.978 1.814 5.494 4 5.494s4.001-2.475 4.001-5.494-1.814-5.452-4-5.452m29.017 13.928h-4.328l-2.145-7.527-.619-2.254-.618 2.254-2.145 7.526h-4.365L80.42 39.571h4.583l3.127 11.928.038.473.034-.473 2.8-9.964-.51-1.964h4.362l2.914 11.89v.51l.034-.51 3.273-11.89h4.328zm12.071-26.51h-4.328v26.51h4.328zm16.616 25.782c-1.781.798-3.596 1.203-5.561 1.203-5.018 0-8.183-3.31-8.183-8.47s3.638-9.387 8.471-9.387c4.182 0 7.091 3.165 7.091 7.747v1.857h-11.201c.072 1.413.184 1.998.582 2.688.727 1.234 2.182 2.037 3.783 2.037.653 0 1.309-.072 1.999-.293 1.02-.292 1.673-.619 3.236-1.597l1.598 3.307c-.799.439-1.418.727-1.819.907m-5.557-13.38c-1.928 0-3.237 1.31-3.6 3.6h6.618c-.112-2.58-.982-3.6-3.018-3.6m20.726 14.109v-2.292c-.619.979-.908 1.309-1.71 1.815-.983.619-2.036.949-3.161.949-4.002 0-6.945-3.567-6.945-8.438 0-5.239 3.6-9.457 8.073-9.457.469 0 .979.071 1.489.183.908.218 1.309.364 2.254 1.017v-10.29h4.327v26.508h-4.327zm0-10.11c0-.946-.113-1.82-.218-2.183-.292-.908-1.488-1.56-2.835-1.56-2.4 0-4.181 2.362-4.181 5.565 0 3.202 1.418 5.197 3.491 5.197 1.347 0 2.689-.907 3.747-2.546v-4.474zm21.851-3.526c.581.837.765 1.418.765 2.509 0 3.855-2.985 6.439-7.418 6.439-.438 0-.693 0-1.237-.109-1.129.836-1.673 1.384-1.673 1.815 0 .364.293.473 1.129.473h5.929c3.311 0 4.875 1.346 4.875 4.072 0 4.219-4.077 7.275-9.746 7.275-4.148 0-6.945-1.71-6.945-4.253 0-1.308.727-2.437 2.692-4.11-1.672-.618-2.366-1.27-2.366-2.29s.581-1.745 2.22-2.836c.217-.18.581-.397 1.054-.761-.765-.585-1.092-.836-1.489-1.309-.983-1.162-1.493-2.546-1.493-4.147 0-4.035 2.764-6.51 7.238-6.51 1.233 0 1.927.142 3.528.69h2.509l3.416-.218v3.27zM161.87 57.5h-5.273c-.146.255-.255.473-.367.581-.506.837-.799 1.493-.799 1.928 0 1.054 1.56 1.894 3.563 1.894 1.308 0 2.729-.473 3.746-1.31.798-.618 1.271-1.383 1.271-2.035 0-.69-.69-1.054-2.145-1.054m-2.651-15.278c-1.526 0-2.764 1.456-2.764 3.2 0 1.743 1.238 3.09 2.801 3.09s2.801-1.385 2.801-3.128-1.271-3.162-2.834-3.162m24.18 13.526c-1.785.798-3.6 1.203-5.565 1.203-5.018 0-8.183-3.31-8.183-8.47s3.638-9.387 8.471-9.387c4.182 0 7.092 3.165 7.092 7.747v1.857h-11.202c.075 1.413.184 1.998.582 2.688.727 1.234 2.182 2.037 3.783 2.037.653 0 1.309-.072 1.999-.293 1.02-.292 1.673-.619 3.24-1.597l1.598 3.307c-.799.439-1.418.727-1.815.907m-5.565-13.38c-1.928 0-3.24 1.308-3.6 3.6h6.618c-.112-2.58-.982-3.6-3.018-3.6m17.429-3.951v5.943h-2.486v-5.944h-5.94v-2.482h5.94v-5.94h2.486v5.94h5.94v2.482z">
+                    </path>
+
+                    <path fill="#F30"
+                        d="M44.038 25.013H30.126v-.69c2.197-.161 2.823-.75 2.823-2.625v-9.45c0-2.07-.393-2.591-2.268-2.921v-.69h12.667l.458 3.746-.687.225c-1.215-2.261-1.968-2.756-4.402-2.858l-3.045-.093v6.333l2.359-.105c1.77-.093 2.23-.517 2.722-2.392h.694V19.5h-.694c-.521-1.84-1.08-2.295-2.722-2.362l-2.36-.128v4.56c0 2.037.395 2.295 3.215 2.295 2.655 0 3.708-.652 5.25-3.247l.69.199-.788 4.2zm27.926-.033v-.69c1.211-.263 1.571-.653 1.571-1.8v-.23l-.982-10.533-6.038 13.946-6.003-13.684-.893 8.239a12.5 12.5 0 0 0-.123 1.676c0 1.538.622 2.096 2.493 2.389v.69h-7.02v-.69c1.834-.424 2.494-1.012 2.723-2.494l1.38-8.53c.165-1.212.258-2 .258-2.393 0-1.054-.72-1.542-2.325-1.58v-.685h4.988l5.25 11.778 5.149-11.778h4.987v.686c-1.672.067-2.257.461-2.257 1.579 0 .165 0 .393.026.656l1.117 11.089c.132 1.15.525 1.51 1.804 1.668v.69zm-27.742 5.505c3.592-1.639 5.04-4.012 5.04-6.87l-.098-11.68c-.033-1.865-.64-2.438-2.887-2.66V8.6h8.407v.8c-2.05.19-2.598.734-2.662 2.568l-.225 10.811c-.094 4.913-2.79 7.579-7.219 8.149l-.352-.443zM28.94 8.603C25.45 2.014 17.497-1.06 10.364 1.688c-7.698 2.97-11.53 11.618-8.56 19.316 2.97 7.699 11.616 11.531 19.319 8.565.038-.015.082-.037.124-.052v-.653c-6.915 2.599-14.64-.859-17.306-7.759-2.678-6.94.776-14.737 7.717-17.414 5.933-2.288 12.487-.094 15.937 4.927h-6.356v.69c2.261.293 2.854.915 2.914 2.816l.266 9.244L13.57 8.618H9.047v.69c2.359.724 2.884 1.508 2.884 4.159l-.394 8.126c-.098 1.935-.686 2.528-2.951 2.689v.686h8.13v-.686c-2.393-.098-3.113-.784-3.147-2.689l-.195-9.409 11.27 13.343 1.117-.915.423-12.488c.038-1.867.593-2.493 2.757-2.816z">
+                    </path>
+
+                </svg>
+
+            </div>
+
+            <h1 class="promo-title">Board Exams and CME</h1>
+
+            <p class="promo-text">Study for ABIM, ABFM, and ABP boards and earn CME credits.</p>
+
+            <a href="/us/customsession" class="button-qbank">Go to Qbank</a>
+
+        </div>
+
+        <!-- Tercer Card: EXTRA (Añadido) -->
+
+
+
+    </div>
+
+</body>

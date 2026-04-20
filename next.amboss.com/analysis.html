@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="amboss-clone.css">
+    <style>
+        /* Layout and Containers */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: auto;
+            overflow-x: hidden;
+            overflow-y: visible;
+        }
+
+        body {
+            background-color: #f3f5f7;
+            font-family: Lato, sans-serif;
+            color: #333;
+        }
+
+        ._6eb1c4a28c8c5a44--body {
+            min-height: 100vh;
+            display: block;
+        }
+
+        .cd71ec7927bda3fc--page {
+  background-color: var(--color-canvas);
+  height: auto;
+  min-height: 110%;
+  overflow: visible !important;
+  padding: 0px 20px !important;
+}
+
+
+
+
+
+
+
+
+        /* Header */
+        [data-ds-id="H1"] {
+            font-size: 24px;
+            font-weight: 800;
+            margin: 40px 0px 10px 0px;
+            color: #1a1a1a;
+        }
+
+        [data-ds-id="Link"] {
+            color: #1a1a1a;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        [data-ds-id="Link"]:hover {
+            text-decoration: underline !important;
+        }
+
+        /* Main Container: No flex constraints for easier scrolling */
+        ._3b339bbf8eb2ed8c2--container {
+            max-width: 1026px !important;
+            margin: 0 auto;
+            width: 100%;
+            height: auto;
+        }
+
+        /* Tabs */
+        .e144eml00 {
+            display: flex !important;
+            gap: 32px !important;
+            border-bottom: 1px solid #e1e7ed !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin-top: 8px !important;
+            margin-bottom: 8px !important;
+        }
+
+        .e144eml01 {
+            font-family: inherit !important;
+            font-size: 14px !important;
+            font-weight: 700 !important;
+            color: #455464 !important;
+            text-decoration: none !important;
+            padding: 12px 0px 12px 0px !important;
+            border-bottom: 3px solid transparent !important;
+            margin-bottom: -1px !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .e144eml01[aria-selected="true"] {
+            color: #007c89 !important;
+            border-bottom-color: #007c89 !important;
+        }
+
+        .e144eml01:hover {
+            color: #007c89 !important;
+        }
+
+        /* Iframe Container */
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: auto;
+            overflow: visible;
+        }
+
+        /* Iframe */
+        #analysis-frame {
+            width: 100%;
+            border: none;
+            display: block;
+            overflow: hidden; /* Important: internal iframe shouldn't scroll */
+            transition: height 0.2s ease-out;
+            min-height: 90px;
+        }
+    </style>
+</head>
+<body>
+    <div class="_6eb1c4a28c8c5a44--body">
+        <div aria-label="Main content2" class="cd71ec7927bda3fc--page" data-e2e-test-id="Session AnalysisPage"
+            data-testid="Session AnalysisPage" role="region" tabindex="0">
+            <div data-ds-id="Box" class="css-1ytcco8-StyledBox ebcgi2u0" style="display: block;">
+                <div class="_3b339bbf8eb2ed8c2--container">
+                    <div data-ds-id="Box" class="css-1dzej3k-StyledBox ebcgi2u0">
+                        <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                                <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                                    <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                                        <div data-ds-id="Inline" class="css-16tmb7f-InlineContainer e6i75dx0">
+                                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                                                    <div class="css-10ts8ay-StackItem e7wwwvf1">
+                                                        <h1 data-ds-id="H1" class="css-11vck74-StyledH1 eqtv71d0">Your
+                                                            Performance Analysis for <a data-ds-id="Link" color="accent"
+                                                                href="#" class="css-1x9kg12-StyledLink ewboijr0">USMLE Step
+                                                                1</a></h1>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="css-h0nko7-StyledInlineItem e6i75dx1"><a data-ds-id="Link"
+                                                    color="accent"
+                                                    href="https://support.amboss.com/hc/en-us/articles/42885439769233-How-Does-the-Analysis-Work"
+                                                    rel="noopener noreferrer" target="_blank"
+                                                    class="css-w6lmhp-StyledLink ewboijr0">How does the analysis work?</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                    
+
+                            <div data-ds-id="Box" class="css-rddrty-StyledBox ebcgi2u0">
+                                <div data-ds-id="Tabs" class="css-bkwbtj-StackContainer e7wwwvf0">
+                                    <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                                        <div role="tablist" aria-label="Personalized analysis sections"
+                                            class="css-17qo4wd-StyledContainer e144eml00">
+                                            <a id="tab-0" role="tab" aria-selected="false" class="css-1ahpu6x-StyledTab e144eml01"
+                                                href="studysummary.html" target="analysis-frame">Study Summary </a>
+                                            <a id="tab-1" role="tab" aria-selected="false" class="css-1ahpu6x-StyledTab e144eml01"
+                                                href="performance.html" target="analysis-frame">Performance </a>
+                                            <a id="tab-2" role="tab" aria-selected="true" class="css-12qhyjg-StyledTab e144eml01"
+                                                href="sessionanalysis.html" target="analysis-frame">Session Analysis </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div data-ds-id="Box" class="css-1dzej3k-StyledBox ebcgi2u0 iframe-container">
+                        <iframe id="analysis-frame" name="analysis-frame" src="sessionanalysis.html" title="Analysis Content" scrolling="no"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        (function() {
+            const iframe = document.getElementById('analysis-frame');
+            if (!iframe) return;
+            
+            function resizeIframe() {
+                try {
+                    if (iframe.contentWindow && iframe.contentWindow.document.body) {
+                        // Force the iframe document to have auto height
+                        iframe.contentWindow.document.body.style.height = 'auto';
+                        iframe.contentWindow.document.documentElement.style.height = 'auto';
+                        
+                        const height = iframe.contentWindow.document.documentElement.scrollHeight;
+                        if (height > 0) {
+                            iframe.style.height = height + 'px';
+                        }
+                    }
+                } catch (e) {
+                    console.log('Resize error:', e);
+                }
+            }
+
+            // Cleanup previous execution resources if they exist in the global scope
+            if (window._analysisCleanup) {
+                window._analysisCleanup();
+            }
+
+            // Define robust resize on events
+            const handleLoad = function() {
+                resizeIframe();
+                try {
+                    const observer = new iframe.contentWindow.MutationObserver(resizeIframe);
+                    observer.observe(iframe.contentWindow.document.body, { childList: true, subtree: true, attributes: true });
+                } catch(e) {}
+            };
+
+            iframe.addEventListener('load', handleLoad);
+            window.addEventListener('resize', resizeIframe);
+            
+            // Tab switching logic
+            const tabs = document.querySelectorAll('[role="tab"]');
+            const tabHandlers = [];
+            
+            tabs.forEach(tab => {
+                const handler = function(e) {
+                    tabs.forEach(t => t.setAttribute('aria-selected', 'false'));
+                    tab.setAttribute('aria-selected', 'true');
+
+                    if (window.parent && window.parent.resetSidebar && window.parent.minimizeSidebar) {
+                        const tabId = tab.id;
+                        if (tabId === 'tab-0' || tabId === 'tab-1') {
+                            window.parent.resetSidebar();
+                        } else if (tabId === 'tab-2') {
+                            window.parent.minimizeSidebar('sidebartoc3.html');
+                        }
+                    }
+
+                    // Reset height so it can grow/shrink accurately with new content
+                    iframe.style.height = '90px';
+                    setTimeout(resizeIframe, 150);
+                    setTimeout(resizeIframe, 500);
+                };
+                tab.addEventListener('click', handler);
+                tabHandlers.push({ tab, handler });
+            });
+
+            // Periodic check
+            const intervalId = setInterval(() => {
+                if (!document.body.contains(iframe)) {
+                    if (window._analysisCleanup) window._analysisCleanup();
+                    return;
+                }
+                resizeIframe();
+            }, 1000);
+
+            // Export cleanup function to global scope to be called by subsequent loads
+            window._analysisCleanup = function() {
+                iframe.removeEventListener('load', handleLoad);
+                window.removeEventListener('resize', resizeIframe);
+                tabHandlers.forEach(({ tab, handler }) => tab.removeEventListener('click', handler));
+                clearInterval(intervalId);
+                window._analysisCleanup = null;
+            };
+        })();
+    </script>
+</body>
+</html>

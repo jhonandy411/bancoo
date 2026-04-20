@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firestore Uploader - Extra Explanations</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .header h1 { font-size: 28px; margin-bottom: 10px; }
+    .header p { opacity: .9; font-size: 15px; }
+
+    .content { padding: 30px; }
+    .section { margin-bottom: 22px; }
+
+    .section-title{
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 12px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .input-group { display:flex; gap:10px; margin-bottom: 10px; }
+
+    input[type="text"]{
+      flex:1;
+      padding: 12px 15px;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: .2s;
+    }
+    input[type="text"]:focus{
+      outline:none;
+      border-color:#667eea;
+      box-shadow: 0 0 0 3px rgba(102,126,234,.12);
+    }
+
+    textarea{
+      width:100%;
+      min-height: 260px;
+      padding: 15px;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+      font-size: 13px;
+      resize: vertical;
+      transition: .2s;
+    }
+    textarea:focus{
+      outline:none;
+      border-color:#667eea;
+      box-shadow: 0 0 0 3px rgba(102,126,234,.12);
+    }
+
+    .button{
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color:white;
+      border:none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor:pointer;
+      transition: .2s;
+      box-shadow: 0 4px 15px rgba(102,126,234,.4);
+    }
+    .button:hover{ transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,.55); }
+    .button:active{ transform: translateY(0); }
+    .button:disabled{ opacity:.6; cursor:not-allowed; transform:none; box-shadow:none; }
+
+    .preview{
+      background:#f8f9fa;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 520px;
+      overflow:auto;
+    }
+
+    .preview-item{
+      background:white;
+      border-left:4px solid #667eea;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    .preview-item h4{ color:#2c3e50; font-size: 15px; margin-bottom: 6px; }
+    .muted{ opacity:.65; font-size:12px; }
+    .kv{ font-size:13px; color:#444; margin-top: 6px; }
+    .kv code{ background:#eef2ff; padding:2px 6px; border-radius:6px; }
+
+    .render{
+      margin-top: 10px;
+      padding: 12px;
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      border-radius: 8px;
+      background: #fff;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #1a1a1a;
+      white-space: normal;
+    }
+
+    .status{
+      padding: 14px;
+      border-radius: 8px;
+      margin-top: 14px;
+      display:none;
+      white-space: pre-wrap;
+    }
+    .status.success{ background:#d4edda; border:1px solid #c3e6cb; color:#155724; display:block; }
+    .status.error{ background:#f8d7da; border:1px solid #f5c6cb; color:#721c24; display:block; }
+    .status.info{ background:#d1ecf1; border:1px solid #bee5eb; color:#0c5460; display:block; }
+
+    .firebase-config{
+      background:#fff3cd;
+      border:2px solid #ffc107;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+    .firebase-config h3{ color:#856404; font-size: 15px; margin-bottom: 8px; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🧩 Firestore Uploader - Extra Explanations</h1>
+      <p>Pegás HTML con <code>.explanation-item</code> / <code>.phrasionary_popover</code> y sube respetando <b>docId = data-trigger-id</b>.</p>
+    </div>
+
+    <div class="content">
+      <div class="firebase-config">
+        <h3>⚠️ Configuración de Firebase requerida</h3>
+        <p style="color:#856404;">
+          Si tu proyecto cambia, reemplazá las credenciales en el JS al final.
+        </p>
+      </div>
+
+      <div class="section">
+        <label class="section-title">📁 Ruta de la colección en Firestore</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="collectionPath"
+            placeholder="Ejemplo: extraExplanations o phrasionary/extraExplanations"
+            value="extraExplanations"
+          />
+        </div>
+        <p style="color:#666; font-size:13px;">
+          Si la ruta termina en <b>documento</b> (segments pares), se agrega <code>/items</code>.
+        </p>
+      </div>
+
+      <div class="section">
+        <label class="section-title">📋 Pegá aquí el HTML (items con <code>data-trigger-id</code>)</label>
+        <textarea
+          id="htmlInput"
+          placeholder='Pegá HTML tipo:
+<div class="explanation-item" data-trigger-id="E..."> ... <div class="...--content">texto</div> ...</div>'
+        ></textarea>
+      </div>
+
+      <div class="section" style="display:flex; gap:12px;">
+        <button class="button" onclick="parseHTML()">🔍 Analizar</button>
+        <button class="button" onclick="uploadToFirestore()" id="uploadBtn" disabled>⬆️ Subir a Firestore</button>
+      </div>
+
+      <div id="statusMessage" class="status"></div>
+
+      <div class="section" id="previewSection" style="display:none;">
+        <h3 class="section-title">👁️ Vista previa (únicos por triggerId)</h3>
+        <div id="preview" class="preview"></div>
+      </div>
+    </div>
+  </div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+  import { getFirestore, collection, doc, writeBatch } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+    authDomain: "bancomicina-62bfe.firebaseapp.com",
+    projectId: "bancomicina-62bfe",
+    storageBucket: "bancomicina-62bfe.appspot.com",
+    messagingSenderId: "737254665977",
+    appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  window.db = db;
+
+  let parsedExplanations = [];
+
+  function showStatus(type, message) {
+    const statusDiv = document.getElementById('statusMessage');
+    statusDiv.className = `status ${type}`;
+    statusDiv.textContent = message;
+    statusDiv.style.display = 'block';
+  }
+  window.showStatus = showStatus;
+
+  function makeSafeIdFromKey(key, fallbackId) {
+    if (!key || !key.trim()) return fallbackId;
+
+    let cleaned = key.trim();
+    cleaned = cleaned.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    cleaned = cleaned.replace(/[^\w\s:\-\(\)\.]/g, "");
+    cleaned = cleaned.replace(/\//g, "-");
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+    return cleaned || fallbackId;
+  }
+
+  function pickContentNode(root) {
+    // ✅ tu caso típico (baseStyles ... --content)
+    const preferred = root.querySelector('.a19c2cb9aca4d5ec--content');
+    if (preferred) return preferred;
+
+    // ✅ fallback: cualquier "content" dentro del popover
+    const anyContent = root.querySelector('[class*="--content"]');
+    if (anyContent) return anyContent;
+
+    // ✅ fallback final: el popover mismo
+    const popover = root.querySelector('.phrasionary_popover');
+    if (popover) return popover;
+
+    return null;
+  }
+
+  function displayPreview(items) {
+    const preview = document.getElementById('preview');
+    const previewSection = document.getElementById('previewSection');
+    preview.innerHTML = '';
+
+    items.forEach((it, idx) => {
+      const div = document.createElement('div');
+      div.className = 'preview-item';
+
+      div.innerHTML = `
+        <h4>#${idx+1} — <span class="muted">docId:</span> ${it.id}</h4>
+        <div class="kv"><b>triggerId:</b> <code>${it.triggerId || ''}</code></div>
+        <div class="kv"><b>triggerIndex:</b> <code>${it.triggerIndex ?? ''}</code> · <b>triggerType:</b> <code>${it.triggerType || ''}</code></div>
+        <div class="kv"><b>text (preview):</b> <code>${(it.text || '').slice(0, 180).replace(/\s+/g,' ').trim()}${(it.text || '').length>180 ? '…' : ''}</code></div>
+        <div class="render">${it.rawHtml || ''}</div>
+      `;
+      preview.appendChild(div);
+    });
+
+    previewSection.style.display = 'block';
+  }
+
+  window.parseHTML = function() {
+    const htmlInput = document.getElementById('htmlInput').value.trim();
+    if (!htmlInput) {
+      showStatus('error', '⚠️ Pegá el HTML primero.');
+      return;
+    }
+
+    try {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlInput;
+
+      // ✅ buscamos contenedores con data-trigger-id (tu wrapper)
+      const items = tempDiv.querySelectorAll('.explanation-item[data-trigger-id], .phrasionary_popover[data-trigger-id]');
+
+      if (!items.length) {
+        showStatus('error', '❌ No encontré elementos con data-trigger-id. Pegá HTML que contenga .explanation-item o .phrasionary_popover con data-trigger-id.');
+        return;
+      }
+
+      parsedExplanations = [];
+
+      // ✅ dedupe por triggerId (docId)
+      const seen = new Set();
+      let skipped = 0;
+      let noContent = 0;
+
+      items.forEach((node, i) => {
+        // triggerId: preferimos el del wrapper (explanation-item) si existe
+        const triggerIdRaw = (node.getAttribute('data-trigger-id') || '').trim()
+          || (node.querySelector('.phrasionary_popover[data-trigger-id]')?.getAttribute('data-trigger-id') || '').trim();
+
+        if (!triggerIdRaw) return;
+
+        const docId = makeSafeIdFromKey(triggerIdRaw, `E_${i+1}`);
+
+        if (seen.has(docId)) { skipped++; return; }
+        seen.add(docId);
+
+        // triggerIndex / triggerType (pueden estar en wrapper o en popover)
+        const idxRaw =
+          (node.getAttribute('data-trigger-index') || '').trim() ||
+          (node.querySelector('.phrasionary_popover')?.getAttribute('data-trigger-index') || '').trim();
+
+        const typeRaw =
+          (node.getAttribute('data-trigger-type') || '').trim() ||
+          (node.querySelector('.phrasionary_popover')?.getAttribute('data-trigger-type') || '').trim();
+
+        const contentNode = pickContentNode(node);
+        if (!contentNode) { noContent++; return; }
+
+        // ✅ guardamos el HTML “núcleo” (lo que te interesa renderizar después)
+        const rawHtml = (contentNode.innerHTML || '').trim();
+        const text = (contentNode.textContent || '').replace(/\s+/g, ' ').trim();
+
+        // opcional: guardar el popover completo (por si querés reconstruir UI exacta)
+        const popover = node.classList?.contains('phrasionary_popover')
+          ? node
+          : node.querySelector('.phrasionary_popover');
+
+        const popoverHtml = (popover ? popover.outerHTML : '').trim();
+
+        parsedExplanations.push({
+          id: docId,                 // 👉 docId en Firestore = data-trigger-id
+          triggerId: triggerIdRaw,
+          triggerIndex: idxRaw ? Number(idxRaw) : null,
+          triggerType: typeRaw || '',
+
+          rawHtml,                   // 👉 contenido “útil”
+          text,                      // 👉 texto plano (búsqueda/debug)
+
+          popoverHtml,               // 👉 opcional (estructura completa)
+          createdAt: new Date().toISOString()
+        });
+      });
+
+      window.parsedExplanations = parsedExplanations;
+
+      displayPreview(parsedExplanations);
+      document.getElementById('uploadBtn').disabled = parsedExplanations.length === 0;
+
+      showStatus(
+        parsedExplanations.length ? 'success' : 'error',
+        parsedExplanations.length
+          ? `✅ Encontrados ${parsedExplanations.length} explanations (únicos por triggerId).` +
+            (skipped ? `\n↩️ Ignorados ${skipped} duplicados (mismo triggerId).` : '') +
+            (noContent ? `\nℹ️ ${noContent} items no tenían nodo de contenido.` : '')
+          : '❌ No se pudo construir ningún item válido.'
+      );
+    } catch (err) {
+      console.error(err);
+      showStatus('error', `❌ Error al analizar: ${err.message}`);
+    }
+  };
+
+  async function commitInChunks(db, collectionPathSegments, items, chunkSize = 450) {
+    let done = 0;
+    const colRef = collection(db, ...collectionPathSegments);
+
+    while (done < items.length) {
+      const batch = writeBatch(db);
+      const slice = items.slice(done, done + chunkSize);
+
+      slice.forEach(item => {
+        const ref = doc(colRef, item.id);
+        batch.set(ref, item);
+      });
+
+      await batch.commit();
+      done += slice.length;
+    }
+  }
+
+  window.uploadToFirestore = async function() {
+    const collectionPathInput = document.getElementById('collectionPath').value.trim();
+    if (!collectionPathInput) {
+      showStatus('error', '⚠️ Ingresá la ruta.');
+      return;
+    }
+    if (!parsedExplanations.length) {
+      showStatus('error', '⚠️ No hay items. Primero analizá.');
+      return;
+    }
+
+    const uploadBtn = document.getElementById('uploadBtn');
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = '⏳ Subiendo...';
+
+    try {
+      let finalPath = collectionPathInput;
+      let segments = collectionPathInput.split('/').filter(Boolean);
+
+      if (!segments.length) {
+        showStatus('error', '❌ Ruta inválida.');
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = '⬆️ Subir a Firestore';
+        return;
+      }
+
+      // si termina en documento (segments pares) => subcolección default "items"
+      if (segments.length % 2 === 0) {
+        const defaultSubcollection = 'items';
+        finalPath = collectionPathInput.replace(/\/+$/, '') + '/' + defaultSubcollection;
+        segments = finalPath.split('/').filter(Boolean);
+
+        showStatus('info',
+          `ℹ️ "${collectionPathInput}" apunta a DOCUMENTO. Se usará "${finalPath}".`
+        );
+      }
+
+      showStatus('info', `📤 Subiendo ${parsedExplanations.length} explanations a "${finalPath}"...`);
+      await commitInChunks(db, segments, parsedExplanations, 450);
+
+      showStatus('success', `🎉 Éxito: ${parsedExplanations.length} explanations subidas a "${finalPath}".`);
+      uploadBtn.textContent = '✅ Subido';
+    } catch (err) {
+      console.error(err);
+      showStatus('error', `❌ Error al subir: ${err.message}`);
+      uploadBtn.disabled = false;
+      uploadBtn.textContent = '⬆️ Subir a Firestore';
+    }
+  };
+</script>
+
+</body>
+</html>

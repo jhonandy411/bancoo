@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Firestore Uploader — Amboss</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+      authDomain: "bancomicina-62bfe.firebaseapp.com",
+      projectId: "bancomicina-62bfe",
+      storageBucket: "bancomicina-62bfe.appspot.com",
+      messagingSenderId: "737254665977",
+      appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // ─── Parser de etiquetas ────────────────────────────────────────────
+    function parseLabels(rawText) {
+      const result = {
+        secciones: []
+      };
+      
+      const lines = rawText.split('\n');
+      const TABLA_FIN = '---tabla_fin---';
+      const LABEL_RE = /^([A-Za-záéíóúÁÉÍÓÚñÑ][A-Za-záéíóúÁÉÍÓÚñÑ0-9_]*)\s*:\s*(.*)$/;
+
+      // Claves que son naturalmente únicas (no necesitan sufijo numérico)
+      const UNIQUE_KEYS = new Set([
+        'titulocentral', 'titulosegmento'
+      ]);
+
+      const isTableKey = (k) => k.startsWith('tabla_');
+
+      // Estado del parser
+      let currentSection = null; // null = root (antes del primer segmento)
+      let sectionCounters = {};  // contadores para la sección actual
+      let globalCounters = {};   // contadores para keys globales (antes del primer segmento)
+
+      const getUniqueKey = (key, counters) => {
+        if (UNIQUE_KEYS.has(key.toLowerCase())) return key;
+        if (!counters._v) counters._v = 0;
+        if (isTableKey(key)) {
+          if (!counters._it) { counters._v++; counters._it = true; }
+          return key + '_' + String(counters._v).padStart(3, '0');
+        }
+        counters._it = false;
+        counters._v++;
+        return key + '_' + String(counters._v).padStart(3, '0');
+      };
+
+      let i = 0;
+      while (i < lines.length) {
+        const line = lines[i].trim();
+        if (!line) { i++; continue; }
+        if (line === TABLA_FIN) { 
+          sectionCounters._it = false; 
+          globalCounters._it = false;
+          i++; continue; 
+        }
+
+        const m = line.match(LABEL_RE);
+        if (m) {
+          const rawKey = m[1].trim();
+          let value = m[2].trim();
+
+          // Multilinea handling
+          while (i + 1 < lines.length) {
+            const next = lines[i + 1].trim();
+            if (!next || LABEL_RE.test(next) || next === TABLA_FIN) break;
+            value += ' ' + next;
+            i++;
+          }
+
+          // Convertir tipos
+          let finalValue = value;
+          if (value === 'true') finalValue = true;
+          else if (value === 'false') finalValue = false; // Fixed typo
+          else if (value !== '' && !isNaN(value)) finalValue = Number(value);
+
+          // Lógica de anidamiento
+          if (rawKey === 'titulosegmento') {
+            // Nueva sección
+            currentSection = {
+              titulosegmento: finalValue
+            };
+            result.secciones.push(currentSection);
+            sectionCounters = {}; // Reset contadores para nueva sección
+          } else {
+            // Asignar al nivel correcto
+            if (currentSection) {
+               // Estamos dentro de una sección
+               const uniqueKey = getUniqueKey(rawKey, sectionCounters);
+               currentSection[uniqueKey] = finalValue;
+            } else {
+               // Estamos en nivel raíz (antes de cualquier titulosegmento)
+               const uniqueKey = getUniqueKey(rawKey, globalCounters);
+               result[uniqueKey] = finalValue;
+            }
+          }
+        }
+        i++;
+      }
+
+      // Limpieza final
+      if (result.secciones.length === 0) delete result.secciones;
+
+      return result;
+    }
+
+    // ─── Upload ────────────────────────────────────────────────────────────────
+    window.uploadToFirestore = async function() {
+      const text = document.getElementById('inputText').value.trim();
+      const path = document.getElementById('inputPath').value.trim();
+
+      if (!text || !path) {
+        showStatus('error', '⚠️ Completá el texto y la ruta antes de subir.');
+        return;
+      }
+
+      // Validar path: debe tener número par de segmentos
+      const segments = path.split('/').filter(s => s.trim());
+      if (segments.length % 2 !== 0) {
+        showStatus('error', '⚠️ La ruta debe tener un número par de segmentos (ej: articulos/dental-abscess)');
+        return;
+      }
+
+      showStatus('loading', '⏳ Parseando y subiendo...');
+
+      try {
+        const parsed = parseLabels(text);
+        parsed._updatedAt = serverTimestamp();
+        parsed._rawPath = path;
+
+        // Reconstruir ref desde path
+        const docRef = doc(db, ...segments);
+        await setDoc(docRef, parsed, { merge: true });
+
+        // Mostrar preview
+        renderPreview(parsed);
+        showStatus('success', `✅ Subido a <strong>${path}</strong>`);
+      } catch (err) {
+        console.error(err);
+        showStatus('error', '❌ Error: ' + err.message);
+      }
+    };
+
+    window.parseOnly = function() {
+      const text = document.getElementById('inputText').value.trim();
+      if (!text) { showStatus('error', '⚠️ Pegá texto primero.'); return; }
+      const parsed = parseLabels(text);
+      renderPreview(parsed);
+      
+      const count = Object.keys(parsed).length + (parsed.secciones ? parsed.secciones.length : 0);
+      showStatus('info', `👁️ Preview: Estructura analizada`);
+    };
+
+    function renderPreview(obj) {
+      const container = document.getElementById('preview');
+      container.innerHTML = '';
+
+      // Separar root de secciones
+      const rootEntries = Object.entries(obj).filter(([k]) => k !== 'secciones' && !k.startsWith('_'));
+      
+      // Render Root
+      if (rootEntries.length > 0) {
+        const rootDiv = document.createElement('div');
+        rootDiv.innerHTML = `<div class="group-header">Root / Global</div>`;
+        rootEntries.forEach(([k, v]) => renderCard(rootDiv, k, v, inferType(k)));
+        container.appendChild(rootDiv);
+      }
+
+      // Render Secciones
+      if (obj.secciones && Array.isArray(obj.secciones)) {
+        obj.secciones.forEach((sec, idx) => {
+          const secWrapper = document.createElement('div');
+          secWrapper.style.marginTop = '16px';
+          secWrapper.style.paddingLeft = '10px';
+          secWrapper.style.borderLeft = '3px solid var(--accent)';
+          
+          const title = sec.titulosegmento || `Sección ${idx + 1}`;
+          const header = document.createElement('div');
+          header.className = 'group-header';
+          header.style.color = 'var(--text)';
+          header.style.borderColor = 'var(--accent)';
+          header.textContent = title;
+          secWrapper.appendChild(header);
+
+          Object.entries(sec).forEach(([k, v]) => {
+            if (k === 'titulosegmento') return; // ya en header
+            renderCard(secWrapper, k, v, inferType(k));
+          });
+          container.appendChild(secWrapper);
+        });
+      }
+    }
+
+    function inferType(key) {
+      const base = key.replace(/_\d{3}$/, '');
+      if (/^titulocentral|titulosegmento/.test(base)) return 'meta';
+      if (/^contenido|TITULO/.test(base)) return 'contenido';
+      if (/^imagen|textoimagen/.test(base)) return 'imágenes';
+      if (/^tabla_/.test(base)) return 'tablas';
+      if (/^LISTA|box/.test(base)) return 'listas_&_boxes';
+      if (/^ref/.test(base)) return 'referencias';
+      return 'otros';
+    }
+
+    function renderCard(container, key, value, type) {
+      const card = document.createElement('div');
+      card.className = `field-card type-${type}`;
+
+      const keyEl = document.createElement('span');
+      keyEl.className = 'field-key';
+      keyEl.textContent = key;
+
+      const valEl = document.createElement('span');
+      valEl.className = 'field-val';
+
+      if (typeof value === 'boolean') {
+        valEl.textContent = value ? '✓ true' : '✗ false';
+        valEl.classList.add('bool');
+      } else if (typeof value === 'number') {
+        valEl.textContent = value;
+        valEl.classList.add('num');
+      } else {
+        const str = String(value);
+        valEl.innerHTML = str.replace(/\*\*(.+?)\*\*/g, '<mark>$1</mark>');
+      }
+
+      card.appendChild(keyEl);
+      card.appendChild(valEl);
+      container.appendChild(card);
+    }
+
+    function showStatus(type, msg) {
+      const el = document.getElementById('status');
+      el.className = 'status ' + type;
+      el.innerHTML = msg;
+      el.style.display = 'flex';
+    }
+  </script>
+
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #1a1a24;
+      --border: #2a2a3a;
+      --accent: #00e5ff;
+      --accent2: #7c3aed;
+      --text: #e8e8f0;
+      --muted: #6b6b80;
+      --success: #00c896;
+      --error: #ff4d6d;
+      --warning: #fbbf24;
+
+      --meta: #00e5ff;
+      --contenido: #a78bfa;
+      --imágenes: #34d399;
+      --tablas: #fb923c;
+      --listas: #f472b6;
+      --referencias: #94a3b8;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── Header ─────────────────────────────────────── */
+    header {
+      padding: 28px 40px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--surface);
+    }
+
+    .logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: grid; place-items: center;
+      font-size: 18px;
+    }
+
+    header h1 {
+      font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
+    }
+
+    header h1 span {
+      color: var(--accent);
+    }
+
+    .badge {
+      margin-left: auto;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+    }
+
+    /* ─── Main layout ────────────────────────────────── */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      height: calc(100vh - 89px);
+    }
+
+    /* ─── Left panel ─────────────────────────────────── */
+    .panel-left {
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 28px 32px;
+      gap: 20px;
+      overflow-y: auto;
+    }
+
+    .panel-title {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title::before {
+      content: '';
+      width: 3px; height: 14px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    /* Path input */
+    .path-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .path-row label {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .path-input-wrapper {
+      display: flex;
+      align-items: center;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .path-input-wrapper:focus-within {
+      border-color: var(--accent);
+    }
+
+    .path-prefix {
+      padding: 10px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--accent);
+      border-right: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    #inputPath {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 10px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    #inputPath::placeholder { color: var(--muted); }
+
+    /* Textarea */
+    #inputText {
+      flex: 1;
+      min-height: 300px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text);
+      resize: none;
+      outline: none;
+      line-height: 1.7;
+      transition: border-color 0.2s;
+    }
+
+    #inputText:focus { border-color: var(--accent); }
+    #inputText::placeholder { color: var(--muted); }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 13px 20px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(0,229,255,0.25);
+    }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Status */
+    .status {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .status.success { background: rgba(0,200,150,0.12); border: 1px solid var(--success); color: var(--success); }
+    .status.error   { background: rgba(255,77,109,0.12); border: 1px solid var(--error);   color: var(--error);   }
+    .status.loading { background: rgba(0,229,255,0.08); border: 1px solid var(--accent);   color: var(--accent);  }
+    .status.info    { background: rgba(124,58,237,0.12); border: 1px solid var(--accent2);  color: var(--accent2); }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+    }
+
+    .legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+
+    /* ─── Right panel: Preview ───────────────────────── */
+    .panel-right {
+      display: flex;
+      flex-direction: column;
+      padding: 28px 32px;
+      gap: 16px;
+      overflow-y: auto;
+      background: var(--surface);
+    }
+
+    #preview {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .group-header {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--muted);
+      margin-top: 16px;
+      margin-bottom: 4px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .field-card {
+      display: flex;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border-left: 3px solid transparent;
+      background: var(--surface2);
+      align-items: flex-start;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .type-meta         { border-color: var(--meta); }
+    .type-contenido    { border-color: var(--contenido); }
+    .type-imágenes     { border-color: var(--imágenes); }
+    .type-tablas       { border-color: var(--tablas); }
+    .type-listas_&_boxes { border-color: var(--listas); }
+    .type-referencias  { border-color: var(--referencias); }
+    .type-otros        { border-color: var(--border); }
+
+    .field-key {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      white-space: nowrap;
+      min-width: 160px;
+      color: var(--muted);
+      padding-top: 2px;
+    }
+
+    .field-val {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .field-val mark {
+      background: rgba(251,191,36,0.2);
+      color: var(--warning);
+      border-radius: 3px;
+      padding: 0 3px;
+      font-weight: 700;
+    }
+
+    .field-val.bool { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    .field-val.num  { font-family: 'JetBrains Mono', monospace; color: var(--tablas); }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .empty-state .icon { font-size: 40px; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; height: auto; }
+      .panel-left, .panel-right { height: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🔥</div>
+  <h1>Firestore <span>Uploader</span></h1>
+  <div class="badge">bancomicina-62bfe</div>
+</header>
+
+<main>
+  <!-- ─── LEFT: Input ─────────────────────────────────── -->
+  <div class="panel-left">
+    <div class="panel-title">Configuración de ruta</div>
+
+    <div class="path-row">
+      <label>Ruta del documento en Firestore</label>
+      <div class="path-input-wrapper">
+        <span class="path-prefix">firestore://</span>
+        <input id="inputPath" type="text"
+          placeholder="articulos/dental-abscess"
+          value="" />
+      </div>
+      <span style="font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace;">
+        Formato: coleccion/documento — ej: articulos/atrioventricular-block
+      </span>
+    </div>
+
+    <div class="panel-title">Texto etiquetado</div>
+
+    <textarea id="inputText" placeholder="Pegá aquí el texto plano generado por el convertidor...
+
+titulocentral: DENTAL ABSCESS
+
+titulosegmento: ETIOLOGY
+
+contenido1: A dental abscess is a localized collection of **pus**...
+
+imagen1link: https://media-us.mbscf.com/...
+textoimagen1: Dental abscess
+
+tabla_totalfilas: 3
+tabla_f1_c1: Type of block
+...
+---tabla_fin---"></textarea>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--meta)"></div>metadatos</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--contenido)"></div>contenido</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--imágenes)"></div>imágenes</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--tablas)"></div>tablas</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--listas)"></div>listas/boxes</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--referencias)"></div>referencias</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--warning)"></div>**bold**</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="parseOnly()">👁 Preview</button>
+      <button class="btn btn-primary" onclick="uploadToFirestore()">🔥 Subir a Firestore</button>
+    </div>
+
+    <div id="status" class="status"></div>
+  </div>
+
+  <!-- ─── RIGHT: Preview ─────────────────────────────── -->
+  <div class="panel-right">
+    <div class="panel-title">Preview de campos</div>
+
+    <div id="preview">
+      <div class="empty-state">
+        <div class="icon">📋</div>
+        <span>Pegá texto y presioná <strong>Preview</strong><br>para ver los campos detectados</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>

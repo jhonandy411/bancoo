@@ -113,8 +113,9 @@
         </div>
 
         <div class="form-group">
-            <label for="fileInput">Select HTML File:</label>
-            <input type="file" id="fileInput" accept=".html">
+            <label for="fileInput">Select File (HTML or JSON):</label>
+            <input type="file" id="fileInput" accept=".html,.json">
+            <small style="color: #666;">Upload JSON (structured sections) or HTML (legacy monolithic).</small>
         </div>
 
         <button id="uploadBtn">Upload to Firestore</button>
@@ -183,16 +184,48 @@
                 // Read file content
                 const textContent = await readFileAsText(file);
 
-                showStatus(`File read successfully (${(textContent.length / 1024).toFixed(2)} KB). Uploading to Firestore...`, 'info');
+                // Detect file type
+                const isJSON = file.name.endsWith('.json');
+                let uploadData;
+
+                if (isJSON) {
+                    // Parse JSON and structure data for sectioned upload
+                    showStatus('Parsing JSON structure...', 'info');
+                    const jsonData = JSON.parse(textContent);
+
+                    uploadData = {
+                        titulo: jsonData.titulo || 'Sin título',
+                        sinonimos: jsonData.sinonimos || '',
+                        lastEdited: jsonData.lastEdited || '',
+                        sections: jsonData.sections || {},
+                        sectionOrder: jsonData.sectionOrder || [],
+                        generatedAt: jsonData.generatedAt || new Date().toISOString(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        contentType: 'sectioned' // Mark as new format
+                    };
+
+                    const sectionCount = uploadData.sectionOrder.length;
+                    showStatus(`Parsed ${sectionCount} sections. Uploading to Firestore...`, 'info');
+                } else {
+                    // Legacy HTML upload
+                    uploadData = {
+                        html_completo: textContent,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        contentType: 'monolithic' // Mark as old format
+                    };
+
+                    showStatus(`File read successfully (${(textContent.length / 1024).toFixed(2)} KB). Uploading to Firestore...`, 'info');
+                }
 
                 // Upload to Firestore at the specific path
                 // Using merge: true to avoid overwriting existing metadata (nombre, orden, etc.)
-                await db.doc(docPath).set({
-                    html_completo: textContent,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
+                await db.doc(docPath).set(uploadData, { merge: true });
 
-                showStatus(`Success! Content uploaded to '${docPath}'.`, 'success');
+                if (isJSON) {
+                    showStatus(`Success! ${uploadData.sectionOrder.length} sections uploaded to '${docPath}'.`, 'success');
+                } else {
+                    showStatus(`Success! Content uploaded to '${docPath}'.`, 'success');
+                }
                 console.log('Document successfully written!');
 
             } catch (error) {

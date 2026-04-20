@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartZoom Viewer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #151821;
+      --border: #1f2535;
+      --accent: #4f8ef7;
+      --accent2: #a78bfa;
+      --text: #e8eaf0;
+      --muted: #7b82a0;
+      --radius: 16px;
+      --green: #28c840;
+      --red: #ff5f57;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 0 80px;
+    }
+
+    header {
+      width: 100%;
+      padding: 26px 48px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 12px var(--accent);
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      background: linear-gradient(90deg, #e8eaf0, #a0a8c8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    header .tag {
+      margin-left: auto;
+      font-size: .7rem;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(79,142,247,.3);
+      padding: 4px 10px;
+      border-radius: 99px;
+    }
+
+    main {
+      width: 100%;
+      max-width: 960px;
+      padding: 48px 24px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+    }
+
+    .input-section { display: flex; flex-direction: column; gap: 12px; }
+    .input-label {
+      font-size: .72rem; font-weight: 500; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .input-row { display: flex; gap: 10px; align-items: stretch; }
+
+    .url-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      resize: vertical;
+      min-height: 54px;
+      max-height: 200px;
+    }
+    .url-input::placeholder { color: var(--muted); }
+    .url-input:focus {
+      border-color: rgba(79,142,247,.55);
+      box-shadow: 0 0 0 3px rgba(79,142,247,.1);
+    }
+
+    .embed-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 26px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .88rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity .2s, transform .15s;
+      align-self: flex-start;
+    }
+    .embed-btn:hover { opacity: .9; transform: translateY(-1px); }
+    .embed-btn:active { transform: translateY(0); opacity: 1; }
+    .embed-btn svg { width: 16px; height: 16px; }
+
+    .hint { font-size: .76rem; color: var(--muted); line-height: 1.6; }
+    .hint code {
+      color: var(--accent2);
+      background: rgba(167,139,250,.1);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: .75rem;
+    }
+
+    .error-msg {
+      display: none;
+      font-size: .8rem; color: #ff6b6b;
+      background: rgba(255,107,107,.08);
+      border: 1px solid rgba(255,107,107,.2);
+      border-radius: 8px; padding: 10px 14px;
+      align-items: center; gap: 8px;
+    }
+    .error-msg.visible { display: flex; }
+    .error-msg svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+    #countBadge { display: none; align-items: center; gap: 10px; font-size: .8rem; color: var(--muted); }
+    #countBadge.visible { display: flex; }
+    #countBadge strong { color: var(--accent); }
+
+    .clear-btn {
+      margin-left: auto;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 12px;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .72rem;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+    }
+    .clear-btn:hover { color: #ff6b6b; border-color: rgba(255,107,107,.4); }
+
+    .dl-all-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, rgba(79,142,247,.15), rgba(167,139,250,.15));
+      border: 1px solid rgba(79,142,247,.4);
+      border-radius: 8px;
+      padding: 5px 14px;
+      color: var(--accent);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .72rem; font-weight: 500;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+    }
+    .dl-all-btn:hover { background: linear-gradient(135deg, rgba(79,142,247,.28), rgba(167,139,250,.28)); border-color: var(--accent); }
+    .dl-all-btn:disabled { opacity: .45; cursor: not-allowed; }
+    #dlAllStatus { font-size: .72rem; color: var(--muted); }
+
+    #viewer { display: none; flex-direction: column; gap: 24px; animation: fadeUp .4s ease both; }
+    #viewer.visible { display: flex; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #slidesGrid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    #slidesGrid.multi { grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); }
+
+    .slide-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      animation: fadeUp .35s ease both;
+    }
+
+    .card-bar {
+      padding: 11px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .slide-num {
+      font-size: .68rem; font-weight: 600; letter-spacing: .06em;
+      color: var(--accent);
+      background: rgba(79,142,247,.1);
+      border: 1px solid rgba(79,142,247,.2);
+      border-radius: 6px; padding: 2px 7px; flex-shrink: 0;
+    }
+    .dots { display: flex; gap: 5px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .card-url {
+      font-size: .72rem; color: var(--muted); flex: 1;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .open-link {
+      color: var(--muted); text-decoration: none; font-size: .7rem;
+      display: flex; align-items: center; gap: 4px;
+      transition: color .2s; flex-shrink: 0;
+    }
+    .open-link:hover { color: var(--accent); }
+    .open-link svg { width: 11px; height: 11px; }
+
+    .iframe-wrap {
+      position: relative; width: 100%; aspect-ratio: 16 / 10;
+      background: #0a0c12;
+    }
+    .iframe-wrap iframe {
+      position: absolute; inset: 0; width: 100%; height: 100%; border: none;
+    }
+
+    .loading-overlay {
+      position: absolute; inset: 0; background: #0a0c12;
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; color: var(--muted); font-size: .82rem;
+      z-index: 2; transition: opacity .4s;
+    }
+    .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .card-footer {
+      padding: 9px 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .72rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .chip {
+      padding: 2px 8px; border-radius: 99px;
+      background: rgba(167,139,250,.1); color: var(--accent2);
+      border: 1px solid rgba(167,139,250,.2);
+      font-size: .63rem; letter-spacing: .06em; text-transform: uppercase;
+    }
+    .chip.blue {
+      background: rgba(79,142,247,.1); color: var(--accent);
+      border-color: rgba(79,142,247,.2);
+    }
+
+    /* ── Download button ── */
+    .dl-btn {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 12px;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .72rem;
+      cursor: pointer;
+      transition: color .2s, border-color .2s, background .2s;
+      flex-shrink: 0;
+    }
+    .dl-btn:hover:not(:disabled) {
+      color: var(--green);
+      border-color: rgba(40,200,64,.4);
+      background: rgba(40,200,64,.05);
+    }
+    .dl-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+    .dl-btn svg { width: 12px; height: 12px; }
+
+    /* ── Progress bar inside card ── */
+    .dl-progress {
+      display: none;
+      height: 3px;
+      background: var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .dl-progress.visible { display: block; }
+    .dl-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--green));
+      transition: width .2s ease;
+    }
+
+    /* ── Status log ── */
+    .dl-status {
+      display: none;
+      padding: 6px 14px;
+      font-size: .68rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: rgba(0,0,0,.2);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dl-status.visible { display: block; }
+    .dl-status.done { color: var(--green); }
+    .dl-status.error { color: var(--red); }
+
+    /* ── History ── */
+    #history-section { display: none; flex-direction: column; gap: 12px; }
+    #history-section.visible { display: flex; }
+    .section-label {
+      font-size: .72rem; font-weight: 500; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--muted);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-label::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+    #history-list { display: flex; flex-direction: column; gap: 6px; }
+    .history-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 14px;
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; transition: border-color .2s, background .2s;
+      font-size: .8rem; color: var(--muted);
+    }
+    .history-item:hover {
+      border-color: rgba(79,142,247,.4);
+      background: rgba(79,142,247,.04);
+      color: var(--text);
+    }
+    .history-item .h-preview { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .history-item .h-count {
+      flex-shrink: 0; font-size: .68rem; color: var(--accent2);
+      background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.2);
+      border-radius: 6px; padding: 2px 7px;
+    }
+    .history-item svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-dot"></div>
+  <h1>SmartZoom Viewer</h1>
+  <span class="tag">Embed Tool</span>
+</header>
+
+<div id="proxyBanner" style="
+  width:100%; background: rgba(79,142,247,.07);
+  border-bottom: 1px solid rgba(79,142,247,.2);
+  padding: 10px 48px; font-size:.75rem; color: var(--muted);
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+  <span style="color:var(--accent)">▶</span>
+  Para descargar, levanta el proxy CORS primero:
+  <code style="background:rgba(0,0,0,.4); padding:2px 10px; border-radius:6px; color:var(--accent2); font-size:.73rem; letter-spacing:.04em;">
+    node proxy.cjs
+  </code>
+  <span>(misma carpeta que el HTML)</span>
+  <button onclick="this.closest('#proxyBanner').style.display='none'"
+    style="margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem">✕</button>
+</div>
+
+<main>
+  <div class="input-section">
+    <div class="input-label">Pegar enlaces de SmartZoom</div>
+    <div class="input-row">
+      <textarea class="url-input" id="urlInput"
+        placeholder="Pega uno o varios enlaces de embed.smartzoom.com/slide/… (o texto con las URLs mezcladas)"
+        autocomplete="off" spellcheck="false" rows="3"></textarea>
+      <button class="embed-btn" onclick="embedSlides()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+        Embed
+      </button>
+    </div>
+    <p class="hint">
+      Acepta <strong>uno o varios</strong> enlaces de <code>embed.smartzoom.com/slide/…</code>.<br>
+      Puedes pegar texto con ruido (como logs del navegador) — extrae las URLs automáticamente.
+    </p>
+    <div class="error-msg" id="errorMsg">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span id="errorText">URL no válida.</span>
+    </div>
+  </div>
+
+  <div id="countBadge">
+    <strong id="countNum">0</strong> slides cargados
+    <button class="dl-all-btn" id="dlAllBtn" onclick="downloadAll()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Descargar todo
+    </button>
+    <span id="dlAllStatus"></span>
+    <button class="clear-btn" onclick="clearAll()">✕ Limpiar</button>
+  </div>
+
+  <div id="viewer">
+    <div id="slidesGrid"></div>
+  </div>
+
+  <div id="history-section">
+    <div class="section-label">Recientes</div>
+    <div id="history-list"></div>
+  </div>
+</main>
+
+<script>
+  /* ════════════════════════════════════════════
+     ESTADO GLOBAL
+  ════════════════════════════════════════════ */
+  const sessionHistory = [];
+  const activeDownloads = new Map();
+  const PROXY = 'http://127.0.0.1:3131';
+
+
+  /* ════════════════════════════════════════════
+     UTILIDADES DE URL
+  ════════════════════════════════════════════ */
+  function extractUrls(text) {
+    const regex = /https?:\/\/embed\.smartzoom\.com\/slide\/[^\s"'<>]+/g;
+    return [...new Set(text.match(regex) || [])];
+  }
+
+  function parseParams(url) {
+    try {
+      const u = new URL(url);
+      return {
+        theme:    u.searchParams.get('theme'),
+        lang:     u.searchParams.get('lang'),
+        showanno: u.searchParams.get('showanno'),
+      };
+    } catch { return {}; }
+  }
+
+  function getSlideId(url) {
+    try {
+      return new URL(url).pathname.split('/').filter(Boolean).pop()?.split('?')[0];
+    } catch { return null; }
+  }
+
+  function getLang(url) {
+    try { return new URL(url).searchParams.get('lang') || 'en'; } catch { return 'en'; }
+  }
+
+  /* ════════════════════════════════════════════
+     UI HELPERS
+  ════════════════════════════════════════════ */
+  function showError(msg) {
+    document.getElementById('errorText').textContent = msg;
+    document.getElementById('errorMsg').classList.add('visible');
+  }
+  function hideError() {
+    document.getElementById('errorMsg').classList.remove('visible');
+  }
+
+  function setDlStatus(card, msg, state = '') {
+    const el = card.querySelector('.dl-status');
+    el.textContent = msg;
+    el.className = 'dl-status visible' + (state ? ' ' + state : '');
+  }
+
+  function setDlProgress(card, pct) {
+    const bar  = card.querySelector('.dl-progress-bar');
+    const wrap = card.querySelector('.dl-progress');
+    wrap.classList.add('visible');
+    bar.style.width = pct + '%';
+  }
+
+  function resetDlUI(card) {
+    card.querySelector('.dl-progress').classList.remove('visible');
+    card.querySelector('.dl-progress-bar').style.width = '0%';
+    card.querySelector('.dl-status').className = 'dl-status';
+    const btn = card.querySelector('.dl-btn');
+    btn.disabled = false;
+    btn.innerHTML = downloadIcon() + ' Descargar';
+  }
+
+  function downloadIcon() {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>`;
+  }
+
+  /* ════════════════════════════════════════════
+     CONSTRUCCIÓN DE TARJETA
+  ════════════════════════════════════════════ */
+  function buildSlideCard(url, index) {
+    const p = parseParams(url);
+    const cardId = 'card_' + index + '_' + Date.now();
+    const frameId = 'frame_' + cardId;
+    const overlayId = 'overlay_' + cardId;
+
+    let chips = '';
+    if (p.theme)    chips += `<span class="chip blue">${p.theme}</span>`;
+    if (p.lang)     chips += `<span class="chip">${p.lang.toUpperCase()}</span>`;
+    if (p.showanno != null)
+      chips += `<span class="chip">${p.showanno === '1' ? 'Anotaciones ✓' : 'Sin anotaciones'}</span>`;
+
+    const card = document.createElement('div');
+    card.className = 'slide-card';
+    card.dataset.cardId = cardId;
+    card.dataset.url = url;
+    card.style.animationDelay = (index * 60) + 'ms';
+
+    card.innerHTML = `
+      <div class="card-bar">
+        <span class="slide-num">#${index + 1}</span>
+        <div class="dots">
+          <div class="dot dot-r"></div>
+          <div class="dot dot-y"></div>
+          <div class="dot dot-g"></div>
+        </div>
+        <span class="card-url" title="${url}">${url}</span>
+        <a class="open-link" href="${url}" target="_blank" rel="noopener">
+          Abrir
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+            <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="iframe-wrap">
+        <div class="loading-overlay" id="${overlayId}">
+          <div class="spinner"></div>
+          Cargando…
+        </div>
+        <iframe id="${frameId}" src="" allowfullscreen title="SmartZoom Slide ${index + 1}"></iframe>
+      </div>
+
+      <div class="dl-progress"><div class="dl-progress-bar"></div></div>
+      <div class="dl-status"></div>
+
+      <div class="card-footer">
+        ${chips}
+        <button class="dl-btn" onclick="startDownload(this.closest('.slide-card'))">
+          ${downloadIcon()} Descargar
+        </button>
+      </div>
+    `;
+
+    // Cargar iframe tras un micro-delay escalonado para no bloquear el paint
+    setTimeout(() => {
+      const frame   = document.getElementById(frameId);
+      const overlay = document.getElementById(overlayId);
+      if (frame) {
+        frame.onload = () => { if (overlay) overlay.classList.add('hidden'); };
+        frame.src = url;
+      }
+    }, 50 + index * 100);
+
+    return card;
+  }
+
+  /* ════════════════════════════════════════════
+     DESCARGA INDIVIDUAL POR TARJETA
+  ════════════════════════════════════════════ */
+  async function startDownload(card) {
+    const url    = card.dataset.url;
+    const cardId = card.dataset.cardId;
+    const btn    = card.querySelector('.dl-btn');
+
+    // Cancelar si ya hay una descarga activa para esta card
+    if (activeDownloads.has(cardId)) {
+      activeDownloads.get(cardId).abort();
+      activeDownloads.delete(cardId);
+      resetDlUI(card);
+      setDlStatus(card, 'Descarga cancelada.', 'error');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Procesando…';
+    setDlStatus(card, 'Obteniendo metadatos…');
+    setDlProgress(card, 5);
+
+    const slideId = getSlideId(url);
+    const lang    = getLang(url);
+
+    if (!slideId) {
+      setDlStatus(card, '❌ No se pudo extraer el Slide ID.', 'error');
+      btn.disabled = false;
+      btn.innerHTML = downloadIcon() + ' Descargar';
+      return;
+    }
+
+    // Registrar como activo
+    const controller = { aborted: false, abort() { this.aborted = true; } };
+    activeDownloads.set(cardId, controller);
+
+    btn.textContent = '✕ Cancelar';
+    btn.disabled = false;
+
+    try {
+      /* ── 1. Verificar proxy + Fetch metadata ── */
+      setDlStatus(card, '🔌 Verificando proxy CORS…');
+      let proxyOk = false;
+      try {
+        const ping = await fetch(`${PROXY}/api/image/${slideId}/${lang}`, { method: 'HEAD', signal: AbortSignal.timeout(1800) });
+        proxyOk = ping.status < 500;
+      } catch { proxyOk = false; }
+
+      if (!proxyOk) {
+        setDlStatus(card,
+          '❌ Proxy no disponible. Ejecuta en terminal:  node proxy.js',
+          'error');
+        btn.innerHTML = downloadIcon() + ' Descargar';
+        btn.disabled = false;
+        activeDownloads.delete(cardId);
+        return;
+      }
+
+      const res = await fetch(`${PROXY}/api/image/${slideId}/${lang}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const meta = await res.json();
+      if (controller.aborted) return;
+
+      const IMG_W     = meta.Width;
+      const IMG_H     = meta.Height;
+      const TITLE     = meta.Title || slideId;
+      const BASE      = `https://embed.smartzoom.com${meta.Url}`;
+      const urlParts  = meta.Url.split('/').filter(Boolean);
+      const SLIDE_NAME = urlParts[urlParts.length - 1]?.replace('_files', '') || slideId;
+
+      setDlStatus(card, `📐 ${IMG_W}×${IMG_H}px — calculando nivel…`);
+      setDlProgress(card, 8);
+
+      /* ── 2. Nivel fijo: imagen liviana ~1MB ── */
+      const MAX_POSSIBLE = Math.ceil(Math.log2(Math.max(IMG_W, IMG_H)));
+
+      // Apuntar a una imagen de ~1500px en el lado mayor → ~0.5-1MB en JPEG
+      const TARGET_PX = 3000;
+      const neededLevel = Math.ceil(Math.log2(TARGET_PX));
+      // Usar el menor de: nivel calculado vs MAX_POSSIBLE-3 (evitar niveles gigantes)
+      const maxLevel = Math.min(neededLevel, MAX_POSSIBLE - 2);
+
+      const SCALE   = Math.pow(2, MAX_POSSIBLE - maxLevel);
+      const LEVEL_W = Math.ceil(IMG_W / SCALE);
+      const LEVEL_H = Math.ceil(IMG_H / SCALE);
+      const TILE_SZ = 256;
+
+      const maxCol = Math.ceil(LEVEL_W / TILE_SZ) - 1;
+      const maxRow = Math.ceil(LEVEL_H / TILE_SZ) - 1;
+
+      setDlStatus(card, `🔭 Nivel ${maxLevel} → ${LEVEL_W}×${LEVEL_H}px (${Math.ceil(LEVEL_W/TILE_SZ)}×${Math.ceil(LEVEL_H/TILE_SZ)} tiles)`);
+      setDlProgress(card, 14);
+
+      /* ── 3. Procesar anotaciones ── */
+      const rawAnns = meta.Annotations || [];
+      const annotations = rawAnns.map((a, i) => {
+        const title       = a.userDefined?.annotationTitle || `Annotation ${i+1}`;
+        const description = a.userDefined?.annotationText  || '';
+        const typeId      = a.typeId ?? 1;
+
+        if (typeId === 1) {
+          const absX = Math.abs(Array.isArray(a.coord) ? a.coord[0] : 0);
+          const absY = Math.abs(Array.isArray(a.coord) ? a.coord[1] : 0);
+          return {
+            id: i+1, title, description, type: 'pin',
+            coords: {
+              original:   { x: absX, y: absY, image_width: IMG_W, image_height: IMG_H },
+              level:      { level: maxLevel, x: Math.round(absX/SCALE), y: Math.round(absY/SCALE), image_width: LEVEL_W, image_height: LEVEL_H },
+              normalized: { x: parseFloat((absX/IMG_W).toFixed(6)), y: parseFloat((absY/IMG_H).toFixed(6)) }
+            }
+          };
+        } else {
+          const points = (Array.isArray(a.coord) ? a.coord : []).map(([px, py]) => ({
+            x: Math.abs(px), y: Math.abs(py)
+          }));
+          if (!points.length) return { id: i+1, title, description, type: 'region', points: [], bbox: null, center: null };
+          const xs = points.map(p => p.x), ys = points.map(p => p.y);
+          const minX = Math.min(...xs), maxX = Math.max(...xs);
+          const minY = Math.min(...ys), maxY = Math.max(...ys);
+          const cx = (minX+maxX)/2, cy = (minY+maxY)/2;
+          return {
+            id: i+1, title, description, type: 'region',
+            points: points.map(p => ({ x: p.x, y: p.y, normX: parseFloat((p.x/IMG_W).toFixed(6)), normY: parseFloat((p.y/IMG_H).toFixed(6)) })),
+            bbox: { minX, minY, maxX, maxY,
+              normMinX: parseFloat((minX/IMG_W).toFixed(6)), normMinY: parseFloat((minY/IMG_H).toFixed(6)),
+              normMaxX: parseFloat((maxX/IMG_W).toFixed(6)), normMaxY: parseFloat((maxY/IMG_H).toFixed(6)) },
+            center: { x: cx, y: cy, normX: parseFloat((cx/IMG_W).toFixed(6)), normY: parseFloat((cy/IMG_H).toFixed(6)) },
+            image_width: IMG_W, image_height: IMG_H
+          };
+        }
+      });
+
+      // Deduplicar
+      const seen = new Set();
+      const uniqueAnnotations = annotations.filter(a => {
+        const key = a.type === 'pin'
+          ? `pin|${a.title}|${a.coords.normalized.x}|${a.coords.normalized.y}`
+          : `region|${a.title}|${a.bbox?.normMinX}|${a.bbox?.normMinY}|${a.bbox?.normMaxX}|${a.bbox?.normMaxY}`;
+        if (seen.has(key)) return false;
+        seen.add(key); return true;
+      });
+      uniqueAnnotations.forEach((a, i) => { a.id = i+1; });
+
+      /* ── 4. Descargar JSON ── */
+      if (controller.aborted) return;
+      const payload = {
+        slide: { id: slideId, title: TITLE, source: url,
+                 width: IMG_W, height: IMG_H, tile_base_url: BASE,
+                 downloaded_level: maxLevel, scale_factor: SCALE,
+                 downloaded_width: LEVEL_W, downloaded_height: LEVEL_H },
+        annotations: uniqueAnnotations
+      };
+      const jl = document.createElement('a');
+      jl.href = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
+      jl.download = `${SLIDE_NAME}_annotations.json`;
+      jl.click();
+
+      /* ── 5. Grilla final ── */
+      const finalCols = maxCol + 1;
+      const finalRows = maxRow + 1;
+      if (controller.aborted) return;
+
+      /* ── 6. Ensamblar imagen en canvas ── */
+      const canvas = document.createElement('canvas');
+      canvas.width  = LEVEL_W;
+      canvas.height = LEVEL_H;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, LEVEL_W, LEVEL_H);
+
+      const realTotal = finalCols * finalRows;
+      let loaded = 0;
+
+      setDlStatus(card, `🧩 Ensamblando ${realTotal} tiles (${finalCols}×${finalRows})…`);
+      setDlProgress(card, 25);
+
+      await Promise.all(
+        Array.from({ length: finalCols }, (_, col) =>
+          Array.from({ length: finalRows }, (_, row) =>
+            new Promise(resolve => {
+              if (controller.aborted) { resolve(); return; }
+              const img = new Image();
+              img.crossOrigin = 'anonymous';
+              img.onload = () => {
+                const destX = col * TILE_SZ, destY = row * TILE_SZ;
+                const drawW = Math.min(img.width,  LEVEL_W - destX);
+                const drawH = Math.min(img.height, LEVEL_H - destY);
+                if (drawW > 0 && drawH > 0)
+                  ctx.drawImage(img, 0, 0, drawW, drawH, destX, destY, drawW, drawH);
+                loaded++;
+                const pct = Math.round(25 + (loaded / realTotal) * 70);
+                setDlProgress(card, pct);
+                setDlStatus(card, `🧩 Tiles: ${loaded}/${realTotal} (${Math.round(loaded/realTotal*100)}%)`);
+                resolve();
+              };
+              img.onerror = () => { loaded++; resolve(); };
+              img.src = `${PROXY}/tile/get?url=${encodeURIComponent(`${BASE}/${maxLevel}/${col}_${row}.jpg`)}`;
+            })
+          ).flat()
+        ).flat()
+      );
+
+      if (controller.aborted) return;
+
+      /* ── 7. Exportar imagen ── */
+      setDlStatus(card, '💾 Exportando imagen…');
+      setDlProgress(card, 97);
+
+      await new Promise(resolve => {
+        canvas.toBlob(blob => {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = `${SLIDE_NAME}_full_annotated.jpg`;
+          a.click();
+          resolve();
+        }, 'image/jpeg', 0.95);
+      });
+
+      setDlProgress(card, 100);
+      const pins    = uniqueAnnotations.filter(a => a.type === 'pin').length;
+      const regions = uniqueAnnotations.filter(a => a.type === 'region').length;
+      setDlStatus(card, `✅ ${SLIDE_NAME} — ${canvas.width}×${canvas.height}px | ${pins} pins, ${regions} regiones`, 'done');
+      btn.innerHTML = downloadIcon() + ' Descargar';
+      btn.disabled = false;
+
+    } catch (err) {
+      if (!controller.aborted) {
+        setDlStatus(card, `❌ Error: ${err.message}`, 'error');
+        btn.innerHTML = downloadIcon() + ' Reintentar';
+        btn.disabled = false;
+      }
+    } finally {
+      activeDownloads.delete(cardId);
+    }
+  }
+
+  /* ════════════════════════════════════════════
+     EMBED PRINCIPAL
+  ════════════════════════════════════════════ */
+  function embedSlides(urlsOverride) {
+    hideError();
+    const raw = urlsOverride
+      ? urlsOverride.join('\n')
+      : document.getElementById('urlInput').value;
+
+    if (!raw.trim()) {
+      showError('Por favor pega uno o varios enlaces de SmartZoom.');
+      return;
+    }
+
+    const urls = extractUrls(raw);
+    if (!urls.length) {
+      showError('No se encontraron URLs válidas de embed.smartzoom.com/slide/…');
+      return;
+    }
+
+    // Cancelar descargas activas antes de limpiar
+    activeDownloads.forEach(ctrl => ctrl.abort());
+    activeDownloads.clear();
+
+    const grid = document.getElementById('slidesGrid');
+    grid.innerHTML = '';
+    grid.className = urls.length >= 2 ? 'multi' : '';
+    urls.forEach((url, i) => grid.appendChild(buildSlideCard(url, i)));
+
+    const viewer = document.getElementById('viewer');
+    viewer.classList.add('visible');
+
+    document.getElementById('countNum').textContent = urls.length;
+    document.getElementById('countBadge').classList.add('visible');
+
+    const label = urls.length === 1
+      ? urls[0].replace('https://embed.smartzoom.com/slide/', '').split('?')[0]
+      : `${urls.length} slides`;
+
+    const entry = { urls, label };
+    const isDup = sessionHistory.length &&
+      JSON.stringify(sessionHistory[0].urls) === JSON.stringify(urls);
+    if (!isDup) {
+      sessionHistory.unshift(entry);
+      if (sessionHistory.length > 8) sessionHistory.pop();
+      renderHistory();
+    }
+
+    setTimeout(() => viewer.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120);
+  }
+
+  function clearAll() {
+    activeDownloads.forEach(ctrl => ctrl.abort());
+    activeDownloads.clear();
+    document.getElementById('slidesGrid').innerHTML = '';
+    document.getElementById('viewer').classList.remove('visible');
+    document.getElementById('countBadge').classList.remove('visible');
+    document.getElementById('urlInput').value = '';
+    hideError();
+  }
+
+  function renderHistory() {
+    const section = document.getElementById('history-section');
+    const list    = document.getElementById('history-list');
+    if (!sessionHistory.length) { section.classList.remove('visible'); return; }
+    section.classList.add('visible');
+    list.innerHTML = sessionHistory.map((entry, i) => `
+      <div class="history-item" onclick="loadFromHistory(${i})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+        </svg>
+        <span class="h-preview">${entry.label}</span>
+        ${entry.urls.length > 1 ? `<span class="h-count">${entry.urls.length} slides</span>` : ''}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent)">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </div>
+    `).join('');
+  }
+
+  function loadFromHistory(i) {
+    const entry = sessionHistory[i];
+    document.getElementById('urlInput').value = entry.urls.join('\n');
+    embedSlides(entry.urls);
+  }
+
+  /* ── Atajos ── */
+  document.getElementById('urlInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) embedSlides();
+  });
+
+  document.getElementById('urlInput').addEventListener('paste', (e) => {
+    const text = e.clipboardData?.getData('text') || '';
+    const urls = extractUrls(text);
+    if (urls.length) {
+      e.preventDefault();
+      document.getElementById('urlInput').value = text;
+      embedSlides();
+    } else {
+      // fallback: esperar render del textarea
+      setTimeout(() => {
+        const val = document.getElementById('urlInput').value;
+        if (extractUrls(val).length) embedSlides();
+      }, 150);
+    }
+  });
+
+  async function downloadAll() {
+    const cards = Array.from(document.querySelectorAll('#slidesGrid .slide-card'));
+    if (!cards.length) return;
+    const btn = document.getElementById('dlAllBtn');
+    const status = document.getElementById('dlAllStatus');
+    btn.disabled = true;
+    let done = 0;
+    status.textContent = `0/${cards.length}`;
+    for (const card of cards) {
+      await startDownload(card);
+      done++;
+      status.textContent = `${done}/${cards.length}`;
+    }
+    btn.disabled = false;
+    status.textContent = `✅ ${done} descargados`;
+    setTimeout(() => { status.textContent = ''; }, 4000);
+  }
+</script>
+</body>
+</html>

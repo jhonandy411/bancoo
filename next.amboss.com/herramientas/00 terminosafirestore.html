@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firestore Uploader - Medical Terms</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 { font-size: 32px; margin-bottom: 10px; }
+    .header p { opacity: 0.9; font-size: 16px; }
+
+    .content { padding: 30px; }
+    .section { margin-bottom: 30px; }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 12px 15px;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 300px;
+      padding: 15px;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      resize: vertical;
+      transition: all 0.3s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 14px 30px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    .button:active { transform: translateY(0); }
+
+    .button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .preview {
+      background: #f8f9fa;
+      border: 2px solid #e1e8ed;
+      border-radius: 8px;
+      padding: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .preview-item {
+      background: white;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .preview-item h4 { color: #2c3e50; margin-bottom: 8px; font-size: 16px; }
+
+    .preview-item .type {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #e3f2fd;
+      color: #1976d2;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 8px;
+    }
+
+    .preview-item .definition {
+      color: #555;
+      margin-top: 10px;
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .status {
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .status.success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      display: block;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      display: block;
+    }
+
+    .status.info {
+      background: #d1ecf1;
+      border: 1px solid #bee5eb;
+      color: #0c5460;
+      display: block;
+    }
+
+    .firebase-config {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .firebase-config h3 {
+      color: #856404;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .firebase-config code {
+      background: white;
+      padding: 10px;
+      border-radius: 4px;
+      display: block;
+      font-size: 12px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔥 Firestore Medical Terms Uploader</h1>
+      <p>Sube definiciones médicas extraídas de popups a Firestore</p>
+    </div>
+
+    <div class="content">
+      <div class="firebase-config">
+        <h3>⚠️ Configuración de Firebase requerida</h3>
+        <p style="margin-bottom: 10px; color: #856404;">
+          Reemplaza las credenciales de Firebase en el código JavaScript al final de este archivo.
+        </p>
+      </div>
+
+      <div class="section">
+        <label class="section-title">📁 Ruta de la colección en Firestore</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="collectionPath"
+            placeholder="Ejemplo: phrasionaryTerms o electrocardiography/terms"
+            value="phrasionaryTerms"
+          >
+        </div>
+        <p style="color: #666; font-size: 13px; margin-top: 8px;">
+          Puedes usar subcollecciones con "/". Ejemplo: <code>electrocardiography/terms</code>
+        </p>
+      </div>
+
+      <div class="section">
+        <label class="section-title">📋 Pega aquí el HTML de los popups clonados</label>
+        <textarea
+          id="htmlInput"
+          placeholder="Pega aquí el HTML completo del contenedor #all-popups-container..."
+        ></textarea>
+      </div>
+
+      <div class="section" style="display: flex; gap: 15px;">
+        <button class="button" onclick="parseHTML()">🔍 Analizar HTML</button>
+        <button class="button" onclick="uploadToFirestore()" id="uploadBtn" disabled>⬆️ Subir a Firestore</button>
+      </div>
+
+      <div id="statusMessage" class="status"></div>
+
+      <div class="section" id="previewSection" style="display: none;">
+        <h3 class="section-title">👁️ Vista previa de términos extraídos</h3>
+        <div id="preview" class="preview"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getFirestore, collection, doc, writeBatch } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+      authDomain: "bancomicina-62bfe.firebaseapp.com",
+      projectId: "bancomicina-62bfe",
+      storageBucket: "bancomicina-62bfe.appspot.com",
+      messagingSenderId: "737254665977",
+      appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Global state
+    let parsedTerms = [];
+    window.db = db;
+
+    function makeSafeIdFromTitle(title, fallbackId) {
+      if (!title || !title.trim()) return fallbackId;
+
+      let cleaned = title.trim();
+
+      // Normalizar acentos (é → e, etc.)
+      cleaned = cleaned.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+      // Eliminar caracteres raros (símbolos, emojis, etc.)
+      cleaned = cleaned.replace(/[^\w\s:\-\(\)]/g, "");
+
+      // Firestore: quitar "/" por seguridad
+      cleaned = cleaned.replace(/\//g, "-");
+
+      // Colapsar espacios múltiples
+      cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+      return cleaned || fallbackId;
+    }
+
+    function showStatus(type, message) {
+      const statusDiv = document.getElementById('statusMessage');
+      statusDiv.className = `status ${type}`;
+      statusDiv.textContent = message;
+      statusDiv.style.display = 'block';
+    }
+    window.showStatus = showStatus;
+
+    function displayPreview(terms) {
+      const preview = document.getElementById('preview');
+      const previewSection = document.getElementById('previewSection');
+
+      preview.innerHTML = '';
+
+      terms.forEach(term => {
+        const item = document.createElement('div');
+        item.className = 'preview-item';
+
+        const typeLabel =
+          term.type === '🔗' ? 'Tooltip Link' :
+          term.type === '📖' ? 'Dictionary' :
+          term.type === '📄' ? 'API Link' : 'Unknown';
+
+        item.innerHTML = `
+          <h4>
+            <span class="type">${term.type} ${typeLabel}</span>
+            #${term.index}: ${term.title} <span style="opacity:.55; font-size:12px;">(docId: ${term.id})</span>
+          </h4>
+          ${term.abbreviation ? `<p><strong>Abreviación:</strong> ${term.abbreviation}</p>` : ''}
+          ${term.synonym ? `<p><strong>Sinónimo:</strong> ${term.synonym}</p>` : ''}
+          ${term.phrasionaryTitle ? `<p><strong>Phrasionary:</strong> ${term.phrasionaryTitle}</p>` : ''}
+          <div class="definition">${(term.definition || '').substring(0, 260)}${(term.definition || '').length > 260 ? '...' : ''}</div>
+          ${term.images?.length ? `<p style="margin-top: 8px; color: #666;"><strong>📷 Imágenes:</strong> ${term.images.length}</p>` : ''}
+          ${term.article?.title ? `<p style="margin-top: 8px; color: #666;"><strong>📄 Artículo:</strong> ${term.article.title}</p>` : ''}
+        `;
+
+        preview.appendChild(item);
+      });
+
+      previewSection.style.display = 'block';
+    }
+
+    window.parseHTML = function() {
+      const htmlInput = document.getElementById('htmlInput').value.trim();
+
+      if (!htmlInput) {
+        showStatus('error', '⚠️ Por favor pega el HTML primero');
+        return;
+      }
+
+      try {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlInput;
+
+        const popups = tempDiv.querySelectorAll('.cloned-popup-wrapper');
+
+        if (!popups.length) {
+          showStatus('error', '❌ No se encontraron popups. Pegá el contenido del contenedor #all-popups-container (o donde estén las .cloned-popup-wrapper).');
+          return;
+        }
+
+        parsedTerms = [];
+
+        // ✅ DEDUPE: si un nombre se repite, se ignora (no se renombra)
+        const seenNames = new Set();
+        let skippedDuplicates = 0;
+
+        popups.forEach((popup, i) => {
+          const dataIndexRaw = popup.getAttribute('data-index');
+          const dataIndex = dataIndexRaw ? parseInt(dataIndexRaw, 10) : (i + 1);
+
+          const dataType = popup.getAttribute('data-type') || '';
+
+          // title del <strong> (si existe)
+          const titleElement = popup.querySelector('strong');
+          const fullTitle = titleElement ? titleElement.textContent : `Term ${dataIndex}`;
+          const tooltipTitle = fullTitle
+            .replace(/^#\d+\s*[🔗📖📄❓]\s*/u, '')
+            .replace(/\uFFFD/g, '') // quita �
+            .trim();
+
+          // header title phrasionary
+          const headerTitleEl = popup.querySelector('._704b81c021ed2ef9--header p.css-v4r7ym-StyledText');
+          const headerTitle = headerTitleEl ? headerTitleEl.textContent.trim() : '';
+
+          // ✅ definition
+          const phrasionaryRoot =
+            popup.querySelector('._704b81c021ed2ef9--phrasionaryContainer') || popup;
+
+          let definition = [...phrasionaryRoot.querySelectorAll('.css-den2g6-StyledText')]
+            .map(el => el.textContent.trim())
+            .filter(Boolean)
+            .join('\n\n');
+
+          if (!definition) {
+            const clone = phrasionaryRoot.cloneNode(true);
+
+            clone
+              .querySelectorAll(
+                '._704b81c021ed2ef9--header,' +
+                '._704b81c021ed2ef9--thumbnailContainer,' +
+                '._704b81c021ed2ef9--linksContainer,' +
+                'script,style'
+              )
+              .forEach(n => n.remove());
+
+            definition = (clone.innerText || '')
+              .replace(/\n{3,}/g, '\n\n')
+              .trim();
+          }
+
+          // article
+          const articleLink = popup.querySelector('a[href^="/us/article/"]');
+          const articleHref = articleLink ? articleLink.getAttribute('href') : '';
+          const articleTitle = articleLink ? articleLink.textContent.trim() : '';
+
+// ✅ canonical title (FIX)
+let mainTitle =
+  (tooltipTitle && tooltipTitle.trim()) ? tooltipTitle.trim() :
+  (headerTitle && headerTitle.trim()) ? headerTitle.trim() :
+  (articleTitle && articleTitle.trim()) ? articleTitle.trim() :
+  (fullTitle && fullTitle.trim()) ? fullTitle.trim() :
+  `Term ${dataIndex}`;
+
+          // ✅ baseId = docId final (NO renombrar)
+          const baseId = makeSafeIdFromTitle(mainTitle, `term_${dataIndex}`);
+
+          // ✅ si ya existe, lo ignoramos
+          if (seenNames.has(baseId)) {
+            skippedDuplicates++;
+            return;
+          }
+          seenNames.add(baseId);
+
+          // images
+          const images = [];
+          popup.querySelectorAll('img[src^="https://media-us.amboss.com"]').forEach(img => {
+            images.push({
+              url: img.getAttribute('src'),
+              alt: img.getAttribute('alt') || '',
+              title: img.getAttribute('title') || ''
+            });
+          });
+
+          // abbreviation + synonyms
+          const abbrevEl = popup.querySelector('._704b81c021ed2ef9--translation');
+          const abbreviation = abbrevEl
+            ? abbrevEl.textContent.replace('Abbreviation:', '').replace('Abbreviations:', '').trim()
+            : '';
+
+          const synonymEl = popup.querySelector('._704b81c021ed2ef9--synonyms');
+          const synonym = synonymEl ? synonymEl.textContent.trim() : '';
+
+          parsedTerms.push({
+            id: baseId,          // ✅ ID estable (sin -2)
+            index: dataIndex,
+            type: dataType,
+            title: mainTitle,
+            tooltipTitle: tooltipTitle,
+            phrasionaryTitle: headerTitle,
+            definition,
+            abbreviation,
+            synonym,
+            article: {
+              href: articleHref,
+              title: articleTitle,
+              fullUrl: articleHref ? `https://next.amboss.com${articleHref}` : ''
+            },
+            images,
+            createdAt: new Date().toISOString(),
+          });
+        });
+
+        window.parsedTerms = parsedTerms;
+
+        displayPreview(parsedTerms);
+        document.getElementById('uploadBtn').disabled = false;
+
+        showStatus(
+          'success',
+          `✅ Se encontraron ${parsedTerms.length} términos únicos.` +
+          (skippedDuplicates ? ` (Ignorados ${skippedDuplicates} duplicados por nombre)` : '')
+        );
+      } catch (error) {
+        console.error('Error parsing HTML:', error);
+        showStatus('error', `❌ Error al analizar el HTML: ${error.message}`);
+      }
+    };
+
+    async function commitInChunks(db, collectionPathSegments, terms, chunkSize = 450) {
+      let done = 0;
+      const colRef = collection(db, ...collectionPathSegments);
+
+      while (done < terms.length) {
+        const batch = writeBatch(db);
+        const slice = terms.slice(done, done + chunkSize);
+
+        slice.forEach(term => {
+          const ref = doc(colRef, term.id);
+          batch.set(ref, term);
+        });
+
+        await batch.commit();
+        done += slice.length;
+      }
+    }
+
+    window.uploadToFirestore = async function() {
+      const collectionPathInput = document.getElementById('collectionPath').value.trim();
+
+      if (!collectionPathInput) {
+        showStatus('error', '⚠️ Por favor ingresa la ruta de la colección o documento');
+        return;
+      }
+
+      if (!parsedTerms.length) {
+        showStatus('error', '⚠️ No hay términos para subir. Primero analiza el HTML.');
+        return;
+      }
+
+      const uploadBtn = document.getElementById('uploadBtn');
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = '⏳ Subiendo...';
+
+      try {
+        let finalPath = collectionPathInput;
+        let segments = collectionPathInput.split('/').filter(Boolean);
+
+        if (!segments.length) {
+          showStatus('error', '❌ Ruta vacía o inválida');
+          uploadBtn.disabled = false;
+          uploadBtn.textContent = '⬆️ Subir a Firestore';
+          return;
+        }
+
+        // si termina en documento (segments pares) => agrego subcolección "terms"
+        if (segments.length % 2 === 0) {
+          const defaultSubcollection = 'terms';
+          finalPath = collectionPathInput.replace(/\/+$/, '') + '/' + defaultSubcollection;
+          segments = finalPath.split('/').filter(Boolean);
+
+          showStatus('info',
+            `ℹ️ La ruta "${collectionPathInput}" apunta a un DOCUMENTO. ` +
+            `Se usará la subcolección "${defaultSubcollection}": "${finalPath}"`
+          );
+        }
+
+        showStatus('info', `📤 Subiendo ${parsedTerms.length} términos a "${finalPath}"...`);
+
+        await commitInChunks(db, segments, parsedTerms, 450);
+
+        showStatus('success', `🎉 ¡Éxito! Se subieron ${parsedTerms.length} términos a "${finalPath}"`);
+        uploadBtn.textContent = '✅ Subido correctamente';
+      } catch (error) {
+        console.error('Error uploading to Firestore:', error);
+        showStatus('error', `❌ Error al subir a Firestore: ${error.message}`);
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = '⬆️ Subir a Firestore';
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+// =========================================
+// ✅ Clonar popovers REALES para span.api.explanation
+// + guardar el ID del trigger (el.id) en cada resultado
+// =========================================
+
+const items = Array.from(document.querySelectorAll(
+  'span.api.explanation[aria-haspopup="true"], span.api.explanation[data-content]'
+));
+console.log(`📌 Encontrados: ${items.length} span.api.explanation`);
+
+let root = document.getElementById("explanation-popover-clones");
+if (root) root.remove();
+
+root = document.createElement("div");
+root.id = "explanation-popover-clones";
+(document.querySelector("article") || document.body).appendChild(root);
+
+let style = document.getElementById("explanation-popover-clones-style");
+if (style) style.remove();
+style = document.createElement("style");
+style.id = "explanation-popover-clones-style";
+style.textContent = `
+  #explanation-popover-clones .explanation-item{ margin: 12px 0; }
+  #explanation-popover-clones .explanation-item + .explanation-item{
+    border-top: 1px solid rgba(0,0,0,.10);
+    padding-top: 12px;
+  }
+  #explanation-popover-clones .phrasionary_popover{
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+    max-width: 100% !important;
+    pointer-events: auto !important;
+  }
+`;
+document.head.appendChild(style);
+
+function closePopovers() {
+  document.body.click();
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', keyCode: 27 }));
+}
+
+function getVisibleDSPopover() {
+  const pops = Array.from(document.querySelectorAll('div[id^="DSPopover_"]'));
+  return pops.find(p => p.offsetParent !== null && p.clientHeight > 20) || null;
+}
+
+function waitForDSPopover(maxAttempts = 60, interval = 120) {
+  return new Promise(resolve => {
+    let a = 0;
+    const t = setInterval(() => {
+      const pop = getVisibleDSPopover();
+      if (pop) { clearInterval(t); resolve(pop); return; }
+      if (++a >= maxAttempts) { clearInterval(t); resolve(null); }
+    }, interval);
+  });
+}
+
+function fireOpen(el) {
+  el.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true, cancelable: true, pointerType: 'mouse' }));
+  el.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, cancelable: true, view: window }));
+  el.dispatchEvent(new FocusEvent('focus', { bubbles: true, cancelable: true }));
+  el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, pointerType: 'mouse' }));
+  el.click();
+}
+
+(async () => {
+  let ok = 0, fail = 0;
+
+  for (let i = 0; i < items.length; i++) {
+    const el = items[i];
+
+    // ✅ ID del trigger (ej: Eca62c862804d111412def8680f124193)
+    const triggerId = el.id || "";
+    const triggerType = el.getAttribute("data-type") || "";
+    const triggerControls = el.getAttribute("aria-controls") || ""; // a veces ya trae DSPopover_xxx
+
+    try {
+      closePopovers();
+      await new Promise(r => setTimeout(r, 150));
+
+      el.scrollIntoView({ behavior: "instant", block: "center" });
+      await new Promise(r => setTimeout(r, 150));
+
+      fireOpen(el);
+
+      const dsp = await waitForDSPopover(60, 120);
+      if (!dsp) throw new Error("No apareció DSPopover");
+
+      const pop = dsp.querySelector('.phrasionary_popover[data-testid="phrasionary_popover"], .phrasionary_popover');
+      if (!pop) throw new Error("No se encontró .phrasionary_popover");
+
+      await new Promise(r => setTimeout(r, 150));
+
+      const clone = pop.cloneNode(true);
+
+      // ✅ Guardar relación 1:1 sin modificar el interior
+      if (triggerId) clone.setAttribute("data-trigger-id", triggerId);
+      clone.setAttribute("data-trigger-index", String(i + 1));
+      if (triggerType) clone.setAttribute("data-trigger-type", triggerType);
+      if (triggerControls) clone.setAttribute("data-trigger-controls", triggerControls);
+
+      // ✅ Contenedor separado por cada item (también guarda id)
+      const item = document.createElement("div");
+      item.className = "explanation-item";
+      if (triggerId) item.setAttribute("data-trigger-id", triggerId);
+      item.setAttribute("data-trigger-index", String(i + 1));
+      if (triggerType) item.setAttribute("data-trigger-type", triggerType);
+
+      item.appendChild(clone);
+      root.appendChild(item);
+
+      ok++;
+      closePopovers();
+      await new Promise(r => setTimeout(r, 80));
+    } catch (e) {
+      fail++;
+      console.warn(`⚠️ Falló #${i + 1} id=${triggerId}: ${e.message}`);
+    }
+  }
+
+  console.log(`✅ Listo: ${ok}/${items.length} · ❌ ${fail}`);
+})();

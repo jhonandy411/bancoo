@@ -1,0 +1,500 @@
+<style>
+
+  #main-content {
+  /* deja lo que ya tengas (background, padding, etc.) */
+  /* 👇 Asegúrate de NO tener estas líneas: */
+  /* position: fixed;
+  */
+  /* position: absolute;
+  */
+  /* top: 0;
+  */
+  /* inset: 0;
+  */
+  /* 👇 y añade estas al final del bloque */
+  margin-top: 56px;
+  /* la altura de tu header principal */
+  height: calc(100vh - 1px);
+  /* todo el alto menos el header */
+  overflow-y: auto;
+
+  /* que scrollee sólo el main content */
+}
+
+
+
+
+
+
+
+</style>
+
+
+<body>
+
+
+  <div class="_6eb1c4a28c8c5a44--focus _6eb1c4a28c8c5a44--focusNavIsOpen" id="main-content" tabindex="-1">
+
+    <div class="_6eb1c4a28c8c5a44--body">
+      <div aria-label="Main content" class="cd71ec7927bda3fc--page" data-e2e-test-id="LibraryPage"
+        data-testid="LibraryPage" role="region" tabindex="0">
+        <div class="bf515b05fa0bc768--pageWrapper">
+          <div
+            class="bf515b05fa0bc768--parentScrollWindow bf515b05fa0bc768--visibleColumns bf515b05fa0bc768--visibleColumns1"
+            id="infiniteTreeAperture">
+            <div class="bf515b05fa0bc768--columnContainer" data-testid="infiniteTreeColumnContainer"
+              id="infiniteTreeColumnContainer">
+              <!-- PANEL 1: Library (2 items) -->
+              <div class="_99a4ff49e0ec9936--column">
+                <div class="aa579d380db5424b--columnContainer" data-e2e-test-id="library-column-Library">
+                  <div class="aa579d380db5424b--header" data-e2e-test-id="library-page-title">
+                    Library
+                  </div>
+
+                  <div class="aa579d380db5424b--listContainer">
+                    <div id="articles-supracat-list"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PANEL 2 -->
+              <div id="panel-2" class="_99a4ff49e0ec9936--column" style="display: none;">
+                <div class="aa579d380db5424b--columnContainer" data-e2e-test-id="library-column-Basic sciences">
+                  <div id="panel2-title" class="aa579d380db5424b--header" data-e2e-test-id="library-page-title">
+                    Basic sciences
+                  </div>
+
+                  <div class="aa579d380db5424b--listContainer">
+                    <div id="articles-cat-list"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PANEL 3 -->
+              <div id="panel-3" class="_99a4ff49e0ec9936--column" style="display: none;">
+                <div class="aa579d380db5424b--columnContainer" data-e2e-test-id="library-column-By discipline">
+                  <div id="panel3-title" class="aa579d380db5424b--header" data-e2e-test-id="library-page-title">
+                    By discipline
+                  </div>
+
+                  <div class="aa579d380db5424b--listContainer">
+                    <div id="articles-subcat-list"></div>
+                  </div>
+                </div>
+              </div>
+
+
+              <!-- END PANELS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const supracatListEl = document.getElementById('articles-supracat-list');
+      const catListEl = document.getElementById('articles-cat-list');
+      const subcatListEl = document.getElementById('articles-subcat-list');
+
+      // Si este HTML se usa embebido y los contenedores no existen, salimos silenciosamente
+      if (!supracatListEl || !catListEl || !subcatListEl) return;
+
+      if (!window.firebase || !firebase.firestore) {
+        console.warn('Firebase no está disponible en Articles');
+        return;
+      }
+
+      const db = firebase.firestore();
+
+      let articleSupracats = [];
+      let articleCats = [];
+      let articleSubcats = [];
+      let selectedSupracatId = null; // Para poder consultar subcolecciones anidadas
+      let selectedCatId = null;
+      let selectedSubcatId = null;
+      // Track names for building the path
+      let selectedSupracatName = null;
+      let selectedCatName = null;
+
+      function getTitleFromDocData(data) {
+        return (
+          data.nombre ||
+          data.denominacion ||
+          data.titulo ||
+          data.title ||
+          'Sin título'
+        );
+      }
+
+
+
+
+      const panel2TitleEl = document.getElementById('panel2-title');
+const panel3TitleEl = document.getElementById('panel3-title');
+
+function setPanelTitle(el, fallback, text) {
+  if (!el) return;
+  el.textContent = (text && String(text).trim()) ? text : fallback;
+}
+
+
+
+
+
+
+
+
+
+      function updateVisibleColumns(count) {
+        const aperture = document.getElementById('infiniteTreeAperture');
+        if (!aperture) return;
+        
+        aperture.classList.remove('bf515b05fa0bc768--visibleColumns1', 'bf515b05fa0bc768--visibleColumns2', 'bf515b05fa0bc768--visibleColumns3', 'bf515b05fa0bc768--visibleColumns4');
+        aperture.classList.add(`bf515b05fa0bc768--visibleColumns${count}`);
+
+        // Reset scroll position of the main page container
+        const pageContainer = document.querySelector('.cd71ec7927bda3fc--page') || 
+                              aperture.closest('.cd71ec7927bda3fc--page');
+        
+        if (pageContainer) {
+          pageContainer.scrollTop = 0;
+        } else {
+          // Fallback
+          window.scrollTo(0, 0);
+        }
+      }
+
+      // =========================
+      // SUPRACATEGORÍAS
+      // =========================
+      async function loadArticlesSupracategorias() {
+        try {
+          supracatListEl.innerHTML = 
+  '<div style="padding:40px; text-align: center;"><span data-loading-spinner></span></div>';          if (window.AmbossUI && window.AmbossUI.initLoadingSpinners) window.AmbossUI.initLoadingSpinners();
+          console.log('Intentando cargar supracategorías...');
+
+          // Eliminamos orderBy('orden') temporalmente porque si los documentos no tienen ese campo, Firestore los filtra.
+          const snap = await db.collection('supracategorias').get();
+
+          if (snap.empty) {
+            console.warn('La colección supracategorias está vacía.');
+            supracatListEl.innerHTML = `
+               <div style="padding:10px; color:orange;">
+                 No hay supracategorías (colección vacía).<br>
+                 <button id="btn-seed-data" style="margin-top:10px; cursor:pointer; padding:5px 10px;">
+                   Generar Datos de Prueba
+                 </button>
+               </div>
+             `;
+            setTimeout(() => {
+              const btn = document.getElementById('btn-seed-data');
+              if (btn) btn.addEventListener('click', seedDatabase);
+            }, 0);
+            return;
+          }
+
+          articleSupracats = snap.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          console.log('Supracategorías cargadas:', articleSupracats);
+          renderArticlesSupracategorias();
+        } catch (err) {
+          console.error('Error cargando supracategorías (Articles):', err);
+          supracatListEl.innerHTML = `<div style="padding:10px; color:red;">Error cargando datos: ${err.message}<br>Verifica la consola y las reglas de seguridad de Firestore.</div>`;
+        }
+      }
+
+      async function seedDatabase() {
+        if (!confirm('¿Quieres generar datos de prueba en Firestore? Esto creará colecciones supracategorias, categorias y subcategorias.')) return;
+
+        try {
+          console.log('Iniciando seed...');
+          const batch = db.batch();
+
+          // 1. Supracategoría: Library
+          const supraRef = db.collection('supracategorias').doc();
+          batch.set(supraRef, { nombre: 'Library', orden: 1 });
+
+          // 2. Categoría: Clinical Sciences (Subcolección)
+          const catRef = supraRef.collection('categorias').doc();
+          batch.set(catRef, { nombre: 'Clinical Sciences', orden: 1 });
+
+          // 3. Subcategoría: Cardiology (Subcolección de nivel 3)
+          const subRef = catRef.collection('subcategorias').doc();
+          batch.set(subRef, { nombre: 'Cardiology', orden: 1, slug: 'cardiology' });
+
+          await batch.commit();
+          alert('Datos generados correctamente. Recargando...');
+          loadArticlesSupracategorias();
+        } catch (err) {
+          console.error('Error generando datos:', err);
+          alert('Error generando datos: ' + err.message);
+        }
+      }
+
+      function renderArticlesSupracategorias() {
+        supracatListEl.innerHTML = '';
+
+        if (articleSupracats.length === 0) return;
+
+        const listContainer = document.createElement('div');
+        listContainer.className = '_0aed7b478bfe4386--listItemContainer _0aed7b478bfe4386--delineated _0aed7b478bfe4386--elevated';
+
+        articleSupracats.forEach(sc => {
+          const isActive = (sc.id === selectedSupracatId);
+          const item = createArticlesListItem(
+            getTitleFromDocData(sc),
+            function (evt) {
+              evt.preventDefault();
+              selectArticlesSupracategoria(sc.id);
+            },
+            isActive
+          );
+          listContainer.appendChild(item);
+        });
+
+        supracatListEl.appendChild(listContainer);
+      }
+
+      // =========================
+      // CATEGORÍAS
+      // =========================
+      async function selectArticlesSupracategoria(supracatId) {
+        selectedSupracatId = supracatId;
+        selectedCatId = null;
+        selectedSubcatId = null;
+        
+        // Track the supracategory name
+        const supracat = articleSupracats.find(sc => sc.id === supracatId);
+        selectedSupracatName = supracat ? getTitleFromDocData(supracat) : null;
+        selectedCatName = null;
+
+
+
+        setPanelTitle(panel2TitleEl, 'Basic sciences', selectedSupracatName); // Panel 2 = nombre supracat
+setPanelTitle(panel3TitleEl, 'By discipline', '');                    // reset panel 3
+
+        renderArticlesSupracategorias();
+
+        try {
+          catListEl.innerHTML = 
+          
+  '<div style="padding:40px; text-align: center;"><span data-loading-spinner></span></div>';          if (window.AmbossUI && window.AmbossUI.initLoadingSpinners) window.AmbossUI.initLoadingSpinners();
+          subcatListEl.innerHTML = '';
+          
+          // Show Panel 2
+          const p2 = document.getElementById('panel-2');
+          if(p2) p2.style.display = 'block';
+          // Hide Panel 3 (reset)
+          const p3 = document.getElementById('panel-3');
+          if(p3) p3.style.display = 'none';
+          
+          updateVisibleColumns(2);
+
+          // Consulta a SUBCOLECCIÓN: supracategorias/{id}/categorias
+          const snap = await db
+            .collection('supracategorias')
+            .doc(supracatId)
+            .collection('categorias')
+            // .orderBy('orden') // Comentado por seguridad
+            .get();
+
+          articleCats = snap.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+
+          renderArticlesCategorias();
+        } catch (err) {
+          console.error('Error cargando categorías (Articles):', err);
+          catListEl.innerHTML = `<div style="padding:10px; color:red;">Error: ${err.message}</div>`;
+        }
+      }
+
+      function renderArticlesCategorias() {
+        catListEl.innerHTML = '';
+
+        if (articleCats.length === 0) {
+          catListEl.innerHTML = '<div style="padding:10px; color:gray;">No hay categorías.</div>';
+          return;
+        }
+
+        const listContainer = document.createElement('div');
+        listContainer.className = '_0aed7b478bfe4386--listItemContainer _0aed7b478bfe4386--delineated _0aed7b478bfe4386--elevated';
+
+        articleCats.forEach(cat => {
+          const isActive = (cat.id === selectedCatId);
+          const item = createArticlesListItem(
+            getTitleFromDocData(cat),
+            function (evt) {
+              evt.preventDefault();
+              selectArticlesCategoria(cat.id);
+            },
+            isActive
+          );
+          listContainer.appendChild(item);
+        });
+
+        catListEl.appendChild(listContainer);
+      }
+
+      // =========================
+      // SUBCATEGORÍAS
+      // =========================
+      async function selectArticlesCategoria(catId) {
+        if (!selectedSupracatId) {
+          console.error('No hay supracategoría seleccionada');
+          return;
+        }
+
+        selectedCatId = catId;
+        selectedSubcatId = null;
+        
+        // Track the category name
+        const cat = articleCats.find(c => c.id === catId);
+        selectedCatName = cat ? getTitleFromDocData(cat) : null;
+
+
+
+        setPanelTitle(panel3TitleEl, 'By discipline', selectedCatName); // Panel 3 = nombre cat
+
+        renderArticlesCategorias();
+
+        try {
+          subcatListEl.innerHTML = 
+  '<div style="padding:40px; text-align: center;"><span data-loading-spinner></span></div>';          if (window.AmbossUI && window.AmbossUI.initLoadingSpinners) window.AmbossUI.initLoadingSpinners();
+          
+          // Show Panel 3
+          const p3 = document.getElementById('panel-3');
+          if(p3) p3.style.display = 'block';
+          
+          updateVisibleColumns(3);
+
+          // Consulta a SUBCOLECCIÓN DE NIVEL 3: supracategorias/{supraId}/categorias/{catId}/subcategorias
+          const snap = await db
+            .collection('supracategorias')
+            .doc(selectedSupracatId)
+            .collection('categorias')
+            .doc(catId)
+            .collection('subcategorias')
+            // .orderBy('orden') // Comentado por seguridad
+            .get();
+
+          articleSubcats = snap.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+
+          renderArticlesSubcategorias();
+        } catch (err) {
+          console.error('Error cargando subcategorías (Articles):', err);
+          subcatListEl.innerHTML = `<div style="padding:10px; color:red;">Error: ${err.message}</div>`;
+        }
+      }
+
+      function renderArticlesSubcategorias() {
+        subcatListEl.innerHTML = '';
+
+        if (articleSubcats.length === 0) return;
+
+        const listContainer = document.createElement('div');
+        listContainer.className = '_0aed7b478bfe4386--listItemContainer _0aed7b478bfe4386--delineated _0aed7b478bfe4386--elevated';
+
+        articleSubcats.forEach(subcat => {
+          const isActive = (subcat.id === selectedSubcatId);
+          const item = createArticlesListItem(
+            getTitleFromDocData(subcat),
+            function (evt) {
+              evt.preventDefault();
+              selectedSubcatId = subcat.id;
+              renderArticlesSubcategorias();
+              openSubcategoriaFromArticles(subcat);
+            },
+            isActive
+          );
+          listContainer.appendChild(item);
+        });
+
+        subcatListEl.appendChild(listContainer);
+      }
+
+      // =========================
+      // FACTOR COMÚN: ITEM DE LISTA
+      // =========================
+      function createArticlesListItem(label, onClick, isActive) {
+        const link = document.createElement('a');
+        link.href = '#';
+        link.className = '_1e1f646697ee8d26--articleLink ac38006eca9237c9--link';
+
+        const activeContainerClass = isActive ? 'd7c682ab962c5138--containerActive' : '';
+        const activeIconClass = isActive ? 'd7c682ab962c5138--iconActive' : '';
+
+        link.innerHTML = `
+          <div class="d7c682ab962c5138--container ${activeContainerClass}">
+            <div class="d7c682ab962c5138--iconWrapper ${activeIconClass}">
+              <div data-ds-id="Icon" data-variant="inherit" color="inherit" class="css-16s79oa-StyledIcon e1kkd7uc0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                  <path fill="currentColor"
+                    d="M3.6 8a.58.58 0 0 0-.6.6v11.2c0 .348.252.6.6.6h12.8a.58.58 0 0 0 .6-.6V11a.58.58 0 0 0-.6-.6H9.2c-.334 0-.646-.168-.832-.446L7.065 8zm12.8 14.4H3.6A2.57 2.57 0 0 1 1 19.8V8.6C1 7.142 2.142 6 3.6 6h4c.334 0 .646.167.832.444L9.735 8.4H16.4c1.458 0 2.6 1.143 2.6 2.6v8.8c0 1.459-1.142 2.6-2.6 2.6M22 21a1 1 0 0 1-1-1V3H9v1a1 1 0 0 1-2 0V2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1M18 7h-6a1 1 0 0 1 0-2h6a1 1 0 1 1 0 2">
+                  </path>
+                </svg>
+              </div>
+            </div>
+            <div class="d7c682ab962c5138--childrenContainer">
+              <div>
+                <h1 class="_41674fd161680aab--header1">${label}</h1>
+              </div>
+            </div>
+          </div>
+        `;
+
+        link.addEventListener('click', onClick);
+        return link;
+      }
+
+      // =========================
+      // CLICK EN SUBCATEGORÍA
+      // =========================
+      function openSubcategoriaFromArticles(subcat) {
+        // Build the dynamic document path
+        const subcatName = getTitleFromDocData(subcat);
+        const docPath = `/supracategorias/${selectedSupracatName}/categorias/${selectedCatName}/subcategorias/${subcatName}`;
+        
+        console.log('Built document path:', docPath);
+        
+        // Add the path to the subcat object
+        const subcatWithPath = {
+          ...subcat,
+          docPath: docPath,
+          supracatName: selectedSupracatName,
+          catName: selectedCatName
+        };
+        
+        if (typeof window.showSubcatFromArticles === 'function') {
+          window.showSubcatFromArticles(subcatWithPath);
+        } else if (typeof window.showSubcatBySlug === 'function' && subcat.slug) {
+          window.showSubcatBySlug(subcat.slug);
+        } else if (typeof window.showSubcat === 'function' && subcat.slug) {
+          window.showSubcat(subcat.slug);
+        } else {
+          console.log('Subcategoría seleccionada desde Articles:', subcatWithPath);
+        }
+      }
+
+      // Lo dejo accesible si quieres reutilizarlo desde otro script
+      window.openSubcategoriaFromArticles = openSubcategoriaFromArticles;
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadArticlesSupracategorias);
+      } else {
+        // Ya cargó el DOM (caso típico cuando inyectás el HTML en portal.html)
+        loadArticlesSupracategorias();
+      }
+    })();
+  </script>
+</body>
+
+
+<!-- 2222 -->

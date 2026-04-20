@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Local Proxy Browser</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: Inter, Arial, sans-serif;
+      background: #0e1116;
+      color: #e8ecf1;
+    }
+
+    .app {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      background: #141923;
+      border-bottom: 1px solid #232a36;
+      align-items: center;
+    }
+
+    .btn {
+      border: 1px solid #2b3444;
+      background: #1a2230;
+      color: #fff;
+      border-radius: 10px;
+      height: 40px;
+      min-width: 40px;
+      padding: 0 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn:hover {
+      background: #212c3d;
+    }
+
+    .url {
+      flex: 1;
+      height: 40px;
+      border-radius: 10px;
+      border: 1px solid #2b3444;
+      background: #0e141d;
+      color: #fff;
+      padding: 0 14px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .statusbar {
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #9ba7b7;
+      background: #10151d;
+      border-bottom: 1px solid #232a36;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #fff;
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="toolbar">
+      <button class="btn" id="backBtn">←</button>
+      <button class="btn" id="forwardBtn">→</button>
+      <button class="btn" id="reloadBtn">↻</button>
+      <input
+        class="url"
+        id="urlInput"
+        value="https://next.amboss.com/us/article/so0tWS"
+        placeholder="Escribe una URL"
+      />
+      <button class="btn" id="goBtn">Go</button>
+    </div>
+
+    <div class="statusbar" id="statusBar">
+      Listo.
+    </div>
+
+    <iframe
+      id="viewer"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-downloads"
+      referrerpolicy="no-referrer"
+    ></iframe>
+  </div>
+
+  <script>
+    const viewer = document.getElementById('viewer');
+    const urlInput = document.getElementById('urlInput');
+    const statusBar = document.getElementById('statusBar');
+    const backBtn = document.getElementById('backBtn');
+    const forwardBtn = document.getElementById('forwardBtn');
+    const reloadBtn = document.getElementById('reloadBtn');
+    const goBtn = document.getElementById('goBtn');
+
+    const historyStack = [];
+    let historyIndex = -1;
+
+    function normalizeUrl(raw) {
+      let url = raw.trim();
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+      return url;
+    }
+
+    function proxied(url) {
+      return '/browse?url=' + encodeURIComponent(url);
+    }
+
+    function updateButtons() {
+      backBtn.disabled = historyIndex <= 0;
+      forwardBtn.disabled = historyIndex >= historyStack.length - 1;
+      backBtn.style.opacity = backBtn.disabled ? '0.45' : '1';
+      forwardBtn.style.opacity = forwardBtn.disabled ? '0.45' : '1';
+    }
+
+    function setStatus(text) {
+      statusBar.textContent = text;
+    }
+
+    function navigate(rawUrl, push = true) {
+      try {
+        const url = normalizeUrl(rawUrl);
+
+        if (push) {
+          historyStack.splice(historyIndex + 1);
+          historyStack.push(url);
+          historyIndex = historyStack.length - 1;
+        }
+
+        urlInput.value = url;
+        viewer.src = proxied(url);
+        setStatus('Cargando: ' + url);
+        updateButtons();
+      } catch (e) {
+        setStatus('URL inválida');
+      }
+    }
+
+    goBtn.addEventListener('click', () => navigate(urlInput.value, true));
+    urlInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') navigate(urlInput.value, true);
+    });
+
+    backBtn.addEventListener('click', () => {
+      if (historyIndex > 0) {
+        historyIndex--;
+        const url = historyStack[historyIndex];
+        urlInput.value = url;
+        viewer.src = proxied(url);
+        setStatus('Cargando: ' + url);
+        updateButtons();
+      }
+    });
+
+    forwardBtn.addEventListener('click', () => {
+      if (historyIndex < historyStack.length - 1) {
+        historyIndex++;
+        const url = historyStack[historyIndex];
+        urlInput.value = url;
+        viewer.src = proxied(url);
+        setStatus('Cargando: ' + url);
+        updateButtons();
+      }
+    });
+
+    reloadBtn.addEventListener('click', () => {
+      if (historyIndex >= 0) {
+        const url = historyStack[historyIndex];
+        viewer.src = proxied(url);
+        setStatus('Recargando: ' + url);
+      }
+    });
+
+    viewer.addEventListener('load', () => {
+      setStatus('Cargado: ' + urlInput.value);
+    });
+
+    navigate(urlInput.value, true);
+  </script>
+</body>
+</html>

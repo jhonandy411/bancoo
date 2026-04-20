@@ -6084,6 +6084,9 @@ body font {
   background-color: #f1f3f4;
   border: none;
   border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
   justify-content: flex-start;
   height: 24px;
   position: relative
@@ -6113,6 +6116,23 @@ body font {
 .isDarkmodeActive ._2dfc3e09bcc2a51e--highlighted button,
 .isDarkmodeActive ._2dfc3e09bcc2a51e--highlighted label {
   background-color: #494a2f
+}
+
+._2dfc3e09bcc2a51e--container .css-1ahszv4-InlineContainer {
+  display: flex;
+  align-items: center;
+  column-gap: 4px
+}
+
+._2dfc3e09bcc2a51e--container .css-h0nko7-StyledInlineItem {
+  display: flex;
+  align-items: center
+}
+
+._2dfc3e09bcc2a51e--container .css-10zfiw3-StyledText,
+._2dfc3e09bcc2a51e--container .eadloo90 {
+  font-size: 12px;
+  line-height: 1.2
 }
 
 ._66bac0107c9899af--headerTitle {
@@ -6293,7 +6313,7 @@ body font {
 
 .c64ffd7459a27da8--toolbarContent {
   background-color: var(--color-background-primary);
-  pointer-events: none;
+  pointer-events: auto;
   visibility: hidden;
   flex-flow: row-reverse wrap;
   align-items: center;
@@ -6303,10 +6323,66 @@ body font {
   overflow: hidden
 }
 
-@media (min-width:960px) {
-  .c64ffd7459a27da8--toolbarContent {
-    visibility: visible
-  }
+.css-e9wdc6-StyledButton,
+.css-16jwmc5-StyledButton,
+.css-f83uhv-StyledPictogramButton {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-decoration: none
+}
+
+.css-e9wdc6-StyledButton .css-c3523d-StyledInner,
+.css-16jwmc5-StyledButton .css-c3523d-StyledInner,
+.css-f83uhv-StyledPictogramButton .css-c3523d-StyledInner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 8px;
+  border-radius: 4px;
+  transition: background-color .15s ease
+}
+
+.css-e9wdc6-StyledButton:hover .css-c3523d-StyledInner,
+.css-e9wdc6-StyledButton:focus-visible .css-c3523d-StyledInner,
+.css-16jwmc5-StyledButton:hover .css-c3523d-StyledInner,
+.css-16jwmc5-StyledButton:focus-visible .css-c3523d-StyledInner,
+.css-f83uhv-StyledPictogramButton:hover .css-c3523d-StyledInner,
+.css-f83uhv-StyledPictogramButton:focus-visible .css-c3523d-StyledInner {
+  background-color: var(--color-background-transparent-hover)
+}
+
+.css-c3523d-StyledInner .css-mgid52-InlineContainer {
+  display: inline-flex;
+  align-items: center;
+  column-gap: 6px
+}
+
+.css-c3523d-StyledInner .css-h0nko7-StyledInlineItem {
+  display: inline-flex;
+  align-items: center
+}
+
+.c64ffd7459a27da8--toolbar .css-c3523d-StyledInner .css-h0nko7-StyledInlineItem:last-child {
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: .06em
+}
+
+.css-cjtild-StyledIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0
 }
 
 .c64ffd7459a27da8--dot {
@@ -16485,3 +16561,86 @@ body {
 
 
 /* 222222 */
+
+/* Learned Checkbox Styles */
+.css-1672r5k-StyledFormField {
+  display: block;
+}
+
+.css-bkwbtj-StackContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.css-nuxaj3-StyledCheckboxContainer {
+  display: inline-block;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.css-6ye7h4-InlineContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.css-ynjq41-StyledInputContainer {
+  position: relative;
+  width: 18px;
+  height: 18px;
+}
+
+.css-oww8b1-StyledRealInput {
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.css-1rvd4z6-StyledFakeInput {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--color-border-primary, #ccc);
+  border-radius: 3px;
+  background-color: var(--color-background-primary, #fff);
+  transition: all 0.2s ease;
+}
+
+.css-oww8b1-StyledRealInput:checked + .css-1rvd4z6-StyledFakeInput {
+  background-color: var(--color-background-accent, #0056b3);
+  border-color: var(--color-background-accent, #0056b3);
+  color: #fff;
+}
+
+.css-cjtild-StyledIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.css-oww8b1-StyledRealInput:checked + .css-1rvd4z6-StyledFakeInput .css-cjtild-StyledIcon {
+  opacity: 1;
+}
+
+.css-den2g6-StyledText {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary, #333);
+  margin: 0;
+}
+
+.css-oww8b1-StyledRealInput:focus + .css-1rvd4z6-StyledFakeInput {
+  box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.2);
+}

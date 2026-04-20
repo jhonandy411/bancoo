@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Convertidor HTML - Amboss Clone</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        opacity: 0.9;
+        font-size: 16px;
+      }
+
+      .content {
+        padding: 30px;
+      }
+
+      .section {
+        margin-bottom: 30px;
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section-title::before {
+        content: "";
+        width: 4px;
+        height: 20px;
+        background: #667eea;
+        border-radius: 2px;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 300px;
+        padding: 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        resize: vertical;
+        transition: border-color 0.3s;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      button {
+        flex: 1;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-secondary {
+        background: #f5f5f5;
+        color: #333;
+      }
+
+      .btn-secondary:hover {
+        background: #e0e0e0;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 32px;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 5px;
+      }
+
+      .stat-label {
+        font-size: 14px;
+        color: #666;
+      }
+
+      .preview {
+        background: #f9f9f9;
+        border: 2px dashed #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        min-height: 200px;
+        max-height: 500px;
+        overflow-y: auto;
+      }
+
+      .preview:empty::before {
+        content: "La vista previa aparecerá aquí...";
+        color: #999;
+        font-style: italic;
+      }
+
+      .icon {
+        width: 20px;
+        height: 20px;
+      }
+
+      .alert {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: none;
+      }
+
+      .alert.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .alert.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .alert.show {
+        display: block;
+      }
+
+      .output-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 24px;
+        align-items: start;
+      }
+
+      .output-col textarea {
+        min-height: 420px;
+      }
+
+      @media (max-width: 1200px) {
+        .output-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .output-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .input-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        align-items: start;
+      }
+
+      .input-col {
+        min-width: 0;
+      }
+
+      @media (max-width: 900px) {
+        .input-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* opcional: estilo para las figuras de extraExplanation */
+      .amb-extraImage {
+        margin: 16px 0;
+        text-align: center;
+      }
+
+      .amb-extraImage img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 6px;
+        display: block;
+        margin: 0 auto;
+      }
+
+      .amb-extraImage figcaption {
+        margin-top: 6px;
+        font-size: 13px;
+        color: #555;
+        font-style: italic;
+      }
+
+      /* Estilos para los iconos de explicación y extraExplanation */
+      .api.extraExplanation, .api.explanation {
+        color: #acacac;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🔄 Convertidor HTML Amboss</h1>
+        <p>
+          Convierte código HTML extenso a formato limpio manteniendo el diseño
+        </p>
+      </div>
+
+      <div class="content">
+        <div id="alert" class="alert"></div>
+
+        <div class="section">
+          <div class="input-grid">
+            <!-- Columna izquierda: HTML original -->
+            <div class="input-col">
+              <div class="section-title">📝 Código HTML Original</div>
+              <textarea
+                id="inputHtml"
+                placeholder="Pega aquí tu código HTML extenso..."
+              ></textarea>
+            </div>
+
+            <!-- Columna derecha: Popups + Imágenes extraExplanation -->
+            <div class="input-col">
+              <div
+                id="popup-fixer"
+                style="
+                  padding: 14px;
+                  border: 1px solid #e5e7eb;
+                  border-radius: 12px;
+                  background: #fafafa;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 14px;
+                "
+              >
+                <!-- Popups de tooltips -->
+                <div>
+                  <div style="font-weight: 700; margin-bottom: 6px">
+                    🧩 Reemplazar href de popups usando HTML clonado
+                  </div>
+
+                  <textarea
+                    id="popupsPaste"
+                    placeholder="Pegá acá el HTML que contiene #all-popups-container (Todos los Popups Clonados)..."
+                    style="
+                      width: 100%;
+                      min-height: 160px;
+                      padding: 10px;
+                      border: 1px solid #d1d5db;
+                      border-radius: 10px;
+                      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco,
+                        Consolas, 'Liberation Mono', 'Courier New', monospace;
+                      font-size: 12px;
+                      background: white;
+                    "
+                  ></textarea>
+                </div>
+
+                <!-- NUEVO: Imágenes de extraExplanation -->
+                <div>
+                  <div style="font-weight: 700; margin-bottom: 6px">
+                    🖼️ Imágenes de popups (extraExplanation)
+                  </div>
+                  <textarea
+                    id="extraImagesPaste"
+                    placeholder="Pegá acá el HTML que contiene &lt;div id=&quot;extraExplanation-clones&quot;&gt;... con las imágenes de los popups..."
+                    style="
+                      width: 100%;
+                      min-height: 160px;
+                      padding: 10px;
+                      border: 1px solid #d1d5db;
+                      border-radius: 10px;
+                      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco,
+                        Consolas, 'Liberation Mono', 'Courier New', monospace;
+                      font-size: 12px;
+                      background: white;
+                    "
+                  ></textarea>
+                </div>
+
+                <div
+                  style="
+                    display: flex;
+                    gap: 10px;
+                    align-items: center;
+                    margin-top: 4px;
+                  "
+                >
+                  <button
+                    id="btnReplacePopups"
+                    style="
+                      padding: 10px 14px;
+                      border-radius: 10px;
+                      border: 0;
+                      cursor: pointer;
+                      background: #2563eb;
+                      color: white;
+                      font-weight: 700;
+                    "
+                  >
+                    Reemplazar popups
+                  </button>
+                  <span
+                    id="replacePopupsStatus"
+                    style="color: #64748b; font-size: 12px"
+                  ></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn-primary" onclick="convertirHTML()">
+            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+              />
+            </svg>
+            Generar HTML Limpio
+          </button>
+          <button class="btn-secondary" onclick="limpiarCampos()">
+            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            Limpiar
+          </button>
+        </div>
+
+        <div class="stats" id="stats" style="display: none">
+          <div class="stat-card">
+            <div class="stat-value" id="originalSize">0</div>
+            <div class="stat-label">Tamaño Original (KB)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="cleanSize">0</div>
+            <div class="stat-label">Tamaño Limpio (KB)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="reduction">0%</div>
+            <div class="stat-label">Reducción</div>
+          </div>
+        </div>
+
+        <div class="section" id="outputSection" style="display: none">
+          <div class="output-grid">
+            <!-- Columna izquierda: HTML limpio -->
+            <div class="output-col">
+              <div class="section-title">✨ Código HTML Limpio</div>
+              <textarea id="outputHtml" readonly></textarea>
+
+              <div class="button-group">
+                <button class="btn-primary" onclick="descargarHTML()">
+                  <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  Descargar HTML
+                </button>
+
+                <button class="btn-secondary" onclick="copiarAlPortapapeles()">
+                  <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"
+                    />
+                    <path
+                      d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
+                    />
+                  </svg>
+                  Copiar al Portapapeles
+                </button>
+              </div>
+            </div>
+
+            <!-- Columna derecha: JSON -->
+            <div class="output-col">
+              <div class="section-title">
+                📊 JSON Estructurado por Secciones
+              </div>
+
+              <div
+                id="sectionInfo"
+                style="
+                  background: #e3f2fd;
+                  padding: 10px;
+                  border-radius: 6px;
+                  margin-bottom: 10px;
+                  color: #1976d2;
+                  font-weight: 600;
+                "
+              ></div>
+
+              <textarea id="outputJson" readonly></textarea>
+
+              <div class="button-group">
+                <button class="btn-primary" onclick="descargarJSON()">
+                  <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  Descargar JSON
+                </button>
+
+                <button class="btn-secondary" onclick="copiarJSON()">
+                  <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"
+                    />
+                    <path
+                      d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
+                    />
+                  </svg>
+                  Copiar JSON
+                </button>
+              </div>
+            </div>
+
+            <!-- Columna nueva: TEXTO PLANO -->
+            <div class="output-col">
+              <div class="section-title">
+                📄 Texto Plano (Sin Estilo)
+              </div>
+
+              <div
+                style="
+                  background: #f1f8e9;
+                  padding: 10px;
+                  border-radius: 6px;
+                  margin-bottom: 10px;
+                  color: #33691e;
+                  font-weight: 600;
+                "
+              >
+                Solo Texto Plano Extraído
+              </div>
+
+              <textarea id="outputTextPlain" readonly></textarea>
+
+              <div class="button-group">
+                <button class="btn-primary" onclick="descargarTextoPlano()">
+                  <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  Descargar Texto
+                </button>
+
+                <button class="btn-secondary" onclick="copiarTextoPlano()">
+                  <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"
+                    />
+                    <path
+                      d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
+                    />
+                  </svg>
+                  Copiar Texto
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function convertirHTML() {
+        const inputRaw = document.getElementById("inputHtml").value.trim();
+
+        if (!inputRaw) {
+          mostrarAlerta(
+            "Por favor, pega código HTML en el campo de entrada.",
+            "error"
+          );
+          return;
+        }
+
+        try {
+          // ✅ 1) empezar del HTML original
+          let input = inputRaw;
+
+          // ✅ 2) Reemplazar hrefs de popups (texto, tooltips) usando #all-popups-container
+          const popupsHtml =
+            document.getElementById("popupsPaste")?.value || "";
+          if (popupsHtml.trim()) {
+            const map = buildPopupHrefMap(popupsHtml);
+            if (map.size) {
+              input = replaceHrefsDeep(
+                input,
+                map,
+                false,
+                "https://next.amboss.com"
+              );
+            }
+          }
+
+          // ✅ 3) NUEVO: reemplazar spans extraExplanation por <figure> usando extraExplanation-clones
+          const extraHtml =
+            document.getElementById("extraImagesPaste")?.value || "";
+          let extraImagesMeta = {};
+          if (extraHtml.trim()) {
+
+
+            const extraMap = buildExtraImageMap(extraHtml);
+if (extraMap.size) {
+  input = replaceExtraExplanationSpans(input, extraMap);
+}
+
+// ✅ JSON: si querés seguir usando tu buildExtraImagesMeta tal cual, no lo toques.
+// (Opcional) Si querés usar el meta del mapa:
+extraImagesMeta = {};
+extraMap.forEach((v, k) => {
+  extraImagesMeta[k] = {
+    src: v.meta.src,
+    big: v.meta.big,
+    title: v.meta.title
+  };
+});
+          }
+
+          // ✅ 4) Luego ejecutar la limpieza del HTML (como antes)
+          let cleanHTML = limpiarHTML(input);
+
+          // ✅ 5) Parsear secciones y generar JSON
+          const structuredData = parseSections(cleanHTML, input);
+
+          // ✅ 6) Agregar campo inicial para imagenespoups al JSON
+          if (extraImagesMeta && Object.keys(extraImagesMeta).length) {
+            structuredData.imagenespoups = extraImagesMeta;
+          }
+
+          // Mostrar resultado HTML limpio
+          document.getElementById("outputHtml").value = cleanHTML;
+
+          // Mostrar resultado JSON
+          document.getElementById("outputJson").value = JSON.stringify(
+            structuredData,
+            null,
+            2
+          );
+
+          document.getElementById("outputSection").style.display = "block";
+
+          // Estadísticas con input ORIGINAL
+          const originalSize = (
+            new Blob([inputRaw]).size / 1024
+          ).toFixed(2);
+          const cleanSize = (new Blob([cleanHTML]).size / 1024).toFixed(2);
+          const jsonSize = (
+            new Blob([JSON.stringify(structuredData)]).size / 1024
+          ).toFixed(2);
+          const reduction = (
+            ((originalSize - cleanSize) / originalSize) *
+            100
+          ).toFixed(1);
+
+          document.getElementById("originalSize").textContent = originalSize;
+          document.getElementById("cleanSize").textContent = cleanSize;
+          document.getElementById("reduction").textContent = reduction + "%";
+          document.getElementById("stats").style.display = "grid";
+
+          const sectionCount = structuredData.sectionOrder
+            ? structuredData.sectionOrder.length
+            : 0;
+          document.getElementById(
+            "sectionInfo"
+          ).textContent = `📑 ${sectionCount} secciones | JSON: ${jsonSize} KB`;
+
+          mostrarAlerta(
+            "✅ HTML convertido y secciones extraídas exitosamente",
+            "success"
+          );
+
+          // Generar texto plano automáticamente al convertir
+          const textPlain = generarTextoPlano(structuredData);
+          document.getElementById("outputTextPlain").value = textPlain;
+
+        } catch (error) {
+          mostrarAlerta("❌ Error al convertir: " + error.message, "error");
+        }
+      }
+
+      function limpiarHTML(html) {
+        console.log(
+          "Iniciando limpieza. Tamaño original:",
+          html.length,
+          "caracteres"
+        );
+
+        // PASO 1: Extraer solo el contenido dentro de <article>
+        const articleMatch = html.match(
+          /<article[\s\S]*?>([\s\S]*)<\/article>/i
+        );
+        if (articleMatch) {
+          console.log(
+            "Etiqueta <article> encontrada. Extrayendo solo su contenido..."
+          );
+          html = articleMatch[1];
+          console.log(
+            "Contenido extraído de <article>:",
+            html.length,
+            "caracteres"
+          );
+        } else {
+          console.log(
+            "No se encontró etiqueta <article>. Se procesará todo el HTML."
+          );
+        }
+
+        let clean = html;
+
+        const topSegmentPattern =
+          /<div class="amboss-ds-portal"[\s\S]*?(?=<div class="_6eb1c4a28c8c5a44--focus)/i;
+        clean = clean.replace(topSegmentPattern, "");
+        console.log(
+          "Después de eliminar segmento superior:",
+          clean.length,
+          "caracteres"
+        );
+
+        const overridesScriptPattern =
+          /<script>\s*window\.__GLOBAL_STATE_OVERRIDES__[\s\S]*?<\/script>/i;
+        clean = clean.replace(overridesScriptPattern, "");
+
+        const ambossAssetsPattern =
+          /<script[^>]+src="https:\/\/next\.amboss\.com\/us\/static\/assets\/[^"]+"[^>]*><\/script>\s*/gi;
+        clean = clean.replace(ambossAssetsPattern, "");
+
+        const tabManagerPattern =
+          /<div id="suspender_tab_manager"[\s\S]*?<\/template>\s*<\/div>\s*/i;
+        clean = clean.replace(tabManagerPattern, "");
+
+        const allInitialPattern =
+          /<div style="all:\s*initial\s*!important"[\s\S]*?<\/template>\s*<\/div>\s*/i;
+        clean = clean.replace(allInitialPattern, "");
+
+        console.log(
+          "Después de eliminar segmento inferior:",
+          clean.length,
+          "caracteres"
+        );
+
+        const dataAttrsToRemove = [
+          "data-e2e-test-id",
+          "data-testid",
+          "data-phrasegroup-id",
+          "data-learningcard-id",
+          "data-lxid",
+          "data-section-id",
+          "data-sxid",
+          "data-content",
+          "data-page",
+          "data-eid",
+          "data-ref-index",
+          "data-anker",
+          "data-title",
+          "data-source",
+          "data-qxids",
+          "data-ds-id",
+          "data-variant",
+          "data-table-maximize",
+          "data-table-start-quiz",
+          "data-table-ref",
+          "data-table",
+          "data-gallery-id",
+          "data-image-index",
+          "data-image-id",
+          "data-overlay",
+          "data-description",
+          "data-author",
+          "data-copyright",
+          "data-medium-size-url",
+        ];
+
+        dataAttrsToRemove.forEach((attr) => {
+          const regex = new RegExp(`\\s+${attr}="[^"]*"`, "gi");
+          clean = clean.replace(regex, "");
+        });
+
+        console.log("Después de eliminar data-*:", clean.length, "caracteres");
+
+
+        // Eliminar IDs generados automáticamente clean = clean.replace(/\s+id="(?!Eedb)[LEYZ][a-f0-9]+"/gi, "");
+
+        clean = clean.replace(/\s+aria-labelledby="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-haspopup="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-describedby="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-controls="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-expanded="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-checked="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-disabled="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-hidden="[^"]*"/gi, "");
+
+        clean = clean.replace(/\s+tabindex="[^"]*"/gi, "");
+        clean = clean.replace(/\s+role="region"/gi, "");
+        clean = clean.replace(/\s+role="group"/gi, "");
+        clean = clean.replace(/\s+translate="no"/gi, "");
+
+        console.log(
+          "Después de eliminar otros atributos:",
+          clean.length,
+          "caracteres"
+        );
+
+        clean = clean.replace(
+          /<div[^>]*class="[^"]*_6eb1c4a28c8c5a44--focus[^"]*"[^>]*id="main-content"[^>]*>[\s]*<div[^>]*class="[^"]*_6eb1c4a28c8c5a44--notifications[^"]*"[^>]*><\/div>[\s]*<div[^>]*class="[^"]*_6eb1c4a28c8c5a44--body[^"]*"[^>]*>[\s]*<div[^>]*class="[^"]*cd71ec7927bda3fc--page[^"]*"[^>]*>[\s]*<div[^>]*class="[^"]*_84d5ef5d71ac9056--container[^"]*"[^>]*>[\s]*<div[^>]*class="[^"]*_3419cbc970b06bec--spaceContainer[^"]*"[^>]*>[\s]*<div[^>]*class="[^"]*_3419cbc970b06bec--space[^"]*"[^>]*>[\s]*<div[^>]*class="[^"]*_3419cbc970b06bec--spaceWrapper[^"]*"[^>]*>[\s]*/gi,
+          ""
+        );
+
+        clean = clean.replace(
+          /<div[^>]*class="[^"]*_6eb1c4a28c8c5a44--notifications[^"]*"[^>]*><\/div>/gi,
+          ""
+        );
+
+        console.log(
+          "Después de eliminar contenedores externos:",
+          clean.length,
+          "caracteres"
+        );
+
+        const tableWrapperPattern =
+          /<div[^>]*class="[^"]*table-wrapper[^"]*"[^>]*>\s*<div[^>]*class="[^"]*table-control-container[^"]*"[^>]*>[\s\S]*?<\/div>\s*(<table[^>]*>[\s\S]*?<\/table>)\s*<\/div>/gi;
+
+        const beforeTables = clean.length;
+        clean = clean.replace(tableWrapperPattern, "$1");
+        console.log(
+          "Después de desempaquetar table-wrapper:",
+          beforeTables,
+          "→",
+          clean.length,
+          "caracteres"
+        );
+
+        const hiddenIframesPattern =
+          /<iframe[^>]*(?:display:\s*none|visibility:\s*hidden|width:\s*[01]px|height:\s*[01]px)[^>]*>(?:<\/iframe>|\s*<\/iframe>)/gi;
+        clean = clean.replace(hiddenIframesPattern, "");
+
+        const trackingPixelsPattern =
+          /<img[^>]*(?:height="[01]"|width="[01]"|display:\s*none|visibility:\s*hidden)[^>]*(?:src="https?:\/\/(?:t\.co|analytics\.twitter\.com|bat\.bing\.com)[^"]*")[^>]*>/gi;
+        clean = clean.replace(trackingPixelsPattern, "");
+
+        const hiddenImagesPattern =
+          /<img[^>]*(?:style="[^"]*(?:display:\s*none|visibility:\s*hidden)[^"]*"|(?:width|height)="[01]")[^>]*>/gi;
+        clean = clean.replace(hiddenImagesPattern, "");
+
+        const hubspotPattern =
+          /<div[^>]*(?:id="hs-web-interactives-[^"]*"|class="go\d+")[^>]*>[\s\S]*?<\/div>\s*/gi;
+        clean = clean.replace(hubspotPattern, "");
+
+        const batBeaconPattern =
+          /<div[^>]*id="batBeacon\d+"[^>]*>[\s\S]*?<\/div>\s*/gi;
+        clean = clean.replace(batBeaconPattern, "");
+
+        console.log(
+          "Después de eliminar tracking y analytics:",
+          clean.length,
+          "caracteres"
+        );
+
+clean = clean.replace(/\n\s*\n\s*\n/g, "\n\n");
+
+// ✅ PASO: eliminar IDs, pero conservar los que necesitás
+{
+  const d = new DOMParser().parseFromString(clean, "text/html");
+
+  d.querySelectorAll("[id]").forEach((el) => {
+    // 1) ✅ conservar IDs de secciones (si no, parseSections se rompe)
+    if (el.matches('section[class*="a19c2cb9aca4d5ec--container"]')) return;
+
+    // 2) ✅ conservar IDs de triggers que vos necesitás
+    if (el.matches(".api.extraExplanation, span.api.explanation, a.api, span.api.dictionary")) return;
+
+    // 3) (opcional) no romper SVGs que usan ids internos
+    if (el.closest("svg")) return;
+
+    el.removeAttribute("id");
+  });
+
+  // ✅ NUEVO: Limpiar clases y estilos
+  d.querySelectorAll("*").forEach((el) => {
+    // 1) Eliminar atributo style
+    el.removeAttribute("style");
+
+    // 2) Limpiar clases
+    if (el.hasAttribute("class")) {
+      const originalClass = el.getAttribute("class");
+      // Mantener solo clases estructurales o funcionales específicas
+      const classesToKeep = [
+        "a19c2cb9aca4d5ec--container",
+        "cebd2a302a3552c4--headerContainer",
+        "cebd2a302a3552c4--contentContainer",
+        "a19c2cb9aca4d5ec--baseStyles",
+        "api",
+        "extraExplanation",
+        "explanation",
+        "dictionary",
+        "tooltip__link",
+        "link--same-article",
+        "wichtig",
+        "leitwort",
+        "content-box",
+        "merkspruch",
+        "merke",
+        "cave",
+        "blue",
+        "green",
+        "red"
+      ];
+
+      const newClasses = originalClass.split(/\s+/).filter(c => 
+        classesToKeep.some(k => c.includes(k)) || 
+        // Mantener clases que NO parezcan basura de CSS-in-JS (como css-...)
+        // Muchas clases de Amboss contienen "--" y son útiles para el estilo
+        (!c.startsWith("css-") && c.includes("--"))
+      );
+
+      if (newClasses.length > 0) {
+        el.setAttribute("class", newClasses.join(" "));
+      } else {
+        el.removeAttribute("class");
+      }
+    }
+  });
+
+  // ✅ Eliminar SVGs de iconos dentro de .content-box (se renderizarán desde subcategoriacontent)
+  d.querySelectorAll(".content-box svg").forEach(svg => {
+    const parentSpan = svg.closest("span"); // Buscar el span contenedor del SVG
+    if (parentSpan && parentSpan.parentElement && parentSpan.parentElement.classList.contains("content-box")) {
+       parentSpan.remove();
+    } else if (svg.parentElement.classList.contains("content-box")) {
+       // Caso raro donde el SVG es hijo directo
+       svg.remove();
+    }
+  });
+
+  // ✅ Eliminar ticks/checkmarks específicos (polyline points="20 6 9 17 4 12")
+  d.querySelectorAll("svg polyline[points='20 6 9 17 4 12']").forEach(poly => {
+    const svg = poly.closest("svg");
+    if (svg) svg.remove();
+  });
+
+  clean = d.body.innerHTML;
+}
+
+if (
+  !clean.includes('rel="stylesheet"') &&
+  !clean.includes("amboss-clone.css")
+) {
+  clean = '<link rel="stylesheet" href="amboss-clone.css">\n' + clean;
+}
+
+return clean.trim();
+      }
+
+      function parseSections(cleanHTML, originalHTML) {
+        const metadata = extractMetadata(originalHTML);
+
+        const sections = {};
+        const sectionOrder = [];
+
+        const sectionRegex =
+          /<section[^>]*class="[^"]*a19c2cb9aca4d5ec--container[^"]*"[^>]*id="([^"]+)"[^>]*>([\s\S]*?)<\/section>/g;
+
+        let match;
+        while ((match = sectionRegex.exec(cleanHTML)) !== null) {
+          const sectionId = match[1];
+          let sectionHTML = match[2];
+
+          const tempDiv = document.createElement("div");
+          tempDiv.innerHTML = sectionHTML;
+
+          const firstH3 = tempDiv.querySelector("h3");
+          const title = firstH3 ? firstH3.textContent.trim() : sectionId;
+
+          let contentRoot = tempDiv;
+
+          const outerWrapper = tempDiv.querySelector(
+            ".cebd2a302a3552c4--contentContainer"
+          );
+          if (outerWrapper) {
+            contentRoot = outerWrapper;
+          }
+
+          const innerWrapper = contentRoot.querySelector(
+            ".a19c2cb9aca4d5ec--baseStyles"
+          );
+          if (innerWrapper) {
+            contentRoot = innerWrapper;
+          }
+
+          const headerContainer = contentRoot.querySelector(
+            ".cebd2a302a3552c4--headerContainer"
+          );
+          if (headerContainer) {
+            headerContainer.remove();
+          }
+
+          const footerContainer = contentRoot.querySelector(
+            ".css-10tzyyx-StyledBox.ebcgi2u0"
+          );
+          if (footerContainer) {
+            footerContainer.remove();
+          }
+
+          // ✅ Restaurado: Extraer subtítulos (H3) para el TOC, pero SIN guardar el HTML (para evitar duplicados)
+          const allH3s = contentRoot.querySelectorAll("h3");
+          const subsections = [];
+          for (let i = 0; i < allH3s.length; i++) {
+            subsections.push({ title: allH3s[i].textContent.trim() });
+          }
+
+
+
+            // ✅ NUEVO: Limpiar clases finales del contenido (dejar solo marcadores funcionales si es necesario)
+          contentRoot.querySelectorAll("[class]").forEach(el => {
+            const keepers = ["api", "extraExplanation", "explanation", "dictionary", "tooltip__link", "link--same-article", "wichtig", "leitwort", "content-box", "merkspruch", "merke", "cave", "blue", "green", "red", "container", "title", "reference"];
+            const classes = Array.from(el.classList).filter(c => keepers.some(k => c.includes(k)));
+            if (classes.length > 0) {
+              el.className = classes.join(" ");
+            } else {
+              el.removeAttribute("class");
+            }
+          });
+// ... (omitting some lines for clarity, will use replace_file_content carefully)
+
+          // Helper para limpiar nombres de claves (slugify ligero)
+          const cleanKey = (text) => text.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').substring(0, 20);
+
+          // Agrupar jerárquicamente por H3 en un MAPA (Objeto) para Firestore
+          const hierarchicalContent = {};
+          let groupCounter = 0;
+          let currentGroupName = "000_Intro";
+          let currentGroup = [];
+          
+          const finalizeGroup = () => {
+            if (currentGroup.length > 0) {
+              // Filtro relajado: solo quitar si es literalmente un div/span vacío sin nada
+              const cleanBlocks = currentGroup.filter(item => {
+                if (typeof item === 'object') return true; // Las tablas/objetos no se filtran
+                const trimmed = item.trim();
+                if (!trimmed) return false;
+                // Si es un div/span vacío (sin contenido útil), lo quitamos
+                if (/^<(div|span)[^>]*>\s*<\/\1>$/.test(trimmed)) return false;
+                return true;
+              });
+              
+              if (cleanBlocks.length > 0) {
+                hierarchicalContent[currentGroupName] = { blocks: cleanBlocks };
+              }
+            }
+          };
+
+          // Helper para convertir tablas en objetos estructurados (legibles en Firestore)
+          const tableToMap = (table) => {
+            const tableData = { type: 'table', rows: {} };
+            Array.from(table.rows).forEach((row, rIdx) => {
+              const rowKey = `r${(rIdx + 1).toString().padStart(2, '0')}_row`;
+              const rowObj = {};
+              Array.from(row.cells).forEach((cell, cIdx) => {
+                const tag = cell.tagName.toLowerCase();
+                const cellKey = `c${(cIdx + 1).toString().padStart(2, '0')}_${tag}`;
+                
+                // Guardar contenido y atributos críticos (rowspan, colspan, class)
+                const attrs = {};
+                if (cell.rowSpan > 1) attrs.rowspan = cell.rowSpan;
+                if (cell.colSpan > 1) attrs.colspan = cell.colSpan;
+                if (cell.className) attrs.class = cell.className;
+                
+                if (Object.keys(attrs).length > 0) {
+                  rowObj[cellKey] = { content: cell.innerHTML, ...attrs };
+                } else {
+                  rowObj[cellKey] = cell.innerHTML;
+                }
+              });
+              tableData.rows[rowKey] = rowObj;
+            });
+            return tableData;
+          };
+
+          Array.from(contentRoot.childNodes).forEach(node => {
+            let itemToAdd = node.nodeType === 1 ? node.outerHTML : node.textContent;
+            if (!itemToAdd.trim()) return;
+
+            // Si es una tabla, la estructuramos como objeto
+            if (node.nodeType === 1 && node.tagName === 'TABLE') {
+              itemToAdd = tableToMap(node);
+            }
+
+            // Detectar H3 incluso si está dentro de un wrapper simple (como div.paragraph)
+            const isH3 = node.tagName === 'H3' || (node.tagName === 'DIV' && node.querySelector('h3:first-child'));
+            
+            if (isH3) {
+              finalizeGroup();
+              groupCounter++;
+              const h3Node = node.tagName === 'H3' ? node : node.querySelector('h3');
+              const subTitle = h3Node.textContent.trim();
+              currentGroupName = `${groupCounter.toString().padStart(3, '0')}_${cleanKey(subTitle)}`;
+              currentGroup = [itemToAdd];
+            } else {
+              currentGroup.push(itemToAdd);
+            }
+          });
+          finalizeGroup();
+
+          sections[sectionId] = {
+            title: title,
+            html: hierarchicalContent,
+            subsections: subsections.length > 0 ? subsections : undefined,
+          };
+
+          sectionOrder.push(sectionId);
+        }
+
+        return {
+          ...metadata,
+          sections: sections,
+          sectionOrder: sectionOrder,
+          generatedAt: new Date().toISOString(),
+        };
+      }
+
+      function extractMetadata(html) {
+        // Intentar varios patrones para el título
+        const titleMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+        let titulo = "Sin título";
+        if (titleMatch) {
+          // Limpiar HTML interno si lo hay (como spans o formateo)
+          const temp = document.createElement("div");
+          temp.innerHTML = titleMatch[1];
+          titulo = temp.textContent.trim();
+        }
+
+        const synonymMatch = html.match(
+          /<p[^>]*class="[^"]*_62af53fea5b31646--synonymText[^"]*"[^>]*>([^<]+)<\/p>/
+        );
+        const sinonimos = synonymMatch ? synonymMatch[1].trim() : "";
+
+        const dateMatch = html.match(/Last edited:\s*([^<]+)</);
+        const lastEdited = dateMatch ? dateMatch[1].trim() : "";
+
+        return {
+          titulo,
+          sinonimos,
+          lastEdited,
+        };
+      }
+
+      function descargarHTML() {
+        const content = document.getElementById("outputHtml").value;
+        const blob = new Blob([content], { type: "text/html" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "contenido_limpio_" + Date.now() + ".html";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        mostrarAlerta("📥 Archivo descargado exitosamente", "success");
+      }
+
+      function copiarAlPortapapeles() {
+        const output = document.getElementById("outputHtml");
+        output.select();
+        document.execCommand("copy");
+
+        mostrarAlerta("📋 HTML copiado al portapapeles", "success");
+      }
+
+      function copiarJSON() {
+        const output = document.getElementById("outputJson");
+        output.select();
+        document.execCommand("copy");
+
+        mostrarAlerta("📋 JSON copiado al portapapeles", "success");
+      }
+
+      function descargarJSON() {
+        const content = document.getElementById("outputJson").value;
+        const blob = new Blob([content], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "contenido_secciones_" + Date.now() + ".json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        mostrarAlerta("📥 JSON descargado exitosamente", "success");
+      }
+
+      function limpiarCampos() {
+        document.getElementById("outputHtml").value = "";
+        document.getElementById("outputJson").value = "";
+        document.getElementById("outputTextPlain").value = "";
+        document.getElementById("outputSection").style.display = "none";
+        document.getElementById("stats").style.display = "none";
+        document.getElementById("alert").classList.remove("show");
+        document.getElementById("popupsPaste").value = "";
+        document.getElementById("extraImagesPaste").value = "";
+        document.getElementById("replacePopupsStatus").textContent = "";
+      }
+
+      function mostrarAlerta(mensaje, tipo) {
+        const alert = document.getElementById("alert");
+        alert.textContent = mensaje;
+        alert.className = "alert " + tipo + " show";
+
+        setTimeout(() => {
+          alert.classList.remove("show");
+        }, 5000);
+      }
+
+      // ============================
+      // Popups href replacer (igual)
+      // ============================
+
+      function _norm(s) {
+        return (s || "").toLowerCase().replace(/\s+/g, " ").trim();
+      }
+
+      function buildPopupHrefMap(pastedHtml) {
+        const doc = new DOMParser().parseFromString(pastedHtml || "", "text/html");
+        const map = new Map();
+
+        doc
+          .querySelectorAll('a._6af23b33c298d7c2--articleLink[href]')
+          .forEach((a) => {
+            const href = a.getAttribute("href") || "";
+            const m = href.match(/\/us\/article\/([^?#]+)#([A-Za-z0-9]+)/);
+            if (m) {
+              const articleId = m[1];
+              const anchor = m[2];
+              map.set(anchor, `/us/article/${articleId}#${anchor}`);
+            }
+          });
+
+        doc
+          .querySelectorAll(
+            'a[data-e2e-test-id="split-view-button"][href]'
+          )
+          .forEach((a) => {
+            const href = a.getAttribute("href") || "";
+            const qs = href.split("?")[1] || "";
+            const params = new URLSearchParams(qs);
+            const sv = params.get("sv");
+            if (!sv) return;
+
+            try {
+              const arr = JSON.parse(decodeURIComponent(sv));
+              (arr || []).forEach((o) => {
+                if (o && o.anchor && o.id) {
+                  map.set(o.anchor, `/us/article/${o.id}#${o.anchor}`);
+                }
+              });
+            } catch (e) {}
+          });
+
+        doc
+          .querySelectorAll(".cloned-popup-wrapper")
+          .forEach((w) => {
+            const title = (
+              w.querySelector('[data-e2e-test-id="phrasonary-title"]')
+                ?.textContent || ""
+            ).trim();
+            const href =
+              w.querySelector('a._6af23b33c298d7c2--articleLink[href]')
+                ?.getAttribute("href") || "";
+            if (title && href) map.set(`title:${_norm(title)}`, href);
+          });
+
+        return map;
+      }
+
+      function replaceHrefsDeep(
+        node,
+        map,
+        makeFullUrlAbsolute = true,
+        base = "https://next.amboss.com",
+        changes = []
+      ) {
+        if (typeof node === "string") {
+          return node.replace(
+            /\/us\/article\/[^"#?]+#([A-Za-z0-9]+)/g,
+            (m, anchor) => {
+              const fixed = map.get(anchor);
+              if (fixed && fixed !== m) {
+                changes.push(`Texto: "${m}" -> "${fixed}"`);
+              }
+              return fixed ? fixed : m;
+            }
+          );
+        }
+
+        if (Array.isArray(node)) {
+          return node.map((x) =>
+            replaceHrefsDeep(x, map, makeFullUrlAbsolute, base, changes)
+          );
+        }
+
+        if (node && typeof node === "object") {
+          for (const k of Object.keys(node)) {
+            node[k] = replaceHrefsDeep(
+              node[k],
+              map,
+              makeFullUrlAbsolute,
+              base,
+              changes
+            );
+          }
+
+          if (typeof node.href === "string") {
+            const m = node.href.match(/#([A-Za-z0-9]+)/);
+            if (m && map.get(m[1])) {
+              const newVal = map.get(m[1]);
+              if (node.href !== newVal) {
+                changes.push(`Href: "${node.href}" -> "${newVal}"`);
+                node.href = newVal;
+              }
+            }
+          }
+
+          if (typeof node.fullUrl === "string") {
+            const m = node.fullUrl.match(/#([A-Za-z0-9]+)/);
+            if (m && map.get(m[1])) {
+              const fixed = map.get(m[1]);
+              const newVal = makeFullUrlAbsolute
+                ? fixed.startsWith("http")
+                  ? fixed
+                  : base + fixed
+                : fixed;
+
+              if (node.fullUrl !== newVal) {
+                changes.push(`FullUrl: "${node.fullUrl}" -> "${newVal}"`);
+                node.fullUrl = newVal;
+              }
+            }
+          }
+
+          return node;
+        }
+
+        return node;
+      }
+
+      document
+        .getElementById("btnReplacePopups")
+        ?.addEventListener("click", () => {
+          const statusEl = document.getElementById("replacePopupsStatus");
+          const popupsHtml =
+            document.getElementById("popupsPaste")?.value || "";
+
+          const map = buildPopupHrefMap(popupsHtml);
+          if (!map.size) {
+            if (statusEl)
+              statusEl.textContent =
+                "❌ No encontré hrefs válidos en el HTML pegado.";
+            return;
+          }
+
+          const outEl =
+            document.getElementById("outputJson") ||
+            document.getElementById("jsonOutput");
+
+          if (!outEl) {
+            if (statusEl)
+              statusEl.textContent =
+                "❌ No encontré el textarea del JSON (id='outputJson').";
+            return;
+          }
+
+          let data;
+          try {
+            data = JSON.parse(outEl.value);
+          } catch (e) {
+            if (statusEl)
+              statusEl.textContent =
+                "❌ El contenido del output no es JSON válido.";
+            return;
+          }
+
+          const changes = [];
+          const updated = replaceHrefsDeep(
+            data,
+            map,
+            true,
+            "https://next.amboss.com",
+            changes
+          );
+          outEl.value = JSON.stringify(updated, null, 2);
+
+          const count = changes.length;
+          if (statusEl)
+            statusEl.textContent = `✅ Reemplazados ${count} enlaces usando ${map.size} referencias de popups.`;
+
+          if (count > 0) {
+            alert(`Se realizaron ${count} cambios:\n\n` + changes.join("\n"));
+          } else {
+            alert(
+              "No se requirieron cambios (los enlaces ya coincidían o no se encontraron)."
+            );
+          }
+        });
+
+      // ============================================
+      // NUEVO: manejo de imágenes extraExplanation
+      // ============================================
+
+      function escapeHtml(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      // Construye un mapa: trigger-id -> HTML <figure>...</figure>
+// ✅ Ícono EXACTO que querés mantener
+const IMAGE_ICON_HTML = `<span class="inline-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 2a1 1 0 0 0-1 1v3.222L1.638 7.67c-.091.097-.236.17-.255.3a.2.2 0 0 0 0 .06c.02.13.164.203.255.3L3 9.778V13a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"></path><circle cx="10.5" cy="5.5" r="1.5" fill="currentColor"></circle><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m3 11 3-3 3 3 2-1.5 4 3.5"></path></svg></span>`;
+
+// Construye un mapa: trigger-id -> HTML del TRIGGER (icono) + data para JSON
+
+function buildExtraImageMap(pastedHtml) {
+  const doc = new DOMParser().parseFromString(pastedHtml || "", "text/html");
+  const map = new Map();
+
+  doc
+    .querySelectorAll("#extraExplanation-clones .phrasionary_popover[data-trigger-id]")
+    .forEach((pop) => {
+      const trigId = (pop.getAttribute("data-trigger-id") || "").trim();
+      if (!trigId) return;
+
+      const thumb = pop.querySelector("span.api.thumbnail__image");
+      const img = thumb?.querySelector("img");
+      if (!thumb || !img) return;
+
+      // ⚠️ Guardamos URLs y meta por si lo necesitás (para JSON / Firestore)
+      const bigUrl =
+        (thumb.getAttribute("data-source") || "").trim() ||
+        (img.getAttribute("data-medium-size-url") || "").trim() ||
+        (img.getAttribute("src") || "").trim();
+
+      const srcMedium =
+        (img.getAttribute("data-medium-size-url") || "").trim() ||
+        (img.getAttribute("src") || "").trim();
+
+      const titleAttr = (img.getAttribute("title") || "").trim();
+      const titleSpan = (thumb.querySelector(".thumbnail__image__title")?.textContent || "").trim();
+      const title = (titleAttr || titleSpan || "").trim();
+
+      // ✅ TRIGGER que queda en el HTML LIMPIO:
+      // - mantiene el icono inline EXACTO
+      // - mantiene clase api/extraExplanation (para tu handler)
+      // - le asocia id = trigId (para que pueda llamarse como popup)
+      const triggerHtml = `<span class="api extraExplanation" id="${trigId}" aria-label="Imagen">${IMAGE_ICON_HTML}</span>`;
+
+      map.set(trigId, {
+        triggerHtml,
+        meta: {
+          src: srcMedium,
+          big: bigUrl,
+          title,
+          descriptionB64: (thumb.getAttribute("data-description") || "").trim(),
+          authorB64: (thumb.getAttribute("data-author") || "").trim(),
+          copyrightB64: (thumb.getAttribute("data-copyright") || "").trim(),
+        },
+      });
+    });
+
+  return map;
+}
+
+      
+      
+      
+      // Construye metadata para JSON: { [id]: { src,title,description,author,copyright } }
+      function buildExtraImagesMeta(pastedHtml) {
+        const doc = new DOMParser().parseFromString(
+          pastedHtml || "",
+          "text/html"
+        );
+        const meta = {};
+
+        doc
+          .querySelectorAll(
+            "#extraExplanation-clones .phrasionary_popover[data-trigger-id]"
+          )
+          .forEach((pop) => {
+            const trigId = pop.getAttribute("data-trigger-id");
+            if (!trigId) return;
+
+            const thumb = pop.querySelector("span.api.thumbnail__image");
+            if (!thumb) return;
+
+            const img = thumb.querySelector("img");
+            if (!img) return;
+
+            const src =
+              img.getAttribute("data-medium-size-url") ||
+              img.getAttribute("src") ||
+              "";
+            const titleAttr = img.getAttribute("title") || "";
+            const titleSpan =
+              thumb.querySelector(".thumbnail__image__title")?.textContent ||
+              "";
+            const title = (titleAttr || titleSpan || "").trim();
+
+            const descB64 = thumb.getAttribute("data-description") || "";
+            let desc = "";
+            if (descB64) {
+              try {
+                desc = atob(descB64);
+              } catch (e) {
+                desc = "";
+              }
+            }
+
+            const authorB64 = thumb.getAttribute("data-author") || "";
+            let author = "";
+            if (authorB64) {
+              try {
+                author = atob(authorB64);
+              } catch (e) {
+                author = "";
+              }
+            }
+
+            const copyrightB64 = thumb.getAttribute("data-copyright") || "";
+            let copyright = "";
+            if (copyrightB64) {
+              try {
+                copyright = atob(copyrightB64);
+              } catch (e) {
+                copyright = "";
+              }
+            }
+
+            meta[trigId] = {
+              src,
+              title,
+              descriptionHtml: desc || undefined,
+              author: author || undefined,
+              copyright: copyright || undefined,
+            };
+          });
+
+        return meta;
+      }
+
+      // Reemplaza el bloque:
+      // <span class="condensed-hidden"><span class="api extraExplanation" id="...">...</span>...</span>
+      // por el <figure> correspondiente según el id
+function replaceExtraExplanationSpans(html, imgMap) {
+  if (!imgMap || !imgMap.size) return html;
+
+  return html.replace(
+    /<span class="condensed-hidden">([\s\S]*?)<\/span>/g,
+    (whole) => {
+      // Solo tocamos los que son extraExplanation
+      if (
+        !/class="api extraExplanation"/.test(whole) &&
+        !/class='api extraExplanation'/.test(whole)
+      ) {
+        return whole;
+      }
+
+      const idMatch =
+        whole.match(/id="([^"]+)"/) || whole.match(/id='([^']+)'/);
+      if (!idMatch) return whole;
+
+      const trigId = idMatch[1];
+      const entry = imgMap.get(trigId);
+      if (!entry) return whole;
+
+      // ✅ devolvemos SOLO el icono trigger (mantiene el inline-icon)
+      return entry.triggerHtml;
+    }
+  );
+}
+
+function generarTextoPlano(data) {
+  let text = "";
+  if (data.titulo) text += "titulocentral: " + data.titulo.toUpperCase() + "\n\n";
+  if (data.sinonimos) text += "Sinónimos: " + data.sinonimos + "\n\n";
+
+  if (data.sections && data.sectionOrder) {
+    data.sectionOrder.forEach((sectionId) => {
+      const section = data.sections[sectionId];
+      let contenidoCounter = 1;
+
+      if (section.title) {
+        text += "titulosegmento: " + section.title.toUpperCase() + "\n\n";
+      }
+
+      if (section.html) {
+        Object.keys(section.html).sort().forEach((groupKey) => {
+          const group = section.html[groupKey];
+          if (group.blocks) {
+            group.blocks.forEach((block) => {
+              if (typeof block === "string") {
+                // Convertir HTML a texto plano con etiquetas descriptivas
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = block;
+                
+                // Aplicar prefijos descriptivos
+                tempDiv.querySelectorAll('[class*="--title"]').forEach(el => el.prepend("TITULO: "));
+                tempDiv.querySelectorAll('h3').forEach(el => el.prepend("SUBTITULO: "));
+
+                
+                
+                // NUEVO: Etiquetar content-boxes por color
+                tempDiv.querySelectorAll('.content-box').forEach(el => {
+                  let colorLabel = "box:";
+                  if (el.classList.contains('green')) colorLabel = "boxverde: ";
+                  else if (el.classList.contains('red')) colorLabel = "boxrojo: ";
+                  else if (el.classList.contains('blue')) colorLabel = "boxazul: ";
+                  el.prepend(colorLabel);
+                });
+
+                // NUEVO: Limpiar etiquetas de link innecesarias sin borrar el padre
+                tempDiv.querySelectorAll('a, span').forEach(el => {
+                  if (el.textContent.trim() === "Open in Read by QxMD") {
+                    el.textContent = "";
+                  }
+                });
+
+                // NUEVO: Etiquetar referencias (ref1, ref2...) con saltos de línea
+                const referenceSelector = '[class*="--referenceWithNumber"]';
+                tempDiv.querySelectorAll(referenceSelector).forEach(el => {
+                  const numEl = el.querySelector('[class*="--referenceNumber"]');
+                  if (numEl) {
+                    const numText = numEl.textContent.replace(/\./g, "").trim();
+                    // Insertamos el refX: y nos aseguramos de que el contenido empiece en línea nueva
+                    const label = document.createElement("div");
+                    label.textContent = `ref${numText}:`;
+                    el.prepend(document.createElement("br"));
+                    el.prepend(label);
+                    numEl.remove();
+                  }
+                });
+
+                // Manejar listas anidadas con nombres de campos distintivos
+                tempDiv.querySelectorAll('li').forEach(el => {
+                  let depth = 0;
+                  let parent = el.parentElement;
+                  while (parent && parent !== tempDiv) {
+                    if (parent.tagName === 'UL' || parent.tagName === 'OL') depth++;
+                    parent = parent.parentElement;
+                  }
+                  
+                  let label = "LISTA1: ";
+                  if (depth === 2) {
+                    label = "LISTA2: ";
+                  } else if (depth >= 3) {
+                    label = "LISTA3: ";
+                  }
+                  el.prepend(label);
+                });
+                
+                // Extraer texto preservando saltos de línea de bloques
+                let blockText = "";
+                // Si hay múltiples referencias en el bloque, innerText suele manejarlos, 
+                // pero si están pegados, forzamos separación.
+                const refs = tempDiv.querySelectorAll(referenceSelector);
+                if (refs.length > 0) {
+                  refs.forEach(r => {
+                    blockText += r.innerText.trim() + "\n\n";
+                  });
+                } else {
+                  blockText = tempDiv.innerText || tempDiv.textContent || "";
+                }
+
+                if (blockText.trim() && blockText.trim() !== "no-condensed") {
+                  const lines = blockText.trim().split('\n').map(l => l.trim()).filter(l => l && l !== "no-condensed");
+                  lines.forEach(line => {
+                    const hasLabel = /^(TITULO:|SUBTITULO:|boxverde:|boxrojo:|boxazul:|ref\d+:|LISTA\d+:)/.test(line);
+                    if (!hasLabel && !tempDiv.querySelector('li')) {
+                      text += `contenido${contenidoCounter}: ${line}\n\n`;
+                      contenidoCounter++;
+                    } else {
+                      text += line + "\n\n";
+                    }
+                  });
+                }
+              } else if (typeof block === "object" && block.type === "table") {
+                // Manejar tablas de forma simple para texto plano
+                text += "[TABLA]\n";
+                Object.keys(block.rows).sort().forEach((rowKey) => {
+                  const row = block.rows[rowKey];
+                  const rowCells = [];
+                  Object.keys(row).sort().forEach((cellKey) => {
+                    const cell = row[cellKey];
+                    const content = typeof cell === "object" ? cell.content : cell;
+                    const tempDiv = document.createElement("div");
+                    tempDiv.innerHTML = content;
+                    rowCells.push(tempDiv.textContent.trim());
+                  });
+                  text += rowCells.join(" | ") + "\n";
+                });
+                text += "\n";
+              }
+            });
+          }
+        });
+      }
+      text += "\n";
+    });
+  }
+
+  return text.trim();
+}
+
+function copiarTextoPlano() {
+  const output = document.getElementById("outputTextPlain");
+  output.select();
+  document.execCommand("copy");
+  mostrarAlerta("📋 Texto plano copiado al portapapeles", "success");
+}
+
+function descargarTextoPlano() {
+  const content = document.getElementById("outputTextPlain").value;
+  const blob = new Blob([content], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "texto_plano_" + Date.now() + ".txt";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  mostrarAlerta("📥 Texto plano descargado exitosamente", "success");
+}
+    
+    </script>
+  </body>
+</html>

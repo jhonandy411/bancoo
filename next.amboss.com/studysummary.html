@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Summary - AMBOSS Clone</title>
+    <link rel="stylesheet" href="amboss-clone.css">
+    <style>
+        html,
+        body {
+            height: auto;
+            overflow: visible;
+            margin: 0;
+            font-family: Lato, sans-serif;
+            color: #333;
+        }
+
+        body {
+            
+        }
+
+        .main-container {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* HEADER: Date Range */
+        .date-range-form {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #4a5568;
+            text-transform: uppercase;
+        }
+
+        .form-group label span {
+            color: #718096;
+            font-weight: 400;
+            text-transform: none;
+            margin-left: 4px;
+        }
+
+        .form-group input {
+            height: 36px;
+            padding: 0 8px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+            width: 160px;
+        }
+
+        .apply-btn {
+            background: #007684;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            height: 36px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* STATS BAR */
+        .stats-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #edf2f7;
+        }
+
+        .stat-item:last-child {
+            border-right: none;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1a202c;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #718096;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-icon {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            color: #718096;
+            cursor: pointer;
+        }
+
+        /* MAIN CONTENT GRID */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 700;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        /* TAB SYSTEM */
+        .tabs-container {
+            display: flex;
+            background: #f5f7f9;
+            border-bottom: 1px solid #edf2f7;
+            padding: 0 0px;
+        }
+
+        .tab {
+            padding: 16px 20px;
+            font-size: 13px;
+            color: #718096;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #1a202c;
+            background: #ffffff;
+            border-top: 3px solid #6b7280;
+        }
+
+        /* ANALYSIS CONTENT (PORTED FROM ANALYSIS.HTML) */
+        .bedd774ffc733deb--chartContainer {
+            display: flex;
+            justify-content: center;
+            margin: 16px 0;
+        }
+
+        .bedd774ffc733deb--legendContainer {
+            font-size: 13px;
+            color: #6e7c89;
+            line-height: 1.4;
+            margin-top: 12px;
+        }
+
+        .bedd774ffc733deb--pillItem {
+            margin-top: 4px;
+        }
+
+        .ed248a657081b99b--pillContainer {
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .ed248a657081b99b--pill {
+            width: 24px;
+            height: 16px;
+            border-radius: 8px;
+            flex-shrink: 0;
+            min-width: 24px;
+        }
+
+        .e6fe6f13c08c0b0c--chartContainer {
+            position: relative;
+            width: 204px;
+            /* Match chart width */
+            height: 204px;
+            /* Match chart height */
+            margin: 0 auto;
+        }
+
+        .e6fe6f13c08c0b0c--chartLabel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .e6fe6f13c08c0b0c--percent {
+            font-size: 80px !important;
+            font-weight: 900 !important;
+            fill: #4a5a6a !important;
+        }
+
+        .e6fe6f13c08c0b0c--label {
+            font-size: 26px !important;
+            font-weight: 900 !important;
+            fill: #6e7c89 !important;
+        }
+
+        .e6fe6f13c08c0b0c--chartLabel svg {
+            width: 100%;
+            height: auto;
+            max-height: 100px;
+        }
+
+        .ed248a657081b99b--container {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        [data-e2e-test-id="performance-widget"] .ed248a657081b99b--container {
+            align-items: center;
+            gap: 8px;
+        }
+
+        [data-e2e-test-id="performance-widget"] .css-1m4h5ng-InlineContainer {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 4px !important;
+            align-items: center !important;
+            white-space: nowrap !important;
+        }
+
+        [data-e2e-test-id="performance-widget"] .eadloo90 {
+            margin: 0 !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            color: #1a1a1a !important;
+        }
+
+        [data-e2e-test-id="performance-widget"] .css-1aulued-StyledText {
+            color: #6e7c89 !important;
+            font-weight: 400 !important;
+        }
+
+        [data-e2e-test-id="performance-widget"] .css-8shw78-StyledColumns {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            gap: 10px !important;
+            margin-top: 16px !important;
+        }
+
+        [data-e2e-test-id="performance-widget"] .css-8shw78-StyledColumns>div {
+            flex: 1 !important;
+            min-width: 0 !important;
+        }
+
+        .amb-spinner {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transform-origin: 50% 65%;
+        }
+
+        .amb-spinner polygon {
+            stroke: #007c89;
+            stroke-dasharray: 17;
+            animation: amb-dash 2s linear infinite;
+        }
+
+        @keyframes amb-dash {
+            to {
+                stroke-dashoffset: 136;
+            }
+        }
+
+        .widget-spinner {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        [data-e2e-test-id="performance-widget"] {
+            position: relative;
+        }
+
+        [data-e2e-test-id="performance-widget"].is-loading .widget-spinner {
+            display: flex;
+            z-index: 10;
+        }
+
+        [data-e2e-test-id="performance-widget"].is-loading>*:not(.widget-spinner) {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* PEER COMPARISON CONTENT */
+        .percentile-label {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1a1a1a;
+            margin-bottom: 0px;
+            margin-left: 20px;
+            line-height: 1;
+        }
+
+        .percentile-label sup {
+            font-size: 16px;
+            font-weight: 500;
+            vertical-align: super;
+            margin-left: 0px;
+        }
+
+        .chart-container {
+            margin: 0px 0px 20px 0px;
+            position: relative;
+        }
+
+        #gaussianCanvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .performance-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            margin-top: 30px;
+        }
+
+        .performance-text strong {
+            font-weight: 600;
+        }
+
+        /* Corregir color del enlace "Learn how" */
+        .css-bt555p-StyledLink.ewboijr0 {
+            color: #2d3748 !important;
+            font-weight: 700;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .css-bt555p-StyledLink.ewboijr0:hover {
+            color: #1a202c !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-container">
+        <!-- Header -->
+        <div class="date-range-form">
+            <div class="form-group">
+                <label>From <span>(DD/MM/YYYY)</span></label>
+                <input type="text" placeholder="__/__/____">
+            </div>
+            <div class="form-group">
+                <label>To <span>(DD/MM/YYYY)</span></label>
+                <input type="text" placeholder="__/__/____">
+            </div>
+            <button class="apply-btn">Apply</button>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-value">1/2839</span>
+                <span class="stat-label">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#64748b">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                    </svg>
+                    USMLE Step 1 Questions
+                </span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">0%</span>
+                <span class="stat-label">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#39d6ac">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                    </svg>
+                    Correct
+                </span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">00m 01s</span>
+                <span class="stat-label">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#64748b">
+                        <path
+                            d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" />
+                        <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+                    </svg>
+                    Time per question
+                </span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">0h 00m</span>
+                <span class="stat-label">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#64748b">
+                        <path
+                            d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" />
+                        <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+                    </svg>
+                    Total time spent
+                </span>
+            </div>
+            <div class="info-icon">
+
+
+
+
+                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                    <div data-e2e-test-id="info" data-testid="info" data-ds-id="Icon" data-variant="inherit"
+                        aria-hidden="true" class="css-10pd6gh-StyledIcon e1tsg83e0"><svg
+                            xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor"
+                            stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 16 16">
+                            <circle cx="8" cy="8" r="7"></circle>
+                            <path d="M8 11V8m0-3h.01"></path>
+                        </svg></div>
+                </div>
+
+
+
+
+
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Analysis -->
+            <div class="card">
+                <div class="card-header">Analysis</div>
+                <div class="tabs-container">
+                    <div class="tab active">All attempts</div>
+                    <div class="tab">Latest attempt</div>
+                </div>
+
+
+
+
+
+
+
+
+                <div data-ds-id="Box" class="css-kcwpgw-StyledBox ebcgi2u0" style="padding:20px">
+                    <div class="_554d4e420112ef2d--container" data-e2e-test-id="performance-widget">
+                        <div class="widget-spinner">
+                            <div class="amb-spinner">
+                                <svg width="60" height="60" viewBox="-3 -4 39 39" aria-hidden="true">
+                                    <polygon fill="transparent" stroke-width="1.5" points="16,0 32,32 0,32"></polygon>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="bedd774ffc733deb--chartContainer" data-e2e-test-id="answer-statistics-chart">
+                            <div class="e6fe6f13c08c0b0c--chartContainer">
+                                <div style="width: 100%; height: 100%;">
+                                    <div style="position: relative;"><svg xmlns="http://www.w3.org/2000/svg" width="204"
+                                            height="204" role="img">
+                                            <rect width="204" height="204" fill="transparent">
+                                            </rect>
+                                            <g transform="translate(0,0)">
+                                                <g transform="translate(102,102)">
+                                                    <path d="M6.245698675651501e-15,-102L5.621128808086351e-15,-91.8Z"
+                                                        opacity="1" fill="#39d6ac" stroke="rgb(40, 150, 120)"
+                                                        stroke-width="0">
+                                                    </path>
+                                                    <path d="M6.245698675651501e-15,-102L5.621128808086351e-15,-91.8Z"
+                                                        opacity="1" fill="#f1d56b" stroke="rgb(169, 149, 75)"
+                                                        stroke-width="0">
+                                                    </path>
+                                                    <path
+                                                        d="M6.245698675651501e-15,-102A102,102,0,1,1,-6.245698675651501e-15,102A102,102,0,1,1,6.245698675651501e-15,-102M6.467139250421243e-14,-91.8A91.8,91.8,0,1,0,-6.467139250421243e-14,91.8A91.8,91.8,0,1,0,6.467139250421243e-14,-91.8Z"
+                                                        opacity="1" fill="#f07575" stroke="rgb(168, 82, 82)"
+                                                        stroke-width="0">
+                                                    </path>
+                                                </g>
+                                            </g>
+                                        </svg></div>
+                                </div>
+                                <div class="e6fe6f13c08c0b0c--chartLabel" data-e2e-test-id="answered-percent-ready"
+                                    data-test-id="percent">
+                                    <svg height="100%" preserveAspectRatio="xMinYMid meet" viewBox="0 0 500 150"
+                                        width="100%" xmlns="http://www.w3.org/2000/svg"
+                                        xmlns:xlink="http://www.w3.org/1999/xlink"><text
+                                            class="e6fe6f13c08c0b0c--percent" dominant-baseline="middle" font-size="75"
+                                            font-weight="900" text-anchor="middle" x="50%" y="35%">0%</text><text
+                                            class="e6fe6f13c08c0b0c--label" dominant-baseline="middle" font-size="30"
+                                            font-weight="900" text-anchor="middle" x="50%" y="80%">CORRECT + USING
+                                            HINTS</text></svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bedd774ffc733deb--legendContainer" data-e2e-test-id="answer-statistics-legend">You
+                            completed 1/12
+                            questions. You answered:
+
+                            <div class="bedd774ffc733deb--pillItem" data-e2e-test-id="legend-right">
+                                <div class="ed248a657081b99b--container">
+                                    <div class="ed248a657081b99b--pillContainer">
+                                        <div class="ed248a657081b99b--pill"
+                                            style="background: linear-gradient(45deg, rgb(57, 214, 172) 30%, rgba(57, 214, 172, 0.6) 100%); width: 24px; height: 16px; border-radius: 8px;">
+                                        </div>
+                                    </div>
+                                    <div data-ds-id="Inline" class="css-1m4h5ng-InlineContainer e6i75dx0">
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            <p data-ds-id="Text" class="css-1bfkpw8-StyledText eadloo90">0% correctly
+                                            </p>
+                                        </div>
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            <p data-ds-id="Text" class="css-1aulued-StyledText eadloo90"> (0
+                                                questions)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bedd774ffc733deb--pillItem" data-e2e-test-id="legend-withHelp">
+                                <div class="ed248a657081b99b--container">
+                                    <div class="ed248a657081b99b--pillContainer">
+                                        <div class="ed248a657081b99b--pill"
+                                            style="background: linear-gradient(45deg, rgb(241, 213, 107) 30%, rgba(241, 213, 107, 0.6) 100%); width: 24px; height: 16px; border-radius: 8px;">
+                                        </div>
+                                    </div><span tabindex="0">
+                                        <div data-ds-id="Inline" class="css-1m4h5ng-InlineContainer e6i75dx0">
+                                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                <p data-ds-id="Text" class="css-1bfkpw8-StyledText eadloo90">0%
+                                                    correctly using hints</p>
+                                            </div>
+                                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                <p data-ds-id="Text" class="css-1aulued-StyledText eadloo90"> (0
+                                                    questions)</p>
+                                            </div>
+                                        </div>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="bedd774ffc733deb--pillItem" data-e2e-test-id="legend-wrong">
+                                <div class="ed248a657081b99b--container">
+                                    <div class="ed248a657081b99b--pillContainer">
+                                        <div class="ed248a657081b99b--pill"
+                                            style="background: linear-gradient(45deg, rgb(240, 117, 117) 30%, rgba(240, 117, 117, 0.6) 100%); width: 24px; height: 16px; border-radius: 8px;">
+                                        </div>
+                                    </div>
+                                    <div data-ds-id="Inline" class="css-1m4h5ng-InlineContainer e6i75dx0">
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            <p data-ds-id="Text" class="css-1bfkpw8-StyledText eadloo90">100%
+                                                incorrectly</p>
+                                        </div>
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            <p data-ds-id="Text" class="css-1aulued-StyledText eadloo90"> (1
+                                                question)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+
+
+
+            </div>
+
+            <!-- Peer Comparison -->
+            <div class="card">
+                <div class="card-header">Peer group comparison</div>
+
+                <div data-ds-id="Box" class="css-kcwpgw-StyledBox ebcgi2u0" style="padding:20px">
+                    <div class="percentile-label">
+                        0<sup>th</sup>
+                    </div>
+                    <div class="chart-container" style="width: 100%; overflow: hidden;">
+                        <canvas id="gaussianCanvas" style="width: 100%; display: block;"></canvas>
+                    </div>
+                    <div class="performance-text">
+                        Your performance places you in the <strong>0th percentile</strong>, meaning you scored higher
+                        than <strong>0%</strong> of students who share your study objective <strong>USMLE Step
+                            1</strong>.
+                    </div>
+                    <p data-ds-id="Text" class="css-den2g6-StyledText eadloo90" style="white-space: pre-line;"><a
+                            data-ds-id="Link" color="primary"
+                            href="https://support.amboss.com/hc/en-us/articles/4851997127444-Peer-Group-Comparison"
+                            target="_blank" class="css-bt555p-StyledLink ewboijr0">Learn how</a> it is calculated.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        // Función para calcular la distribución normal
+        function normalDistribution(x, mean = 50, stdDev = 15) {
+            const coefficient = 1 / (stdDev * Math.sqrt(2 * Math.PI));
+            const exponent = -Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2));
+            return coefficient * Math.exp(exponent);
+        }
+
+        // Dibujar el gráfico
+        function drawGaussianChart() {
+            const canvas = document.getElementById('gaussianCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            // Usar el ancho del contenedor padre para evitar bucles de redimensionamiento
+            const containerWidth = canvas.parentElement.clientWidth;
+            const dpr = window.devicePixelRatio || 1;
+
+            const width = containerWidth;
+            // Mantener proporción de aspecto (aspect ratio) constante
+            const aspectRatio = 0.6; // Altura = 60% del ancho
+            const height = Math.round(width * aspectRatio);
+
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+
+            ctx.scale(dpr, dpr);
+
+            const padding = { top: 30, right: 30, bottom: 50, left: 40 };
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+
+            // Limpiar canvas
+            ctx.clearRect(0, 0, width, height);
+
+            // Generar datos
+            const mean = 50;
+            const stdDev = 15;
+            const points = [];
+            let maxY = 0;
+
+            for (let x = 0; x <= 100; x += 0.5) {
+                const y = normalDistribution(x, mean, stdDev);
+                points.push({ x, y });
+                if (y > maxY) maxY = y;
+            }
+
+            // Dibujar líneas verticales punteadas (grid)
+            ctx.strokeStyle = '#e5e5e5';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+
+            const xTicks = [0, 25, 50, 75, 100];
+            xTicks.forEach(tick => {
+                const x = padding.left + (tick / 100) * chartWidth;
+                ctx.beginPath();
+                ctx.moveTo(x, padding.top);
+                ctx.lineTo(x, padding.top + chartHeight);
+                ctx.stroke();
+            });
+
+            // Dibujar puntos en el eje Y (sin números)
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#ccc';
+            const numYDots = 10;
+            for (let i = 0; i <= numYDots; i++) {
+                const y = padding.top + (i / numYDots) * chartHeight;
+                ctx.beginPath();
+                ctx.arc(padding.left - 5, y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Dibujar ejes
+            ctx.strokeStyle = '#d0d0d0';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([]);
+
+            // Eje Y
+            ctx.beginPath();
+            ctx.moveTo(padding.left, padding.top);
+            ctx.lineTo(padding.left, padding.top + chartHeight);
+            ctx.stroke();
+
+            // Eje X
+            ctx.beginPath();
+            ctx.moveTo(padding.left, padding.top + chartHeight);
+            ctx.lineTo(padding.left + chartWidth, padding.top + chartHeight);
+            ctx.stroke();
+
+            // Dibujar etiquetas del eje X
+            ctx.fillStyle = '#b0b0b0';
+            ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.textAlign = 'center';
+
+            xTicks.forEach(tick => {
+                const x = padding.left + (tick / 100) * chartWidth;
+                ctx.fillText(tick.toString(), x, padding.top + chartHeight + 25);
+            });
+
+            // Dibujar la curva de Gauss con relleno
+            ctx.beginPath();
+            ctx.moveTo(padding.left, padding.top + chartHeight);
+
+            points.forEach(point => {
+                const x = padding.left + (point.x / 100) * chartWidth;
+                const y = padding.top + chartHeight - (point.y / maxY) * chartHeight;
+                ctx.lineTo(x, y);
+            });
+
+            ctx.lineTo(padding.left + chartWidth, padding.top + chartHeight);
+            ctx.closePath();
+
+            // Relleno con gradiente
+            const gradient = ctx.createLinearGradient(0, padding.top, 0, padding.top + chartHeight);
+            gradient.addColorStop(0, 'rgba(125, 211, 192, 0.3)');
+            gradient.addColorStop(1, 'rgba(125, 211, 192, 0.05)');
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Dibujar el contorno de la curva
+            ctx.beginPath();
+            let firstPoint = true;
+            points.forEach(point => {
+                const x = padding.left + (point.x / 100) * chartWidth;
+                const y = padding.top + chartHeight - (point.y / maxY) * chartHeight;
+                if (firstPoint) {
+                    ctx.moveTo(x, y);
+                    firstPoint = false;
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+
+            ctx.strokeStyle = '#7dd3c0';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+        }
+
+        // Dibujar cuando cargue la página
+        window.addEventListener('load', drawGaussianChart);
+
+        // Redibujar al cambiar el tamaño de la ventana
+        window.addEventListener('resize', drawGaussianChart);
+    </script>
+
+</body>
+
+</html>

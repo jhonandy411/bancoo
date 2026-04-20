@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Renderer con Popups</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0f;
+    --surface: #16161a;
+    --border: #2a2a32;
+    --accent: #00e5a0;
+    --accent2: #ff4d6d;
+    --accent3: #7b8cff;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  header {
+    padding: 1.2rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: var(--surface);
+  }
+
+  .logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 1rem;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+  .logo span { color: var(--muted); }
+
+  .header-desc {
+    color: var(--muted);
+    font-size: 0.78rem;
+    border-left: 1px solid var(--border);
+    padding-left: 1.5rem;
+  }
+
+  main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: calc(100vh - 61px);
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 0.75rem 1.5rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .badge { font-size: 0.58rem; padding: 0.18rem 0.5rem; border-radius: 3px; font-weight: 700; letter-spacing: 0.05em; }
+  .badge-green { background: var(--accent); color: #000; }
+  .badge-blue  { background: var(--accent3); color: #fff; }
+
+  textarea {
+    flex: 1;
+    background: var(--bg);
+    color: #7fdbca;
+    border: none;
+    outline: none;
+    padding: 1.5rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    line-height: 1.8;
+    resize: none;
+    caret-color: var(--accent);
+  }
+  textarea::placeholder { color: #252530; }
+
+  .actions {
+    padding: 0.85rem 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 0.6rem;
+    background: var(--surface);
+    flex-shrink: 0;
+    align-items: center;
+  }
+
+  .shortcut-hint {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  button {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 0.55rem 1.1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-render { background: var(--accent); color: #000; flex-shrink: 0; }
+  .btn-render:hover { background: #00ffb0; transform: translateY(-1px); }
+  .btn-clear { background: transparent; color: var(--muted); border: 1px solid var(--border); flex-shrink: 0; }
+  .btn-clear:hover { color: var(--accent2); border-color: var(--accent2); }
+
+  .preview-panel { display: flex; flex-direction: column; overflow: hidden; }
+  #preview-frame { flex: 1; border: none; background: #fff; display: none; }
+
+  .empty-state {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--bg); color: var(--muted); gap: 1rem;
+  }
+  .empty-icon { font-size: 2.5rem; opacity: 0.2; }
+  .empty-text {
+    font-family: 'Space Mono', monospace; font-size: 0.68rem;
+    letter-spacing: 0.06em; text-align: center; line-height: 2.2; opacity: 0.5;
+  }
+
+  /* Popup */
+  .popup-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); z-index: 9000;
+    backdrop-filter: blur(6px); align-items: center; justify-content: center;
+  }
+  .popup-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+
+  .popup-box {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    width: min(740px, 93vw); max-height: 84vh; display: flex; flex-direction: column;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.03);
+    animation: slideUp 0.28s cubic-bezier(0.34,1.56,0.64,1); overflow: hidden;
+  }
+
+  .popup-topbar {
+    padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 1rem; background: var(--bg); flex-shrink: 0;
+  }
+  .popup-meta { display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+  .popup-title { font-family: 'Space Mono', monospace; font-size: 0.88rem; color: var(--accent); word-break: break-word; }
+  .popup-subtitle { font-size: 0.68rem; color: var(--muted); font-family: 'Space Mono', monospace; letter-spacing: 0.03em; }
+
+  .popup-tags {
+    display: flex; flex-wrap: wrap; gap: 0.35rem;
+    padding: 0.7rem 1.25rem; border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.015); flex-shrink: 0;
+  }
+  .tag {
+    font-family: 'Space Mono', monospace; font-size: 0.58rem;
+    padding: 0.2rem 0.55rem; border-radius: 3px;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    color: var(--muted); letter-spacing: 0.04em;
+  }
+  .tag b { color: var(--text); }
+
+  .popup-body { overflow-y: auto; flex: 1; }
+  .popup-body.html-mode { background: #fff; }
+  .popup-body.text-mode {
+    padding: 1.5rem; background: var(--bg);
+    color: var(--text); font-size: 0.88rem; line-height: 1.75;
+  }
+
+  .popup-close {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    color: var(--muted); cursor: pointer; font-size: 0.7rem;
+    padding: 0.3rem 0.65rem; border-radius: 5px; flex-shrink: 0; transition: all 0.15s;
+  }
+  .popup-close:hover { color: var(--accent2); border-color: var(--accent2); }
+
+  .toast {
+    position: fixed; bottom: 1.5rem; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); font-family: 'Space Mono', monospace;
+    font-size: 0.68rem; padding: 0.65rem 1.25rem; border-radius: 6px;
+    z-index: 9999; opacity: 0; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    white-space: nowrap; box-shadow: 0 10px 40px rgba(0,0,0,0.5); pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .t-green { color: var(--accent); }
+  .t-blue  { color: var(--accent3); }
+
+  @keyframes fadeIn  { from { opacity:0 } to { opacity:1 } }
+  @keyframes slideUp {
+    from { transform: translateY(30px) scale(0.97); opacity:0 }
+    to   { transform: translateY(0) scale(1); opacity:1 }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">html<span>//</span>renderer</div>
+  <div class="header-desc">
+    Soporta <code style="color:var(--accent3)">href="#id"</code> y enlaces con
+    <code style="color:var(--accent)">data-anker</code> · <code style="color:var(--accent)">data-source</code> (phrasonary)
+  </div>
+</header>
+
+<main>
+  <!-- Editor -->
+  <div class="panel">
+    <div class="panel-header">
+      Editor HTML
+      <span class="badge badge-green">INPUT</span>
+    </div>
+    <textarea id="html-input" placeholder="Pega aquí el HTML completo de Amboss...
+
+Los enlaces con data-phrasegroup-id abrirán el popup con título y descripción
+si el HTML incluye el div popup correspondiente (id = data-source del enlace)."></textarea>
+    <div class="actions">
+      <button class="btn-clear" onclick="clearAll()">✕ Limpiar</button>
+      <button class="btn-render" onclick="renderHTML()">▶ Renderizar</button>
+      <div class="shortcut-hint">Ctrl + Enter</div>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="panel preview-panel">
+    <div class="panel-header">
+      Vista Previa
+      <span id="link-count" style="display:none;" class="badge badge-blue">─</span>
+    </div>
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">◫</div>
+      <div class="empty-text">
+        Pega HTML y pulsa Renderizar<br>
+        Los enlaces internos abrirán popups
+      </div>
+    </div>
+    <iframe id="preview-frame"></iframe>
+  </div>
+</main>
+
+<!-- Popup -->
+<div class="popup-overlay" id="popup-overlay" onclick="overlayClick(event)">
+  <div class="popup-box" onclick="event.stopPropagation()">
+    <div class="popup-topbar">
+      <div class="popup-meta">
+        <div class="popup-title" id="popup-title">─</div>
+        <div class="popup-subtitle" id="popup-subtitle"></div>
+      </div>
+      <button class="popup-close" onclick="closePopup()">✕ ESC</button>
+    </div>
+    <div class="popup-tags" id="popup-tags"></div>
+    <div class="popup-body" id="popup-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Utils ─────────────────────────────────────────────────────────────────────
+function showToast(html) {
+  const t = document.getElementById('toast');
+  t.innerHTML = html;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ── El interceptor que se inyecta en el iframe ────────────────────────────────
+// Se define aquí como función, luego se serializa con .toString()
+// para evitar cualquier problema con tags HTML dentro de string literals.
+function _iframeInterceptor() {
+  function b64(s) {
+    try { return decodeURIComponent(escape(atob(s))); } catch(e) { return s; }
+  }
+
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a');
+    if (!a) return;
+
+    var href     = a.getAttribute('href') || '';
+    var anker    = a.getAttribute('data-anker') || '';
+    var source   = a.getAttribute('data-source') || a.getAttribute('id') || '';
+    var rawTitle = a.getAttribute('data-title') || '';
+    var cardId   = a.getAttribute('data-learningcard-id') || a.getAttribute('data-lxid') || '';
+    var sectId   = a.getAttribute('data-section-id') || a.getAttribute('data-sxid') || '';
+    var phraseId = a.getAttribute('data-phrasegroup-id') || '';
+
+    var dataset = {};
+    Array.from(a.attributes).forEach(function(at) {
+      if (at.name.indexOf('data-') === 0) dataset[at.name] = at.value;
+    });
+
+    var isApi = a.classList.contains('api') ||
+                a.classList.contains('link--same-article') ||
+                a.classList.contains('tooltip__link') ||
+                !!anker || !!phraseId;
+
+    if (isApi || /^https?:/.test(href) || href.indexOf('/us/') === 0) {
+      e.preventDefault();
+    }
+
+    // Buscar contenido del popup
+    var ih = null;
+    if (source) {
+      var el = document.getElementById(source);
+      if (el && el.querySelector('[data-e2e-test-id="phrasonary-title"]')) {
+        ih = el.innerHTML;
+      }
+    }
+    if (!ih && anker) {
+      var el2 = document.querySelector('[data-anker="' + anker + '"]') ||
+                document.getElementById(anker);
+      if (el2) ih = el2.outerHTML;
+    }
+    if (!ih && href.charAt(0) === '#') {
+      var el3 = document.querySelector(href);
+      if (el3) ih = el3.outerHTML;
+    }
+
+    // Determinar título
+    var title = '';
+    if (rawTitle) title = b64(rawTitle);
+    if (!title && ih) {
+      var tmp = document.createElement('div');
+      tmp.innerHTML = ih;
+      var te = tmp.querySelector('[data-e2e-test-id="phrasonary-title"]');
+      if (te) title = te.textContent.trim();
+    }
+    if (!title) title = a.textContent.trim();
+
+    if (!isApi && href.charAt(0) !== '#' && !anker && !phraseId) return;
+
+    window.parent.postMessage({
+      type: 'popup',
+      kind: anker ? 'data-anker' : (phraseId ? 'phrasonary' : 'hash'),
+      anker: anker || href,
+      rawTitle: rawTitle, title: title,
+      cardId: cardId, sectId: sectId,
+      source: source, phraseId: phraseId,
+      linkText: a.textContent.trim(),
+      href: href, dataset: dataset, innerHtml: ih
+    }, '*');
+  });
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function renderHTML() {
+  var code = document.getElementById('html-input').value.trim();
+  if (!code) { showToast('⚠ Pega código HTML primero'); return; }
+
+  var parser   = new DOMParser();
+  var doc      = parser.parseFromString(code, 'text/html');
+  var standard = doc.querySelectorAll('a[href^="#"]').length;
+  var apiLinks = doc.querySelectorAll('a[data-anker], a[data-phrasegroup-id]').length;
+  var total    = standard + apiLinks;
+
+  var counter = document.getElementById('link-count');
+  counter.textContent = total + ' enlace' + (total !== 1 ? 's' : '') + ' · ' + standard + ' std · ' + apiLinks + ' api';
+  counter.style.display = total > 0 ? '' : 'none';
+
+  // ── Pre-procesar: construir mapa phrasegroup-id → {titulo, sinonimos, descripcion}
+  window._pMap = {};
+
+  function extractPopupData(popupEl) {
+    if (!popupEl) return null;
+    var titleEl = popupEl.querySelector('[data-e2e-test-id="phrasonary-title"]');
+    if (!titleEl) return null;
+    var synEl  = popupEl.querySelector('[data-e2e-test-id="phrasonary-synonym"]');
+    var allP   = Array.from(popupEl.querySelectorAll('p, div > div'));
+    var descEl = allP.find(function(el) {
+      return !el.hasAttribute('data-e2e-test-id') && el.textContent.trim().length > 15
+          && !el.querySelector('button') && !el.querySelector('a[href]');
+    });
+    return {
+      titulo:      titleEl.textContent.trim(),
+      sinonimos:   synEl  ? synEl.textContent.trim()  : '',
+      descripcion: descEl ? descEl.textContent.trim() : ''
+    };
+  }
+
+  // Estrategia A: data-source del link == id del div popup
+  doc.querySelectorAll('a[data-phrasegroup-id][data-source]').forEach(function(link) {
+    var pid = link.getAttribute('data-phrasegroup-id');
+    if (window._pMap[pid]) return;
+    var popup = doc.getElementById(link.getAttribute('data-source'));
+    var data  = extractPopupData(popup);
+    if (data) window._pMap[pid] = data;
+  });
+
+  // Estrategia B: aria-controls del link == id del div popup
+  doc.querySelectorAll('a[data-phrasegroup-id][aria-controls]').forEach(function(link) {
+    var pid = link.getAttribute('data-phrasegroup-id');
+    if (window._pMap[pid]) return;
+    var popup = doc.getElementById(link.getAttribute('aria-controls'));
+    var data  = extractPopupData(popup);
+    if (data) window._pMap[pid] = data;
+  });
+
+  // Estrategia C (inversa): buscar todos los popups phrasonary y trazar al link más cercano
+  doc.querySelectorAll('[data-e2e-test-id="phrasonary-title"]').forEach(function(titleEl) {
+    // Subir hasta un contenedor con id (el popup raíz)
+    var popup = titleEl.parentElement;
+    while (popup && !popup.id) popup = popup.parentElement;
+    if (!popup || !popup.id) return;
+
+    // Buscar el trigger por aria-controls o data-source
+    var trigger = doc.querySelector('[aria-controls="' + popup.id + '"]')
+               || doc.querySelector('[data-source="' + popup.id + '"]');
+
+    // Si no encontramos trigger, buscar en hermanos anteriores del popup
+    if (!trigger) {
+      var node = popup;
+      for (var d = 0; d < 8; d++) {
+        node = node.parentElement;
+        if (!node) break;
+        var prev = node.previousElementSibling;
+        if (prev) {
+          trigger = prev.querySelector('a[data-phrasegroup-id]') ||
+                    (prev.matches && prev.matches('a[data-phrasegroup-id]') ? prev : null);
+          if (trigger) break;
+        }
+      }
+    }
+
+    if (!trigger) return;
+    var pid = trigger.getAttribute('data-phrasegroup-id');
+    if (!pid || window._pMap[pid]) return;
+    var data = extractPopupData(popup);
+    if (data) window._pMap[pid] = data;
+  });
+
+  var mapCount = Object.keys(window._pMap).length;
+
+  // ── Inyectar el interceptor en el iframe via onload
+  var frame = document.getElementById('preview-frame');
+  frame.srcdoc = code;
+  frame.style.display = 'block';
+  document.getElementById('empty-state').style.display = 'none';
+
+  frame.onload = function() {
+    try {
+      var iDoc = frame.contentDocument || frame.contentWindow.document;
+      var sc = iDoc.createElement('script');
+      sc.textContent = '(' + _iframeInterceptor.toString() + ')();';
+      iDoc.body.appendChild(sc);
+    } catch(err) {
+      console.warn('interceptor inject error:', err);
+    }
+  };
+
+  showToast('<span class="t-green">✓ Renderizado</span> · ' + standard + ' std · <span class="t-blue">' + apiLinks + ' api · ' + mapCount + ' popups</span>');
+}
+
+
+// ── Mensaje del iframe ────────────────────────────────────────────────────────
+window.addEventListener('message', function(e) {
+  if (e.data && e.data.type === 'popup') openPopup(e.data);
+});
+
+function openPopup(data) {
+  document.getElementById('popup-title').textContent = data.title || data.linkText || data.anker || '─';
+
+  var subs = [];
+  if (data.kind) subs.push(data.kind);
+  if (data.href) subs.push(data.href);
+  document.getElementById('popup-subtitle').textContent = subs.join('  ·  ');
+
+  // Tags
+  var tagsEl = document.getElementById('popup-tags');
+  tagsEl.innerHTML = '';
+  ['data-anker','data-phrasegroup-id','data-learningcard-id','data-lxid','data-section-id','data-sxid','data-source'].forEach(function(k) {
+    if (data.dataset && data.dataset[k]) {
+      tagsEl.insertAdjacentHTML('beforeend',
+        '<span class="tag">' + k.replace('data-','') + ' <b>' + data.dataset[k] + '</b></span>');
+    }
+  });
+  if (data.rawTitle) {
+    tagsEl.insertAdjacentHTML('beforeend',
+      '<span class="tag">data-title (b64) <b>' + data.rawTitle.slice(0, 28) + '…</b></span>');
+  }
+  tagsEl.style.display = tagsEl.children.length ? '' : 'none';
+
+  var body = document.getElementById('popup-body');
+
+  // ── Prioridad 1: mapa pre-procesado del parent (más confiable)
+  var mapped = data.phraseId && window._pMap && window._pMap[data.phraseId];
+  if (mapped) {
+    // Actualizar el título del popup con el título completo del mapa
+    document.getElementById('popup-title').textContent = mapped.titulo || data.title || data.linkText || '─';
+    body.className = 'popup-body text-mode';
+    body.innerHTML =
+      (mapped.titulo    ? '<p style="font-size:1rem;font-weight:600;margin-bottom:.5rem;color:var(--accent)">' + mapped.titulo + '</p>' : '') +
+      (mapped.sinonimos ? '<p style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem;font-style:italic;">Sinónimos: ' + mapped.sinonimos + '</p>' : '') +
+      (mapped.descripcion
+        ? '<p style="font-size:0.9rem;line-height:1.8;color:var(--text)">' + mapped.descripcion + '</p>'
+        : '<p style="color:var(--muted);font-size:0.8rem;">Sin descripción disponible.</p>');
+    document.getElementById('popup-overlay').classList.add('active');
+    return;
+  }
+
+  // ── Prioridad 2: phrasonary desde innerHtml enviado por el iframe
+
+  if (data.kind === 'phrasonary' && data.innerHtml) {
+    var tmp = document.createElement('div');
+    tmp.innerHTML = data.innerHtml;
+    var titleEl = tmp.querySelector('[data-e2e-test-id="phrasonary-title"]');
+    var synEl   = tmp.querySelector('[data-e2e-test-id="phrasonary-synonym"]');
+    var allP    = Array.from(tmp.querySelectorAll('p'));
+    var descEl  = allP.find(function(p) {
+      return !p.hasAttribute('data-e2e-test-id') && p.textContent.trim().length > 10;
+    });
+    var titulo = (titleEl && titleEl.textContent.trim()) || data.title || '';
+    var sinos  = (synEl  && synEl.textContent.trim())  || '';
+    var desc   = (descEl && descEl.textContent.trim()) || '';
+    body.className = 'popup-body text-mode';
+    body.innerHTML =
+      (titulo ? '<p style="font-size:1rem;font-weight:600;margin-bottom:.5rem;color:var(--accent)">' + titulo + '</p>' : '') +
+      (sinos  ? '<p style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem;font-style:italic;">🔤 ' + sinos + '</p>' : '') +
+      (desc   ? '<p style="font-size:0.88rem;line-height:1.8;">' + desc + '</p>'
+              : '<p style="color:var(--muted);font-size:0.8rem;">Sin descripción disponible.</p>');
+
+  // Modo HTML genérico
+  } else if (data.innerHtml) {
+    body.className = 'popup-body html-mode';
+    body.innerHTML = '';
+    var f = document.createElement('iframe');
+    f.style.cssText = 'width:100%;min-height:250px;border:none;display:block;';
+    f.onload = function() {
+      try {
+        var h = f.contentDocument.body.scrollHeight;
+        f.style.height = Math.min(Math.max(h + 40, 200), 520) + 'px';
+      } catch(err) {}
+    };
+    var srcdocParts = [
+      '<!DOCTYPE html><html><head><style>',
+      'body{margin:1.5rem 2rem;font-family:system-ui,sans-serif;line-height:1.7;font-size:15px;color:#1a1a2e;}',
+      'h1,h2,h3{margin-top:1.25em;margin-bottom:.5em;}p{margin-bottom:.75em;}img{max-width:100%;border-radius:6px;}',
+      '<' + '/style><' + '/head><body>',
+      data.innerHtml,
+      '<' + '/body><' + '/html>'
+    ].join('');
+    f.srcdoc = srcdocParts;
+    body.appendChild(f);
+
+
+  // Sin contenido
+  } else {
+    body.className = 'popup-body text-mode';
+    body.innerHTML =
+      '<p style="color:var(--muted);font-family:\'Space Mono\',monospace;font-size:0.75rem;line-height:1.9;margin-bottom:1.25rem;">' +
+      'No se encontró popup para <b style="color:var(--accent)">' + (data.linkText || data.anker || '?') + '</b>.<br>' +
+      'Puede estar en otra página o cargarse dinámicamente.</p>' +
+      '<hr style="border:none;border-top:1px solid var(--border);margin-bottom:1rem;">' +
+      '<p style="font-size:0.82rem;line-height:2;"><b>href:</b> <code style="color:var(--accent3);font-size:0.78rem;">' + (data.href || '─') + '</code></p>';
+  }
+
+  document.getElementById('popup-overlay').classList.add('active');
+}
+
+function closePopup() {
+  document.getElementById('popup-overlay').classList.remove('active');
+  document.getElementById('popup-body').innerHTML = '';
+}
+
+function overlayClick(e) {
+  if (e.target === document.getElementById('popup-overlay')) closePopup();
+}
+
+function clearAll() {
+  document.getElementById('html-input').value = '';
+  var frame = document.getElementById('preview-frame');
+  frame.srcdoc = '';
+  frame.style.display = 'none';
+  document.getElementById('empty-state').style.display = '';
+  document.getElementById('link-count').style.display = 'none';
+}
+
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') renderHTML();
+  if (e.key === 'Escape') closePopup();
+});
+</script>
+</body>
+</html>

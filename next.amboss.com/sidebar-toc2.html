@@ -1,0 +1,795 @@
+<style>
+  /* Evitar scroll horizontal en todo el panel */
+  html,
+  body {
+    overflow-x: hidden;
+    overflow-y: hidden;
+    height: 100%;
+    margin: 0;
+  }
+
+  /* Contenedor principal ocupa toda la altura */
+  /* Contenedor principal ocupa toda la altura disponible del padre */
+  .session-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 60px);
+    max-height: calc(100vh - 60px);
+  }
+
+  /* Wrap crece para llenar el espacio disponible */
+  .wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  /* Content crece y permite scroll */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+  }
+
+  /* Asegurar que ningún contenedor lateral se desborde */
+  .wrap,
+  .card,
+  .content,
+  .list {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Ítems de la lista: nunca crecer en X */
+  .ed71ad0ad070e9f8--item,
+  .ac38006eca9237c9--link,
+  ._5dd6536775541c73--questionListContainer {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Texto largo: cortar correctamente */
+  ._5dd6536775541c73--contentPreview {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    /* word-break: break-word; removed to prevent wrapping */
+    max-width: 100px;
+  }
+
+  /* Flex items no expanden el contenedor */
+  ._5dd6536775541c73--questionListContainer>* {
+    min-width: 0;
+  }
+
+  /* UL sin padding ni margen */
+  ul.list {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Ocultar cabeceras vacías o no usadas */
+  .head {
+    display: none;
+  }
+
+  /* tamaño y "modo" del texto */
+  ._5dd6536775541c73--number {
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 20px;
+  }
+
+  ._5dd6536775541c73--contentPreview {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 18px;
+    color: rgba(17, 24, 39, 0.7);
+    /* ajustá si estás en dark */
+  }
+
+  /* Active item styling */
+  .ed71ad0ad070e9f8--selected {
+    background-color: #eef5fa;
+    /* Light blue commonly used in AMBOSS */
+  }
+
+  .ed71ad0ad070e9f8--selected ._5dd6536775541c73--number {
+    color: #0d2a45;
+  }
+
+  /* Active item: también cambia el color del preview */
+  .ed71ad0ad070e9f8--selected ._5dd6536775541c73--contentPreview {
+    font-weight: 500;
+
+    color: #0d2a45;
+  }
+
+  ._5dd6536775541c73--symbolContainer {
+    padding-top: 0px !important;
+    align-items: flex-start !important;
+    justify-content: center;
+  }
+</style>
+<style>
+  .exit-sess-ftr {
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: center;
+    background-color: #fff;
+    height: 36px;
+    align-items: center;
+  }
+
+  .exit-sess-btn {
+    text-decoration: none;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    height: 40px;
+    align-items: center;
+    transition: background-color 0.2s;
+  }
+
+  .exit-sess-btn:hover {
+    background-color: #f3f4f6;
+  }
+</style>
+
+<body>
+
+  <div class="session-container">
+
+
+
+
+    <div class="_5dd6536775541c73--header" id="UVvNi5Iqa0">
+      <div class="_5dd6536775541c73--headerText">
+        <div class="_5dd6536775541c73--title" data-e2e-test-id="sessionTitle" data-testid="session-title">
+          <p data-ds-id="Text" class="css-d3zvrx-StyledText eadloo90">
+            <span data-ds-id="Text" class="css-lsk70e-StyledText eadloo90"></span>Questions based on " " (not yet seen or skipped)
+          </p>
+        </div>
+        <div data-e2e-test-id="sessionQuestionCount">
+          <p data-ds-id="Text" class="css-d3zvrx-StyledText eadloo90"> <span style="margin:0 1px"></span> </span> </p>
+        </div>
+      </div>
+      <div class="_40cdb67c5e889bae--progressContainer" data-testid="progress-bar" style="height: 4px">
+        <div class="_40cdb67c5e889bae--progressInner _40cdb67c5e889bae--regularGray" data-testid="segment"
+          style="width: 8.33333%"></div>
+      </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="wrap">
+      <div class="card">
+        <div class="head">
+          <div>
+            <div class="path" id="pathText"></div>
+          </div>
+        </div>
+
+        <div class="content">
+          <div class="state" id="state"></div>
+          <ul class="list" id="lista"></ul>
+        </div>
+
+        <div class="footer">
+          <span id="count"></span>
+        </div>
+      </div>
+    </div>
+
+
+
+
+
+
+
+    <div class="_5dd6536775541c73--footer">
+      <div class="f30fa100dfe07726--timerRow" data-e2e-test-id="open-timer" id="timer-open">
+        <div class="f30fa100dfe07726--buttonContainer f30fa100dfe07726--timerOffContainer">
+          <button onclick="document.getElementById('timer-open').style.display='none'; document.getElementById('timer-collapsed').style.display='flex'; window.tp(1);" data-ds-id="PictogramButton" type="button" aria-label="Hide timer" class="css-f83uhv-StyledPictogramButton ej9y1j50">
+            <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                <div data-e2e-test-id="timer-off" data-testid="timer-off" data-ds-id="Icon" data-variant="inherit"
+                  color="inherit" aria-hidden="true" class="css-16s79oa-StyledIcon e1kkd7uc0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M6.848 6.88a8 8 0 1 0 11.275 11.27M19.748 15A8 8 0 0 0 10 5.252M15.5 9.5l-.5.5"></path>
+                    <path stroke-width="2" d="M12 5V2"></path>
+                    <path stroke-linecap="round" stroke-width="2" d="M10 2h4"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 4 17 17"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+        <div data-ds-id="Box" class="css-bru14v-StyledBox ebcgi2u0">
+          <p id="total-timer" data-ds-id="Text" class="css-v4r7ym-StyledText eadloo90">0h 00m</p>
+          <h6 data-ds-id="H6" class="css-138rc6z-StyledH6 ell7oe05">SESSION</h6>
+        </div>
+        <div data-ds-id="Box" class="css-bru14v-StyledBox ebcgi2u0">
+          <p id="question-timer" data-ds-id="Text" class="css-v4r7ym-StyledText eadloo90">00:00</p>
+          <h6 data-ds-id="H6" class="css-138rc6z-StyledH6 ell7oe05">QUESTION</h6>
+        </div>
+        <div
+          class="f30fa100dfe07726--buttonContainer f30fa100dfe07726--pauseButtonContainer f30fa100dfe07726--borderLeftContainer"
+          data-e2e-test-id="pause-button-container">
+          <button id="pause-btn" onclick="window.tp()" data-ds-id="Button" type="button" style="padding: 0 !important;" class="css-os1ghn-StyledButton ejph2fy0">
+            <div class="css-c3523d-StyledInner ejph2fy1" style="padding: 0 !important; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+              <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round" stroke-width="2"
+                    class="f30fa100dfe07726--buttonSvg" viewBox="0 0 24 24" role="img">
+                    <path d="M6 4h4v16H6zm8 0h4v16h-4z"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div class="f30fa100dfe07726--collapsedTimer" data-e2e-test-id="collapsed-timer" id="timer-collapsed" style="display: none; position: absolute; left: 12px !important; bottom: 52px !important; margin: 0 !important; z-index: 10; background: var(--color-background-primary); width: 48px; height: 48px; border-radius: 8px !important; box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important; border: none !important;">
+        <button onclick="document.getElementById('timer-open').style.display='flex'; document.getElementById('timer-collapsed').style.display='none'; window.tp(0);" data-ds-id="Button" type="button" aria-label="Show timer" style="border: none !important; outline: none !important; box-shadow: none !important; background: transparent; cursor: pointer; width: 100%; height: 100%; padding: 0; display: flex; align-items: center; justify-content: center;" class="css-1g8bq5d-StyledButton ejph2fy0">
+          <div class="css-c3523d-StyledInner ejph2fy1">
+            <div data-ds-id="Inline" class="css-1iyebzw-InlineContainer e6i75dx0">
+              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                <div data-ds-id="Icon" data-variant="secondary" class="css-6uu77s-StyledIcon e1tsg83e0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16m3-11-3 3"></path>
+                    <path stroke-width="2" d="M12 5V2"></path>
+                    <path stroke-linecap="round" stroke-width="2" d="M10 2h4"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </button>
+      </div>
+      <div class="exit-sess-ftr">
+        <a data-e2e-test-id="exit-session-button" data-ds-id="Button"
+          class="css-1m1hh93-StyledButton ejph2fy0 exit-sess-btn" href="/us/analysis/JT2-0s7S9i">
+          <div class="css-c3523d-StyledInner ejph2fy1"
+            style="width: 100%; display: flex; justify-content: center; box-sizing: border-box;">
+            <div data-ds-id="Inline" class="css-1iyebzw-InlineContainer e6i75dx0"
+              style="justify-content: center; width: 100%; display: flex;">
+              <div class="css-h0nko7-StyledInlineItem e6i75dx1"
+                style="text-transform: uppercase; font-weight: 700; color: #5f6b7c; font-size: 13px; letter-spacing: 0.5px; text-align: center;">
+                EXIT SESSION
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+
+
+  </div>
+
+  <script>
+    // Ruta (como en tu captura)
+    function getPreguntasColRef() {
+      const path = sessionStorage.getItem('currentDocPath');
+      return path ? window.db.collection(`${path}/preguntas`) : null;
+    }
+
+    function setState(msg) {
+      document.getElementById("state").textContent = msg;
+    }
+
+    function setCount(total) {
+      const isFromAnalysis = sessionStorage.getItem('isFromAnalysis') === 'true';
+      const statusMap = JSON.parse(sessionStorage.getItem('questionStatusMap') || '{}');
+      const ans = isFromAnalysis ? Object.keys(statusMap).length : JSON.parse(sessionStorage.getItem('answeredQuestions') || '[]').length;
+      
+      const p = document.querySelector('[data-e2e-test-id="sessionQuestionCount"] p');
+      if (p) p.innerHTML = `${ans}<span style="margin:0 2px">/</span>${total || 0}`;
+      const bar = document.querySelector('._40cdb67c5e889bae--progressInner');
+      if (bar && total > 0) bar.style.width = (ans / total * 100) + '%';
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function cargarListaPreguntas() {
+      const lista = document.getElementById("lista");
+      lista.innerHTML = "";
+
+      const path = sessionStorage.getItem('currentDocPath');
+      if (path) {
+          let topicName = path.split('/').pop().replace(/_/g, ' ');
+          const titleSpan = document.querySelector('._5dd6536775541c73--title span');
+          if (titleSpan) titleSpan.textContent = topicName;
+      }
+
+      if (!window.db) {
+        setState("Firestore no inicializado.");
+        setCount(0);
+        return;
+      }
+
+      let snap;
+      try {
+        snap = await getPreguntasColRef().get();
+      } catch (e) {
+        console.error("Error leyendo preguntas:", e);
+        setState("Error cargando preguntas (mirá la consola).");
+        setCount(0);
+        return;
+      }
+
+      const docs = snap.docs
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => {
+          const na = Number(a.id),
+            nb = Number(b.id);
+          if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+          return String(a.id).localeCompare(String(b.id), "es");
+        });
+
+      // Filter docs to match the current session's IDs (especially from Analysis)
+      let filteredDocs = docs;
+      const isFromAnalysis = sessionStorage.getItem('isFromAnalysis') === 'true';
+      const sessionData = JSON.parse(sessionStorage.getItem('sessionAnalysisData') || '{}');
+      const sessionIds = sessionData.questionIds;
+
+      if (isFromAnalysis && Array.isArray(sessionIds)) {
+        filteredDocs = docs.filter(d => sessionIds.includes(d.id))
+                           .sort((a, b) => sessionIds.indexOf(a.id) - sessionIds.indexOf(b.id));
+      } else {
+        const storedFilteredIds = sessionStorage.getItem('qbankFilteredIds');
+        if (storedFilteredIds) {
+          try {
+            const allowedIds = JSON.parse(storedFilteredIds);
+            if (Array.isArray(allowedIds)) {
+              filteredDocs = filteredDocs.filter(d => allowedIds.includes(d.id));
+            }
+          } catch (e) {
+            console.error("Error parsing filtered IDs in sidebar:", e);
+          }
+        }
+        const sessionLimit = parseInt(sessionStorage.getItem('qbankSessionLimit') || '0');
+        if (sessionLimit > 0 && sessionLimit < filteredDocs.length) {
+          filteredDocs = filteredDocs.slice(0, sessionLimit);
+        }
+      }
+
+      setCount(filteredDocs.length);
+
+      if (!filteredDocs.length) {
+        setState("No hay documentos en esta subcategoría.");
+        return;
+      }
+      
+      const docsToRender = filteredDocs;
+      
+      // ... continue with docsToRender
+      
+      // Helper function for rendering difficulty hammers
+      const currentQuestionId = sessionStorage.getItem('currentQuestionId');
+      const answeredQuestions = JSON.parse(sessionStorage.getItem('answeredQuestions') || '[]');
+      const previouslyAnswered = JSON.parse(sessionStorage.getItem('previouslyAnswered') || '[]');
+      const markedQuestions = JSON.parse(sessionStorage.getItem('markedQuestions') || '[]');
+      const questionStatusMap = JSON.parse(sessionStorage.getItem('questionStatusMap') || '{}');
+
+      // Helper function for rendering difficulty hammers
+      function renderHammers(count) {
+        let html = "";
+        const TOTAL = 5; // ← 5 niveles
+
+        for (let i = 0; i < TOTAL; i++) {
+          const filled = i < count;
+
+          html += `
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14" height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              aria-hidden="true"
+              style="
+                display:block;
+                flex:0 0 auto;
+                margin:-1px;
+                padding:0;
+              "
+            >
+              <path
+                fill="currentColor"
+                d="m14.494 6.195-4-4A.66.66 0 0 0 10.023 2H5.289a.666.666 0 0 0-.468 1.14l2.414 2.39-5.706 5.705a.666.666 0 0 0 0 .944l1.885 1.885a.667.667 0 0 0 .943 0l5.721-5.72 1.14 1.128c.329.327.75.491 1.171.491s.843-.164 1.172-.492l.933-.932c.32-.32.495-.736.495-1.172s-.175-.852-.495-1.172"
+                style="opacity:${filled ? "1" : "0.25"};"
+              />
+            </svg>`;
+        }
+
+        return `
+          <span
+            style="
+              display:inline-flex;
+              align-items:center;
+              gap:0;
+              margin:0;
+              padding:0;
+              line-height:0;
+              font-size:0;        /* MATA cualquier espacio residual */
+              letter-spacing:0;  /* por si hay estilos globales raros */
+            "
+          >${html}</span>
+        `;
+      }
+
+      const CORRECT_SVG = `<div data-ds-id="Icon" data-variant="inherit" class="css-10pd6gh-StyledIcon e1tsg83e0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m4.737-10.324a1 1 0 0 0-1.474-1.352L6.5 9.52 4.737 7.597a1 1 0 0 0-1.474 1.351l2.5 2.728a1 1 0 0 0 1.474 0z" clip-rule="evenodd"></path></svg></div>`;
+
+      const INCORRECT_SVG = `<div data-ds-id="Icon" data-variant="inherit" color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m3.707-11.707a1 1 0 0 1 0 1.414L9.414 8l2.293 2.293a1 1 0 0 1-1.414 1.414L8 9.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L6.586 8 4.293 5.707a1 1 0 0 1 1.414-1.414L8 6.586l2.293-2.293a1 1 0 0 1 1.414 0" clip-rule="evenodd"></path></svg></div>`;
+
+      const FLAG_SVG = `<div data-ds-id="Icon" data-variant="inherit" class="css-10pd6gh-StyledIcon e1tsg83e0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path fill="currentColor" d="M3 10.28s.625-.72 2.5-.72S8.625 11 10.5 11s2.5-.72 2.5-.72V2.72s-.625.72-2.5.72S7.375 2 5.5 2 3 2.72 3 2.72z"></path><path d="M3 15v-5"></path></g></svg></div>`;
+
+
+      lista.innerHTML = docsToRender
+        .map((q, index) => {
+          // Plain text preview
+          const hint =
+            q.questionContent?.text || q.text || "Pregunta sin texto";
+          const tmp = document.createElement("div");
+          tmp.innerHTML = hint;
+          const plainText = tmp.textContent || tmp.innerText || "";
+          const truncatedPreview =
+            plainText.length > 200
+              ? plainText.substring(0, 200) + "..."
+              : plainText;
+
+          // Difficulty from document metadata or fallback
+          const difficulty = q.metadata?.difficulty || q.difficulty || 1;
+
+          // Determine if preview should be shown (active OR answered OR skipped)
+          const isFromAnalysis = sessionStorage.getItem('isFromAnalysis') === 'true';
+          const status = questionStatusMap[String(q.id)];
+          const isActive = String(q.id) === String(currentQuestionId);
+          const isAnswered = answeredQuestions.includes(String(q.id)) || (isFromAnalysis && status && status !== 'pending' && status !== 'skipped');
+          const isSkipped = previouslyAnswered.includes(String(q.id)) || (isFromAnalysis && (status === 'skipped' || status === 'pending'));
+          const showPreview = isFromAnalysis || isActive || isAnswered || isSkipped;
+
+          // Difficulty hammers ALWAYS block
+          const hammersDisplayStyle = 'block';
+
+          // Correct/Incorrect logic
+          const isCorrect = status === 'correct';
+          const isCorrectWithHelp = status === 'correctWithHelp';
+          
+          let iconHTML = INCORRECT_SVG;
+          let iconClass = '_5dd6536775541c73--dotContainerRed';
+          
+          if (isCorrect) {
+            iconHTML = CORRECT_SVG;
+            iconClass = '_5dd6536775541c73--dotContainerGreen';
+          } else if (isCorrectWithHelp) {
+            iconHTML = CORRECT_SVG;
+            iconClass = '_5dd6536775541c73--dotContainerYellow';
+          }
+
+          // Render item
+          // Note: Add ID to the preview div so we can easily find it later
+          return `
+            <div class="ed71ad0ad070e9f8--item ${isActive ? 'ed71ad0ad070e9f8--selected' : ''}" id="item-${q.id}" data-question-id="${q.id}" data-e2e-test-id="sidebar-item">
+              <a class="ac38006eca9237c9--link" href="#" onclick="event.preventDefault(); window.loadQuestion && window.loadQuestion('${q.id}');">
+                <div class="_5dd6536775541c73--questionListContainer _5dd6536775541c73--containerMuted ${isActive ? '_5dd6536775541c73--active' : ''}" data-e2e-test-id="question-selected-${isActive}" id="FLaJnh0OIM_${q.id}" style="display: flex; align-items: center; min-height: 40px;">
+                  <div class="_5dd6536775541c73--symbolContainer" style="display: flex; justify-content: center; flex: 0 0 40px !important;">
+                    <span tabindex="0" style="display: ${isAnswered || isSkipped ? 'block' : 'none'};">
+                      <div class="${isAnswered ? iconClass : '_5dd6536775541c73--dotContainerGrey'}" data-testid="${isAnswered ? 'x-circle-filled-' + iconClass : 'dot-dotContainerGrey'}">
+                        ${isAnswered ? iconHTML : `<div data-ds-id="Icon" data-variant="inherit" class="css-10pd6gh-StyledIcon e1tsg83e0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4"></circle></svg></div>`}
+                      </div>
+                    </span>
+                  </div>
+                  <div class="_5dd6536775541c73--number" data-e2e-test-id="question-${q.id}" style="flex: 0 0 22px !important; width: 22px !important; max-width: 22px !important; box-sizing: border-box !important; padding: 0 2px !important;">${q.id}</div>
+                  <div class="_5dd6536775541c73--contentPreview" id="preview-${q.id}" data-test-id="snippet" style="display: block; flex: 0 0 108px !important; width: 108px !important; max-width: 108px !important; box-sizing: border-box !important; padding: 0 4px !important; visibility: ${showPreview ? 'visible' : 'hidden'};">
+                    <span>${escapeHtml(truncatedPreview)}</span>
+                  </div>
+                  <div class="_5dd6536775541c73--hammersWrapper" id="hammers-${q.id}" style="display: block; flex: 0 0 89px !important; width: 89px !important; max-width: 89px !important; box-sizing: border-box !important; visibility: ${showPreview ? 'visible' : 'hidden'};">
+                    <span tabindex="0" style="display: inline">
+                      <div class="_62e60f41f7d36e9d--hammerContainer">
+                        ${renderHammers(difficulty)}
+                      </div>
+                    </span>
+                  </div>
+
+                                    <div style="flex: 0 0 20px !important;">
+                    </div>
+
+
+                  <div id="mark-${q.id}" style="flex: 0 0 20px !important; display: flex; align-items: center; justify-content: center;">${markedQuestions.includes(String(q.id)) ? FLAG_SVG : ''}
+                    </div>
+
+
+                </div>
+              </a>
+            </div>`;
+        })
+        .join("");
+
+      // Link click handler logic removed as we use onclick in the HTML above now
+    }
+
+    // --- Event Listeners for Dynamic Updates ---
+
+    // Listen for question loaded (sent from qbanksesion.html)
+    window.addEventListener('amboss:question-loaded', (e) => {
+      const qId = String(e.detail.questionId);
+      
+      // Auto-refresh list if it's empty or the question isn't found (context change)
+      const listItems = document.querySelectorAll('[data-question-id]');
+      const idsInList = Array.from(listItems).map(el => el.getAttribute('data-question-id'));
+      
+      if (listItems.length === 0 || !idsInList.includes(qId)) {
+        console.log("🔄 TOC2: Context mismatch or empty list, refreshing...");
+        cargarListaPreguntas().then(() => {
+            // Re-run the update logic once list is fresh
+            updateActiveState(qId);
+        });
+        return;
+      }
+
+      updateActiveState(qId);
+    });
+
+    function updateActiveState(qId) {
+      const answeredQuestions = JSON.parse(sessionStorage.getItem('answeredQuestions') || '[]');
+      const previouslyAnswered = JSON.parse(sessionStorage.getItem('previouslyAnswered') || '[]');
+      const questionStatusMap = JSON.parse(sessionStorage.getItem('questionStatusMap') || '{}');
+
+      const isFromAnalysis = sessionStorage.getItem('isFromAnalysis') === 'true';
+
+      // 1. Update Preview Visibility - Hide non-active, non-answered previews
+      document.querySelectorAll('[id^="preview-"]').forEach(previewEl => {
+        const pId = previewEl.id.replace('preview-', '');
+        const isActiveOrAnswered = isFromAnalysis || (pId === qId) || answeredQuestions.includes(pId) || previouslyAnswered.includes(pId);
+        previewEl.style.visibility = isActiveOrAnswered ? 'visible' : 'hidden';
+        
+        // Also update hammers visibility
+        const hammerEl = document.getElementById(`hammers-${pId}`);
+        if (hammerEl) hammerEl.style.visibility = isActiveOrAnswered ? 'visible' : 'hidden';
+      });
+
+      // 2. Update Active Styling
+      document.querySelectorAll('._5dd6536775541c73--questionListContainer').forEach(container => {
+        const cId = container.id.replace('FLaJnh0OIM_', '');
+        const wrapper = document.getElementById(`item-${cId}`);
+        if (cId === qId) {
+          container.classList.add('_5dd6536775541c73--active');
+          if (wrapper) wrapper.classList.add('ed71ad0ad070e9f8--selected');
+        } else {
+          container.classList.remove('_5dd6536775541c73--active');
+          if (wrapper) wrapper.classList.remove('ed71ad0ad070e9f8--selected');
+        }
+      });
+
+      // 3. Update Icon (Handle Reset state)
+      const itemWrapper = document.getElementById(`item-${qId}`);
+      if (itemWrapper) {
+        const symbolContainer = itemWrapper.querySelector('._5dd6536775541c73--symbolContainer');
+        if (symbolContainer) {
+          const innerSpan = symbolContainer.querySelector('span');
+          const isResultKnown = answeredQuestions.includes(qId) || (isFromAnalysis && questionStatusMap[qId] && questionStatusMap[qId] !== 'pending');
+          const isSkippedKnown = previouslyAnswered.includes(qId) || (isFromAnalysis && (questionStatusMap[qId] === 'skipped' || questionStatusMap[qId] === 'pending'));
+
+          if (innerSpan) {
+            if (isResultKnown) {
+                // Keep existing behavior (Result icon already set by answered event or initial render)
+                innerSpan.style.display = 'block';
+            } else if (isSkippedKnown) {
+                innerSpan.style.display = 'block';
+                innerSpan.innerHTML = `<div class="_5dd6536775541c73--dotContainerGrey" data-testid="dot-dotContainerGrey"><div data-ds-id="Icon" data-variant="inherit" class="css-10pd6gh-StyledIcon e1tsg83e0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4"></circle></svg></div></div>`;
+            } else {
+                innerSpan.style.display = 'none';
+            }
+          }
+        }
+      }
+
+      setCount(document.querySelectorAll('[data-e2e-test-id="sidebar-item"]').length);
+    }
+
+    window.addEventListener('amboss:question-answered', (e) => {
+      const qId = String(e.detail.questionId);
+      const isCorrect = e.detail.isCorrect;
+      console.log("Sidebar: Question answered", qId, "Correct:", isCorrect);
+      // Show the hammers (now using visibility)
+      const hammersContainer = document.getElementById(`hammers-${qId}`);
+      if (hammersContainer) {
+        hammersContainer.style.visibility = 'visible';
+      }
+
+      // Show the 'incorrect' or 'correct' symbol
+      const itemWrapper = document.getElementById(`item-${qId}`);
+      if (itemWrapper) {
+        const symbolContainer = itemWrapper.querySelector('._5dd6536775541c73--symbolContainer');
+        if (symbolContainer) {
+          const innerSpan = symbolContainer.querySelector('span');
+          if (innerSpan) {
+            innerSpan.style.display = 'block';
+
+            // Update inner HTML based on correctness
+            const CORRECT_SVG = `<div data-ds-id="Icon" data-variant="inherit" class="css-10pd6gh-StyledIcon e1tsg83e0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m4.737-10.324a1 1 0 0 0-1.474-1.352L6.5 9.52 4.737 7.597a1 1 0 0 0-1.474 1.351l2.5 2.728a1 1 0 0 0 1.474 0z" clip-rule="evenodd"></path></svg></div>`;
+            const INCORRECT_SVG = `<div data-ds-id="Icon" data-variant="inherit" color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m3.707-11.707a1 1 0 0 1 0 1.414L9.414 8l2.293 2.293a1 1 0 0 1-1.414 1.414L8 9.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L6.586 8 4.293 5.707a1 1 0 0 1 1.414-1.414L8 6.586l2.293-2.293a1 1 0 0 1 1.414 0" clip-rule="evenodd"></path></svg></div>`;
+
+            if (isCorrect) {
+              const isWithHelp = e.detail.isWithHelp;
+              if (isWithHelp) {
+                innerSpan.innerHTML = `<div class="_5dd6536775541c73--dotContainerYellow">${CORRECT_SVG}</div>`;
+              } else {
+                innerSpan.innerHTML = `<div class="_5dd6536775541c73--dotContainerGreen">${CORRECT_SVG}</div>`;
+              }
+            } else {
+              innerSpan.innerHTML = `<div class="_5dd6536775541c73--dotContainerRed">${INCORRECT_SVG}</div>`;
+            }
+          }
+        }
+      }
+      setCount(document.querySelectorAll('[data-e2e-test-id="sidebar-item"]').length);
+    });
+
+    // Listen for question marked
+    window.addEventListener('amboss:question-marked', (e) => {
+      const qId = String(e.detail.questionId);
+      const isMarked = e.detail.isMarked;
+      const markContainer = document.getElementById(`mark-${qId}`);
+      if (markContainer) {
+        const FLAG_SVG = `<div data-ds-id="Icon" data-variant="inherit" class="css-10pd6gh-StyledIcon e1tsg83e0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path fill="currentColor" d="M3 10.28s.625-.72 2.5-.72S8.625 11 10.5 11s2.5-.72 2.5-.72V2.72s-.625.72-2.5.72S7.375 2 5.5 2 3 2.72 3 2.72z"></path><path d="M3 15v-5"></path></g></svg></div>`;
+        markContainer.innerHTML = isMarked ? FLAG_SVG : '';
+      }
+    });
+
+    window.addEventListener('amboss:question-skipped', (e) => {
+      const qId = String(e.detail.questionId);
+      const itemWrapper = document.getElementById(`item-${qId}`);
+      if (itemWrapper) {
+        const symbolContainer = itemWrapper.querySelector('._5dd6536775541c73--symbolContainer');
+        if (symbolContainer) {
+          const innerSpan = symbolContainer.querySelector('span');
+          if (innerSpan) {
+            innerSpan.style.display = 'block';
+            innerSpan.innerHTML = `<div class="_5dd6536775541c73--dotContainerGrey" data-testid="dot-dotContainerGrey"><div data-ds-id="Icon" data-variant="inherit" class="css-10pd6gh-StyledIcon e1tsg83e0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><circle cx="8" cy="8" r="4"></circle></svg></div></div>`;
+          }
+        }
+      }
+      const previewEl = document.getElementById(`preview-${qId}`);
+      if (previewEl) previewEl.style.visibility = 'visible';
+      const hammersEl = document.getElementById(`hammers-${qId}`);
+      if (hammersEl) hammersEl.style.visibility = 'visible';
+    });
+
+    (function boot() {
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", cargarListaPreguntas, {
+          once: true,
+        });
+      } else {
+        cargarListaPreguntas(); // si ya cargó el DOM (contenido inyectado), ejecuta ya
+      }
+    })();
+
+    // --- Timer Logic ---
+    (function() {
+      let qId = sessionStorage.getItem('currentQuestionId');
+      let times = JSON.parse(sessionStorage.getItem('qTimes') || '{}');
+      let paused = false; 
+      let modalOverlay;
+
+      window.tp = p => {
+        paused = (p === undefined) ? !paused : !!p;
+        const btn = document.getElementById('pause-btn');
+        const path = btn?.querySelector('path');
+        if (path) path.setAttribute('d', paused ? 'm5 3 14 9-14 9z' : 'M6 4h4v16H6zm8 0h4v16h-4z');
+        if (btn) btn.disabled = paused ? false : (JSON.parse(sessionStorage.getItem('answeredQuestions') || '[]').includes(qId));
+
+        try {
+          if (!modalOverlay) modalOverlay = window.top.document.getElementById('ds-modal');
+          if (!modalOverlay) {
+            const d = window.top.document.createElement('div');
+            d.innerHTML = `<div class="amboss-ds-portal" id="ds-modal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2147483647;background:rgba(47,51,65,.8);display:flex;align-items:center;justify-content:center;">
+                <div class="_525e0b73ddffb195--modalContent _525e0b73ddffb195--isAutoWidth" data-e2e-test-id="modalContainer" style="width:300px; height:320px; background:white; border-radius:8px; padding:24px 24px 32px; box-sizing:border-box; display:flex; flex-direction:column; position:relative; box-shadow: 0 4px 14px 0 rgba(0,0,0,0.1);">
+                  <div class="_525e0b73ddffb195--btnContainer" style="position:absolute; top:8px; right:8px; z-index:10;">
+                    <div data-e2e-test-id="exit-modal" data-testid="exit-modal" role="button" tabindex="0" style="cursor:pointer; color:#5f6b7c; padding: 14px; display: flex;">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon _525e0b73ddffb195--exitBtn" viewBox="0 0 24 24" role="img" style="width:24px; height:24px;"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+                    </div>
+                  </div>
+                  <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:space-between; margin-top:20px;">
+                    <div class="css-182itqs-StackItem e7wwwvf1" style="display:flex; justify-content:center;">
+                      <picture data-ds-id="Image"><img class="_77ad967e8b96512c--coffee css-q2drrd-StyledImg esvv5850" src="https://next.amboss.com/us/static/assets/ac6fe41ef97de084.png" style="width:240px; display:block;"></picture>
+                    </div>
+                    <div class="css-182itqs-StackItem e7wwwvf1" style="margin-top: -10px;">
+                      <p data-ds-id="Text" class="css-qi1pn1-StyledText eadloo90" style="font-size:16px; font-weight:500; color:#0d2a45; margin:0; text-align:center; line-height: 1.5;">Your question session is paused.</p>
+                    </div>
+                    <div class="css-182itqs-StackItem e7wwwvf1" style="width:100%;">
+                      <button data-ds-id="Button" type="button" class="css-1vkyyzb-StyledButton ejph2fy0" style="width:100%; height:40px; background-color:#04828a; color:white; border:none; border-radius:4px; font-weight:700; font-size:14px; cursor:pointer; transition: background-color 0.2s;">
+                        <div class="css-c3523d-StyledInner ejph2fy1" style="height:100%; display:flex; align-items:center; justify-content:center;">
+                          <div data-ds-id="Inline" class="css-1iyebzw-InlineContainer e6i75dx0">
+                            <div class="css-h0nko7-StyledInlineItem e6i75dx1" style="text-transform: uppercase; letter-spacing: 0.5px;">Resume</div>
+                          </div>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+              </div>
+            </div>`;
+            window.top.document.body.appendChild(d.firstElementChild);
+            modalOverlay = window.top.document.getElementById('ds-modal');
+            
+            const resume = (e) => { if(e) e.stopPropagation(); window.tp(0); };
+            const closeBtn = modalOverlay.querySelector('[data-e2e-test-id="exit-modal"]');
+            const resumeBtn = modalOverlay.querySelector('button');
+            if(closeBtn) closeBtn.onclick = resume;
+            if(resumeBtn) resumeBtn.onclick = resume;
+            
+            // Close when clicking outside content
+            modalOverlay.addEventListener('click', (e) => {
+              if (e.target === modalOverlay) resume(e);
+            });
+          }
+          if(modalOverlay) modalOverlay.style.display = (paused && p === undefined) ? 'flex' : 'none';
+        } catch(e) { console.error('Pause modal error:', e); }
+      };
+
+      const fmtQ = s => `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+      const fmtT = s => `${Math.floor(s/3600)}h ${Math.floor((s%3600)/60).toString().padStart(2,'0')}m`;
+
+      function update() {
+        if (qId && !paused) {
+          times[qId] = (times[qId] || 0) + 1;
+          sessionStorage.setItem('qTimes', JSON.stringify(times));
+        }
+        document.getElementById('question-timer').textContent = fmtQ(times[qId] || 0);
+        document.getElementById('total-timer').textContent = fmtT(Object.values(times).reduce((a,b)=>a+b, 0));
+      }
+
+      window.addEventListener('amboss:question-loaded', e => {
+        times = JSON.parse(sessionStorage.getItem('qTimes') || '{}');
+        qId = String(e.detail.questionId);
+        let p = false;
+        const answered = JSON.parse(sessionStorage.getItem('answeredQuestions') || '[]');
+        if (answered.includes(qId)) p = true;
+        window.tp(p);
+        document.getElementById('question-timer').textContent = fmtQ(times[qId] || 0);
+      });
+
+      window.addEventListener('amboss:question-answered', () => {
+        window.tp(1);
+        const btn = document.getElementById('pause-btn');
+        if (btn) btn.disabled = true;
+      });
+      
+      setInterval(update, 1000);
+    })();
+  </script>
+</body>

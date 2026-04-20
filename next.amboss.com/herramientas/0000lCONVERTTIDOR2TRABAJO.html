@@ -1,0 +1,1916 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Convertidor HTML - Amboss Clone</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        opacity: 0.9;
+        font-size: 16px;
+      }
+
+      .content {
+        padding: 30px;
+      }
+
+      .section {
+        margin-bottom: 30px;
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section-title::before {
+        content: "";
+        width: 4px;
+        height: 20px;
+        background: #667eea;
+        border-radius: 2px;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 300px;
+        padding: 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        resize: vertical;
+        transition: border-color 0.3s;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      button {
+        flex: 1;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-secondary {
+        background: #f5f5f5;
+        color: #333;
+      }
+
+      .btn-secondary:hover {
+        background: #e0e0e0;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 32px;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 5px;
+      }
+
+      .stat-label {
+        font-size: 14px;
+        color: #666;
+      }
+
+      .preview {
+        background: #f9f9f9;
+        border: 2px dashed #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        min-height: 200px;
+        max-height: 500px;
+        overflow-y: auto;
+      }
+
+      .preview:empty::before {
+        content: "La vista previa aparecerá aquí...";
+        color: #999;
+        font-style: italic;
+      }
+
+      .icon {
+        width: 20px;
+        height: 20px;
+      }
+
+      .alert {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: none;
+      }
+
+      .alert.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .alert.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .alert.show {
+        display: block;
+      }
+
+      .output-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        align-items: start;
+      }
+
+      .output-col textarea {
+        min-height: 420px;
+      }
+
+      .input-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        align-items: start;
+      }
+
+      .input-col {
+        min-width: 0;
+      }
+
+      /* opcional: estilo para las figuras de extraExplanation */
+      .amb-extraImage {
+        margin: 16px 0;
+        text-align: center;
+      }
+
+      .amb-extraImage img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 6px;
+        display: block;
+        margin: 0 auto;
+      }
+
+      .amb-extraImage figcaption {
+        margin-top: 6px;
+        font-size: 13px;
+        color: #555;
+        font-style: italic;
+      }
+
+      /* Estilos para los iconos de explicación y extraExplanation */
+      .api.extraExplanation, .api.explanation {
+        color: #acacac;
+      }
+      
+      /* Estilos para la configuración de ruta y subida */
+      .path-row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .path-row label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+      }
+      .path-input-wrapper {
+        display: flex;
+        align-items: center;
+        background: #f9f9f9;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: border-color 0.3s;
+      }
+      .path-input-wrapper:focus-within {
+        border-color: #667eea;
+      }
+      .path-prefix {
+        padding: 12px 14px;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        color: #667eea;
+        background: #f0f4f8;
+        border-right: 2px solid #e0e0e0;
+        white-space: nowrap;
+        font-weight: 600;
+      }
+      #inputPath {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        padding: 12px 14px;
+        font-family: inherit;
+        font-size: 14px;
+        color: #333;
+      }
+      .path-helper {
+        font-size: 12px;
+        color: #777;
+        margin-top: -4px;
+      }
+
+      /* Preview Styles */
+      .group-header {
+        font-size: 11px;
+        font-family: 'Courier New', monospace;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #777;
+        margin-top: 16px;
+        margin-bottom: 4px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid #e0e0e0;
+        font-weight: bold;
+      }
+      .field-card {
+        display: flex;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border-left: 3px solid transparent;
+        background: #fafafa;
+        align-items: flex-start;
+        margin-bottom: 8px;
+        border: 1px solid #e0e0e0;
+      }
+      .type-meta { border-left-color: #00e5ff; }
+      .type-contenido { border-left-color: #a78bfa; }
+      .type-imágenes { border-left-color: #34d399; }
+      .type-tablas { border-left-color: #fb923c; }
+      .type-listas__boxes { border-left-color: #f472b6; }
+      .type-referencias { border-left-color: #94a3b8; }
+      .type-otros { border-left-color: #cbd5e1; }
+      
+      .field-key {
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        min-width: 140px;
+        color: #555;
+        font-weight: bold;
+      }
+      .field-val {
+        font-size: 13px;
+        color: #333;
+        word-break: break-word;
+      }
+      .field-val mark {
+        background: rgba(251,191,36,0.3);
+        border-radius: 3px;
+        padding: 0 3px;
+        font-weight: bold;
+      }
+      #preview {
+        margin-top: 20px;
+        background: white;
+        border: 2px dashed #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      #preview:empty {
+        display: none;
+      }
+    </style>
+
+    <!-- Firebase -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCK8SLFcVDyvLUUzVjOWOBDGHi0kD8-cKs",
+        authDomain: "bancomicina-62bfe.firebaseapp.com",
+        projectId: "bancomicina-62bfe",
+        storageBucket: "bancomicina-62bfe.appspot.com",
+        messagingSenderId: "737254665977",
+        appId: "1:737254665977:web:dbafb6c16ad9d96fae7c28"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      window.db = getFirestore(app);
+      window.serverTimestamp = serverTimestamp;
+      window.doc = doc;
+      window.setDoc = setDoc;
+      window.getDoc = getDoc;
+    </script>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🔄 Convertidor HTML Amboss</h1>
+        <p>
+          Convierte código HTML extenso a formato limpio manteniendo el diseño
+        </p>
+      </div>
+
+      <div class="content">
+        <div id="alert" class="alert"></div>
+
+        <div class="section">
+          <div class="input-grid">
+            <!-- Columna izquierda: HTML original -->
+            <div class="input-col">
+              <div class="section-title">📝 Código HTML Original</div>
+              <textarea
+                id="inputHtml"
+                placeholder="Pega aquí tu código HTML extenso..."
+              ></textarea>
+            </div>
+
+
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn-primary" onclick="convertirHTML()">
+            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+              />
+            </svg>
+            Generar HTML Limpio
+          </button>
+          <button class="btn-secondary" onclick="limpiarCampos()">
+            <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            Limpiar
+          </button>
+        </div>
+
+        <div class="stats" id="stats" style="display: none">
+          <div class="stat-card">
+            <div class="stat-value" id="originalSize">0</div>
+            <div class="stat-label">Tamaño Original (KB)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="cleanSize">0</div>
+            <div class="stat-label">Tamaño Limpio (KB)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="reduction">0%</div>
+            <div class="stat-label">Reducción</div>
+          </div>
+        </div>
+
+        <div class="section" id="outputSection" style="display: none">
+          <div class="output-grid">
+            <!-- Columna nueva: TEXTO PLANO -->
+            <div class="output-col">
+              <div class="section-title">
+                📄 Texto Plano (Sin Estilo)
+              </div>
+
+              <div
+                style="
+                  background: #f1f8e9;
+                  padding: 10px;
+                  border-radius: 6px;
+                  margin-bottom: 10px;
+                  color: #33691e;
+                  font-weight: 600;
+                "
+              >
+                Solo Texto Plano Extraído
+              </div>
+
+              <textarea id="outputTextPlain" readonly></textarea>
+
+              <div
+                style="
+                  background: #e3f2fd;
+                  padding: 10px;
+                  border-radius: 6px;
+                  margin-top: 20px;
+                  margin-bottom: 10px;
+                  color: #1565c0;
+                  font-weight: 600;
+                "
+              >
+                Información de Imágenes Extraída
+              </div>
+              <textarea id="outputImagesInfo" readonly></textarea>
+
+              <div class="path-row" style="margin-top: 20px;">
+                <label>Ruta del documento en Firestore</label>
+                <div class="path-input-wrapper">
+                  <span class="path-prefix">firestore://</span>
+                  <input id="inputPath" type="text" placeholder="articulos/dental-abscess" />
+                </div>
+                <span class="path-helper">Formato: coleccion/documento (ej: articulos/dental-abscess)</span>
+              </div>
+
+              <div class="button-group" style="flex-wrap: wrap;">
+                <button class="btn-primary" onclick="descargarTextoPlano()">
+                  <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  Descargar Texto
+                </button>
+
+                <button class="btn-secondary" onclick="copiarTextoPlano()">
+                  <svg class="icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"
+                    />
+                    <path
+                      d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
+                    />
+                  </svg>
+                  Copiar Texto
+                </button>
+
+                <button class="btn-secondary" onclick="parseOnly()" style="background: #e3f2fd; color: #1976d2; border: 1px solid #bbdefb;">
+                  👁️ Previsualizar
+                </button>
+
+                <button class="btn-primary" onclick="uploadToFirestore()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                  🔥 Subir a Firestore
+                </button>
+              </div>
+
+              <div id="preview"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function convertirHTML() {
+        const inputRaw = document.getElementById("inputHtml").value.trim();
+
+        if (!inputRaw) {
+          mostrarAlerta(
+            "Por favor, pega código HTML en el campo de entrada.",
+            "error"
+          );
+          return;
+        }
+
+        try {
+          // ✅ 1) empezar del HTML original
+          let input = inputRaw;
+
+          // ✅ PRE-PASS: extraer popups de phrasonary del DOM completo de la página
+          // (funciona cuando el usuario pega el HTML fuente completo de Amboss)
+          window._phrasonaryMap = {};
+          try {
+            const fullDoc = new DOMParser().parseFromString(input, 'text/html');
+            // El atributo data-source del link == el id del div popup correspondiente en el DOM.
+            // Es la misma cadena, ej: data-source="L7f526e28c1e63171341cf25d78556e52"
+            // → el popup tiene id="L7f526e28c1e63171341cf25d78556e52"
+            fullDoc.querySelectorAll('a[data-phrasegroup-id][data-source]').forEach(link => {
+              const pid     = link.getAttribute('data-phrasegroup-id');
+              const popupId = link.getAttribute('data-source');
+              if (!pid || !popupId || window._phrasonaryMap[pid]) return;
+
+              // Buscar el div del popup por su id
+              const popup = fullDoc.getElementById(popupId);
+              if (!popup) return;
+
+              const titleEl = popup.querySelector('[data-e2e-test-id="phrasonary-title"]');
+              if (!titleEl) return; // Si no tiene título, no es un popup de phrasonary
+
+              const synEl  = popup.querySelector('[data-e2e-test-id="phrasonary-synonym"]');
+              const descEl = Array.from(popup.querySelectorAll('p')).find(p =>
+                !p.hasAttribute('data-e2e-test-id') && p.textContent.trim().length > 10);
+
+              window._phrasonaryMap[pid] = {
+                titulo:      titleEl.textContent.trim(),
+                sinonimos:   synEl?.textContent.trim() || '',
+                descripcion: descEl?.textContent.trim() || ''
+              };
+            });
+          } catch(e) { console.warn('phrasonary pre-pass error', e); }
+
+          // ✅ 4) Luego ejecutar la limpieza del HTML (como antes)
+          let cleanHTML = limpiarHTML(input);
+
+          // ✅ 5) Parsear secciones y generar JSON
+          const structuredData = parseSections(cleanHTML, input);
+
+          document.getElementById("outputSection").style.display = "block";
+
+          // Estadísticas con input ORIGINAL
+          const originalSize = (
+            new Blob([inputRaw]).size / 1024
+          ).toFixed(2);
+          const cleanSize = (new Blob([cleanHTML]).size / 1024).toFixed(2);
+          const reduction = (
+            ((originalSize - cleanSize) / originalSize) *
+            100
+          ).toFixed(1);
+
+          document.getElementById("originalSize").textContent = originalSize;
+          document.getElementById("cleanSize").textContent = cleanSize;
+          document.getElementById("reduction").textContent = reduction + "%";
+          document.getElementById("stats").style.display = "grid";
+
+          mostrarAlerta(
+            "✅ HTML convertido a texto plano exitosamente",
+            "success"
+          );
+
+          // Generar texto plano automáticamente al convertir
+          const { textPlain, imagesText } = generarTextoPlano(structuredData);
+          document.getElementById("outputTextPlain").value = textPlain;
+          const outputImagesInfo = document.getElementById("outputImagesInfo");
+          if (outputImagesInfo) outputImagesInfo.value = imagesText;
+
+        } catch (error) {
+          mostrarAlerta("❌ Error al convertir: " + error.message, "error");
+        }
+      }
+
+      // ─── LÓGICA DE UPLOADER A FIRESTORE ───────────────────────────────────────
+      
+      function parseLabels(rawText) {
+        const result = { secciones: [] };
+        const lines = rawText.split('\n');
+        const TABLA_FIN = '---tabla_fin---';
+        const LABEL_RE = /^([A-Za-záéíóúÁÉÍÓÚñÑ][A-Za-záéíóúÁÉÍÓÚñÑ0-9_]*)\s*:\s*(.*)$/;
+
+        const UNIQUE_KEYS = new Set(['titulocentral', 'titulosegmento']);
+        const isTableKey = (k) => k.startsWith('tabla_');
+
+        let currentSection = null;
+        let sectionCounters = {};
+        let globalCounters = {};
+
+        const getUniqueKey = (key, counters) => {
+          if (UNIQUE_KEYS.has(key.toLowerCase())) return key;
+          if (!counters._v) counters._v = 0;
+          if (isTableKey(key)) {
+            if (!counters._it) { counters._v++; counters._it = true; }
+            return key + '_' + String(counters._v).padStart(3, '0');
+          }
+          counters._it = false;
+          counters._v++;
+          return key + '_' + String(counters._v).padStart(3, '0');
+        };
+
+        let i = 0;
+        while (i < lines.length) {
+          const line = lines[i].trim();
+          if (!line) { i++; continue; }
+          if (line === TABLA_FIN) { 
+            sectionCounters._it = false; 
+            globalCounters._it = false;
+            i++; continue; 
+          }
+
+          const m = line.match(LABEL_RE);
+          if (m) {
+            const rawKey = m[1].trim();
+            let value = m[2].trim();
+
+            while (i + 1 < lines.length) {
+              const next = lines[i + 1].trim();
+              if (!next || LABEL_RE.test(next) || next === TABLA_FIN) break;
+              value += ' ' + next;
+              i++;
+            }
+
+            let finalValue = value;
+            if (value === 'true') finalValue = true;
+            else if (value === 'false') finalValue = false;
+            else if (value !== '' && !isNaN(value)) finalValue = Number(value);
+
+            if (rawKey === 'titulosegmento') {
+              currentSection = { titulosegmento: finalValue };
+              result.secciones.push(currentSection);
+              sectionCounters = {};
+            } else {
+              if (currentSection) {
+                 const uniqueKey = getUniqueKey(rawKey, sectionCounters);
+                 currentSection[uniqueKey] = finalValue;
+              } else {
+                 const uniqueKey = getUniqueKey(rawKey, globalCounters);
+                 result[uniqueKey] = finalValue;
+              }
+            }
+          }
+          i++;
+        }
+
+        if (result.secciones.length === 0) delete result.secciones;
+        return result;
+      }
+
+      window.uploadToFirestore = async function() {
+        const btn = document.querySelector('button[onclick="uploadToFirestore()"]');
+        const originalBtnHtml = btn.innerHTML;
+        
+        const text = document.getElementById("outputTextPlain").value.trim();
+        const path = document.getElementById("inputPath").value.trim();
+
+        if (!text) {
+          mostrarAlerta("⚠️ No hay texto plano para subir. Genera el texto primero.", "error");
+          return;
+        }
+        if (!path) {
+          mostrarAlerta("⚠️ Por favor ingresa la ruta del documento en Firestore.", "error");
+          return;
+        }
+
+        const segments = path.split('/').filter(s => s.trim());
+        if (segments.length % 2 !== 0) {
+          mostrarAlerta("⚠️ La ruta debe tener un número par de segmentos", "error");
+          return;
+        }
+
+        if (!window.db) {
+          mostrarAlerta("⚠️ Firebase no se inicializó correctamente.", "error");
+          return;
+        }
+
+        try {
+          btn.innerHTML = "⏳ Parseando...";
+          mostrarAlerta("⏳ Parseando y subiendo documento a Firestore...", "loading");
+          
+          let uploadedImagesCount = 0;
+          let totalImagesFound = 0;
+          
+          try {
+            const rawHtml = document.getElementById("inputHtml").value;
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = rawHtml;
+            const imagesToUpload = [];
+
+            tempDiv.querySelectorAll('span[data-gallery-id], span[data-image-id]').forEach(span => {
+              const id = span.getAttribute('data-image-id') || span.getAttribute('data-gallery-id');
+              const img = span.querySelector('img');
+              if (id && img) {
+                const src = img.getAttribute('data-medium-size-url') || img.getAttribute('src');
+                const title = img.getAttribute('title') || span.querySelector('.thumbnail__image__title')?.textContent || '';
+                
+                const urlBig = span.getAttribute('data-source') || '';
+                const urlOverlay = span.getAttribute('data-overlay') || '';
+                
+                let descPlain = "";
+                let copyPlain = "";
+                const cSpan = span.closest('[data-description]') || span;
+                const descB64 = cSpan.getAttribute('data-description');
+                const copyB64 = cSpan.getAttribute('data-copyright');
+                
+                if (descB64) {
+                    try {
+                        let tmp = document.createElement('div');
+                        tmp.innerHTML = decodeURIComponent(escape(window.atob(descB64)));
+                        descPlain = (tmp.textContent || tmp.innerText).trim();
+                    } catch(e) {}
+                }
+                if (copyB64) {
+                    try {
+                        let tmp = document.createElement('div');
+                        tmp.innerHTML = decodeURIComponent(escape(window.atob(copyB64)));
+                        copyPlain = (tmp.textContent || tmp.innerText).trim();
+                    } catch(e) {}
+                }
+                
+                if (src && title) {
+                  imagesToUpload.push({ 
+                    id, link: src, text: title,
+                    descripcion: descPlain,
+                    copyright: copyPlain,
+                    urls: { big: urlBig, medium: src, overlay: urlOverlay, thumb: src }
+                  });
+                }
+              }
+            });
+
+            totalImagesFound = imagesToUpload.length;
+            
+            for (let i = 0; i < totalImagesFound; i++) {
+              const img = imagesToUpload[i];
+              btn.innerHTML = `⏳ Subiendo imagen ${i + 1}/${totalImagesFound}...`;
+              
+              const imgRef = window.doc(window.db, "bancoimagenes", img.id);
+              const docSnap = await window.getDoc(imgRef);
+              if (!docSnap.exists()) {
+                const dataToSave = {
+                  textoimagen1: img.text,
+                  id: img.id,
+                  urls: img.urls
+                };
+                if (img.descripcion) dataToSave.descripcion = img.descripcion;
+                if (img.copyright) dataToSave.copyright = img.copyright;
+                
+                await window.setDoc(imgRef, dataToSave);
+                uploadedImagesCount++;
+              }
+            }
+          } catch (imgError) {
+            console.error("Error validando/guardando en bancoimagenes:", imgError);
+          }
+
+          btn.innerHTML = "⏳ Subiendo documento...";
+          const parsed = parseLabels(text);
+          parsed._updatedAt = window.serverTimestamp();
+          parsed._rawPath = path;
+
+          const docRef = window.doc(window.db, ...segments);
+          await window.setDoc(docRef, parsed, { merge: true });
+
+          renderPreview(parsed);
+          
+          let successMsg = `✅ ¡Subido exitosamente a ${path}!`;
+          if (totalImagesFound > 0) {
+            successMsg += ` (Imágenes nuevas subidas: ${uploadedImagesCount}/${totalImagesFound})`;
+          }
+          mostrarAlerta(successMsg, "success");
+          
+          btn.innerHTML = `✅ ¡Subido! (${uploadedImagesCount}/${totalImagesFound} imgs nuevas)`;
+          setTimeout(() => btn.innerHTML = originalBtnHtml, 5000);
+          
+        } catch (err) {
+          console.error(err);
+          mostrarAlerta("❌ Error al subir: " + err.message, "error");
+          btn.innerHTML = "❌ Error";
+          setTimeout(() => btn.innerHTML = originalBtnHtml, 3000);
+        }
+      };
+
+      window.parseOnly = function() {
+        const text = document.getElementById('outputTextPlain').value.trim();
+        if (!text) { mostrarAlerta('⚠️ Genera el texto primero.', 'error'); return; }
+        const parsed = parseLabels(text);
+        renderPreview(parsed);
+        
+        mostrarAlerta(`👁️ Preview: Estructura analizada y mostrada abajo`, 'info');
+      };
+
+      function renderPreview(obj) {
+        const container = document.getElementById('preview');
+        container.innerHTML = '';
+
+        const rootEntries = Object.entries(obj).filter(([k]) => k !== 'secciones' && !k.startsWith('_'));
+        
+        if (rootEntries.length > 0) {
+          const rootDiv = document.createElement('div');
+          rootDiv.innerHTML = `<div class="group-header">Root / Global</div>`;
+          rootEntries.forEach(([k, v]) => renderCard(rootDiv, k, v, inferType(k)));
+          container.appendChild(rootDiv);
+        }
+
+        if (obj.secciones && Array.isArray(obj.secciones)) {
+          obj.secciones.forEach((sec, idx) => {
+            const secWrapper = document.createElement('div');
+            secWrapper.style.marginTop = '16px';
+            secWrapper.style.paddingLeft = '10px';
+            secWrapper.style.borderLeft = '3px solid #667eea';
+            
+            const title = sec.titulosegmento || `Sección ${idx + 1}`;
+            const header = document.createElement('div');
+            header.className = 'group-header';
+            header.style.color = '#333';
+            header.style.borderBottomColor = '#667eea';
+            header.textContent = title;
+            secWrapper.appendChild(header);
+
+            Object.entries(sec).forEach(([k, v]) => {
+              if (k === 'titulosegmento') return;
+              renderCard(secWrapper, k, v, inferType(k));
+            });
+            container.appendChild(secWrapper);
+          });
+        }
+      }
+
+      function inferType(key) {
+        const base = key.replace(/_\d{3}$/, '');
+        if (/^titulocentral|titulosegmento/.test(base)) return 'meta';
+        if (/^contenido|TITULO/.test(base)) return 'contenido';
+        if (/^imagen|textoimagen/.test(base)) return 'imágenes';
+        if (/^tabla_/.test(base)) return 'tablas';
+        if (/^LISTA|box/.test(base)) return 'listas__boxes';
+        if (/^ref/.test(base)) return 'referencias';
+        return 'otros';
+      }
+
+      function renderCard(container, key, value, type) {
+        const card = document.createElement('div');
+        card.className = `field-card type-${type}`;
+
+        const keyEl = document.createElement('span');
+        keyEl.className = 'field-key';
+        keyEl.textContent = key;
+
+        const valEl = document.createElement('span');
+        valEl.className = 'field-val';
+
+        if (typeof value === 'boolean') {
+          valEl.textContent = value ? '✓ true' : '✗ false';
+          valEl.style.fontFamily = 'Courier New, monospace';
+        } else if (typeof value === 'number') {
+          valEl.textContent = value;
+          valEl.style.fontFamily = 'Courier New, monospace';
+          valEl.style.color = '#fb923c';
+        } else {
+          const str = String(value);
+          valEl.innerHTML = str.replace(/\*\*(.+?)\*\*/g, '<mark>$1</mark>');
+        }
+
+        card.appendChild(keyEl);
+        card.appendChild(valEl);
+        container.appendChild(card);
+      }
+
+      function limpiarHTML(html) {
+        console.log(
+          "Iniciando limpieza. Tamaño original:",
+          html.length,
+          "caracteres"
+        );
+
+        // PASO 1: Extraer solo el contenido dentro de <article>
+        const articleMatch = html.match(
+          /<article[\s\S]*?>([\s\S]*)<\/article>/i
+        );
+        if (articleMatch) {
+          console.log(
+            "Etiqueta <article> encontrada. Extrayendo solo su contenido..."
+          );
+          html = articleMatch[1];
+          console.log(
+            "Contenido extraído de <article>:",
+            html.length,
+            "caracteres"
+          );
+        } else {
+          console.log(
+            "No se encontró etiqueta <article>. Se procesará todo el HTML."
+          );
+        }
+
+        let clean = html;
+
+        const topSegmentPattern =
+          /<div class="amboss-ds-portal"[\s\S]*?(?=<div class="_6eb1c4a28c8c5a44--focus)/i;
+        clean = clean.replace(topSegmentPattern, "");
+        console.log(
+          "Después de eliminar segmento superior:",
+          clean.length,
+          "caracteres"
+        );
+
+        const overridesScriptPattern =
+          /<script>\s*window\.__GLOBAL_STATE_OVERRIDES__[\s\S]*?<\/script>/i;
+        clean = clean.replace(overridesScriptPattern, "");
+
+        const ambossAssetsPattern =
+          /<script[^>]+src="https:\/\/next\.amboss\.com\/us\/static\/assets\/[^"]+"[^>]*><\/script>\s*/gi;
+        clean = clean.replace(ambossAssetsPattern, "");
+
+        const tabManagerPattern =
+          /<div id="suspender_tab_manager"[\s\S]*?<\/template>\s*<\/div>\s*/i;
+        clean = clean.replace(tabManagerPattern, "");
+
+        const allInitialPattern =
+          /<div style="all:\s*initial\s*!important"[\s\S]*?<\/template>\s*<\/div>\s*/i;
+        clean = clean.replace(allInitialPattern, "");
+
+        console.log(
+          "Después de eliminar segmento inferior:",
+          clean.length,
+          "caracteres"
+        );
+
+        const dataAttrsToRemove = [
+          "data-e2e-test-id",
+          "data-testid",
+          "data-phrasegroup-id",
+          "data-learningcard-id",
+          "data-lxid",
+          "data-section-id",
+          "data-sxid",
+          "data-content",
+          "data-page",
+          "data-eid",
+          "data-ref-index",
+          "data-anker",
+          "data-source",
+          "data-qxids",
+          "data-ds-id",
+          "data-variant",
+          "data-table-maximize",
+          "data-table-start-quiz",
+          "data-table-ref",
+          "data-table",
+          "data-image-index",
+          "data-overlay",
+          "data-medium-size-url",
+        ];
+
+        dataAttrsToRemove.forEach((attr) => {
+          const regex = new RegExp(`\\s+${attr}="[^"]*"`, "gi");
+          clean = clean.replace(regex, "");
+        });
+
+        console.log("Después de eliminar data-*:", clean.length, "caracteres");
+
+
+        // Eliminar IDs generados automáticamente clean = clean.replace(/\s+id="(?!Eedb)[LEYZ][a-f0-9]+"/gi, "");
+
+        clean = clean.replace(/\s+aria-labelledby="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-haspopup="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-describedby="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-controls="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-expanded="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-checked="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-disabled="[^"]*"/gi, "");
+        clean = clean.replace(/\s+aria-hidden="[^"]*"/gi, "");
+
+        clean = clean.replace(/\s+tabindex="[^"]*"/gi, "");
+        clean = clean.replace(/\s+role="region"/gi, "");
+        clean = clean.replace(/\s+role="group"/gi, "");
+        clean = clean.replace(/\s+translate="no"/gi, "");
+
+        console.log(
+          "Después de eliminar otros atributos:",
+          clean.length,
+          "caracteres"
+        );
+
+        clean = clean.replace(
+          /<div[^>]*class="[^"]*_6eb1c4a28c8c5a44--focus[^"]*"[^>]*id="main-content"[^>]*>[\s]*<div[^>]*class="[^"]*_6eb1c4a28c8c5a44--notifications[^"]*"[^>]*><\/div>[\s]*<div[^>]*class="[^"]*_6eb1c4a28c8c5a44--body[^"]*"[^>]*>[\s]*<div[^>]*class="[^"]*cd71ec7927bda3fc--page[^"]*"[^>]*>[\s]*<div[^>]*class="[^"]*_84d5ef5d71ac9056--container[^"]*"[^>]*>[\s]*<div[^>]*class="[^"]*_3419cbc970b06bec--spaceContainer[^"]*"[^>]*>[\s]*<div[^>]*class="[^"]*_3419cbc970b06bec--space[^"]*"[^>]*>[\s]*<div[^>]*class="[^"]*_3419cbc970b06bec--spaceWrapper[^"]*"[^>]*>[\s]*/gi,
+          ""
+        );
+
+        clean = clean.replace(
+          /<div[^>]*class="[^"]*_6eb1c4a28c8c5a44--notifications[^"]*"[^>]*><\/div>/gi,
+          ""
+        );
+
+        console.log(
+          "Después de eliminar contenedores externos:",
+          clean.length,
+          "caracteres"
+        );
+
+        const tableWrapperPattern =
+          /<div[^>]*class="[^"]*table-wrapper[^"]*"[^>]*>\s*<div[^>]*class="[^"]*table-control-container[^"]*"[^>]*>[\s\S]*?<\/div>\s*(<table[^>]*>[\s\S]*?<\/table>)\s*<\/div>/gi;
+
+        const beforeTables = clean.length;
+        clean = clean.replace(tableWrapperPattern, "$1");
+        console.log(
+          "Después de desempaquetar table-wrapper:",
+          beforeTables,
+          "→",
+          clean.length,
+          "caracteres"
+        );
+
+        const hiddenIframesPattern =
+          /<iframe[^>]*(?:display:\s*none|visibility:\s*hidden|width:\s*[01]px|height:\s*[01]px)[^>]*>(?:<\/iframe>|\s*<\/iframe>)/gi;
+        clean = clean.replace(hiddenIframesPattern, "");
+
+        const trackingPixelsPattern =
+          /<img[^>]*(?:height="[01]"|width="[01]"|display:\s*none|visibility:\s*hidden)[^>]*(?:src="https?:\/\/(?:t\.co|analytics\.twitter\.com|bat\.bing\.com)[^"]*")[^>]*>/gi;
+        clean = clean.replace(trackingPixelsPattern, "");
+
+        const hiddenImagesPattern =
+          /<img[^>]*(?:style="[^"]*(?:display:\s*none|visibility:\s*hidden)[^"]*"|(?:width|height)="[01]")[^>]*>/gi;
+        clean = clean.replace(hiddenImagesPattern, "");
+
+        const hubspotPattern =
+          /<div[^>]*(?:id="hs-web-interactives-[^"]*"|class="go\d+")[^>]*>[\s\S]*?<\/div>\s*/gi;
+        clean = clean.replace(hubspotPattern, "");
+
+        const batBeaconPattern =
+          /<div[^>]*id="batBeacon\d+"[^>]*>[\s\S]*?<\/div>\s*/gi;
+        clean = clean.replace(batBeaconPattern, "");
+
+        console.log(
+          "Después de eliminar tracking y analytics:",
+          clean.length,
+          "caracteres"
+        );
+
+clean = clean.replace(/\n\s*\n\s*\n/g, "\n\n");
+
+// ✅ PASO: eliminar IDs, pero conservar los que necesitás
+{
+  const d = new DOMParser().parseFromString(clean, "text/html");
+
+  d.querySelectorAll("[id]").forEach((el) => {
+    // 1) ✅ conservar IDs de secciones (si no, parseSections se rompe)
+    if (el.matches('section[class*="a19c2cb9aca4d5ec--container"]')) return;
+
+    // 2) ✅ conservar IDs de triggers que vos necesitás
+    if (el.matches(".api.extraExplanation, span.api.explanation, a.api, span.api.dictionary")) return;
+
+    // 3) (opcional) no romper SVGs que usan ids internos
+    if (el.closest("svg")) return;
+
+    el.removeAttribute("id");
+  });
+
+  // ✅ NUEVO: Limpiar clases y estilos
+  d.querySelectorAll("*").forEach((el) => {
+    // 1) Eliminar atributo style
+    el.removeAttribute("style");
+
+    // 2) Limpiar clases
+    if (el.hasAttribute("class")) {
+      const originalClass = el.getAttribute("class");
+      // Mantener solo clases estructurales o funcionales específicas
+      const classesToKeep = [
+        "a19c2cb9aca4d5ec--container",
+        "cebd2a302a3552c4--headerContainer",
+        "cebd2a302a3552c4--contentContainer",
+        "a19c2cb9aca4d5ec--baseStyles",
+        "api",
+        "extraExplanation",
+        "explanation",
+        "dictionary",
+        "tooltip__link",
+        "link--same-article",
+        "wichtig",
+        "leitwort",
+        "content-box",
+        "merkspruch",
+        "merke",
+        "cave",
+        "blue",
+        "green",
+        "red",
+        "thumbnail__video",
+        "thumbnail__video__backdrop",
+        "clinic-box"
+      ];
+
+      const newClasses = originalClass.split(/\s+/).filter(c => 
+        classesToKeep.some(k => c.includes(k)) || 
+        // Mantener clases que NO parezcan basura de CSS-in-JS (como css-...)
+        // Muchas clases de Amboss contienen "--" y son útiles para el estilo
+        (!c.startsWith("css-") && c.includes("--"))
+      );
+
+      if (newClasses.length > 0) {
+        el.setAttribute("class", newClasses.join(" "));
+      } else {
+        el.removeAttribute("class");
+      }
+    }
+  });
+
+  // ✅ Eliminar SVGs de iconos dentro de .content-box (se renderizarán desde subcategoriacontent)
+  d.querySelectorAll(".content-box svg").forEach(svg => {
+    const parentSpan = svg.closest("span"); // Buscar el span contenedor del SVG
+    if (parentSpan && parentSpan.parentElement && parentSpan.parentElement.classList.contains("content-box")) {
+       parentSpan.remove();
+    } else if (svg.parentElement.classList.contains("content-box")) {
+       // Caso raro donde el SVG es hijo directo
+       svg.remove();
+    }
+  });
+
+  // ✅ Eliminar ticks/checkmarks específicos (polyline points="20 6 9 17 4 12")
+  d.querySelectorAll("svg polyline[points='20 6 9 17 4 12']").forEach(poly => {
+    const svg = poly.closest("svg");
+    if (svg) svg.remove();
+  });
+
+  clean = d.body.innerHTML;
+}
+
+if (
+  !clean.includes('rel="stylesheet"') &&
+  !clean.includes("amboss-clone.css")
+) {
+  clean = '<link rel="stylesheet" href="amboss-clone.css">\n' + clean;
+}
+
+return clean.trim();
+      }
+
+      function parseSections(cleanHTML, originalHTML) {
+        const metadata = extractMetadata(originalHTML);
+
+        const sections = {};
+        const sectionOrder = [];
+
+        const sectionRegex =
+          /<section[^>]*class="[^"]*a19c2cb9aca4d5ec--container[^"]*"[^>]*id="([^"]+)"[^>]*>([\s\S]*?)<\/section>/g;
+
+        let match;
+        while ((match = sectionRegex.exec(cleanHTML)) !== null) {
+          const sectionId = match[1];
+          let sectionHTML = match[2];
+
+          const tempDiv = document.createElement("div");
+          tempDiv.innerHTML = sectionHTML;
+
+          const headerEl = tempDiv.querySelector('[class*="--headerContainer"]');
+          const firstH3 = tempDiv.querySelector("h3");
+          const title = headerEl ? headerEl.textContent.trim().replace(/\s+/g, ' ') : (firstH3 ? firstH3.textContent.trim() : sectionId);
+
+          let contentRoot = tempDiv;
+
+          const outerWrapper = tempDiv.querySelector(
+            ".cebd2a302a3552c4--contentContainer"
+          );
+          if (outerWrapper) {
+            contentRoot = outerWrapper;
+          }
+
+          const innerWrapper = contentRoot.querySelector(
+            ".a19c2cb9aca4d5ec--baseStyles"
+          );
+          if (innerWrapper) {
+            contentRoot = innerWrapper;
+          }
+
+          const headerContainer = contentRoot.querySelector(
+            ".cebd2a302a3552c4--headerContainer"
+          );
+          if (headerContainer) {
+            headerContainer.remove();
+          }
+
+          const footerContainer = contentRoot.querySelector(
+            ".css-10tzyyx-StyledBox.ebcgi2u0"
+          );
+          if (footerContainer) {
+            footerContainer.remove();
+          }
+
+          // ✅ Restaurado: Extraer subtítulos (H3) para el TOC, pero SIN guardar el HTML (para evitar duplicados)
+          const allH3s = contentRoot.querySelectorAll("h3");
+          const subsections = [];
+          for (let i = 0; i < allH3s.length; i++) {
+            subsections.push({ title: allH3s[i].textContent.trim() });
+          }
+
+
+
+            // ✅ NUEVO: Limpiar clases finales del contenido (dejar solo marcadores funcionales si es necesario)
+          contentRoot.querySelectorAll("[class]").forEach(el => {
+            const keepers = ["api", "extraExplanation", "explanation", "dictionary", "tooltip__link", "link--same-article", "wichtig", "leitwort", "content-box", "merkspruch", "merke", "cave", "blue", "green", "red", "container", "title", "reference", "thumbnail__video", "clinic-box", "qgDiagApproach", "qgRedFlags", "qgLifeThreatening", "qgManagementChecklist", "qgInitManag", "qgLifeThreat"];
+            const classes = Array.from(el.classList).filter(c => keepers.some(k => c.includes(k)));
+            if (classes.length > 0) {
+              el.className = classes.join(" ");
+            } else {
+              el.removeAttribute("class");
+            }
+          });
+
+          // Helper para limpiar nombres de claves (slugify ligero)
+          const cleanKey = (text) => text.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').substring(0, 20);
+
+          // Agrupar jerárquicamente por H3 en un MAPA (Objeto) para Firestore
+          const hierarchicalContent = {};
+          let groupCounter = 0;
+          let currentGroupName = "000_Intro";
+          let currentGroup = [];
+          
+          const finalizeGroup = () => {
+            if (currentGroup.length > 0) {
+              // Filtro relajado: solo quitar si es literalmente un div/span vacío sin nada
+              const cleanBlocks = currentGroup.filter(item => {
+                if (typeof item === 'object') return true; // Las tablas/objetos no se filtran
+                const trimmed = item.trim();
+                if (!trimmed) return false;
+                // Si es un div/span vacío (sin contenido útil), lo quitamos
+                if (/^<(div|span)[^>]*>\s*<\/\1>$/.test(trimmed)) return false;
+                return true;
+              });
+              
+              if (cleanBlocks.length > 0) {
+                hierarchicalContent[currentGroupName] = { blocks: cleanBlocks };
+              }
+            }
+          };
+
+          // Helper para convertir tablas en objetos estructurados (legibles en Firestore)
+          const tableToMap = (table) => {
+            const tableData = { type: 'table', rows: {} };
+            Array.from(table.rows).forEach((row, rIdx) => {
+              const rowKey = `r${(rIdx + 1).toString().padStart(2, '0')}_row`;
+              const rowObj = {};
+              Array.from(row.cells).forEach((cell, cIdx) => {
+                const tag = cell.tagName.toLowerCase();
+                const cellKey = `c${(cIdx + 1).toString().padStart(2, '0')}_${tag}`;
+                
+                // Guardar contenido y atributos críticos (rowspan, colspan, class)
+                const attrs = {};
+                if (cell.rowSpan > 1) attrs.rowspan = cell.rowSpan;
+                if (cell.colSpan > 1) attrs.colspan = cell.colSpan;
+                if (cell.className) attrs.class = cell.className;
+                
+                if (Object.keys(attrs).length > 0) {
+                  rowObj[cellKey] = { content: cell.innerHTML, ...attrs };
+                } else {
+                  rowObj[cellKey] = cell.innerHTML;
+                }
+              });
+              tableData.rows[rowKey] = rowObj;
+            });
+            return tableData;
+          };
+
+          Array.from(contentRoot.childNodes).forEach(node => {
+            let itemToAdd = node.nodeType === 1 ? node.outerHTML : node.textContent;
+            if (!itemToAdd.trim()) return;
+
+            // Si es una tabla, la estructuramos como objeto
+            if (node.nodeType === 1 && node.tagName === 'TABLE') {
+              itemToAdd = tableToMap(node);
+            }
+
+            // Detectar H3 incluso si está dentro de un wrapper simple (como div.paragraph)
+            const isH3 = node.tagName === 'H3' || (node.tagName === 'DIV' && node.querySelector('h3:first-child'));
+            
+            if (isH3) {
+              finalizeGroup();
+              groupCounter++;
+              const h3Node = node.tagName === 'H3' ? node : node.querySelector('h3');
+              const subTitle = h3Node.textContent.trim();
+              currentGroupName = `${groupCounter.toString().padStart(3, '0')}_${cleanKey(subTitle)}`;
+              currentGroup = [itemToAdd];
+            } else {
+              currentGroup.push(itemToAdd);
+            }
+          });
+          finalizeGroup();
+
+          sections[sectionId] = {
+            title: title,
+            html: hierarchicalContent,
+            subsections: subsections.length > 0 ? subsections : undefined,
+          };
+
+          sectionOrder.push(sectionId);
+        }
+
+        return {
+          ...metadata,
+          sections: sections,
+          sectionOrder: sectionOrder,
+          generatedAt: new Date().toISOString(),
+        };
+      }
+
+      function extractMetadata(html) {
+        // Intentar varios patrones para el título
+        const titleMatch = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+        let titulo = "Sin título";
+        if (titleMatch) {
+          // Limpiar HTML interno si lo hay (como spans o formateo)
+          const temp = document.createElement("div");
+          temp.innerHTML = titleMatch[1];
+          titulo = temp.textContent.trim();
+        }
+
+        const synonymMatch = html.match(
+          /<p[^>]*class="[^"]*_62af53fea5b31646--synonymText[^"]*"[^>]*>([^<]+)<\/p>/
+        );
+        const sinonimos = synonymMatch ? synonymMatch[1].trim() : "";
+
+        const dateMatch = html.match(/Last edited:\s*([^<]+)</);
+        const lastEdited = dateMatch ? dateMatch[1].trim() : "";
+
+        return {
+          titulo,
+          sinonimos,
+          lastEdited,
+        };
+      }
+
+
+
+      function limpiarCampos() {
+        document.getElementById("outputTextPlain").value = "";
+        document.getElementById("outputSection").style.display = "none";
+        document.getElementById("stats").style.display = "none";
+        document.getElementById("alert").classList.remove("show");
+        document.getElementById("popupsPaste").value = "";
+        document.getElementById("extraImagesPaste").value = "";
+        document.getElementById("replacePopupsStatus").textContent = "";
+      }
+
+      function mostrarAlerta(mensaje, tipo) {
+        const alert = document.getElementById("alert");
+        alert.textContent = mensaje;
+        alert.className = "alert " + tipo + " show";
+
+        setTimeout(() => {
+          alert.classList.remove("show");
+        }, 5000);
+      }
+
+
+function generarTextoPlano(data) {
+  let text = "";
+  let imagesText = "";
+  if (data.titulo) text += "titulocentral: " + data.titulo.toUpperCase() + "\n\n";
+  if (data.sinonimos) text += "Sinónimos: " + data.sinonimos + "\n\n";
+
+  if (data.sections && data.sectionOrder) {
+    data.sectionOrder.forEach((sectionId) => {
+      const section = data.sections[sectionId];
+      let contenidoCounter = 1;
+
+      if (section.title) {
+        text += "titulosegmento: " + section.title + "\n\n";
+      }
+
+      if (section.html) {
+        let imgCounter = 1; // ✅ Contador global de imágenes para toda la sección
+        let msgCounter = 1; // ✅ Contador global de mensajes para toda la sección
+        let galCounter = 1; // ✅ Contador global de galerías para toda la sección
+        let dosCounter = 1; // ✅ Contador global de dosis para toda la sección
+        let vidCounter = 1; // ✅ Contador global de videos para toda la sección
+        let sectionMsgLabels = ""; // Acumulador para no romper la contigüidad de tablas
+        Object.keys(section.html).sort().forEach((groupKey) => {
+          const group = section.html[groupKey];
+          if (group.blocks) {
+            group.blocks.forEach((block) => {
+              if (typeof block === "string") {
+                // Convertir HTML a texto plano con etiquetas descriptivas
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = block;
+
+                // ✅ Extraer imágenes ANTES de innerText: emitir directamente como líneas
+                // y eliminarlas del DOM para que no contaminen el texto restante.
+                tempDiv.querySelectorAll('img').forEach(img => {
+                  if(!img.getAttribute('title')) return; // Solo imágenes con title
+                  const title = (img.getAttribute('title') || '').trim();
+                  const src = (img.getAttribute('src') || '').trim();
+                  
+                  // Intentar buscar el atributo id en el contenedor o en la propia imagen
+                  const container = img.closest('[data-image-id], [data-gallery-id]') || img;
+                  const imgId = container.getAttribute('data-image-id') || container.getAttribute('data-gallery-id') || '';
+                  
+                  text += `imagen${imgCounter}link: ${src}\n\n`;
+                  text += `textoimagen${imgCounter}: ${title}\n\n`;
+                  if(imgId) {
+                    text += `imagen${imgCounter}id: ${imgId}\n\n`;
+                  }
+                  
+                  const cSpan = img.closest('[data-description]') || img.closest('.thumbnail__image');
+                  if (cSpan) {
+                     const descB64 = cSpan.getAttribute('data-description');
+                     const copyB64 = cSpan.getAttribute('data-copyright');
+                     
+                     let descPlain = "";
+                     let copyPlain = "";
+                     
+                     if (descB64) {
+                         try {
+                           let descHtml = decodeURIComponent(escape(window.atob(descB64)));
+                           let tmp = document.createElement('div');
+                           tmp.innerHTML = descHtml;
+                           descPlain = (tmp.textContent || tmp.innerText).trim();
+                         } catch(e) {}
+                     }
+                     if (copyB64) {
+                          try {
+                             let copyHtml = decodeURIComponent(escape(window.atob(copyB64)));
+                             let tmp = document.createElement('div');
+                             tmp.innerHTML = copyHtml;
+                             copyPlain = (tmp.textContent || tmp.innerText).trim();
+                          } catch(e) {}
+                     }
+                     
+                     if (descPlain || copyPlain) {
+                         imagesText += `IMAGEN ${imgCounter} - ${title}\n`;
+                         if (descPlain) imagesText += `Descripción: ${descPlain}\n`;
+                         if (copyPlain) imagesText += `Copyright: ${copyPlain}\n`;
+                         imagesText += `\n`;
+                     }
+                  }
+                  
+                  imgCounter++;
+                  const removeTarget = img.closest('span') || img.parentElement || img;
+                  removeTarget.remove();
+                });
+
+                tempDiv.querySelectorAll('span.api.explanation[id]').forEach(span => {
+                  const msgId = span.getAttribute('id');
+                  if (msgId) {
+                    sectionMsgLabels += `message${msgCounter}: ${msgId}\n\n`;
+                    span.outerHTML = `(message${msgCounter})`;
+                    msgCounter++;
+                  }
+                });
+
+                tempDiv.querySelectorAll('span.api.extraExplanation[id]').forEach(span => {
+                  const galId = span.getAttribute('id');
+                  if (galId) {
+                    sectionMsgLabels += `gallery${galCounter}: ${galId}\n\n`;
+                    span.outerHTML = `(gallery${galCounter})`;
+                    galCounter++;
+                  }
+                });
+
+                tempDiv.querySelectorAll('span[data-type="dosageEntity"]').forEach(span => {
+                  const dosageId = span.getAttribute('id') || span.getAttribute('data-dosage-entity-id');
+                  if (dosageId) {
+                    sectionMsgLabels += `dosage${dosCounter}: ${dosageId}\n\n`;
+                    span.outerHTML = `(DOSAGE${dosCounter})`;
+                    dosCounter++;
+                  }
+                });
+
+                tempDiv.querySelectorAll('span.api.thumbnail__video').forEach(span => {
+                  const vidId = span.getAttribute('data-asset-id');
+                  const img = span.querySelector('img');
+                  const vidLink = img ? img.getAttribute('miamed-video') : null;
+                  const vidThumb = img ? (img.getAttribute('data-medium-size-url') || img.getAttribute('src')) : null;
+                  
+                  if (vidLink) {
+                    text += `video${vidCounter}link: ${vidLink}\n\n`;
+                    if (vidThumb) text += `video${vidCounter}thumb: ${vidThumb}\n\n`;
+                    if (vidId) {
+                      text += `video${vidCounter}id: ${vidId}\n\n`;
+                    }
+                    vidCounter++;
+                  }
+                  
+                  // Remover el span de video para que no ensucie el texto plano
+                  span.remove();
+                });
+
+                tempDiv.querySelectorAll('a.api.link--same-article[data-title]').forEach(link => {
+                  try {
+                    const anchorText = (link.textContent || link.innerText || '').trim();
+                    if (!anchorText) return;
+                    const pid = link.getAttribute('data-phrasegroup-id');
+                    const phrasonary = pid && window._phrasonaryMap && window._phrasonaryMap[pid];
+                    if (phrasonary && phrasonary.titulo) {
+                      // Tenemos data completa del popup
+                      imagesText += `Término: ${anchorText}\n`;
+                      imagesText += `Título completo: ${phrasonary.titulo}\n`;
+                      if (phrasonary.sinonimos) imagesText += `Sinónimos: ${phrasonary.sinonimos}\n`;
+                      if (phrasonary.descripcion) imagesText += `Descripción: ${phrasonary.descripcion}\n`;
+                      imagesText += '\n';
+                    } else {
+                      // Fallback: solo el data-title en base64
+                      const titleB64 = link.getAttribute('data-title');
+                      if (titleB64) {
+                        const descPlain = decodeURIComponent(escape(window.atob(titleB64)));
+                        imagesText += `Título: ${anchorText}\nDescripción: ${descPlain}\n\n`;
+                      }
+                    }
+                  } catch(e) {}
+                });
+
+                // Si el bloque era solo imágenes, ya terminamos
+                if (!tempDiv.textContent.trim()) return;
+                
+                // ✅ Marcar bold y subrayados ANTES de cualquier otra manipulación
+                tempDiv.querySelectorAll('strong, b, [class*="wichtig"], [class*="leitwort"]').forEach(el => {
+                  const t = el.textContent.trim();
+                  // Caso especial para el botón/etiqueta Consult de Amboss
+                  if (t.toLowerCase() === 'consult' && el.classList.contains('leitwort')) {
+                    el.textContent = `##${t}##`;
+                    return;
+                  }
+                  const h = el.innerHTML.trim();
+                  if (h && !h.startsWith('**')) el.innerHTML = `**${h}**`;
+                });
+
+                // ✅ Marcar subrayados: procesar en orden de prioridad para evitar doble marcado.
+                // Regla: si un <a> tiene AMBAS clases (tooltip__link + link--same-article),
+                // gana link--same-article (punteado = ^^) ya que es la clase más específica visualmente.
+                // Se procesa punteado primero, y luego continuo solo si NO es punteado.
+
+                // Paso 1: subrayado punteado ^^x^^ — links a la misma página
+                tempDiv.querySelectorAll('a[class*="link--same-article"]').forEach(el => {
+                  const t = el.textContent.trim();
+                  if (t) el.textContent = `^^${t}^^`;
+                });
+
+                // Paso 2: subrayado continuo __x__ — links a otros artículos
+                // Solo si NO tiene también link--same-article (ya procesado arriba)
+                // Se incluyen también links con clase "api" o dentro de "linksuggest"
+                tempDiv.querySelectorAll('a[class*="tooltip__link"], a.api, .linksuggest a').forEach(el => {
+                  if (el.classList.contains('link--same-article') ||
+                      (el.getAttribute('class') || '').includes('link--same-article')) return;
+                  const t = el.textContent.trim();
+                  if (t) el.textContent = `__${t}__`;
+                });
+
+                // ✅ Si el bloque ES un h3 (subtítulo puro), emitirlo directamente y salir
+                // Esto evita que "Mobitz type II [2]" se emita como contenidoN
+                const rootH3 = tempDiv.querySelector('h3');
+                if (rootH3 && tempDiv.children.length === 1 && tempDiv.firstElementChild.tagName === 'H3') {
+                  const h3Text = tempDiv.textContent.trim();
+                  let label = "SUBTITULO: ";
+                  const cls = rootH3.className;
+                  if (cls.includes('qgDiagApproach')) label = "SUBTITULOGUIDEazul: ";
+                  else if (cls.includes('qgRedFlags')) label = "SUBTITULOGUIDErosa: ";
+                  else if (cls.includes('qgLifeThreatening') || cls.includes('qgLifeThreat')) label = "SUBTITULOGUIDErojo: ";
+                  else if (cls.includes('qgManagementChecklist') || cls.includes('qgInitManag')) label = "SUBTITULOGUIDEverde: ";
+                  
+                  if (h3Text) text += `${label}${h3Text}\n\n`;
+                  return;
+                }
+
+                // Aplicar prefijos descriptivos
+                tempDiv.querySelectorAll('[class*="--title"]').forEach(el => el.prepend("TITULO: "));
+                tempDiv.querySelectorAll('h3').forEach(el => {
+                  let label = "SUBTITULO: ";
+                  const cls = el.className;
+                  if (cls.includes('qgDiagApproach')) label = "SUBTITULOGUIDEazul: ";
+                  else if (cls.includes('qgRedFlags')) label = "SUBTITULOGUIDErosa: ";
+                  else if (cls.includes('qgLifeThreatening') || cls.includes('qgLifeThreat')) label = "SUBTITULOGUIDErojo: ";
+                  else if (cls.includes('qgManagementChecklist') || cls.includes('qgInitManag')) label = "SUBTITULOGUIDEverde: ";
+                  el.prepend(label);
+                });
+                
+                // NUEVO: Etiquetar content-boxes por color
+                tempDiv.querySelectorAll('.content-box').forEach(el => {
+                  let colorLabel = "box:";
+                  if (el.classList.contains('green')) {
+                    colorLabel = el.classList.contains('clinic-box') ? "boxverdemedical: " : "boxverde: ";
+                  }
+                  else if (el.classList.contains('red')) colorLabel = "boxrojo: ";
+                  else if (el.classList.contains('blue')) colorLabel = "boxazul: ";
+                  else colorLabel = "boxgris: "; // Fallback para recuadros sin color definido
+                  el.prepend(colorLabel);
+                });
+
+                // NUEVO: Limpiar etiquetas de link innecesarias sin borrar el padre
+                tempDiv.querySelectorAll('a, span').forEach(el => {
+                  if (el.textContent.trim() === "Open in Read by QxMD") {
+                    el.textContent = "";
+                  }
+                });
+
+                // NUEVO: Etiquetar referencias (ref1_001cita y ref1_001link)
+                const referenceSelector = '[class*="--referenceWithNumber"]';
+                tempDiv.querySelectorAll(referenceSelector).forEach(el => {
+                  const numEl = el.querySelector('[class*="--referenceNumber"]');
+                  if (numEl) {
+                    const numText = numEl.textContent.replace(/\./g, "").trim();
+                    const doiLink = el.querySelector('a[color="primary"]')?.href || "";
+                    numEl.remove();
+                    const citationText = (el.innerText || el.textContent || "").trim();
+                    el.textContent = `ref${numText}_001cita: ${citationText}${doiLink ? '\nref' + numText + '_001link: ' + doiLink : ''}`;
+                  }
+                });
+
+                // ✅ Helper para extraer texto de un nodo ignorando sub-listas e inputs
+                const extractNodeText = (node) => {
+                  let t = "";
+                  node.childNodes.forEach(child => {
+                    if (child.nodeType === Node.TEXT_NODE) {
+                      t += child.textContent;
+                    } else if (child.nodeType === Node.ELEMENT_NODE &&
+                               child.tagName !== 'UL' && child.tagName !== 'OL' &&
+                               child.tagName !== 'INPUT' && child.tagName !== 'SPAN' ||
+                               (child.nodeType === Node.ELEMENT_NODE &&
+                                child.tagName === 'SPAN' && !child.querySelector('svg'))) {
+                      // Incluir spans sin SVG (excluye iconos), a, strong, etc.
+                      if (child.tagName !== 'UL' && child.tagName !== 'OL' &&
+                          child.tagName !== 'INPUT') {
+                        t += child.textContent;
+                      }
+                    }
+                  });
+                  return t.trim();
+                };
+
+                // ✅ PASO 1: Detectar y procesar label.checkbox-list (checkboxes de Amboss)
+                // Estos son <label class="checkbox-list ..."> que contienen el item + sub-<ul>
+                // Buscar por estructura real (input checkbox dentro de label) ya que las clases se eliminan en limpiarHTML
+                const checkboxLabels = Array.from(tempDiv.querySelectorAll('label')).filter(l => l.querySelector('input[type="checkbox"]'));
+                let hasCheckboxOrList = checkboxLabels.length > 0;
+
+                checkboxLabels.forEach(label => {
+                  // La estructura del label de Amboss es SIEMPRE:
+                  //   <label>
+                  //     <div> <input type=checkbox> <span.checkboxIcon>...</span> </div>  ← ícono
+                  //     <div> texto... <ul>sub-items</ul> </div>                          ← contenido
+                  //   </label>
+                  // Tomamos el segundo div hijo (el de contenido)
+                  const divs = Array.from(label.children).filter(c => c.tagName === 'DIV');
+                  // El div de contenido es el que NO tiene input[type=checkbox]
+                  const contentDiv = divs.find(d => !d.querySelector('input[type="checkbox"]')) || divs[1];
+
+                  let labelText = "";
+                  if (contentDiv) {
+                    contentDiv.childNodes.forEach(inner => {
+                      if (inner.nodeType === Node.TEXT_NODE) {
+                        labelText += inner.textContent;
+                      } else if (inner.nodeType === Node.ELEMENT_NODE &&
+                                 inner.tagName !== 'UL' && inner.tagName !== 'OL') {
+                        // Incluir a, span, strong etc. — excluir solo sub-listas
+                        labelText += inner.textContent;
+                      }
+                    });
+                  }
+                  labelText = labelText.replace(/\s+/g, ' ').trim();
+                  if (labelText) text += `LISTA1B: ${labelText}\n\n`;
+
+                  // Procesar sub-listas dentro del label
+                  label.querySelectorAll('li').forEach(li => {
+                    let depth = 0;
+                    let parent = li.parentElement;
+                    while (parent && parent !== tempDiv) {
+                      if (parent.tagName === 'UL' || parent.tagName === 'OL') depth++;
+                      parent = parent.parentElement;
+                    }
+                    const liLabel = depth >= 3 ? "LISTA3" : "LISTA2";
+                    const clone = li.cloneNode(true);
+                    clone.querySelectorAll('ul, ol').forEach(sub => sub.remove());
+                    const liText = (clone.textContent || "").trim();
+                    if (liText) text += `${liLabel}: ${liText}\n\n`;
+                  });
+
+                  // Eliminar del DOM para que no se procese dos veces
+                  label.remove();
+                });
+
+                // ✅ PASO 2: Procesar <li> regulares restantes
+                const liItems = tempDiv.querySelectorAll('li');
+                if (liItems.length > 0) hasCheckboxOrList = true;
+
+                if (liItems.length > 0) {
+                  liItems.forEach(el => {
+                    let depth = 0;
+                    let parent = el.parentElement;
+                    while (parent && parent !== tempDiv) {
+                      if (parent.tagName === 'UL' || parent.tagName === 'OL') depth++;
+                      parent = parent.parentElement;
+                    }
+                    const liLabel = depth >= 3 ? "LISTA3" : depth === 2 ? "LISTA2" : "LISTA1";
+                    const clone = el.cloneNode(true);
+                    clone.querySelectorAll('ul, ol').forEach(sub => sub.remove());
+                    const liText = (clone.textContent || "").trim();
+                    if (liText) text += `${liLabel}: ${liText}\n\n`;
+                  });
+                }
+
+                if (hasCheckboxOrList) return; // bloque procesado, pasar al siguiente
+
+                // ✅ Si hay referencias: emitir una por una
+                const refs = tempDiv.querySelectorAll(referenceSelector);
+                if (refs.length > 0) {
+                  refs.forEach(r => {
+                    const refText = (r.innerText || r.textContent || "").trim();
+                    if (refText) text += refText + "\n\n";
+                  });
+                  return;
+                }
+
+                // ✅ Caso general: extraer texto línea por línea
+                const blockText = (tempDiv.innerText || tempDiv.textContent || "").trim();
+                if (blockText && blockText !== "no-condensed") {
+                  const lines = blockText.split('\n').map(l => l.trim()).filter(l => l && l !== "no-condensed");
+                  lines.forEach(line => {
+                    const hasLabel = /^(TITULO:|SUBTITULO:|SUBTITULOGUIDE[a-z]+:|message\d*:|gallery\d*:|dosage\d*:|boxverdemedical:|boxverde:|boxrojo:|boxazul:|boxgris:|ref\d+(_\d+)?(cita|link)?:|LISTA\d+:|imagen\d+(link|id):|video\d+(link|id|thumb):|textoimagen\d+:|tabla_)/.test(line);
+                    if (!hasLabel) {
+                      text += `contenido${contenidoCounter}: ${line}\n\n`;
+                      contenidoCounter++;
+                    } else {
+                      text += line + "\n\n";
+                    }
+                  });
+                }
+              } else if (typeof block === "object" && block.type === "table") {
+                // Manejar tablas de forma simple para texto plano
+                // ✅ Tabla: formato etiquetado por celda preservando rowspan/colspan
+                // Formato: tabla_fila1_col1: texto | tabla_fila1_col1_rowspan: 3 | ...
+                // Esto permite reconstruir la tabla idéntica en Flutter/JS
+                const rowKeys = Object.keys(block.rows).sort();
+                text += `tabla_totalfilas: ${rowKeys.length}\n\n`;
+                rowKeys.forEach((rowKey, rIdx) => {
+                  const row = block.rows[rowKey];
+                  const colKeys = Object.keys(row).sort();
+                  text += `tabla_totalcols_fila${rIdx + 1}: ${colKeys.length}\n\n`;
+                  colKeys.forEach((cellKey, cIdx) => {
+                    const cell = row[cellKey];
+                    const isObj = typeof cell === "object" && cell !== null;
+                    const content = isObj ? cell.content : cell;
+                    const rowspan = isObj && cell.rowspan ? cell.rowspan : 1;
+                    const colspan = isObj && cell.colspan ? cell.colspan : 1;
+                    const isHeader = cellKey.includes('_th');
+
+                    // Extraer texto plano del contenido HTML de la celda
+                    const cellDiv = document.createElement("div");
+                    cellDiv.innerHTML = content || "";
+                    
+                    // ✅ Procesar explicaciones (mensajes) dentro de celdas
+                    cellDiv.querySelectorAll('span.api.explanation[id]').forEach(span => {
+                      const msgId = span.getAttribute('id');
+                      if (msgId) {
+                        sectionMsgLabels += `message${msgCounter}: ${msgId}\n\n`;
+                        span.outerHTML = `(message${msgCounter})`;
+                        msgCounter++;
+                      }
+                    });
+
+                    // ✅ Procesar galerías dentro de celdas
+                    cellDiv.querySelectorAll('span.api.extraExplanation[id]').forEach(span => {
+                      const galId = span.getAttribute('id');
+                      if (galId) {
+                        sectionMsgLabels += `gallery${galCounter}: ${galId}\n\n`;
+                        span.outerHTML = `(gallery${galCounter})`;
+                        galCounter++;
+                      }
+                    });
+
+                    // ✅ Procesar dosis dentro de celdas
+                    cellDiv.querySelectorAll('span[data-type="dosageEntity"]').forEach(span => {
+                      const dosageId = span.getAttribute('id') || span.getAttribute('data-dosage-entity-id');
+                      if (dosageId) {
+                        sectionMsgLabels += `dosage${dosCounter}: ${dosageId}\n\n`;
+                        span.outerHTML = `(DOSAGE${dosCounter})`;
+                        dosCounter++;
+                      }
+                    });
+                    // ✅ Marcar bold dentro de celdas
+                    cellDiv.querySelectorAll('strong, b, [class*="wichtig"], [class*="leitwort"]').forEach(el => {
+                      const t = el.innerHTML.trim();
+                      if (t && !t.startsWith('**')) el.innerHTML = `**${t}**`;
+                    });
+                    // ✅ Marcar subrayado continuo (__x__) dentro de celdas — solo si NO es también link--same-article
+                    // Se incluyen también links con clase "api" o dentro de "linksuggest"
+                    cellDiv.querySelectorAll('a[class*="tooltip__link"], a.api, .linksuggest a').forEach(el => {
+                      if ((el.getAttribute('class') || '').includes('link--same-article')) return;
+                      const t = el.textContent.trim();
+                      if (t) el.textContent = `__${t}__`;
+                    });
+                    // ✅ Marcar subrayado punteado (^^x^^) dentro de celdas
+                    cellDiv.querySelectorAll('a[class*="link--same-article"]').forEach(el => {
+                      const t = el.textContent.trim();
+                      if (t) el.textContent = `^^${t}^^`;
+                    });
+
+                    const prefixBase = `tabla_f${rIdx + 1}_c${cIdx + 1}`;
+                    let cellElemCounter = 1;
+                    const cellLis = cellDiv.querySelectorAll('li');
+
+                    if (cellLis.length > 0) {
+                      cellLis.forEach(li => {
+                        let depth = 0;
+                        let parent = li.parentElement;
+                        while (parent && parent !== cellDiv) {
+                          if (parent.tagName === 'UL' || parent.tagName === 'OL') depth++;
+                          parent = parent.parentElement;
+                        }
+                        const liLabel = depth <= 1 ? "listatabla1: " : "sublistatabla1: ";
+                        
+                        const clone = li.cloneNode(true);
+                        clone.querySelectorAll('ul, ol').forEach(sub => sub.remove());
+                        const liText = (clone.textContent || "").replace(/\s+/g, ' ').trim();
+                        
+                        if (liText) {
+                          const fullPrefix = `${prefixBase}_${cellElemCounter.toString().padStart(3, '0')}`;
+                          text += `${fullPrefix}: ${liLabel}${liText}\n\n`;
+                          cellElemCounter++;
+                        }
+                      });
+                    } else {
+                      const cellText = (cellDiv.textContent || "").replace(/\s+/g, ' ').trim();
+                      if (cellText) {
+                        const fullPrefix = `${prefixBase}_${cellElemCounter.toString().padStart(3, '0')}`;
+                        text += `${fullPrefix}: ${cellText}\n\n`;
+                      }
+                    }
+
+                    const prefix = `tabla_f${rIdx + 1}_c${cIdx + 1}`;
+                    if (rowspan > 1) text += `${prefix}_rowspan: ${rowspan}\n\n`;
+                    if (colspan > 1) text += `${prefix}_colspan: ${colspan}\n\n`;
+                    if (isHeader) text += `${prefix}_header: true\n\n`;
+                  });
+                });
+                text += "---tabla_fin---\n\n";
+              }
+            });
+          }
+        });
+        text += sectionMsgLabels + "\n";
+      }
+      text += "\n";
+    });
+  }
+  return { textPlain: text.trim(), imagesText };
+}
+
+function copiarTextoPlano() {
+  const output = document.getElementById("outputTextPlain");
+  output.select();
+  document.execCommand("copy");
+  mostrarAlerta("📋 Texto plano copiado al portapapeles", "success");
+}
+
+function descargarTextoPlano() {
+  const content = document.getElementById("outputTextPlain").value;
+  const blob = new Blob([content], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "texto_plano_" + Date.now() + ".txt";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  mostrarAlerta("📥 Texto plano descargado exitosamente", "success");
+}
+    
+    </script>
+  </body>
+</html>

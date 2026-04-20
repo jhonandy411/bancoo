@@ -1,0 +1,2696 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Media Viewer (Amboss-like)</title>
+
+    <link rel="stylesheet" href="amboss-clone.css">
+
+    <!-- Si ya tenés tu amboss-clone.css, podés dejar esto: -->
+    <!-- <link rel="stylesheet" href="amboss-clone.css" /> -->
+
+    <style>
+        :root {
+            --bg-app: #0f1414;
+            --bg-top: #1c2323;
+            --bg-panel: #121818;
+            --bg-panel-2: #0f1515;
+            --text: #e8f0ef;
+            --muted: #9fb2b0;
+
+            --teal: #4da6a3;
+            --teal-2: #2b7f7c;
+
+            --border: #2a3434;
+            --border-2: #3a4646;
+
+            --white: #ffffff;
+            --shadow: 0 8px 24px rgba(0, 0, 0, .28);
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+              background: transparent !important;
+
+            height: 100%;
+            margin: 0
+        }
+
+        body {
+            color: var(--color-text-primary);
+
+            font: 14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            overflow: hidden;
+            
+        }
+
+
+
+
+/* ✅ SOLO este título del sidebar en blanco */
+aside.sidebar > h2{
+  color: #fff !important;
+}
+
+
+/* ✅ Split: vuelve a primary */
+main.split-mode aside.sidebar > h2{
+  color: var(--color-text-primary) !important;
+}
+
+
+/* ✅ Split: sidebar con padding 16px en todos los lados */
+main.split-mode aside.sidebar{
+  padding: 26px !important;
+}
+
+
+
+
+
+
+
+
+        /* “panel” principal semitransparente */
+.viewer{
+  background: rgba(16, 22, 22, .42);
+}
+
+/* fondo del área de imagen también suave */
+.stage{
+  background: rgba(15, 21, 21, .55);
+}
+
+/* (opcional) sidebar un poco glass */
+.sidebar{
+  background: rgba(15, 21, 21, .98);
+  backdrop-filter: blur(10px);
+}
+
+        /* ====== Shell (topbar + content) ====== */
+        .media-viewer-shell {
+            height: 100%;
+            display: grid;
+            grid-template-rows: 56px 1fr;
+            min-height: 0;
+        }
+
+        /* ====== Topbar ====== */
+        .topbar {
+            background: linear-gradient(#202a2a, #1a2121);
+            border-bottom: 1px solid rgba(255, 255, 255, .06);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .tabbtn {
+            height: 34px;
+            padding: 0 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(77, 166, 163, .55);
+            color: rgba(167, 226, 224, .95);
+            background: rgba(20, 30, 30, .55);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .tabbtn:hover {
+            filter: brightness(1.06)
+        }
+
+        .tabbtn.primary {
+            background: linear-gradient(180deg, rgba(77, 166, 163, .95), rgba(43, 127, 124, .95));
+            border-color: rgba(77, 166, 163, .95);
+            color: #062221;
+            font-weight: 600;
+        }
+
+        .tabicon {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+            opacity: .9;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .iconbtn {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, .08);
+            background: rgba(20, 28, 28, .6);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+        }
+
+        .iconbtn:hover {
+            background: rgba(30, 40, 40, .7)
+        }
+
+        .iconbtn svg {
+            width: 18px;
+            height: 18px;
+            stroke: #d7e5e3;
+            opacity: .92;
+        }
+
+
+
+
+
+
+
+
+
+
+
+/* ====== Tabs Description/Indicators/Labels ====== */
+
+/* Base (INACTIVO) */
+.css-ldjgno-StyledContainer{
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center !important;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: all .15s ease;
+
+  border: 1px solid rgba(255, 255, 255, .15);
+  background: rgba(15, 21, 21, 0.4);
+}
+
+/* Texto inactivo */
+.css-ldjgno-StyledContainer .css-1dh26my-StyledText-StyledLabel{
+  color: #9fb2b0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Icono inactivo */
+.css-ldjgno-StyledContainer .css-10pd6gh-StyledIcon{
+  color: #9fb2b0;
+  opacity: 0.8;
+}
+
+/* ACTIVO (clase mv-active) */
+.css-ldjgno-StyledContainer.mv-active {
+  background: rgb(34, 60, 68) !important;
+  border: 1px solid #25a1b3 !important;
+}
+
+/* Estilo para miniaturas activas */
+.thumb.active{
+  border: 1px solid rgba(255, 255, 255, .18);
+  outline: 2px solid rgba(255, 255, 255, .18);
+  outline-offset: 2px;
+  box-shadow: none;
+  opacity: 1;
+}
+
+/* Texto activo */
+.css-ldjgno-StyledContainer.mv-active .css-1dh26my-StyledText-StyledLabel{
+  color: #25a1b3 !important;
+  font-weight: 500;
+}
+
+/* Icono activo */
+.css-ldjgno-StyledContainer.mv-active .css-10pd6gh-StyledIcon{
+  color: #25a1b3 !important;
+  opacity: 1;
+}
+
+/* Ocultar los inputs reales (radio/checkbox) */
+.css-uyvl5w-StyledInput {
+  display: none !important;
+}
+
+/* Hover sutil (solo inactivo) */
+.css-ldjgno-StyledContainer:hover:not(.mv-active){
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+
+
+
+
+
+
+
+
+        
+
+        /* ====== Layout (sidebar + viewer) ====== */
+        .media-viewer-layout {
+            height: 100%;
+            display: grid;
+            grid-template-columns: 375px 1fr;
+            min-height: 0;
+        }
+        
+
+        /* ====== Left panel ====== */
+        .sidebar {
+            border-right: 1px solid rgba(255, 255, 255, .06);
+            padding: 54px 34px 14px;
+            min-height: 0;
+            overflow: auto;
+        }
+        .sidebar{
+  position: relative; /* 🔑 clave */
+}
+
+
+/* sidebar animable */
+.sidebar{
+  transition: transform .25s ease, opacity .2s ease;
+  will-change: transform;
+}
+
+/* estado oculto */
+
+
+
+
+        .sidebar h2 {
+            margin: 6px 0 12px;
+            font-size: 16px;
+            letter-spacing: .2px;
+        }
+
+        .sidebar p {
+            margin: 0;
+            color: rgba(220, 238, 236, .78);
+            line-height: 1.55;
+            font-size: 13px;
+            max-width: fit-content;
+        }
+
+        .sidebar .footer {
+            margin-top: 18px;
+            color: rgba(220, 238, 236, .35);
+            font-size: 11px;
+        }
+
+        /* ====== Right viewer ====== */
+        .viewer {
+              position: relative;  /* 🔑 así NO invade la sidebar */
+
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+.viewer.viewer--video-stage-offset{
+  padding-bottom: var(--mv-video-filmstrip-offset, 125px);
+}
+
+.stage{
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;   /* 🔑 */
+  justify-content: stretch;
+  position: relative;
+}
+
+/* ✅ ocupa TODO el espacio del viewer */
+.canvas{
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0; /* 🔑 sin “aire” */
+}
+
+
+.figure img{
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: none;
+  touch-action: none;        /* 🔑 permite pan con touch */
+}
+.figure img.is-panning{ cursor: grabbing; }
+/* ✅ el contenedor blanco se ajusta al alto disponible, y usa ancho máximo */
+.figure{
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: transparent;
+  border-radius: 0;             /* Amboss se ve “flush” */
+  box-shadow: none;             /* si querés sombra, ponela muy sutil */
+  overflow: hidden;
+}
+
+/* ✅ imagen: ancho máximo, altura se ajusta (contain) */
+.figure img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+        /* Mini “handle” al centro abajo (como en la captura) */
+        .center-handle {
+            position: absolute;
+            left: 50%;
+            bottom: 86px;
+            transform: translateX(-50%);
+            width: 44px;
+            height: 22px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .12);
+            border: 1px solid rgba(255, 255, 255, .14);
+            display: grid;
+            place-items: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .center-handle:before {
+            content: "";
+            width: 12px;
+            height: 2px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, .55);
+            box-shadow: 0 4px 0 rgba(255, 255, 255, .35);
+            opacity: .9;
+        }
+
+        /* ====== Filmstrip wrapper (125px total) ====== */
+/* ====== Filmstrip wrapper (125px total) ====== */
+.filmstrip-wrapper{
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 125px;
+  padding-top: 16px;
+  box-sizing: border-box;
+
+  /* ✅ sin gradiente: solo “blur glass” */
+  background: rgba(10, 14, 14, .65);
+
+  border-top: 1px solid rgba(255,255,255,.10);
+
+  z-index: 999;
+
+    transition: transform .28s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+}
+
+        /* ====== Filmstrip: ocupa el resto y centra verticalmente ====== */
+        .filmstrip {
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            /* centra vertical dentro del espacio restante */
+            padding: 0 14px;
+            /* márgenes laterales */
+            z-index: 1;
+        }
+
+        .navarrow {
+  height: 100%;          /* 🔑 ocupa toda la altura disponible */
+  max-height: 100%;
+            margin-bottom: 8px;
+            /* = 16px / 2 */
+
+            border-radius: 10px;
+            border: transparent;
+background: transparent;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            flex: 0 0 auto;
+        }
+
+        .navarrow:hover {
+            background: rgba(25, 34, 34, .7)
+        }
+
+        .navarrow svg {
+            width: 18px;
+            height: 18px;
+            stroke: #d7e5e3;
+            opacity: .9;
+        }
+
+.thumbs{
+  /* ocupa el espacio entre flechas */
+  flex: 1;
+  min-width: 0;
+
+  /* el truco: el ancho real lo define el contenido, pero no puede pasar el viewport */
+  width: 100%;
+  max-width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  /* ✅ si no alcanza, queda centrado; si sobra, el scroll funciona */
+  justify-content: flex-start;
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  white-space: nowrap;
+
+  /* ✅ importantísimo para “scroll solo cuando hace falta” */
+  scrollbar-gutter: stable both-edges; /* evita saltos por aparición de scrollbar */
+  overscroll-behavior-x: contain;
+
+  /* padding de respiración */
+    padding: 4px 0; 
+  box-sizing: border-box;
+
+  /* ✅ “snap” opcional estilo Amboss */
+  scroll-snap-type: x proximity;
+}
+
+/* centrado automático SOLO si no hay overflow */
+.thumbs::before,
+.thumbs::after{
+  content:"";
+  flex: 1 0 auto;          /* empuja el contenido al centro cuando entra */
+  min-width: 0;
+}
+/* opcional: scrollbar discreta */
+.thumbs::-webkit-scrollbar{
+  height: 6px;
+}
+.thumbs::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,.25);
+  border-radius: 3px;
+}
+
+
+
+        .thumb {
+            width: 78px;
+            height: 78px;
+            border-radius: 6px;
+            border: .5px solid rgba(220, 238, 236, .55);
+            overflow: hidden;
+              scroll-snap-align: center;
+            position: relative;
+
+            flex: 0 0 auto;
+            opacity: .92;
+            cursor: pointer;   
+            
+        }
+
+        .thumb:hover:not(.active){
+  opacity: .55;   /* 👈 un poquito opaco */
+}
+
+        .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: saturate(.95) contrast(1.02);
+        }
+
+        .thumb.thumb--video::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, .42), rgba(0, 0, 0, .04));
+            pointer-events: none;
+        }
+
+        .thumb-video-badge {
+            position: absolute;
+            left: 3px;
+            bottom: 3px;
+            width: 23px;
+            height: 21px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #32465a;
+            border-radius: 3px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .thumb-video-badge .css-az2xxc-StyledIconContainer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .thumb-video-badge .css-prjrwq-StyledIcon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            width: 12px;
+            height: 12px;
+        }
+
+        .thumb-video-badge .css-prjrwq-StyledIcon svg {
+            width: 12px;
+            height: 12px;
+            display: block;
+        }
+
+
+
+        .filmstrip-footer {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex: 0 0 auto;
+            color: rgba(220, 238, 236, .55);
+            font-size: 12px;
+        }
+
+        /* ====== Small label “FEEDBACK” bottom-left ====== */
+.feedback{
+  position: absolute;
+  right: 14px;   /* mismo padding lateral del sidebar */
+  bottom: 34px;
+  color: rgba(220, 238, 236, .45);
+  font-size: 11px;
+  letter-spacing: .6px;
+}
+
+        /* icono + texto SIEMPRE en una sola fila */
+        .css-by26cy-InlineContainer {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+        }
+
+        .css-h0nko7-StyledInlineItem {
+            display: flex;
+            align-items: center;
+        }
+
+        .css-1dh26my-StyledText-StyledLabel {
+            white-space: nowrap;
+        }
+
+        /* ====== Toggle wrapper = fondo gris azulado semitransparente ====== */
+        .filmstrip-toggle-wrapper {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+
+            width: 76px;
+            height: 16px;
+
+            background: rgba(28, 35, 35, .65);
+            border: 1px solid rgba(255, 255, 255, .14);
+            backdrop-filter: blur(8px);
+border-radius: 0 0 4px 4px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Botón toggle (sin fondo, lo tiene el wrapper) */
+        .filmstrip-toggle {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            background: transparent;
+            border: none;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        /* ÍCONO */
+        .filmstrip-toggle .css-ywd400-StyledIcon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 0;
+            color: rgba(255, 255, 255, .85);
+        }
+        
+
+        .filmstrip-toggle svg {
+            width: 12px !important;
+            height: 12px !important;
+            display: block !important;
+            transform: translateY(-1px);
+        }
+
+
+
+        /* Flecha: por defecto apunta hacia abajo */
+.filmstrip-toggle svg{
+  transition: transform .18s ease;
+  transform-origin: 50% 50%;
+}
+/* Cuando la barra está colapsada → flecha hacia ARRIBA */
+.filmstrip-wrapper.is-collapsed .filmstrip-toggle svg{
+  transform: rotate(180deg);
+}
+
+/* Cuando está colapsado: que apunte hacia arriba */
+.filmstrip-wrapper.is-collapsed{
+  transform: translateY(calc(100% - 17px)); /* deja visible la barrita */
+}
+
+        /* Hover: sobre el wrapper (no el botón) */
+        .filmstrip-toggle-wrapper:hover {
+            background: rgba(40, 55, 55, .75);
+        }
+
+        /* (si usás este wrapper interno) */
+        .filmstrip-inner-92 {
+            height: 92px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+
+
+        
+        
+
+/* estado colapsado */
+.filmstrip-wrapper.is-collapsed{
+
+  background: rgba(10, 14, 14, .65); /* 🔑 mantiene fondo oscuro */
+  border-top: 1px solid rgba(255,255,255,.10);
+}
+
+/* ocultar SOLO el contenido interno */
+
+
+
+
+
+
+
+
+
+/* ========= ZOOM POPOVER (Amboss-like) ========= */
+
+#zoom-popover{
+  position: fixed;
+  z-index: 2000;
+  display: none;
+  transform-origin: top right;
+}
+
+#zoom-popover.is-open{
+  display: block;
+  animation: mvPop .18s ease;
+}
+
+@keyframes mvPop{
+  from{ opacity: 0; transform: translateY(-6px) scale(.985); }
+  to  { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* “pill” */
+#zoom-popover .css-18dlkqo-StyledBox{
+  background: rgba(28, 34, 34, .96);
+  border: .5px solid rgba(255,255,255,.10);
+  border-radius: 6px;
+  padding: 10px 14px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.15);
+  backdrop-filter: blur(10px);
+}
+
+/* fila y alturas */
+#zoom-popover .css-19x4i2u-InlineContainer{
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 100% grande */
+#zoom-percent{
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: .2px;
+  color: rgba(232,240,239,.96);
+  margin: 0;
+  padding: 0 6px 0 2px;
+}
+
+/* botones igual Amboss (cuadraditos dentro del pill) */
+#zoom-popover .css-1kqlkol-StyledPictogramButton,
+#zoom-popover .css-vjil57-StyledPictogramButton{
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+#zoom-popover .css-1kqlkol-StyledPictogramButton:hover{
+  background: rgba(255,255,255,.06);
+}
+
+#zoom-popover .css-vjil57-StyledPictogramButton[disabled]{
+  opacity: .35;
+  cursor: default;
+}
+
+/* iconos */
+#zoom-popover .css-10pd6gh-StyledIcon{
+  color: rgba(232,240,239,.88);
+}
+
+/* separador vertical (bien finito) */
+#zoom-popover ._66903cf573cb5f11--separator{
+  width: 1px;
+  height: 12px;
+  background: rgba(255,255,255,.14);
+  margin: 0 2px;
+}
+
+/* flechita triangular arriba (como en tu captura) */
+#zoom-popover .css-196i78w-StyledArrow{
+  position: absolute;
+  top: -8px;     /* sale hacia arriba */
+  width: 18px;
+  height: 10px;
+  background: rgba(28, 34, 34, .96);
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  filter: drop-shadow(0 -1px 0 rgba(255,255,255,.10));
+}
+
+/* Split Mode White Theme Overrides */
+main.split-mode #zoom-popover .css-18dlkqo-StyledBox {
+  background: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1) !important;
+}
+
+main.split-mode #zoom-popover #zoom-percent,
+main.split-mode #zoom-popover .css-10pd6gh-StyledIcon {
+  color: #4a4a4a !important;
+}
+
+main.split-mode #zoom-popover ._66903cf573cb5f11--separator {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+main.split-mode #zoom-popover .css-196i78w-StyledArrow {
+  background: #ffffff !important;
+  filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.1)) !important;
+}
+
+main.split-mode #zoom-popover .css-1kqlkol-StyledPictogramButton:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+       
+
+
+
+
+
+
+
+
+
+        /* ✅ Split: Sidebar overlay logic */
+        main.split-mode .media-viewer-layout {
+            grid-template-columns: 1fr !important;
+            position: relative;
+        }
+
+        main.split-mode aside.sidebar {
+            position: absolute !important;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            height: 100%;
+            z-index: 1;
+            /* Ensure it sits on top */
+            width: 289px !important; 
+            /* Fixed width */
+            box-shadow: 2px 0 2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ✅ En split mode: cuando tiene .split-hidden, ocultar completamente */
+main.split-mode aside.sidebar.split-hidden {
+    transform: translateX(-100%) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* ✅ Asegurar que la transición funcione suavemente */
+main.split-mode aside.sidebar {
+    transition: transform .25s ease, opacity .2s ease !important;
+}
+
+
+
+        
+
+
+
+        /* ✅ SOLO en split: ícono rojo */
+main.split-mode .filmstrip-toggle .css-ywd400-StyledIcon{
+  color: rgb(28, 27, 27) !important;
+}
+
+
+/* NO split: padding izquierdo/derecho 6px también para el wrapper del icono */
+
+
+:not(main.split-mode) .css-by26cy-InlineContainer > .css-h0nko7-StyledInlineItem:first-child{
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+
+/* (mantener) NO split: padding para el texto */
+:not(main.split-mode) .css-1dh26my-StyledText-StyledLabel{
+  padding-left: 6px !important;
+  padding-right: 16px !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* === NO split: sidebar empuja al content con animación === */
+:not(main.split-mode) .media-viewer-layout{
+  display: flex;          /* en vez de grid */
+  height: 100%;
+  min-height: 0;
+}
+
+:not(main.split-mode) .media-viewer-layout > .sidebar{
+  flex: 0 0 375px;        /* ancho base */
+  width: 375px;
+  overflow: hidden;
+  transition: width .25s ease, padding .25s ease, border-color .25s ease;
+  will-change: width;
+}
+
+
+
+/* contenido interno: fade cuando se colapsa */
+:not(main.split-mode) .media-viewer-layout > .sidebar > *{
+  transition: opacity .18s ease;
+}
+
+:not(main.split-mode) .media-viewer-layout > .viewer{
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* estado oculto: colapsa ancho (y padding) => el viewer se corre suave */
+:not(main.split-mode) .media-viewer-layout > .sidebar.is-hidden{
+  width: 0;
+  flex-basis: 0;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border-right-color: transparent;
+  pointer-events: none;
+}
+
+:not(main.split-mode) .media-viewer-layout > .sidebar.is-hidden > *{
+  opacity: 0;
+}
+
+
+
+
+
+.figure{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+/* Imagen principal: empieza oculta */
+.figure .mv-main-image{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+
+.figure .mv-main-video,
+.figure .mv-main-iframe{
+  width: 100%;
+  height: 100%;
+  display: none;
+  border: 0;
+  background: #fff;
+}
+
+.figure .mv-main-iframe{
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+
+.figure .mv-main-video{
+  object-fit: contain;
+}
+
+/* Texto "loading..." por defecto (no split) → blanco */
+.mv-loading{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  letter-spacing: .08em;
+  color: #ffffff;
+}
+
+/* En split mode → negro (o casi negro) */
+main.split-mode .mv-loading{
+  color: #111111;
+}
+
+/* Cuando ya hay imagen: mostrar img y ocultar texto */
+.figure.has-image .mv-main-image{
+  opacity: 1;
+}
+.figure.has-image .mv-loading{
+  display: none;
+}
+
+
+
+    </style>
+</head>
+
+<body>
+    <div class="media-viewer-shell">
+        <!-- TOP BAR -->
+
+
+
+        <header class="topbar">
+            <nav class="_263b2693457a5c12--container" data-e2e-test-id="media-viewer-nav">
+                <div data-ds-id="Inline" class="css-1isf9yl-InlineContainer e6i75dx0">
+                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                        <div data-ds-id="Inline" class="css-1yxslas-InlineContainer e6i75dx0">
+
+                            <!-- LEFT: Start quiz + radios -->
+                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                <div data-ds-id="Inline" class="css-eeo9h7-InlineContainer e6i75dx0">
+
+                                    <!-- Start quiz -->
+                                    <div id="quiz-tab-container" class="css-h0nko7-StyledInlineItem e6i75dx1" style="display:none !important">
+
+                                        <div aria-label="Start quiz-wrapper" role="button" tabindex="0">
+                                            <button data-ds-id="Button" type="button" aria-label="Start quiz"
+                                                color="primary" class="css-1ilnupm-StyledButton ejph2fy0">
+                                                <div class="css-c3523d-StyledInner ejph2fy1">
+                                                    <div data-ds-id="Inline"
+                                                        class="css-mgid52-InlineContainer e6i75dx0">
+                                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">Staaaaart quiz
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Description -->
+                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                        <div aria-label="Description-wrapper" role="button" tabindex="0">
+                                            <fieldset data-ds-id="FormFieldGroup"
+                                                class="css-1895qtb-StyledFieldset eznyom90">
+                                                <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                                                    <div class="css-16xflo2-StyledContainer ed0qz3a1">
+                                                        <label tabindex="-1"
+                                                            class="css-ldjgno-StyledContainer eet47ev4">
+                                                            <input type="radio" name="viewer-tab"
+                                                                class="css-uyvl5w-StyledInput eet47ev0" value="desc"
+                                                                checked>
+                                                            <div data-ds-id="Inline"
+                                                                class="css-by26cy-InlineContainer e6i75dx0">
+                                                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                                    <div
+                                                                        class="css-bqdic2-StyledIconContainer eet47ev3">
+                                                                        <div data-ds-id="Icon" data-variant="inherit"
+                                                                            class="css-10pd6gh-StyledIcon e1tsg83e0">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                                width="16" height="16" fill="none"
+                                                                                viewBox="0 0 16 16">
+                                                                                <path fill="currentColor"
+                                                                                    fill-rule="evenodd"
+                                                                                    d="M1 4a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3zm3-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z"
+                                                                                    clip-rule="evenodd"></path>
+                                                                                <path fill="currentColor"
+                                                                                    fill-rule="evenodd"
+                                                                                    d="M4 8a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1m0 3a1 1 0 0 1 1-1h4a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1"
+                                                                                    clip-rule="evenodd"></path>
+                                                                            </svg>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                                    <p data-ds-id="Text"
+                                                                        class="eet47ev1 css-1dh26my-StyledText-StyledLabel eadloo90">
+                                                                        Description</p>
+                                                                </div>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+
+                                    <!-- Indicators -->
+                                    <div id="indicators-tab-container" class="css-h0nko7-StyledInlineItem e6i75dx1" style="display:none !important">
+
+                                        <div aria-label="Indicators-wrapper" role="button" tabindex="0">
+                                            <fieldset data-ds-id="FormFieldGroup"
+                                                class="css-1895qtb-StyledFieldset eznyom90">
+                                                <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                                                    <div class="css-16xflo2-StyledContainer ed0qz3a1">
+                                                        <label tabindex="-1"
+                                                            class="css-ldjgno-StyledContainer eet47ev4">
+                                                            <input type="radio" name="viewer-tab"
+                                                                class="css-uyvl5w-StyledInput eet47ev0" value="ind">
+                                                            <div data-ds-id="Inline"
+                                                                class="css-by26cy-InlineContainer e6i75dx0">
+                                                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                                    <div
+                                                                        class="css-bqdic2-StyledIconContainer eet47ev3">
+                                                                        <div data-ds-id="Icon" data-variant="inherit"
+                                                                            class="css-10pd6gh-StyledIcon e1tsg83e0">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                                width="16" height="16" fill="none"
+                                                                                viewBox="0 0 16 16">
+                                                                                <g fill="currentColor"
+                                                                                    fill-rule="evenodd"
+                                                                                    clip-rule="evenodd">
+                                                                                    <path
+                                                                                        d="M4 10a2 2 0 1 0 4 0 2 2 0 0 0-4 0">
+                                                                                    </path>
+                                                                                    <path
+                                                                                        d="M1 4a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v2l-2 1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1l2-1v2a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3z">
+                                                                                    </path>
+                                                                                    <path d="m15 9-4 2H7V9h4l4-2z">
+                                                                                    </path>
+                                                                                </g>
+                                                                            </svg>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+
+                                    <!-- Labels -->
+                                    <div id="labels-tab-container" class="css-h0nko7-StyledInlineItem e6i75dx1" style="display:none !important">
+
+                                        <div aria-label="Labels-wrapper" role="button" tabindex="0">
+                                            <fieldset data-ds-id="FormFieldGroup"
+                                                class="css-1895qtb-StyledFieldset eznyom90">
+                                                <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                                                    <div class="css-16xflo2-StyledContainer ed0qz3a1">
+                                                        <label tabindex="-1"
+                                                            class="css-ldjgno-StyledContainer eet47ev4">
+                                                            <input type="radio" name="viewer-tab"
+                                                                class="css-uyvl5w-StyledInput eet47ev0" value="lab">
+                                                            <div data-ds-id="Inline"
+                                                                class="css-by26cy-InlineContainer e6i75dx0">
+                                                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                                    <div
+                                                                        class="css-bqdic2-StyledIconContainer eet47ev3">
+                                                                        <div data-ds-id="Icon" data-variant="inherit"
+                                                                            class="css-10pd6gh-StyledIcon e1tsg83e0">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                                width="16" height="16" fill="none"
+                                                                                viewBox="0 0 16 16">
+                                                                                <g fill="currentColor"
+                                                                                    fill-rule="evenodd"
+                                                                                    clip-rule="evenodd">
+                                                                                    <path
+                                                                                        d="M1 4a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v2l-2 1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1l2-1v2a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3z">
+                                                                                    </path>
+                                                                                    <path
+                                                                                        d="M11.263 7.304A1 1 0 0 0 10.546 7H5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h5.546a1 1 0 0 0 .717-.304l1.455-1.5a1 1 0 0 0 0-1.392zM10.123 9l.484.5-.485.5H6V9z">
+                                                                                    </path>
+                                                                                    <path d="m15 9-4 2V9l4-2z"></path>
+                                                                                </g>
+                                                                            </svg>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                                    <p data-ds-id="Text"
+                                                                        class="eet47ev1 css-1dh26my-StyledText-StyledLabel eadloo90">
+                                                                        Labels</p>
+                                                                </div>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Smartzoom -->
+                                    <div id="smartzoom-tab-container" class="css-h0nko7-StyledInlineItem e6i75dx1" style="display:none !important">
+                                        <div aria-label="Smartzoom-wrapper" role="button" tabindex="0">
+                                            <fieldset data-ds-id="FormFieldGroup" class="css-1895qtb-StyledFieldset eznyom90">
+                                                <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                                                    <div class="css-16xflo2-StyledContainer ed0qz3a1">
+                                                        <label tabindex="-1" class="css-ldjgno-StyledContainer eet47ev4">
+                                                            <input type="radio" name="viewer-tab" class="css-uyvl5w-StyledInput eet47ev0" value="sz">
+                                                            <div data-ds-id="Inline" class="css-by26cy-InlineContainer e6i75dx0">
+                                                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                                    <div class="css-bqdic2-StyledIconContainer eet47ev3">
+                                                                        <div data-ds-id="Icon" data-variant="inherit" aria-hidden="true" class="css-10pd6gh-StyledIcon e1tsg83e0">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16" focusable="false"><g fill="currentColor" fill-rule="evenodd" clip-path="url(#a)" clip-rule="evenodd"><path d="M4 13a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h2V1H4a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h1v-2z"></path><path d="M5.182 5.439a1 1 0 0 0 .05 1.413l.266.248-.827.887a.25.25 0 0 0 .012.354l2.012 1.875a.25.25 0 0 0 .353-.013l.827-.887.283.263a1 1 0 0 0 1.413-.05l2.69-2.885A3.5 3.5 0 0 1 14 9.67c0 1.933-1.568 3.33-3.5 3.33H7v2h3c3.028 0 5.307-1.575 5.867-4.123a5.51 5.51 0 0 0-2.221-5.719l.698-.749a1 1 0 0 0-.05-1.413L11.368.268a1 1 0 0 0-1.413.05zm2.145.632L8.79 7.435l3.409-3.658-1.463-1.364z"></path></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"></path></clipPath></defs></svg>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                                    <p data-ds-id="Text" class="eet47ev1 css-1dh26my-StyledText-StyledLabel eadloo90">Smartzoom</p>
+                                                                </div>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+
+                                    <!-- Smart Overlay -->
+                                    <div id="overlay-tab-container" class="css-h0nko7-StyledInlineItem e6i75dx1" style="display:none !important">
+                                        <div aria-label="SmartOverlay-wrapper" role="button" tabindex="0">
+                                            <fieldset data-ds-id="FormFieldGroup" class="css-1895qtb-StyledFieldset eznyom90">
+                                                <div data-ds-id="Stack" class="css-bkwbtj-StackContainer e7wwwvf0">
+                                                    <div class="css-16xflo2-StyledContainer ed0qz3a1">
+                                                        <label tabindex="-1" class="css-ldjgno-StyledContainer eet47ev4">
+                                                            <input type="checkbox" id="overlay-toggle" class="css-uyvl5w-StyledInput eet47ev0">
+                                                            <div data-ds-id="Inline" class="css-by26cy-InlineContainer e6i75dx0">
+                                                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                                    <div class="css-bqdic2-StyledIconContainer eet47ev3">
+                                                                        <div data-ds-id="Icon" data-variant="inherit" class="css-10pd6gh-StyledIcon e1tsg83e0">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path fill="currentColor" 
+                                                                              fill-rule="evenodd" d="M1 4a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3zm3-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z" clip-rule="evenodd"></path>
+                                                                              <path fill="currentColor" d="M6 6.621V3.793L8.793 1h2.828zM7.652 9.97a2 2 0 0 1-1.535-1.294l7.19-7.19A2 2 0 0 1 14 3v.621zm4.969.03H9.793L14 5.793V8.62zm-6-9L6 1.621V1z"></path>
+                                                                            </svg>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                                    <p data-ds-id="Text" class="eet47ev1 css-1dh26my-StyledText-StyledLabel eadloo90">Overlay</p>
+                                                                </div>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT ICONS -->
+                <div data-ds-id="Inline" class="css-liukhq-InlineContainer e6i75dx0">
+
+                    <span tabindex="0">
+                        <button data-ds-id="PictogramButton" type="button" aria-label="Save to collection"
+                            name="save_button" class="css-1kqlkol-StyledPictogramButton ej9y1j50">
+                            <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                    <div data-ds-id="Icon" data-variant="inherit" aria-hidden="true"
+                                        class="css-10pd6gh-StyledIcon e1tsg83e0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                            viewBox="0 0 16 16">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="m13 14-5-3.333L3 14V3.333C3 2.597 3.64 2 4.429 2h7.142C12.361 2 13 2.597 13 3.333z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </button>
+                    </span>
+
+                    <span tabindex="0">
+                        <button data-ds-id="PictogramButton" type="button" aria-label="zoom-button" id="zoom-button"
+                            class="css-1kqlkol-StyledPictogramButton ej9y1j50">
+                            <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                    <div data-ds-id="Icon" data-variant="inherit" aria-hidden="true"
+                                        class="css-10pd6gh-StyledIcon e1tsg83e0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M6 6V4h2v2h2v2H8v2H6V8H4V6z"></path>
+                                            <path fill-rule="evenodd"
+                                                d="M7 0a7 7 0 1 0 4.192 12.606l3.1 3.101a1 1 0 0 0 1.415-1.414l-3.1-3.1A7 7 0 0 0 7 0M2 7a5 5 0 1 1 10 0A5 5 0 0 1 2 7"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </button>
+                    </span>
+
+<span tabindex="0">
+  <button data-ds-id="PictogramButton" type="button" aria-label="toggle-fullscreen-button"
+    id="toggle-fullscreen-button" class="css-1kqlkol-StyledPictogramButton ej9y1j50">
+    
+    <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+      <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+        
+        <!-- 🔁 Este DIV es el que cambia de icono -->
+        <div id="splitIcon" data-ds-id="Icon" data-variant="inherit" aria-hidden="true"
+          class="css-10pd6gh-StyledIcon e1tsg83e0">
+
+          <!-- Ícono inicial (no-split / expand) -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+            <path fill="currentColor"
+              d="m4.576 10-3.293 3.293 1.414 1.414 3.293-3.293V13a1 1 0 1 0 2 0V9a1 1 0 0 0-1-1h-4a1 1 0 0 0 0 2zM13 7.99a1 1 0 1 0 0-2h-1.586l3.293-3.293-1.414-1.414L10 4.576V2.99a1 1 0 1 0-2 0v4a1 1 0 0 0 1 1z">
+            </path>
+          </svg>
+
+        </div>
+      </div>
+    </div>
+  </button>
+</span>
+
+                    <span tabindex="0">
+                        <button data-ds-id="PictogramButton" type="button" aria-label="viewer-button-exit"
+                            id="viewer-button-exit" class="css-1kqlkol-StyledPictogramButton ej9y1j50">
+                            <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                    <div data-ds-id="Icon" data-variant="inherit" aria-hidden="true"
+                                        class="css-10pd6gh-StyledIcon e1tsg83e0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                            viewBox="0 0 16 16">
+                                            <g fill="currentColor">
+                                                <path
+                                                    d="M12.707 4.707a1 1 0 0 0-1.414-1.414zm-9.414 6.586a1 1 0 1 0 1.414 1.414zm8-8-8 8 1.414 1.414 8-8z">
+                                                </path>
+                                                <path
+                                                    d="M4.707 3.293a1 1 0 0 0-1.414 1.414zm6.586 9.414a1 1 0 0 0 1.414-1.414zm-8-8 8 8 1.414-1.414-8-8z">
+                                                </path>
+                                            </g>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </button>
+                    </span>
+
+                </div>
+            </nav>
+        </header>
+
+
+
+
+
+
+        <!-- MAIN -->
+        <div class="media-viewer-layout">
+            <!-- LEFT SIDEBAR -->
+            <aside class="sidebar">
+                <h2 class="mv-sidebar-title"></h2>
+                <p class="mv-sidebar-desc">
+                </p>
+                <div class="footer">© BANCOMICINA</div>
+
+
+                <div class="feedback">FEEDBACK</div>
+
+            </aside>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <!-- RIGHT VIEWER -->
+            <section class="viewer">
+                <div class="stage">
+                    <div class="canvas">
+<div class="figure">
+  <!-- Placeholder de loading -->
+  <div class="mv-loading">Loading...</div>
+
+  <!-- Img principal (sin src inicial) -->
+  <img class="mv-main-image" src="" alt="">
+  <video class="mv-main-video" controls playsinline preload="metadata"></video>
+  <iframe class="mv-main-iframe" title="Video player" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+  <img class="mv-overlay-image" src="" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; display:none; pointer-events:none;">
+</div>
+                    </div>
+
+                </div>
+
+
+
+
+                <!-- FILMSTRIP -->
+                <div class="filmstrip-wrapper" data-e2e-test-id="media-viewer-collection-controls">
+
+                    <!-- Toggle centrado arriba -->
+                    <!-- Toggle wrapper -->
+                    <div class="filmstrip-toggle-wrapper">
+                        <button aria-label="Click to expand or collapse the thumbnail bar"
+                            class="css-tvsuf5-StyledToggleButton e1gqglpx3 filmstrip-toggle">
+                            <div data-ds-id="Icon" data-variant="primary" class="css-ywd400-StyledIcon e1tsg83e0">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <path d="M4 6 L8 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <path d="M12 6 L8 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="filmstrip">
+                        <div class="filmstrip-inner-92">
+                            <button class="navarrow" type="button" aria-label="Prev">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <path d="M15 18l-6-6 6-6" />
+                                </svg>
+                            </button>
+
+                        <div class="thumbs">
+                          <!-- Thumbs will be injected by JS -->
+                        </div>
+
+                            <button class="navarrow" type="button" aria-label="Next">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <path d="M9 6l6 6-6 6" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+
+                
+            </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Zoom Popover (hidden by default) -->
+<div data-e2e-test-id="zoom-controls-popover"
+     data-ds-id="Popover"
+     id="zoom-popover"
+     class="css-ts13me-StyledContainer efqithb0"
+     aria-hidden="true">
+  <div class="css-133em0v-StyledContainer elvd5sb0">
+    <div data-ds-id="Box" class="css-18dlkqo-StyledBox ebcgi2u0">
+      <div data-ds-id="Inline" class="css-19x4i2u-InlineContainer e6i75dx0">
+        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+          <p data-ds-id="Text" class="css-qjnsn-StyledText eadloo90" id="zoom-percent">100%</p>
+        </div>
+
+        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+          <button data-e2e-test-id="zoom-out-button"
+                  data-ds-id="PictogramButton"
+                  type="button"
+                  aria-label="zoom-out"
+                  id="viewer-button-zoom-out"
+                  class="css-1kqlkol-StyledPictogramButton ej9y1j50">
+            <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                <div data-ds-id="Icon" data-variant="inherit" aria-hidden="true"
+                     class="css-10pd6gh-StyledIcon e1tsg83e0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="bevel" stroke-width="2" d="M4 8h8"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+          <button data-e2e-test-id="zoom-in-button"
+                  data-ds-id="PictogramButton"
+                  type="button"
+                  aria-label="zoom-in"
+                  id="viewer-button-zoom-in"
+                  class="css-1kqlkol-StyledPictogramButton ej9y1j50">
+            <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                <div data-ds-id="Icon" data-variant="inherit" aria-hidden="true"
+                     class="css-10pd6gh-StyledIcon e1tsg83e0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="bevel" stroke-width="2" d="M4 8h8M8 4v8"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+          <div class="_66903cf573cb5f11--separator"></div>
+        </div>
+
+        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+          <button data-e2e-test-id="reset-zoom-button"
+                  data-ds-id="PictogramButton"
+                  type="button"
+                  aria-label="reset-zoom"
+                  id="viewer-button-zoom-reset"
+                  class="css-vjil57-StyledPictogramButton ej9y1j50"
+                  disabled>
+            <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                <div data-ds-id="Icon" data-variant="inherit" aria-hidden="true"
+                     class="css-10pd6gh-StyledIcon e1tsg83e0">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M2 3v4h4M3.859 5.437a4.93 4.93 0 1 1-.165 4.927"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <div data-e2e-test-id="zoom-controls-popover_arrow" size="8"
+         class="css-196i78w-StyledArrow efqithb1"></div>
+  </div>
+</div>
+
+<script>
+{
+  const toggleBtn = document.querySelector(
+    '[aria-label="Click to expand or collapse the thumbnail bar"]'
+  );
+  const strip = document.querySelector('.filmstrip-wrapper');
+
+  if (toggleBtn && strip) {
+      toggleBtn.addEventListener('click', () => {
+        const collapsed = strip.classList.toggle('is-collapsed');
+        toggleBtn.setAttribute('aria-expanded', String(!collapsed));
+        syncFilmstripStageOffset();
+      });
+  }
+
+  // ====== GALLERY STATE ======
+  let galleryItems = [];
+  let currentIndex = 0;
+
+
+
+
+  let ytPlayer = null;
+let ytWatchTimer = null;
+
+function clearYouTubeWatcher() {
+  if (ytWatchTimer) {
+    clearInterval(ytWatchTimer);
+    ytWatchTimer = null;
+  }
+  ytPlayer = null;
+}
+
+function setupYouTubePlayer(iframeEl) {
+  clearYouTubeWatcher();
+
+  if (!iframeEl || !iframeEl.src || !iframeEl.src.includes('youtube')) return;
+  if (!window.YT || !YT.Player) return;
+
+  ytPlayer = new YT.Player(iframeEl, {
+    events: {
+      onReady: () => {
+        ytWatchTimer = setInterval(() => {
+          try {
+            const duration = ytPlayer.getDuration?.() || 0;
+            const current = ytPlayer.getCurrentTime?.() || 0;
+
+            if (duration > 1 && current >= duration - 0.8) {
+              ytPlayer.pauseVideo();
+              clearYouTubeWatcher();
+            }
+          } catch (e) {}
+        }, 200);
+      },
+      onStateChange: (event) => {
+        if (event.data === 0) {
+          try {
+            ytPlayer.pauseVideo();
+          } catch (e) {}
+          clearYouTubeWatcher();
+        }
+      }
+    }
+  });
+}
+
+function stopActiveMediaPlayback() {
+  try { ytPlayer?.pauseVideo?.(); } catch (e) {}
+  try { ytPlayer?.stopVideo?.(); } catch (e) {}
+  clearYouTubeWatcher();
+
+  if (mainVideo) {
+    try { mainVideo.pause(); } catch (e) {}
+    mainVideo.removeAttribute('src');
+    mainVideo.load();
+  }
+
+  if (mainIframe) {
+    mainIframe.removeAttribute('src');
+    mainIframe.src = 'about:blank';
+  }
+}
+
+window.stopMediaViewerPlayback = stopActiveMediaPlayback;
+
+
+
+
+  
+  const viewerEl = document.querySelector('.viewer');
+  const thumbsContainer = document.querySelector('.thumbs');
+  const navPrev = document.querySelector('.navarrow[aria-label="Prev"]');
+  const navNext = document.querySelector('.navarrow[aria-label="Next"]');
+  const mainImage = document.querySelector('.mv-main-image');
+  const mainVideo = document.querySelector('.mv-main-video');
+  const mainIframe = document.querySelector('.mv-main-iframe');
+  const loadingLabel = document.querySelector('.mv-loading');
+
+  function isVideoItem(item) {
+    return item?.type === 'video';
+  }
+
+  function syncFilmstripStageOffset() {
+    if (!viewerEl || !strip) return;
+    const currentItem = galleryItems[currentIndex];
+    const isVideo = isVideoItem(currentItem);
+    const isEmbedded = !!currentItem?.href;
+    const hasFilmstrip = galleryItems.length > 1;
+    viewerEl.classList.toggle('viewer--video-stage-offset', isVideo || isEmbedded);
+    const offset = !hasFilmstrip ? '0px' : (strip.classList.contains('is-collapsed') ? '17px' : '125px');
+    viewerEl.style.setProperty('--mv-video-filmstrip-offset', (isVideo || isEmbedded) ? offset : '0px');
+  }
+
+  function normalizeDriveThumbUrl(url, size = 'w1000') {
+    if (!url) return "";
+    return url
+      .replace(/https?:\/\/drive\.google\.com\/thumbnail\?id=([^&]+)&sz=w\d+/i, `https://drive.google.com/thumbnail?id=$1&sz=${size}`)
+      .replace(/^.*(?:\/file\/d\/|id=)([^\/&?]+).*$/, `https://drive.google.com/thumbnail?id=$1&sz=${size}`);
+  }
+
+  function normalizeGalleryItem(rawItem = {}) {
+    const item = { ...rawItem };
+    item.type = isVideoItem(item) ? 'video' : 'image';
+    if (item.type === 'video') {
+      item.src = normalizeDriveThumbUrl(item.src || "");
+    } else if (item.src) {
+      item.src = item.src.replace(/https?:\/\/drive\.google\.com\/file\/d\/([^\/]+)\/view.*/, 'https://lh3.googleusercontent.com/d/$1=w2000');
+    }
+    if (item.overlay) {
+      item.overlay = item.overlay.replace(/https?:\/\/drive\.google\.com\/file\/d\/([^\/]+)\/view.*/, 'https://drive.google.com/thumbnail?id=$1&sz=w2000');
+    }
+    return item;
+  }
+
+  function setFigureLoading(text = 'Loading...') {
+    const fig = document.querySelector('.figure');
+    if (fig) fig.classList.remove('has-image');
+    if (loadingLabel) {
+      loadingLabel.textContent = text;
+      loadingLabel.style.display = 'flex';
+    }
+  }
+
+  function resetStageMedia(options = {}) {
+    const preserveIframe = options.preserveIframe === true;
+    clearYouTubeWatcher();
+    if (mainImage) {
+      mainImage.onload = null;
+      mainImage.onerror = null;
+      mainImage.style.display = 'none';
+      mainImage.removeAttribute('src');
+      mainImage.removeAttribute('title');
+    }
+    if (mainVideo) {
+      try { mainVideo.pause(); } catch (err) {}
+      mainVideo.onloadeddata = null;
+      mainVideo.onerror = null;
+      mainVideo.style.display = 'none';
+      mainVideo.removeAttribute('src');
+      mainVideo.load();
+    }
+    if (mainIframe && !preserveIframe) {
+      mainIframe.onload = null;
+      mainIframe.style.display = 'none';
+      mainIframe.style.opacity = '0';
+      mainIframe.src = 'about:blank';
+    }
+  }
+
+  function getYouTubeEmbedUrl(url) {
+  if (!url) return "";
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, '');
+    let videoId = "";
+
+    if (host === 'youtu.be') {
+      videoId = parsed.pathname.replace(/^\/+/, '').split('/')[0];
+    } else if (host.includes('youtube.com')) {
+      if (parsed.pathname === '/watch') videoId = parsed.searchParams.get('v') || "";
+      else if (parsed.pathname.startsWith('/embed/')) videoId = parsed.pathname.split('/embed/')[1]?.split('/')[0] || "";
+      else if (parsed.pathname.startsWith('/shorts/')) videoId = parsed.pathname.split('/shorts/')[1]?.split('/')[0] || "";
+    }
+
+    return videoId
+      ? `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&playsinline=1&enablejsapi=1`
+      : "";
+  } catch (err) {
+    return "";
+  }
+}
+
+  function getDrivePreviewUrl(url) {
+    if (!url) return "";
+    const match = url.match(/drive\.google\.com\/file\/d\/([^\/]+)/i);
+    return match ? `https://drive.google.com/file/d/${match[1]}/preview` : "";
+  }
+
+  function getDriveFileId(url) {
+    if (!url) return "";
+    const match = url.match(/(?:\/file\/d\/|[?&]id=)([^\/&?#]+)/i);
+    return match ? match[1] : "";
+  }
+
+  function getDriveDirectVideoUrl(url) {
+    const fileId = getDriveFileId(url);
+    return fileId ? `https://drive.google.com/uc?export=download&id=${fileId}` : "";
+  }
+
+  function isDirectVideoUrl(url) {
+    return /\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i.test(url || "");
+  }
+
+  function getPlayableVideoSource(item) {
+    const candidates = [item?.link, item?.videoUrl, item?.linkBackup].filter(Boolean);
+
+    for (const candidate of candidates) {
+      const driveDirect = getDriveDirectVideoUrl(candidate);
+      if (driveDirect) return { kind: 'video', src: driveDirect, original: candidate, sourceLabel: 'Google Drive video' };
+      if (isDirectVideoUrl(candidate)) return { kind: 'video', src: candidate, original: candidate, sourceLabel: 'Direct video' };
+    }
+
+    for (const candidate of candidates) {
+      const ytEmbed = getYouTubeEmbedUrl(candidate);
+      if (ytEmbed) return { kind: 'iframe', src: ytEmbed, original: candidate, sourceLabel: 'YouTube embed' };
+    }
+
+    for (const candidate of candidates) {
+      const drivePreview = getDrivePreviewUrl(candidate);
+      if (drivePreview) return { kind: 'iframe', src: drivePreview, original: candidate, sourceLabel: 'Google Drive preview' };
+    }
+
+    return null;
+  }
+
+  function getFallbackPlayableVideoSource(item, failedPlayable) {
+    const original = failedPlayable?.original || item?.link || item?.videoUrl || item?.linkBackup || "";
+    if (!original) return null;
+
+    if (failedPlayable?.sourceLabel !== 'YouTube embed') {
+      const ytEmbed = getYouTubeEmbedUrl(item?.linkBackup || "");
+      if (ytEmbed) return { kind: 'iframe', src: ytEmbed, original: item?.linkBackup || "", sourceLabel: 'YouTube embed' };
+    }
+
+    if (failedPlayable?.sourceLabel === 'Google Drive video') {
+      const drivePreview = getDrivePreviewUrl(original);
+      if (drivePreview) return { kind: 'iframe', src: drivePreview, original, sourceLabel: 'Google Drive preview' };
+    }
+
+    return null;
+  }
+
+  function syncMediaSpecificControls(item) {
+    const overlayTab = document.getElementById('overlay-tab-container');
+    const overlayImg = document.querySelector('.mv-overlay-image');
+    const overlayToggle = document.getElementById('overlay-toggle');
+    const quizTab = document.getElementById('quiz-tab-container');
+    const indTab = document.getElementById('indicators-tab-container');
+    const labTab = document.getElementById('labels-tab-container');
+    const szTab = document.getElementById('smartzoom-tab-container');
+    const zoomButton = document.getElementById('zoom-button');
+    const zoomButtonWrap = zoomButton?.closest('span') || zoomButton;
+    const fullscreenButton = document.getElementById('toggle-fullscreen-button');
+    const fullscreenButtonWrap = fullscreenButton?.closest('span') || fullscreenButton;
+    const isVideo = isVideoItem(item);
+    const isEmbedded = !!item?.href;
+
+    if (zoomButtonWrap) {
+      zoomButtonWrap.style.display = (isVideo || isEmbedded) ? 'none' : '';
+    }
+    if (fullscreenButtonWrap) {
+      fullscreenButtonWrap.style.display = isEmbedded ? 'none' : '';
+    }
+
+    if (overlayToggle) {
+      overlayToggle.checked = false;
+      overlayToggle.dispatchEvent(new Event('change'));
+    }
+
+    if (overlayTab && overlayImg && overlayToggle) {
+      if (!isVideo && !isEmbedded && item.overlay && String(item.overlay).trim() !== "" && String(item.overlay) !== "undefined") {
+        overlayTab.style.setProperty('display', 'block', 'important');
+        overlayImg.onerror = () => { overlayImg.style.display = 'none'; };
+        overlayImg.src = item.overlay;
+        overlayImg.style.display = overlayToggle.checked ? 'block' : 'none';
+      } else {
+        overlayTab.style.setProperty('display', 'none', 'important');
+        overlayImg.style.display = 'none';
+        overlayImg.src = '';
+      }
+    }
+
+    const hasLabels = !isVideo && !isEmbedded && (item.labels === true || item.labels === "true");
+    const hasSZ = !isVideo && !isEmbedded && (item.smartzoom === true || item.smartzoom === "true");
+    if (quizTab) quizTab.style.setProperty('display', hasLabels ? 'block' : 'none', 'important');
+    if (indTab) indTab.style.setProperty('display', hasLabels ? 'block' : 'none', 'important');
+    if (labTab) labTab.style.setProperty('display', hasLabels ? 'block' : 'none', 'important');
+    if (szTab) szTab.style.setProperty('display', hasSZ ? 'block' : 'none', 'important');
+  }
+
+  // ====== TEMPORARY EXPANSION HELPER ======
+  let expandTimer = null;
+  function expandThumbnailsTemporarily() {
+    if (!strip) return;
+    if (expandTimer) clearTimeout(expandTimer);
+    
+    // Expand
+    strip.classList.remove('is-collapsed');
+    if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
+    syncFilmstripStageOffset();
+
+    // Collapse after 2 seconds
+    expandTimer = setTimeout(() => {
+      strip.classList.add('is-collapsed');
+      if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+      syncFilmstripStageOffset();
+      expandTimer = null;
+    }, 2000);
+  }
+
+  // Handle INIT_GALLERY message from parent
+  window.addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'INIT_GALLERY') {
+      galleryItems = (e.data.gallery || []).map(normalizeGalleryItem);
+      
+      currentIndex = e.data.index || 0;
+      
+      // Sync to global for Split View handover
+      window.mvGalleryItems = galleryItems;
+      window.mvCurrentIndex = currentIndex;
+
+      renderGallery();
+      updateMainImage();
+
+      // Expand thumbnails temporarily on initialization (Split OR Overlay)
+      expandThumbnailsTemporarily();
+      window.focus();
+    }
+
+    if (e.data === 'RESET_SPLIT_ICON') {
+      // Expand thumbnails temporarily when returning to overlay (IN iframe)
+      if (window.self !== window.top) {
+        expandThumbnailsTemporarily();
+      }
+    }
+  });
+
+  // Extract initial query params if loaded directly via iframe src
+  const urlParams = new URLSearchParams(window.location.search);
+  const srcParam = urlParams.get('src');
+  const titleParam = urlParams.get('title');
+  const descParam = urlParams.get('desc');
+  const copyParam = urlParams.get('copy');
+  if (srcParam && galleryItems.length === 0) {
+    let finalSrc = srcParam.replace(/https?:\/\/drive\.google\.com\/file\/d\/([^\/]+)\/view.*/, 'https://lh3.googleusercontent.com/d/$1=w2000');
+    galleryItems = [{ type: 'image', src: finalSrc, title: titleParam || "", description: descParam || "", copyright: copyParam || "" }];
+    currentIndex = 0;
+    setTimeout(() => {
+      renderGallery();
+      updateMainImage();
+    }, 50);
+  }
+
+  // Navigation Click Handlers
+  navPrev?.addEventListener('click', () => {
+    if (galleryItems.length === 0 || currentIndex <= 0) return;
+    currentIndex--;
+    updateMainImage();
+    updateActiveThumb();
+    expandThumbnailsTemporarily();
+  });
+
+  navNext?.addEventListener('click', () => {
+    if (galleryItems.length === 0 || currentIndex >= galleryItems.length - 1) return;
+    currentIndex++;
+    updateMainImage();
+    updateActiveThumb();
+    expandThumbnailsTemporarily();
+  });
+
+function getHighResUrl(url) {
+  if (!url) return "";
+
+  // normalizar dominio viejo
+  url = url.replace('media-us.mbscf.com', 'media-us.amboss.com');
+
+  // Fix para enlaces de Google Drive (/view -> lh3 bypass)
+  url = url.replace(/https?:\/\/drive\.google\.com\/file\/d\/([^\/]+)\/view.*/, 'https://lh3.googleusercontent.com/d/$1=w2000');
+
+  // si ya es big thumb, listo
+  if (url.includes('/media/thumbs/big_')) return url;
+
+  // medium/small/tiny -> big
+  url = url
+    .replace('/media/thumbs/medium_', '/media/thumbs/big_')
+    .replace('/media/thumbs/small_',  '/media/thumbs/big_')
+    .replace('/media/thumbs/tiny_',   '/media/thumbs/big_');
+
+  // si te llega como /media/images/ID.jpg -> /media/thumbs/big_ID.jpg
+  url = url.replace(/\/media\/images\/([^\/]+)\.jpg$/i, '/media/thumbs/big_$1.jpg');
+
+  // svg-de 500 -> 3600
+  if (url.includes('__500.jpeg')) url = url.replace('__500.jpeg', '__3600.jpeg');
+
+  return url;
+}
+
+function updateMainImage() {
+  if (!galleryItems || !galleryItems[currentIndex]) return;
+
+  window.mvCurrentIndex = currentIndex;
+  const item = galleryItems[currentIndex];
+  window.mvCurrentItem = item;
+  syncFilmstripStageOffset();
+
+  if (typeof window.resetZoom === 'function') window.resetZoom();
+  else if (typeof resetZoom === 'function') resetZoom();
+
+  const sidebarTitle = document.querySelector('.sidebar h2.mv-sidebar-title');
+  const sidebarDesc = document.querySelector('.sidebar p.mv-sidebar-desc');
+  const sidebarFooter = document.querySelector('.sidebar .footer');
+  if (sidebarTitle) sidebarTitle.textContent = item.title || '';
+  if (sidebarDesc) {
+    sidebarDesc.style.whiteSpace = 'pre-line';
+    sidebarDesc.textContent = (item.description || '').replace(/^\/\//, '').replaceAll('//', '\n');
+  }
+  if (sidebarFooter) sidebarFooter.textContent = item?.href ? 'Calculator' : (isVideoItem(item) ? 'Video' : (item.copyright || '© BANCOMICINA'));
+
+  syncMediaSpecificControls(item);
+
+  if (item?.href && mainIframe) {
+    resetStageMedia({ preserveIframe: true });
+    setFigureLoading('Loading calculator...');
+    mainIframe.style.display = 'block';
+    mainIframe.style.opacity = '0';
+    mainIframe.onload = () => {
+      if (loadingLabel) loadingLabel.style.display = 'none';
+      mainIframe.style.opacity = '1';
+    };
+    if (mainIframe.src !== item.href) {
+      mainIframe.src = item.href;
+    } else {
+      if (loadingLabel) loadingLabel.style.display = 'none';
+      mainIframe.style.opacity = '1';
+    }
+    return;
+  }
+
+  resetStageMedia();
+
+  if (isVideoItem(item)) {
+    setFigureLoading('Loading video...');
+    const playable = getPlayableVideoSource(item);
+    if (!playable) {
+      if (loadingLabel) loadingLabel.textContent = 'Video unavailable';
+      return;
+    }
+
+    if (playable.kind === 'video' && mainVideo) {
+      mainVideo.src = playable.src;
+      mainVideo.style.display = 'block';
+      mainVideo.onloadeddata = () => {
+        if (loadingLabel) loadingLabel.style.display = 'none';
+      };
+      mainVideo.onerror = () => {
+        const fallback = getFallbackPlayableVideoSource(item, playable);
+        if (!fallback) {
+          if (loadingLabel) loadingLabel.textContent = 'Video unavailable';
+          return;
+        }
+        mainVideo.style.display = 'none';
+        mainVideo.removeAttribute('src');
+        mainVideo.load();
+        if (fallback.kind === 'iframe' && mainIframe) {
+          mainIframe.style.display = 'block';
+          mainIframe.onload = () => {
+            if (loadingLabel) loadingLabel.style.display = 'none';
+          };
+          mainIframe.src = fallback.src;
+        } else if (loadingLabel) {
+          loadingLabel.textContent = 'Video unavailable';
+        }
+      };
+      mainVideo.load();
+    } else if (mainIframe) {
+  mainIframe.style.display = 'block';
+  mainIframe.onload = () => {
+    if (loadingLabel) loadingLabel.style.display = 'none';
+
+    if (mainIframe.src.includes('youtube')) {
+      const initYT = () => setupYouTubePlayer(mainIframe);
+
+      if (window.YT && YT.Player) {
+        initYT();
+      } else {
+        const waitYT = setInterval(() => {
+          if (window.YT && YT.Player) {
+            clearInterval(waitYT);
+            initYT();
+          }
+        }, 150);
+      }
+    }
+  };
+  mainIframe.src = playable.src;
+}
+    return;
+  }
+
+  setFigureLoading('Loading...');
+  if (mainImage) {
+    const highRes = getHighResUrl(item.src);
+    mainImage.style.display = 'block';
+    mainImage.src = highRes;
+    mainImage.title = item.title;
+  }
+
+  if (typeof window.applyZoom === 'function') {
+    setTimeout(() => { window.applyZoom(); }, 50);
+  } else if (typeof applyZoom === 'function') {
+    setTimeout(() => { applyZoom(); }, 50);
+  }
+
+  const fig = document.querySelector('.figure');
+  if (mainImage) {
+    mainImage.onload = () => {
+      if (fig) fig.classList.add('has-image');
+      if (loadingLabel) loadingLabel.style.display = 'none';
+    };
+    mainImage.onerror = () => {
+      if (loadingLabel) loadingLabel.textContent = 'Image unavailable';
+    };
+  }
+}
+
+  
+
+
+
+
+
+
+
+
+
+
+
+function renderGallery() {
+    if(!thumbsContainer) return;
+    if (strip) strip.style.display = galleryItems.length > 1 ? '' : 'none';
+    thumbsContainer.innerHTML = '';
+    galleryItems.forEach((item, idx) => {
+      const thumb = document.createElement('div');
+      thumb.className = `thumb ${idx === currentIndex ? 'active' : ''}${isVideoItem(item) ? ' thumb--video' : ''}`;
+      if (item.src) {
+        thumb.innerHTML = `<img src="${item.src}" alt="${item.title}">`;
+      }
+      if (isVideoItem(item)) {
+        thumb.insertAdjacentHTML('beforeend', `<span class="thumb-video-badge"><span class="css-az2xxc-StyledIconContainer eclnczy5"><span data-ds-id="Icon" data-variant="inherit" aria-hidden="true" class="css-prjrwq-StyledIcon erb38ua0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16" focusable="false"><g fill-rule="evenodd" clip-rule="evenodd"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14"></path><path fill="currentColor" d="M6 5.809a.5.5 0 0 1 .724-.447l4.382 2.19a.5.5 0 0 1 0 .895l-4.382 2.191A.5.5 0 0 1 6 10.191z"></path></g></svg></span></span></span>`);
+      }
+      
+      thumb.addEventListener('click', () => {
+        currentIndex = idx;
+        updateMainImage();
+        updateActiveThumb();
+      });
+      
+      thumbsContainer.appendChild(thumb);
+    });
+    
+    syncFilmstripStageOffset();
+    scrollToActiveThumb();
+  }
+
+  function updateActiveThumb() {
+    if(!thumbsContainer) return;
+    const allThumbs = thumbsContainer.querySelectorAll('.thumb');
+    allThumbs.forEach((t, i) => {
+      if (i === currentIndex) t.classList.add('active');
+      else t.classList.remove('active');
+    });
+    scrollToActiveThumb();
+  }
+  
+  function scrollToActiveThumb() {
+    if(!thumbsContainer) return;
+    const active = thumbsContainer.querySelector('.thumb.active');
+    if (active) {
+      const targetScroll = active.offsetLeft - (thumbsContainer.offsetWidth / 2) + (active.offsetWidth / 2);
+      thumbsContainer.scrollTo({ left: targetScroll, behavior: 'smooth' });
+    }
+  }
+
+  // Toggle overlay on checkbox change
+  const overlayTgl = document.getElementById('overlay-toggle');
+  if (overlayTgl) {
+    const syncOverlayStyle = () => {
+      const label = overlayTgl.closest('label');
+      if (label) label.classList.toggle('mv-active', overlayTgl.checked);
+    };
+    overlayTgl.addEventListener('change', () => {
+      const overlayImg = document.querySelector('.mv-overlay-image');
+      if (overlayImg) overlayImg.style.display = overlayTgl.checked ? 'block' : 'none';
+      syncOverlayStyle();
+    });
+    syncOverlayStyle(); // Estado inicial
+  }
+
+  // Teclado: Navegación y Cierre
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') { 
+      document.querySelector('.navarrow[aria-label="Prev"]')?.click();
+    }
+    if (e.key === 'ArrowRight') {
+      document.querySelector('.navarrow[aria-label="Next"]')?.click();
+    }
+    if (e.key === 'Escape')     document.getElementById('viewer-button-exit')?.click();
+  });
+  window.focus();
+}
+</script>
+
+<script>
+{
+  const sb = document.querySelector('.sidebar');
+  const ly = document.querySelector('.media-viewer-layout');
+  const mainEl = document.querySelector('main') || document.body; // para detectar split-mode
+
+  const descRadio = document.querySelector('input[name="viewer-tab"][value="desc"]');
+  const descLabel = descRadio?.closest('label');
+
+  const otherRadios = [...document.querySelectorAll('input[name="viewer-tab"]')]
+    .filter(r => r.value !== 'desc');
+
+  function setSidebarVisible(visible){
+    if(sb) sb.classList.toggle('is-hidden', !visible);
+    if(ly) ly.classList.toggle('sidebar-hidden', !visible);
+  }
+
+  function setDescActive(active){
+    descLabel?.classList.toggle('mv-active', !!active);
+  }
+
+  // Estado inicial
+  const isSplitInit = mainEl.classList.contains('split-mode');
+  if (isSplitInit) {
+    if (sb) {
+      sb.classList.add('split-hidden');
+      setSidebarVisible(false);
+    }
+    setDescActive(false);
+  } else {
+    if (sb) setSidebarVisible(true);
+    setDescActive(true);
+  }
+
+  // ✅ Description: toggle sidebar + su estilo, SIN cambiar radios
+  descLabel?.addEventListener('click', (e) => {
+    e.preventDefault(); // evita que el radio cambie
+    
+    if(!sb) return;
+
+    const isHidden = sb.classList.contains('is-hidden');
+    const isSplitMode = mainEl.classList.contains('split-mode');
+    
+    // Si estamos en split mode, también agregamos/quitamos la clase para ocultar completamente
+    if (isSplitMode) {
+      sb.classList.toggle('split-hidden', !isHidden);
+      
+      // ✅ Si se va a mostrar el sidebar, colapsar la barra de miniaturas (solo en split)
+      if (isHidden) {
+        const strip = document.querySelector('.filmstrip-wrapper');
+        const toggleBtn = document.querySelector('[aria-label="Click to expand or collapse the thumbnail bar"]');
+        if (strip) {
+          strip.classList.add('is-collapsed');
+          if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+        }
+      }
+    }
+    
+    setSidebarVisible(isHidden);   // hidden -> show, visible -> hide
+    setDescActive(isHidden);       // si se muestra, queda activo
+  });
+}
+</script>
+
+
+
+
+
+<script>
+{
+  // ====== HELPERS ======
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+  function roundStep(v, step){
+    const inv = 1 / step;
+    return Math.round(v * inv) / inv;
+  }
+
+  // ====== ZOOM ENGINE + POPOVER ======
+  const zoomBtn  = document.getElementById('zoom-button');
+  const pop      = document.getElementById('zoom-popover');
+  const zOut     = document.getElementById('viewer-button-zoom-out');
+  const zIn      = document.getElementById('viewer-button-zoom-in');
+  const zReset   = document.getElementById('viewer-button-zoom-reset');
+  const zLabel   = document.getElementById('zoom-percent');
+
+  const zoomTarget = document.querySelector('.mv-main-image');
+  const MIN = 0.5, MAX = 3.0, STEP = 0.1;
+
+  let scale = 1;
+  let tx = 0, ty = 0;
+  let isPanning = false;
+  let lastX = 0, lastY = 0;
+
+
+
+  const panViewport = document.querySelector('.canvas'); // ✅ límite de desplazamiento
+  
+  
+  function getContainSize(imgEl, viewportEl){
+  const vw = viewportEl.clientWidth;
+  const vh = viewportEl.clientHeight;
+
+  // si todavía no cargó la imagen
+  const iw = imgEl.naturalWidth || 1;
+  const ih = imgEl.naturalHeight || 1;
+
+  const imgAR = iw / ih;
+  const viewAR = vw / vh;
+
+  let baseW, baseH;
+  if (imgAR > viewAR) {        // limita por ancho
+    baseW = vw;
+    baseH = vw / imgAR;
+  } else {                     // limita por alto
+    baseH = vh;
+    baseW = vh * imgAR;
+  }
+  return { baseW, baseH, vw, vh };
+}
+
+function clampPan(){
+  if (!zoomTarget || !panViewport) return;
+
+  const { baseW, baseH, vw, vh } = getContainSize(zoomTarget, panViewport);
+  const scaledW = baseW * scale;
+  const scaledH = baseH * scale;
+
+  // máximo desplazamiento permitido desde el centro
+  const maxTx = Math.max(0, (scaledW - vw) / 2);
+  const maxTy = Math.max(0, (scaledH - vh) / 2);
+
+  tx = clamp(tx, -maxTx, maxTx);
+  ty = clamp(ty, -maxTy, maxTy);
+}
+
+  function applyZoom() {
+    if (window.mvCurrentItem?.type === 'video') {
+      scale = 1;
+      tx = 0;
+      ty = 0;
+      if (zLabel) zLabel.textContent = '100%';
+      if (zReset) zReset.disabled = true;
+      if (zOut) zOut.disabled = true;
+      if (zIn) zIn.disabled = true;
+      return;
+    }
+
+    clampPan();
+    scale = clamp(roundStep(scale, 0.01), MIN, MAX);
+
+    if (zoomTarget) {
+      zoomTarget.style.transformOrigin = 'center center';
+      zoomTarget.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+      zoomTarget.style.transition = isPanning ? 'none' : 'transform 120ms ease';
+    }
+    const overlayEl = document.querySelector('.mv-overlay-image');
+    if (overlayEl) {
+      overlayEl.style.transformOrigin = 'center center';
+      overlayEl.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+      overlayEl.style.transition = isPanning ? 'none' : 'transform 120ms ease';
+    }
+
+    const pct = Math.round(scale * 100);
+    if (zLabel) zLabel.textContent = `${pct}%`;
+
+    const isDefault = Math.abs(scale - 1) < 0.001;
+    if (zReset) zReset.disabled = isDefault && Math.abs(tx) < 0.5 && Math.abs(ty) < 0.5;
+
+    if (zOut) zOut.disabled = scale <= MIN + 0.001;
+    if (zIn)  zIn.disabled  = scale >= MAX - 0.001;
+  }
+
+  function zoomIn(){  if (window.mvCurrentItem?.type === 'video') return; scale = clamp(scale + STEP, MIN, MAX); applyZoom(); }
+  function zoomOut(){ if (window.mvCurrentItem?.type === 'video') return; scale = clamp(scale - STEP, MIN, MAX); applyZoom(); }
+  function resetZoom(){
+    scale = 1;
+    tx = 0; ty = 0;          // ✅ importante: resetea el pan también
+    applyZoom();
+  }
+
+  // ====== PAN (drag) ======
+  if (zoomTarget){
+    zoomTarget.addEventListener('pointerdown', (e) => {
+      isPanning = true;
+      zoomTarget.classList.add('is-panning');
+      lastX = e.clientX; lastY = e.clientY;
+      zoomTarget.setPointerCapture?.(e.pointerId);
+      e.preventDefault();
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (!isPanning) return;
+      const dx = e.clientX - lastX;
+      const dy = e.clientY - lastY;
+      lastX = e.clientX; lastY = e.clientY;
+      tx += dx; ty += dy;
+      applyZoom();
+      e.preventDefault();
+    }, { passive: false });
+
+    window.addEventListener('pointerup', () => {
+      if (!isPanning) return;
+      isPanning = false;
+      zoomTarget.classList.remove('is-panning');
+      applyZoom();
+    });
+  }
+
+  // ====== POPOVER ======
+  function placePopover(){
+    if (!zoomBtn || !pop) return;
+    const r = zoomBtn.getBoundingClientRect();
+    const top = r.bottom + 10;
+
+    const w = pop.offsetWidth || 161;
+    const left = clamp(r.right - w, 12, window.innerWidth - 12 - w);
+
+    pop.style.top = `${top}px`;
+    pop.style.left = `${left}px`;
+
+    const arrow = pop.querySelector('.css-196i78w-StyledArrow');
+    if (arrow){
+      const cx = r.left + r.width/2;
+      const inside = cx - left - arrow.offsetWidth/2;
+      arrow.style.left = `${clamp(inside, 12, w - 12 - arrow.offsetWidth)}px`;
+    }
+  }
+
+
+
+
+
+
+// sensibilidad (más chico = más suave)
+const ZOOM_SENS = 0.0012;
+
+// Zoom centrado en el cursor (anclaje)
+function zoomAt(clientX, clientY, nextScale){
+  if (!panViewport || !zoomTarget) return;
+
+  nextScale = clamp(nextScale, MIN, MAX);
+  if (Math.abs(nextScale - scale) < 1e-6) return;
+
+  const rect = panViewport.getBoundingClientRect();
+
+  // cursor relativo al centro del viewport
+  const cx = clientX - (rect.left + rect.width  / 2);
+  const cy = clientY - (rect.top  + rect.height / 2);
+
+  const prevScale = scale;
+  const ratio = nextScale / prevScale;
+
+  // mantener fijo el punto bajo el cursor:
+  // t' = t + (1 - ratio) * (c - t)
+  tx = tx + (1 - ratio) * (cx - tx);
+  ty = ty + (1 - ratio) * (cy - ty);
+
+  scale = nextScale;
+  applyZoom();
+}
+
+// ✅ Wheel/trackpad: zoom anclado al cursor
+panViewport?.addEventListener('wheel', (e) => {
+  if (!zoomTarget || window.mvCurrentItem?.type === 'video') return;
+
+  // opcional: si querés que SOLO zoom con ctrl/pinch:
+  // if (!e.ctrlKey) return;
+
+  e.preventDefault();
+
+  const factor = Math.exp(-e.deltaY * ZOOM_SENS);
+  const next = scale * factor;
+
+  zoomAt(e.clientX, e.clientY, next);
+}, { passive: false });
+
+  function openPopover(){
+    if (!pop) return;
+    pop.classList.add('is-open');
+    pop.setAttribute('aria-hidden','false');
+    requestAnimationFrame(placePopover);
+  }
+  function closePopover(){
+    if (!pop) return;
+    pop.classList.remove('is-open');
+    pop.setAttribute('aria-hidden','true');
+  }
+  function togglePopover(){
+    if (!pop) return;
+    pop.classList.contains('is-open') ? closePopover() : openPopover();
+  }
+
+  zoomBtn?.addEventListener('click', (e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    togglePopover();
+  });
+
+  document.addEventListener('click', (e)=>{
+    if (!pop?.classList.contains('is-open')) return;
+    if (pop.contains(e.target) || zoomBtn.contains(e.target)) return;
+    closePopover();
+  });
+
+  document.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape') closePopover();
+    if (!pop?.classList.contains('is-open')) return;
+    if (e.key === '+' || e.key === '='){ e.preventDefault(); zoomIn(); }
+    if (e.key === '-'){ e.preventDefault(); zoomOut(); }
+    if (e.key === '0'){ e.preventDefault(); resetZoom(); }
+  });
+
+  window.addEventListener('resize', ()=>{ if (pop?.classList.contains('is-open')) placePopover(); }, {passive:true});
+  window.addEventListener('scroll',  ()=>{ if (pop?.classList.contains('is-open')) placePopover(); }, {passive:true, capture:true});
+
+  zIn?.addEventListener('click',  (e)=>{ e.preventDefault(); e.stopPropagation(); zoomIn(); });
+  zOut?.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); zoomOut(); });
+  zReset?.addEventListener('click',(e)=>{ e.preventDefault(); e.stopPropagation(); if (!zReset.disabled) resetZoom(); });
+
+  // init
+  applyZoom();
+  zoomTarget?.addEventListener('load', () => { tx = 0; ty = 0; applyZoom(); });
+window.addEventListener('resize', () => applyZoom(), { passive:true });
+}
+
+
+
+
+
+
+
+</script>
+
+
+
+
+
+<script>
+{
+  // Botón salir (igual que antes)
+  // Re-query elements because they are new DOM nodes
+  const exitBtn = document.getElementById("viewer-button-exit");
+  if(exitBtn) {
+      exitBtn.addEventListener("click", () => {
+        if (typeof window.stopMediaViewerPlayback === 'function') {
+          window.stopMediaViewerPlayback();
+        }
+
+        // ✅ Verificar si estamos en iframe (overlay mode)
+        if (window.self !== window.top && window.parent) {
+          const p = window.parent;
+          
+          // Ocultar/Eliminar el contenedor del media viewer
+          const overlay = p.document.getElementById('media-viewer-overlay');
+          if (overlay) {
+            overlay.remove();
+          } else {
+             // Fallback for older IDs if any
+             const mv2 = p.document.getElementById('mv2');
+             if(mv2) mv2.style.display = 'none';
+          }
+          
+          // Restaurar scroll del body
+          p.document.body.style.overflow = '';
+        } else {
+          // En split mode, llamar a la función de cierre total (NO volver a overlay)
+          if (typeof window.closeMediaViewer2 === 'function') {
+            console.log("MediaViewer (Split): Closing completely");
+            window.closeMediaViewer2();
+          } else if (typeof window.exitSplitView === 'function') {
+            window.exitSplitView();
+          }
+        }
+      });
+  }
+
+  // ====== Toggle split <-> no-split + cambio de icono ======
+  {
+    const toggleFsBtn = document.getElementById("toggle-fullscreen-button");
+    const splitIcon   = document.getElementById("splitIcon");
+
+    const iconExpand = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+      <path fill="currentColor"
+        d="m4.576 10-3.293 3.293 1.414 1.414 3.293-3.293V13a1 1 0 1 0 2 0V9a1 1 0 0 0-1-1h-4a1 1 0 0 0 0 2zM13 7.99a1 1 0 1 0 0-2h-1.586l3.293-3.293-1.414-1.414L10 4.576V2.99a1 1 0 1 0-2 0v4a1 1 0 0 0 1 1z">
+      </path>
+    </svg>`;
+
+    const iconMaximize = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+      <g stroke="currentColor" stroke-linejoin="round" stroke-width="2">
+        <path d="M14 2 9 7m-7 7 5-5"></path>
+        <path stroke-linecap="round" d="M10 2h4v4m-8 8H2v-4"></path>
+      </g>
+    </svg>`;
+
+    // Determinación de Contexto:
+    const isIframe = (window.self !== window.top);
+
+    // Configuración Inicial Visual
+    if (splitIcon) {
+      splitIcon.innerHTML = isIframe ? iconExpand : iconMaximize;
+    }
+
+    // Listener de Click
+    if (toggleFsBtn) {
+       toggleFsBtn.onclick = (e) => {
+         e.preventDefault();
+         e.stopPropagation();
+
+         if (isIframe) {
+            // Contexto: Overlay (Iframe) -> Acción: IR A SPLIT
+            console.log("MediaViewer (Iframe): Requesting Split View");
+            
+            const p = window.parent;
+            if (p) {
+               // 1. Ocultar Overlay
+               const mv2 = p.document.getElementById('mv2');
+               if (mv2) mv2.style.display = 'none';
+               p.document.body.style.overflow = '';
+
+               // 2. Cargar Split PASANDO EL ESTADO ACTUAL
+               if (typeof p.loadSplitView === 'function') {
+                  // asumiendo variables globales galleryItems / currentIndex del script anterior
+                  // Pero como ahora están en scope, necesitamos acceder a ellas.
+                  // galleryItems IS NOT VISIBLE HERE if scoped in another block.
+                  // FIX: We need to expose galleryItems globally (or window) too?
+                  // OR simply re-read it from DOM? No, dom doesn't store full gallery data easily.
+                  
+                  // Let's assume the FIRST script block attached them to window or we merge.
+                  // Actually, let's fix the first block to expose `window.mvGalleryItems`.
+                  
+                  // RETRY LOGIC:
+                  const items = window.mvGalleryItems || []; // We will add this to block 1
+                  const idx = window.mvCurrentIndex || 0;
+                  
+                  p.loadSplitView(items, idx);
+               }
+            }
+
+         } else {
+            // Contexto: Split Panel (Inyectado) -> Acción: SALIR DE SPLIT (a Overlay)
+            console.log("MediaViewer (Injected): Exiting Split View");
+            if (typeof window.exitSplitView === 'function') {
+                window.exitSplitView();
+            }
+         }
+       };
+    }
+  }
+}
+</script>
+<script src="https://www.youtube.com/iframe_api"></script>
+
+
+
+
+
+
+
+
+
+
+</body>
+
+</html>

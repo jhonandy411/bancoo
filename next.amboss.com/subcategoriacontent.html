@@ -1,0 +1,3900 @@
+<link rel="stylesheet" href="amboss-clone.css" />
+<style>
+
+  [data-type="dosageEntity"] {
+    display: inline-flex;
+    align-items: center;
+    background-color: rgb(218, 208, 244);
+    color: #32363e;
+    border-radius: 20px;
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    vertical-align: middle;
+    margin: 0 4px;
+    line-height: 1.6;
+    height: 16px;
+    white-space: nowrap;
+  }
+  [data-type="dosageEntity"] span {
+    display: inline-flex;
+    align-items: center;
+  }
+  [data-type="dosageEntity"] svg {
+    width: 12px;
+    height: 12px;
+    margin-left: 2px;
+    stroke-width: 2.5;
+  }
+  [data-type="dosageEntity"]:hover {
+    background-color: #dcdcff;
+  }
+  /* Estilos para los enlaces dentro de los popups de referencia */
+  .reference-popup-content a[color="accent"], 
+  .reference-popup-content a[color="accent"] span,
+  .reference-popup-content a[color="accent"] svg {
+    color: rgb(4, 122, 136) !important;
+  }
+  .reference-popup-content a[color="primary"],
+  .reference-popup-content a[color="primary"] span,
+  .reference-popup-content a[color="primary"] svg {
+    color: inherit !important;
+  }
+  .reference-popup-content a {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    gap: 4px;
+    text-decoration: none;
+  }
+  .reference-popup-content a:hover {
+    text-decoration: underline;
+  }
+  /* Espacio a la derecha del DOI */
+  .reference-popup-content span:has(a[color="primary"]) {
+    margin-right: 6px;
+    display: inline-block;
+  }
+
+  /* Tabla estilo Amboss */
+  .amboss-table {
+    border-left: 1px solid var(--color-divider-primary);
+    border-spacing: 0;
+    border-top: 1px solid var(--color-divider-primary);
+    color: var(--color-text-primary);
+    overflow-x: inherit;
+    text-align: left;
+    border-radius: 4px;
+    width: 100%;
+    font-size: 0.85em;
+    line-height: 1.5em;
+    overflow-y: auto;
+    border-collapse: separate;
+  }
+
+  @media screen and (min-width: 1280px) {
+    .amboss-table {
+      font-size: 0.95em;
+    }
+  }
+
+  /* Dark mode support for table */
+  .isDarkmodeActive .amboss-table {
+    border-top: 1px solid #32363e;
+    border-left: 1px solid #32363e;
+  }
+
+  .amboss-table th {
+    background-color: var(--color-background-secondary);
+    border-bottom: 1px solid var(--color-divider-primary);
+    border-right: 1px solid var(--color-divider-primary);
+    padding: 8px 12px;
+    font-weight: bold;
+  }
+
+  .isDarkmodeActive .amboss-table th {
+    background-color: #1e2125;
+    border-bottom: 1px solid #32363e;
+    border-right: 1px solid #32363e;
+  }
+
+  .amboss-table td {
+    border-bottom: 1px solid var(--color-divider-primary);
+    border-right: 1px solid var(--color-divider-primary);
+    padding: 8px 12px;
+    vertical-align: middle;
+  }
+
+  .isDarkmodeActive .amboss-table td {
+    border-bottom: 1px solid #32363e;
+    border-right: 1px solid #32363e;
+  }
+
+  .amboss-table td ul,
+  .amboss-table td ol {
+    margin: 4px 0 0;
+    padding: 0;
+  }
+
+  .amboss-table td ul li,
+  .amboss-table td ol li {
+    margin: 0 0 4px 16px;
+  }
+  .article-h3-divider {
+    border-bottom: 1px solid #e0e6eb;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  /* Estilos para Referencias (Amboss Style) */
+  .reference-item {
+    display: flex;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+    color: var(--color-text-primary, #222);
+    font-family: var(--font-family-primary);
+  }
+  .reference-number {
+    min-width: 24px;
+    margin-right: 4px;
+    color: var(--color-text-primary, #222);
+  }
+  .isDarkmodeActive .reference-item,
+  .isDarkmodeActive .reference-number {
+    color: #cbd5e1;
+  }
+  .reference-text {
+    flex: 1;
+  }
+  .reference-link-icon {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 4px;
+    color: #047a88;
+    vertical-align: middle;
+  }
+  .reference-link-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  .content-box * {
+    text-decoration-color: color-mix(in srgb, currentColor, transparent 40%) !important;
+    -webkit-text-decoration-color: color-mix(in srgb, currentColor, transparent 40%) !important;
+  }
+  sub, sup {
+    font-size: .76em;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+  sup {
+    top: -0.5em;
+  }
+  sub {
+    bottom: -0.25em;
+  }
+
+  /* Badge para ##Consult## */
+  .consult-badge {
+    background-color: var(--color-background-warningSubtle);
+    border: 1px solid var(--color-background-warning) !important;
+    color: var(--color-text-secondary) !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    font-size: 8px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 4px !important;
+    vertical-align: middle !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  /* SUBTITULOGUIDE Styles */
+  .subtitulo-guide {
+    margin: 0 !important;
+    padding: 10px 16px !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+    border-radius: 8px 8px 0 0 !important;
+    border: 1px solid transparent;
+    display: block !important;
+  }
+  .subtitulo-guide + .article-h3-divider { display: none; } /* Ocultar divisor para estas cabeceras */
+
+  .guide-azul { 
+    background-color: #eef3fe !important; 
+    color: #2a4b8d !important; 
+    border-color: #ccdbf7 !important;
+    border-bottom: none !important;
+  }
+  .guide-rosa { 
+    background-color: #fff1f2 !important; 
+    color: #cc3333 !important; 
+    border-color: #ffe4e6 !important;
+    text-decoration: underline !important;
+    border-bottom: none !important;
+  }
+  .guide-verde { 
+    background-color: #e6f7f8 !important; 
+    color: #036873 !important; 
+    border-color: #c9eded !important;
+    border-bottom: none !important;
+  }
+  .guide-rojo { 
+    background-color: #d93025 !important; 
+    color: #ffffff !important; 
+    border-color: #d93025 !important;
+    border-bottom: none !important;
+  }
+
+  /* Ajuste de contenedor de lista inmediata o boxgris para que parezca parte del recuadro */
+  .subtitulo-guide + ul, .subtitulo-guide + .article-h3-divider + ul,
+  .subtitulo-guide + .boxgris {
+    border: 1px solid #ccdbf7;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 16px 16px 16px 36px !important;
+    margin-top: 0 !important;
+    background-color: rgba(255,255,255,0.5);
+  }
+  .subtitulo-guide + .boxgris { padding: 16px !important; } /* Menos padding lateral para boxes que para listas */
+  
+  .guide-rosa + ul, .guide-rosa + .boxgris { border: 1px solid #e9ecef; background-color: transparent; }
+  .guide-verde + ul, .guide-verde + .boxgris { border: 1px solid #e9ecef; background-color: transparent; }
+  .guide-rojo + ul, .guide-rojo + .boxgris { border: 1px solid #e9ecef; background-color: transparent; }
+  .guide-azul + ul, .guide-azul + .boxgris { border: 1px solid #e9ecef; background-color: transparent; }
+  .boxgris { background-color: #f8f9fa; border: 1px solid #e9ecef; }
+
+  /* Masonry Layout para Article Content (Aproximación vertical) */
+  /* Quick guide persistence */
+  .quick-guide-accent {
+    color: #00848f !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  .cebd2a302a3552c4--headerContainer.quick-guide-container:not(.cebd2a302a3552c4--headerContainerActive) {
+    background-color: var(--color-background-accentSubtle) !important;
+  }
+  .cebd2a302a3552c4--headerContainer.quick-guide-container:not(.cebd2a302a3552c4--headerContainerActive):hover {
+    filter: brightness(0.98) !important;
+  }
+
+  .a19c2cb9aca4d5ec--content {
+    display: block !important;
+    column-count: 2;
+    column-gap: 16px;
+  }
+  .a19c2cb9aca4d5ec--content > * {
+    break-inside: avoid;
+    margin-bottom: 16px;
+    width: 100%;
+  }
+  /* Elementos que no son recuadros guía ocupan todo el ancho */
+  .a19c2cb9aca4d5ec--content > :not(.guide-box-wrapper) {
+    column-span: all;
+  }
+  @media (max-width: 768px) {
+    .a19c2cb9aca4d5ec--content { column-count: 1; }
+  }
+</style>
+
+
+
+<body style="background-color: rgb(255, 255, 255)" class="d03e7f0e2eb62303--bodyConnectionStatus">
+  <div class="f9cf365808f534a0--page">
+    
+    <!-- ✅ SPINNER DE CARGA (Visible por defecto) -->
+    <div id="full-page-loader" style="display: flex; justify-content: center; align-items: center; height: 80vh; width: 100%;">
+      <div data-loading-spinner data-size="60"></div>
+    </div>
+    <script>
+       if (window.AmbossUI && typeof AmbossUI.initLoadingSpinners === "function") {
+           AmbossUI.initLoadingSpinners();
+       }
+    </script>
+    
+    <!-- ✅ CONTENIDO (Oculto por defecto hasta que cargue Firestore) -->
+    <div id="main-article-content" class="css-1ve4fzk-StyledBox ebcgi2u0" style="display:none;">
+      <!-- Sticky Breadcrumbs -->
+      <div class="f9cf365808f534a0--breadcrumbsBackdrop f9cf365808f534a0--breadcrumbsAnimation" id="sticky-breadcrumbs" style="position: sticky; top: 1.3px; z-index: -1; background: var(--color-background-primary); box-shadow: var(--elevation-1); opacity: 0; pointer-events: none; transition: opacity 0.2s ease; height: 0; overflow: visible; visibility: hidden;">
+        <div class="breadcrumbs-container _85fdf59867fefc3b--breadcrumbsContainer f9cf365808f534a0--breadcrumbsContainerArticle">
+          <div class="_85fdf59867fefc3b--innerContainer f9cf365808f534a0--breadcrumbsInnerContainerArticle">
+            <div data-ds-id="Inline" class="css-1yxslas-InlineContainer e6i75dx0" style="padding: 0px 22px;">
+              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                <div data-ds-id="Inline" class="css-1yxslas-InlineContainer e6i75dx0">
+                  <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                    <div class="_85fdf59867fefc3b--segment _85fdf59867fefc3b--shrinkFirst">
+                      <p data-ds-id="Text" class="css-1u86dlv-StyledText eadloo90"><a class="ac38006eca9237c9--link" id="bc-main"></a></p>
+                    </div>
+                  </div>
+                  <div class="css-h0nko7-StyledInlineItem e6i75dx1" id="bc-arrow" style="display:none;">
+                    <div data-ds-id="Icon" data-variant="tertiary" class="css-1d8769h-StyledIcon e1tsg83e0">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 12 4-4-4-4"></path></svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="css-h0nko7-StyledInlineItem e6i75dx1" id="bc-sub-container" style="display:none;">
+                <div data-ds-id="Inline" class="css-1yxslas-InlineContainer e6i75dx0">
+                  <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                    <div class="_85fdf59867fefc3b--segment _85fdf59867fefc3b--shrinkLast">
+                      <p data-ds-id="Text" class="css-1u86dlv-StyledText eadloo90"><a class="ac38006eca9237c9--link" id="bc-sub"></a></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="_3b339bbf8eb2ed8c--container f9cf365808f534a0--articlePageWidth">
+        <div class="f9cf365808f534a0--floatingContainer">
+          <div class="f9cf365808f534a0--floatingInner"></div>
+        </div>
+        <div style="font-size: 15px">
+          <div
+            class="a2e0dbc7f6affd28--baseStyles _3fb038ba90024ae6--censorTradeMarks f9cf365808f534a0--articleContainer">
+            <header class="_62af53fea5b31646--header">
+              <div class="_62af53fea5b31646--headerContent">
+                <div class="_62af53fea5b31646--titleContainer">
+                  <h1 class="_62af53fea5b31646--headerTitle" id="article-title">
+
+                  </h1>
+
+                  <p class="_62af53fea5b31646--synonymText">(Heart block)</p>
+                </div>
+                <div class="_62af53fea5b31646--updateInfoContainer">
+                  <p class="css-1aulued-StyledText eadloo90" id="last-edited-date">
+                    Last edited: Dec 18, 2023
+                  </p>
+                  <div class="css-45jk0v-StyledBox ebcgi2u0">
+                    <a color="accent"
+                      href="https://support.amboss.com/hc/en-us/articles/6365572887188-AMBOSS-Content-Policy"
+                      target="_blank" rel="noopener noreferrer" class="css-e9evth-StyledLink ewboijr0">
+                      <div class="_62af53fea5b31646--inlineFlex">
+                        Content policy
+                        <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                            viewBox="0 0 16 16">
+                            <g stroke="currentColor" stroke-linejoin="round" stroke-width="2">
+                              <path
+                                d="M13 9v2.667c0 .736-.597 1.333-1.333 1.333H4.333A1.333 1.333 0 0 1 3 11.667V4.333C3 3.597 3.597 3 4.333 3H7">
+                              </path>
+                              <path stroke-linecap="round" d="M10 2h4v4M8 8l6-6"></path>
+                            </g>
+                          </svg>
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="css-cr0e2z-StyledColumns e144tdwe1">
+                <div class="css-xbe1vp-StyledColumn e144tdwe0">
+                  <div class="css-liukhq-InlineContainer e6i75dx0">
+                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                      <div class="css-18nqx2-InlineContainer e6i75dx0">
+                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                          <button class="_2dfc3e09bcc2a51e--container" type="button"
+                            onclick="if(window.openQbankModal) window.openQbankModal()">
+                            <div class="css-1ahszv4-InlineContainer e6i75dx0">
+                              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                <div color="tertiary" class="css-1eyirtp-StyledIcon e1kkd7uc0">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                    viewBox="0 0 16 16">
+                                    <path fill="currentColor" fill-rule="evenodd"
+                                      d="M3.86 2.183a1.79 1.79 0 0 1 1.682.055l7.7 4.5C13.714 7.014 14 7.49 14 8s-.286.986-.758 1.262l-7.7 4.5a1.8 1.8 0 0 1-1.683.055C3.33 13.554 3 13.049 3 12.5v-9c0-.549.33-1.054.86-1.317"
+                                      clip-rule="evenodd"></path>
+                                  </svg>
+                                </div>
+                              </div>
+                              <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                <p class="css-10zfiw3-StyledText eadloo90">
+                                  QBANK SESSION
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+
+
+
+
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="css-xbe1vp-StyledColumn e144tdwe0">
+                  <div class="css-1g0bb51-InlineContainer e6i75dx0">
+                    <div class="css-h0nko7-StyledInlineItem e6i75dx1"></div>
+                    <div class="css-h0nko7-StyledInlineItem e6i75dx1"></div>
+                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                      <div class="_7a37f680f120945d--checkboxContainer" role="button">
+                        <div class="css-1672r5k-StyledFormField e1uawe9k0">
+                          <div class="css-bkwbtj-StackContainer e7wwwvf0">
+                            <div class="css-10ts8ay-StackItem e7wwwvf1">
+                              <label>
+                                <div class="css-bkwbtj-StackContainer e7wwwvf0">
+                                  <div class="css-1mpk5ch-StackItem e7wwwvf1">
+                                    <div class="css-nuxaj3-StyledCheckboxContainer eify5ws3">
+                                      <div class="css-6ye7h4-InlineContainer e6i75dx0">
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                          <div class="css-ynjq41-StyledInputContainer eify5ws0">
+                                            <input name="learned-checkbox" type="checkbox"
+                                              class="css-oww8b1-StyledRealInput eify5ws1" /><span
+                                              class="css-1rvd4z6-StyledFakeInput eify5ws2">
+                                              <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                  fill="none" viewBox="0 0 16 16">
+                                                  <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2" d="m14 4-8.25 8L2 8.364">
+                                                  </path>
+                                                </svg>
+                                              </div>
+                                            </span>
+                                          </div>
+                                        </div>
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                          <div>
+                                            <p class="css-den2g6-StyledText eadloo90">
+                                              Learned
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </header>
+
+            <div class="f9cf365808f534a0--articleToolbarWrapper">
+              <section class="c64ffd7459a27da8--toolbar">
+                <div></div>
+                <div class="c64ffd7459a27da8--toolbarContent">
+                  <div class="c64ffd7459a27da8--lineBreaker"></div>
+                  <div class="c64ffd7459a27da8--viewOptionsToggles" style="padding-right: 175.148px">
+                    <div class="">
+                      <div class="css-18nqx2-InlineContainer e6i75dx0">
+                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                          <div>
+                            <div class="">
+                              <div
+                                class="aa9fea4bb80d2cb7--toolbarItemContainer aa9fea4bb80d2cb7--firstItem aa9fea4bb80d2cb7--lastItem aa9fea4bb80d2cb7--notInDropdown">
+                                <div class="aa9fea4bb80d2cb7--container aa9fea4bb80d2cb7--hoverable" role="button">
+                                  <div class="aa9fea4bb80d2cb7--innerContainer" id="personalHighlightsToggle">
+                                    <button type="button" aria-label="Toggle personal highlights"
+                                      class="css-e9wdc6-StyledButton ejph2fy0">
+                                      <div class="css-c3523d-StyledInner ejph2fy1">
+                                        <div class="css-mgid52-InlineContainer e6i75dx0">
+                                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0">
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                                viewBox="0 0 16 16">
+                                                <path fill="currentColor" fill-rule="evenodd"
+                                                  d="M14 15h-2v-3H4v3H2v-3.852a2 2 0 0 1 .297-1.049l2.42-3.932L4.7 4.602a2 2 0 0 1 1.21-1.86L11.17.478l-.026 5.674 2.536 3.922c.209.322.321.698.321 1.085zm-9.293-5h6.543L9.464 7.238A2 2 0 0 1 9.332 7H6.536a2 2 0 0 1-.115.216zm4.448-6.478L9.148 5H6.704L6.7 4.58z"
+                                                  clip-rule="evenodd"></path>
+                                              </svg>
+                                            </div>
+                                          </div>
+                                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            My highlighting
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="c64ffd7459a27da8--absoluteRightContainer">
+                 
+                  <div class="c64ffd7459a27da8--itemWrapper">
+
+                  <span><button type="button" aria-label="Save to collection" name="save_button"
+                      class="css-f83uhv-StyledPictogramButton ej9y1j50">
+                      <div class="css-mgid52-InlineContainer e6i75dx0">
+                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                          <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                              viewBox="0 0 16 16">
+                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                stroke-width="2"
+                                d="m13 14-5-3.333L3 14V3.333C3 2.597 3.64 2 4.429 2h7.142C12.361 2 13 2.597 13 3.333z"
+                                clip-rule="evenodd"></path>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </span>
+                  </div>
+
+
+                  <div class="c64ffd7459a27da8--verticalDivider"></div>
+
+
+                  <div class="c64ffd7459a27da8--itemWrapper">
+                    <div class="">
+                      <div class="_26113a8df64b36e4--buttonContainer">
+                        <button type="button" aria-label="Toggle all sections"
+                          class="css-f83uhv-StyledPictogramButton ej9y1j50">
+                          <div class="css-mgid52-InlineContainer e6i75dx0">
+                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                              <div id="toggleAllSectionsIconRoot">
+                                <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+                                  <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                    <div data-e2e-test-id="expand" data-testid="expand" data-ds-id="Icon"
+                                      data-variant="inherit" aria-hidden="true"
+                                      class="css-10pd6gh-StyledIcon e1tsg83e0">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                        viewBox="0 0 16 16">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="bevel"
+                                          stroke-width="2" d="M3 6h10M3 10h10"></path>
+                                        <path fill="currentColor" d="m8 16-3-3h6zM8 0l3 3H5z"></path>
+                                      </svg>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="c64ffd7459a27da8--verticalDivider"></div>
+
+
+                  <div class="c64ffd7459a27da8--itemWrapper">
+
+                    <button type="button" aria-label="Change font size"
+                      class="css-f83uhv-StyledPictogramButton ej9y1j50">
+                      <div class="css-mgid52-InlineContainer e6i75dx0">
+                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                          <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                              viewBox="0 0 16 16">
+                              <path fill="currentColor" fill-rule="evenodd"
+                                d="M8.372 13h-2.81l-.596-1.6H2.293L1.697 13H0l2.885-7.75h1.488l2.32 6.231L10.063 3h1.967L16 13h-2.282l-.848-2.134H9.22zM3.63 7.81 4.47 10H2.79zM12.15 9l-1.105-2.73L9.92 9z"
+                                clip-rule="evenodd"></path>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+
+
+                  <div>
+                    <button type="button" class="css-e9wdc6-StyledButton ejph2fy0">
+                      <div class="css-c3523d-StyledInner ejph2fy1">
+                        <div class="css-mgid52-InlineContainer e6i75dx0">
+                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                            EN
+                          </div>
+                          <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                            <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                viewBox="0 0 16 16">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                  stroke-width="2" d="m4 6 4 4 4-4"></path>
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+
+
+
+
+                </div>
+              </section>
+              <div class="c64ffd7459a27da8--toolbarDivider"></div>
+            </div>
+
+            <!-- Contenedor dinámico donde se insertará el contenido de Firestore -->
+            <!-- Contenedor dinámico donde se insertará el contenido de Firestore -->
+            <div id="dynamic-content-loader" style="padding: 0px; text-align: left">
+              <!-- Content injected here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    window.phrasionaryCache = window.phrasionaryCache || {};
+    const phrasionaryCache = window.phrasionaryCache;
+
+    async function getPhrasionaryTerm(termId) {
+      if (!termId) throw new Error('No termId');
+
+      // Cache en memoria para no pegarle mil veces a Firestore
+      if (phrasionaryCache[termId]) return phrasionaryCache[termId];
+
+      const snap = await db.collection('phrasionaryTerms').doc(termId).get();
+      if (!snap.exists) {
+        throw new Error('Term not found in phrasionaryTerms/' + termId);
+      }
+      const data = snap.data();
+      phrasionaryCache[termId] = data;
+      return data;
+    }
+
+    // NUEVO: buscar por mainArticle.anchorId sin cambiar el ID del doc
+    async function getPhrasionaryTermByAnchor(anchorId) {
+      if (!anchorId) throw new Error('No anchorId');
+
+      const cacheKey = 'anchor:' + anchorId;
+      if (phrasionaryCache[cacheKey]) return phrasionaryCache[cacheKey];
+
+      const snap = await db
+        .collection('phrasionaryTerms')
+        .where('mainArticle.anchorId', '==', anchorId)
+        .limit(1)
+        .get();
+
+      if (snap.empty) {
+        throw new Error('Term not found for anchorId ' + anchorId);
+      }
+
+      const doc = snap.docs[0];
+      const data = doc.data();
+      phrasionaryCache[cacheKey] = data;
+      return data;
+    }
+
+    // Buscar por href EXACTO (lo que tenés guardado en term.article.href)
+    async function getPhrasionaryTermByHref(href) {
+      if (!href) throw new Error('No href');
+
+      const cacheKey = 'href:' + href;
+      if (phrasionaryCache[cacheKey]) return phrasionaryCache[cacheKey];
+
+      const snap = await db
+        .collection('phrasionaryTerms')
+        .where('article.href', '==', href)
+        .limit(1)
+        .get();
+
+      if (snap.empty) {
+        throw new Error('Term not found for href ' + href);
+      }
+
+      const data = snap.docs[0].data();
+      phrasionaryCache[cacheKey] = data;
+      return data;
+    }
+
+    // Buscar por nombre de fármaco en la colección 'farmacos'
+    async function getDosageData(drugName) {
+      if (!drugName) throw new Error('No drugName');
+      
+      const cleanName = drugName.trim()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^\w\s:\-\(\)]/g, "")
+        .replace(/\//g, "-")
+        .replace(/\s+/g, " ").trim();
+        
+      if (!cleanName) throw new Error('Invalid drug name after cleaning');
+
+      const cacheKey = 'dosage:' + cleanName;
+      if (phrasionaryCache[cacheKey]) return phrasionaryCache[cacheKey];
+
+      // 1) Intentar por docId (ID seguro generado)
+      let snap = await db.collection('farmacos').doc(cleanName).get();
+      if (snap.exists) {
+        phrasionaryCache[cacheKey] = snap.data();
+        return snap.data();
+      }
+
+      // 2) Fallback: buscar por campo 'drugName' (más robusto que título con prefijos)
+      snap = await db.collection('farmacos').where('drugName', '==', cleanName).limit(1).get();
+      if (!snap.empty) {
+        const data = snap.docs[0].data();
+        phrasionaryCache[cacheKey] = data;
+        return data;
+      }
+
+      throw new Error('Dosage info not found for: ' + cleanName);
+    }
+  </script>
+
+
+
+
+
+
+
+
+  <script>
+    (function () {
+      // These are now handled globally by portal.html
+      // window.currentModalTable
+      // window.quizModeOn
+
+      // Get the document path from sessionStorage (set by articles.html navigation)
+      // Fallback to hardcoded path if not set
+      let docPath = sessionStorage.getItem('currentDocPath') ||
+        "supracategorias/Cardiología y cirugía cardiovascular/categorias/Taquicardias/subcategorias/Taquicardia supraventricular";
+
+      // Normalize path (FireStore doesn't like leading slashes in doc())
+      if (docPath.startsWith('/')) docPath = docPath.substring(1);
+
+      console.log('Using document path:', docPath);
+
+      const container = document.getElementById("dynamic-content-loader");
+
+      // Track loaded sections to avoid reloading
+      const loadedSections = new Set();
+      let articleData = null;
+
+      // Ensure Firebase is initialized (it should be from portal1.html)
+      if (typeof db !== "undefined") {
+        console.log("Fetching content from:", docPath);
+        db.doc(docPath)
+          .get()
+          .then((doc) => {
+            if (doc.exists) {
+              const data = doc.data();
+              articleData = data;
+
+              // ✅ TÍTULO PRINCIPAL = título de la subcategoría
+              const h1 = document.getElementById("article-title");
+
+              if (h1) {
+                // Try new format first (titulocentral_001), then fallback to legacy
+                const groups = hasSequentialFields(data) ? groupFieldsByBase(data) : {};
+                const tituloFromNew = groups.titulocentral?.[0]?.value;
+                
+                h1.textContent =
+                  tituloFromNew ||
+                  data.titulocentral ||
+                  data.titulo ||
+                  data.denominacion ||
+                  data.title ||
+                  data.nombre ||
+                  "Untitled article";
+              }
+
+                // Actualizar fecha de edición
+                const dateEl = document.getElementById("last-edited-date");
+                // New format uses _updatedAt, legacy uses updatedAt
+                const dateField = data._updatedAt || data.updatedAt;
+                if (dateEl && dateField) {
+                  const d = dateField.toDate ? dateField.toDate() : new Date(dateField);
+                  dateEl.textContent = "Last edited: " + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                }
+
+              // Check content type
+              if (data.contentType === "sectioned" && data.sections) {
+                // Sectioned format with lazy loading
+                renderSectionedContent(data);
+              } else if (data.html_completo) {
+                // Legacy monolithic HTML format
+                container.innerHTML = data.html_completo;
+                enhanceTables(container);
+              } else if (data.secciones && Array.isArray(data.secciones)) {
+                 // ✨ NEWEST: Nested sequential field format (with sections)
+                 console.log('📝 Detected nested sequential field format...');
+                 let fullHtml = '';
+                 
+                 // Render Global/Root fields first (if any sequential ones exist at root)
+                 if (hasSequentialFields(data)) {
+                    fullHtml += generateHTMLFromFields(data, data);
+                 }
+                 
+                 data.secciones.forEach((section, index) => {
+                    const sectionId = `section-${index}`;
+                    const titleMarkup = processInlineMarkup(section.titulosegmento || "", section);
+                    
+                    fullHtml += `
+                      <section class="a19c2cb9aca4d5ec--container" id="${sectionId}" data-section-id="${sectionId}">
+                        <div class="cebd2a302a3552c4--headerContainer" role="button" data-section-header="${sectionId}">
+                          <div class="d7af962a6244a4b8--container">
+                            <div class="d7af962a6244a4b8--title">
+                              <h4 class="d7af962a6244a4b8--expanded" data-section-title="${sectionId}" style="margin: 0;">${titleMarkup}</h4>
+                              <div class="d7af962a6244a4b8--bookmarkButton">
+                                <button class="css-f83uhv-StyledPictogramButton" type="button" name="save_button">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m13 14-5-3.333L3 14V3.333C3 2.597 3.64 2 4.429 2h7.142C12.361 2 13 2.597 13 3.333z"/></svg>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="css-2vq6ya-StyledIcon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
+                        </div>
+                        <div class="cebd2a302a3552c4--contentContainer" data-section-content="${sectionId}" style="display: none;">
+                          <div class="a19c2cb9aca4d5ec--content" style="padding: 8px 24px;">
+                            ${generateHTMLFromFields(section, section, sectionId + '-')}
+                          </div>
+                          <div class="css-10tzyyx-StyledBox ebcgi2u0">
+                            <div class="css-1ox6j4a-StyledBox ebcgi2u0">
+                                <div class="css-1isf9yl-InlineContainer e6i75dx0 custom-toolbar-flex">
+                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                      <button type="button" class="css-e9wdc6-StyledButton ejph2fy0">
+                                            <div class="css-c3523d-StyledInner ejph2fy1">
+                                                <div class="css-mgid52-InlineContainer e6i75dx0">
+                                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                        <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg
+                                                                xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                                                viewBox="0 0 16 16">
+                                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="bevel"
+                                                                    stroke-width="2" d="M3 6h10M3 10h10"></path>
+                                                                <path fill="currentColor" d="m8 12 3 3H5zm0-8L5 1h6z"></path>
+                                                            </svg></div>
+                                                    </div>
+                                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">COLLAPSE</div>
+                                                </div>
+                                            </div>
+                                        </button></div>
+                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                        <div class="css-17dkjqr-InlineContainer e6i75dx0 custom-toolbar-row">
+                                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                <div class="css-1yxslas-InlineContainer e6i75dx0">
+                                                  <div class="css-h0nko7-StyledInlineItem e6i75dx1"><button type="button"
+                                                            class="css-e9wdc6-StyledButton ejph2fy0">
+                                                            <div class="css-c3523d-StyledInner ejph2fy1">
+                                                                <div class="css-mgid52-InlineContainer e6i75dx0">
+                                                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                                        <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg
+                                                                                xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                                                fill="none" viewBox="0 0 16 16">
+                                                                                <path stroke="currentColor" stroke-linecap="round"
+                                                                                    stroke-linejoin="round" stroke-width="2"
+                                                                                    d="M9 14h6M10.45 3.438a1.494 1.494 0 1 1 2.113 2.112l-7.746 7.746L2 14l.704-2.817z">
+                                                                                </path>
+                                                                            </svg></div>
+                                                                    </div>
+                                                                    <div class="css-h0nko7-StyledInlineItem e6i75dx1">NOTES</div>
+                                                                </div>
+                                                            </div>
+                                                        </button></div>
+                                                </div>
+                                            </div>
+                                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                              <button type="button" class="css-e9wdc6-StyledButton ejph2fy0">
+                                                    <div class="css-c3523d-StyledInner ejph2fy1">
+                                                        <div class="css-mgid52-InlineContainer e6i75dx0">
+                                                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">FEEDBACK</div>
+                                                        </div>
+                                                    </div>
+                                                </button></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
+                        </div>
+                      </section>`;
+                 });
+                 
+                 container.innerHTML = fullHtml;
+                 
+                 // Apply all dynamic styling
+                 attachSectionHandlers();
+                 attachToggleAllSectionsHandler();
+                 applyDynamicStyling(container);
+                 enhanceTables(container);
+                 
+                 console.log('✅ Nested sequential field content rendered successfully');
+
+              } else if (hasSequentialFields(data)) {
+                // ✨ NEW: Legacy flat sequential field format
+                console.log('📝 Detected sequential field format, generating HTML...');
+                const generatedHTML = generateHTMLFromFields(data, data);
+                container.innerHTML = generatedHTML;
+                
+                // Apply all dynamic styling (checkboxes, popups, etc.)
+                applyDynamicStyling(container);
+                enhanceTables(container);
+                
+                console.log('✅ Sequential field content rendered successfully');
+              } else {
+                container.innerHTML =
+                  '<p style="color:red">Document found, but no valid content.</p>';
+              }
+            } else {
+              container.innerHTML =
+                '<p style="color:red">Content not found in Firestore.</p>';
+            }
+          })
+          .catch((error) => {
+            console.error("Error loading dynamic content:", error);
+            container.innerHTML =
+              '<p style="color:red">Error loading content: ' +
+              error.message +
+              "</p>";
+          })
+          .finally(() => {
+             // ✅ Ocultar loader y mostrar contenido
+             const loader = document.getElementById("full-page-loader");
+             const content = document.getElementById("main-article-content");
+             if (loader) loader.style.display = "none";
+             if (content) content.style.display = "block";
+
+             // Auto-scroll to target section if coming from search TOC
+             const targetSid = sessionStorage.getItem('targetSectionId');
+             if (targetSid) {
+                sessionStorage.removeItem('targetSectionId');
+                setTimeout(() => {
+                    if (window.scrollToSection) {
+                        window.scrollToSection(targetSid);
+                    }
+                }, 800);
+             }
+          });
+      } else {
+        container.innerHTML =
+          '<p style="color:red">Firebase not initialized.</p>';
+        // En caso de error de init, mostrar contenido igual para ver el error
+        const loader = document.getElementById("full-page-loader");
+        const content = document.getElementById("main-article-content");
+        if (loader) loader.style.display = "none";
+        if (content) content.style.display = "block";
+      }
+
+      function enhanceTables(root) {
+        if (!root) return;
+
+        const tables = root.querySelectorAll("table");
+        tables.forEach((table) => {
+          // Si ya está dentro de un wrapper con controles, no tocar
+          if (table.closest(".table-wrapper")) return;
+
+          const wrapper = document.createElement("div");
+          wrapper.className = "table-wrapper api table-wrapper-wide";
+          wrapper.style.minWidth = "800px";
+          wrapper.style.width = "100%";
+
+          const controls = document.createElement("div");
+          controls.className = "table-control-container notranslate";
+          controls.innerHTML = `
+            <button type="button" class="table-control-btn btn-maximize-table">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+                   viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                   class="feather feather-maximize-2">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <polyline points="9 21 3 21 3 15"></polyline>
+                <line x1="21" y1="3" x2="14" y2="10"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+              </svg>
+              Maximize table
+            </button>
+            <button type="button" class="table-control-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" 
+                   fill="none" viewBox="0 0 22 22">
+                <path
+                  fill="currentColor"
+                  fill-rule="evenodd"
+                  d="M6.8 12.1a1 1 0 1 1 0 2C3.05 14.1 0 11.005 0 7.2 0 3.387 2.987.4 6.8.4c3.75 0 6.8 3.05 6.8 6.8a1 1 0 1 1-2 0c0-2.646-2.154-4.8-4.8-4.8C4.109 2.4 2 4.509 2 7.2c0 2.748 2.109 4.9 4.8 4.9m-1-7.4a1 1 0 0 1 2 0v2.085l1.007 1.008a.999.999 0 1 1-1.414 1.414l-1.3-1.3A1 1 0 0 1 5.8 7.2zm7.3 12.486L10.914 15 17.4 8.514l2.185 2.186zM10.686 19.6H8.5v-2.185l1-1 2.186 2.185zm11.02-9.607-3.598-3.6a1.003 1.003 0 0 0-1.414 0l-9.901 9.9A1 1 0 0 0 6.5 17v3.6a1 1 0 0 0 1 1h3.6a1 1 0 0 0 .708-.293l9.899-9.9a1 1 0 0 0 0-1.414"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+              Table Quiz
+            </button>
+          `;
+
+          // Insertar wrapper antes de la tabla y mover la tabla dentro
+          const parent = table.parentNode;
+          parent.insertBefore(wrapper, table);
+          wrapper.appendChild(controls);
+        });
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // ✨ NEW: Helper functions for sequential field parsing and HTML generation
+      // ═══════════════════════════════════════════════════════════════════
+
+      /**
+       * Parse field name to extract base name and sequential number
+       * e.g., "LISTA1_001" → {base: "LISTA1", num: 1}
+       */
+      function parseFieldName(fieldName) {
+        const match = fieldName.match(/^([A-Za-záéíóúÁÉÍÓÚñÑ][A-Za-záéíóúÁÉÍÓÚñÑ0-9_]*)_(\d{3})$/);
+        if (match) return { base: match[1], num: parseInt(match[2], 10) };
+        return null;
+      }
+
+      /**
+       * Group fields by base name and sort by number
+       * Returns: { "LISTA1": [{key, value, num}, ...], ... }
+       */
+      function groupFieldsByBase(data) {
+        const groups = {};
+        Object.keys(data).forEach(key => {
+          const parsed = parseFieldName(key);
+          if (parsed) {
+            if (!groups[parsed.base]) groups[parsed.base] = [];
+            groups[parsed.base].push({ key, value: data[key], num: parsed.num });
+          }
+        });
+        
+        // Sort each group by number
+        Object.keys(groups).forEach(base => {
+          groups[base].sort((a, b) => a.num - b.num);
+        });
+        
+        return groups;
+      }
+
+      /**
+       * Check if data has sequential fields (new format)
+       */
+      function hasSequentialFields(data) {
+        return Object.keys(data).some(key => {
+          const parsed = parseFieldName(key);
+          return parsed && (['LISTA1B', 'LISTA1', 'SUBTITULO'].includes(parsed.base) || parsed.base.startsWith('contenido'));
+        });
+      }
+
+      /**
+       * Process inline markup: **bold** → <strong>
+       * Preserves existing HTML tags
+       */
+      function processInlineMarkup(text, data = null) {
+        if (typeof text !== 'string') return text;
+        return text
+          .replace(/\*\*(.*?)\*\*/g, '<strong class="leitwort">$1</strong>')
+          .replace(/##(.*?)##/g, '<span class="consult-badge">$1</span>')
+          .replace(/__(.*?)__/g, (_, text) => {
+            const match = text.match(/^(.*?)\s*\|\s*(Z[\w-]+)\s*$/);
+            const visibleText = (match ? match[1] : text).trim();
+            const anchorAttr = match ? ` data-anker="${match[2]}"` : '';
+            return `<span class="api tooltip__link"${anchorAttr} style="text-underline-offset: 1px; text-decoration-line: underline; text-decoration-thickness: 1px; cursor: pointer;">${visibleText}</span>`;
+          })
+          .replace(/::(.*?)\s*\|\s*id:(Z[\w-]+)\s*::/g, '<span class="api" data-type="anker" id="$2">$1</span>')
+          .replace(/\^\^(.*?)\^\^/g, (_, text) => {
+            const match = text.match(/^(.*?)\s*\|\s*(Z[\w-]+)\s*$/);
+            const visibleText = (match ? match[1] : text).trim();
+            const anchorAttr = match ? ` data-anker="${match[2]}"` : '';
+            return `<span class="api link--same-article"${anchorAttr} style="text-underline-offset: 2px; -webkit-text-decoration-line: underline; -webkit-text-decoration-style: dotted; text-decoration-line: underline; text-decoration-style: dotted; text-decoration-thickness: 2px; cursor: pointer;">${visibleText}</span>`;
+          })
+          .replace(/\((message(\d+))(?:\/id:([A-Za-z0-9_-]+))?\)/g, (match, full, num, explicitId) => {
+            const pattern = new RegExp(`^message${num}_`);
+            const mKey = Object.keys(data || {}).find(k => pattern.test(k));
+            const msgId = explicitId || (mKey ? data[mKey] : '');
+            return `<span class="api explanation" data-type="bonus" id="${msgId}"><span class="inline-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><g stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 2a1 1 0 0 0-1 1v3.222L1.638 7.67c-.091.097-.236.17-.255.3a.2.2 0 0 0 0 .06c.02.13.164.203.255.3L3 9.778V13a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"></path><path stroke-linecap="square" stroke-linejoin="bevel" d="M7 6h4m-4 4h4"></path></g></svg></span></span>`;
+          })
+          .replace(/\((gallery(\d+))([^)]*)\)/g, (match, full, num, idsStr) => {
+            const pattern = new RegExp(`^gallery${num}_`);
+            const gKey = Object.keys(data || {}).find(k => pattern.test(k));
+            const galId = gKey ? data[gKey] : '';
+            const imgIds = idsStr ? [...idsStr.matchAll(/id\s+([^\s/]+)/g)].map(m => m[1]).join(',') : '';
+            const imgIdsAttr = imgIds ? ` data-img-ids="${imgIds}"` : '';
+            return `<span class="api extraExplanation" id="${galId}"${imgIdsAttr}><span class="inline-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 2a1 1 0 0 0-1 1v3.222L1.638 7.67c-.091.097-.236.17-.255.3a.2.2 0 0 0 0 .06c.02.13.164.203.255.3L3 9.778V13a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"></path><circle cx="10.5" cy="5.5" r="1.5" fill="currentColor"></circle><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m3 11 3-3 3 3 2-1.5 4 3.5"></path></svg></span></span>`;
+          })
+          .replace(/\((DOSAGE(\d+))\)/g, (match, full, num) => {
+            const pattern = new RegExp(`^dosage${num}_`);
+            const dKey = Object.keys(data || {}).find(k => pattern.test(k));
+            const dosId = dKey ? data[dKey] : '';
+            return `<span data-type="dosageEntity" class="a19c2cb9aca4d5ec--dosageBadge" id="${dosId}">DOSAGE<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down" style="width: 14px; height: 14px; margin-left: 2px;"><polyline points="6 9 12 15 18 9"></polyline></svg></span>`;
+          })
+          .replace(/\$\$(.*?)\$\$/g, '<span class="unwichtig" style="color: #64788c;">$1</span>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>') // Soporte para cursiva simple
+          .replace(/\[(\d+)\]/g, '<sup><a href="#ref$1" class="reference-citation" style="text-decoration: none; color: inherit; font-size: .70em;">[$1]</a></sup>')
+          .replace(/sublistatabla1:\s*(.*)/g, '<li style="margin-left: 16px; list-style-type: circle;">$1</li>')
+          .replace(/listatabla1:\s*(.*)/g, '<li style="margin-left: 0px; list-style-type: disc;">$1</li>');
+      }
+
+      /**
+       * Render individual field as HTML based on type
+       */
+      function renderFieldAsHTML(baseType, value, data = null, id = '', link = null, imageId = null, imageTitle = null) {
+        if (!value || value === '') return '';
+        
+        const processedValue = processInlineMarkup(value, data);
+        const idAttr = id ? ` id="${id}"` : '';
+        
+        switch(baseType) {
+          case 'titulocentral':
+            return `<h1 class="_62af53fea5b31646--headerTitle"${idAttr}>${processedValue}</h1>`;
+            
+          case 'SUBTITULO':
+            return `<h3${idAttr}>${processedValue}</h3><div class="article-h3-divider"></div>`;
+            
+          case 'SUBTITULOGUIDEazul':
+            return `<h3 class="subtitulo-guide guide-azul"${idAttr}>${processedValue}</h3>`;
+          case 'SUBTITULOGUIDErosa':
+            return `<h3 class="subtitulo-guide guide-rosa"${idAttr}>${processedValue}</h3>`;
+          case 'SUBTITULOGUIDEverde':
+            return `<h3 class="subtitulo-guide guide-verde"${idAttr}>${processedValue}</h3>`;
+          case 'SUBTITULOGUIDErojo':
+            return `<h3 class="subtitulo-guide guide-rojo"${idAttr}>${processedValue}</h3>`;
+            
+          case 'contenido1':
+          case 'contenido2':
+          case 'contenido3':
+          case 'contenido4':
+          case 'contenido5':
+          case 'contenido6':
+          case 'contenido7':
+          case 'contenido8':
+          case 'contenido9':
+          case 'contenido10':
+            return `<p class="paragraph"${idAttr}>${processedValue}</p>`;
+            
+          case 'LISTA1B':
+            // Checkbox list item (Amboss style)
+            // Note: applyDynamicStyling will handle the checkbox styling and wrapping
+            return `
+              <label class="checkbox-list" style="display: flex;"${idAttr}>
+                <input type="checkbox" name="learned-checkbox" style="display: none;">
+                <div style="flex: 1;">${processedValue}</div>
+              </label>`;
+            
+          case 'LISTA1':
+            return `<li style="margin-left: 0px;"${idAttr}>${processedValue}</li>`;
+            
+          case 'LISTA2':
+            return `<li style="margin-left: 30px; list-style-type: circle;"${idAttr}>${processedValue}</li>`;
+            
+          case 'LISTA3':
+            return `<li style="margin-left: 60px; list-style-type: square;"${idAttr}>${processedValue}</li>`;
+            
+          case 'boxverde':
+            return `<div class="content-box merke green" style="padding: 16px; margin: 16px 0;"${idAttr}>${processedValue}</div>`;
+          case 'boxverdemedical':
+            return `<div class="content-box merke green clinic-box" style="padding: 16px; margin: 16px 0;"${idAttr}><span class="icon"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 32 32"><path fill="currentColor" fill-rule="evenodd" d="M5 4a1 1 0 0 1 1-1h2.625a1 1 0 0 1 0 2H7v5.429C7 14.809 9.866 18 13 18s6-3.191 6-7.571V5h-1.625a1 1 0 1 1 0-2H20a1 1 0 0 1 1 1v6.429c0 4.71-2.917 8.904-7 9.499v4.93C14 27.11 15.906 29 18.333 29s4.334-1.889 4.334-4.143q0-.083.013-.162a3 3 0 1 1 1.986.23C24.628 28.32 21.773 31 18.333 31 14.87 31 12 28.284 12 24.857v-4.93c-4.083-.594-7-4.787-7-9.498zm20 18a1 1 0 1 1-2 0 1 1 0 0 1 2 0" clip-rule="evenodd"></path></svg></span>${processedValue}</div>`;
+          case 'boxrojo':
+            return `<div class="content-box cave red" style="padding: 16px; margin: 16px 0;"${idAttr}>${processedValue}</div>`;
+          case 'boxazul':
+            return `<div class="content-box merkspruch blue" style="padding: 16px; margin: 16px 0;"${idAttr}>${processedValue}</div>`;
+          case 'boxgris':
+            return `<div class="content-box boxgris" style="padding: 16px; margin: 16px 0;"${idAttr}>${processedValue}</div>`;
+            
+          default:
+            // Handle image/video links
+            if ((baseType.startsWith('imagen') || baseType.startsWith('video')) && baseType.includes('link')) {
+              const type = baseType.startsWith('video') ? 'video' : 'image';
+              const imgIdAttr = imageId ? ` data-${type}-id="${imageId}"` : '';
+              const titleAttr = imageTitle ? ` title="${imageTitle.replace(/"/g, '&quot;')}"` : '';
+              const backdrop = type === 'video' ? '<span class="thumbnail__video__backdrop" style="position: absolute; top: 80px; left: 4px; width: 28px; height: 26px; display: flex; align-items: center; justify-content: center; background: #32465a; border-radius: 4px;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="white" viewBox="0 0 24 24"><path d="M7.042 4.245a2 2 0 0 1 2.04.073l9.333 6a2 2 0 0 1 0 3.364l-9.333 6A2 2 0 0 1 6 18V6a2 2 0 0 1 1.042-1.755"/></svg></span>' : '';
+              const caption = imageTitle ? `<span style="font-size: 12px; margin-top: 4px; text-align: left; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; width: 110px; hyphens: auto; overflow-wrap: anywhere;">${imageTitle}</span>` : '';
+              const videoUrl = link || value;
+              const displaySrc = value.replace(/^.*(?:\/file\/d\/|id=)([^\/&?]+).*$/, 'https://drive.google.com/thumbnail?id=$1&sz=w1000');
+              return `<span data-type="${type}" class="thumbnail__${type}" style="display: inline-flex; position: relative; width: 110px; height: auto; margin: 8px; cursor: pointer; flex-direction: column; align-items: flex-start; vertical-align: top;"${idAttr}${imgIdAttr}>
+                <img src="${displaySrc}" referrerpolicy="no-referrer" ${type === 'video' ? `miamed-video="${videoUrl}"` : ''} ${titleAttr} style="width: 110px; height: 110px; object-fit: cover; border-radius: 4px; border: 0.3px solid rgba(100, 100, 100, 0.18); box-sizing: border-box;" />
+                ${backdrop}
+                ${caption}
+              </span>`;
+            }
+            
+            // Handle image captions
+            if (baseType.startsWith('textoimagen')) {
+              return `<span style="font-size: 12px; margin-top: 4px;"${idAttr}>${value}</span>`;
+            }
+            
+            // Handle references
+            if (baseType.startsWith('ref')) {
+               // Evitar duplicados si es un campo de link (se integrará en la cita si es posible, 
+               // pero por ahora solo nos enfocamos en que la cita se vea bien)
+               if (baseType.includes('link')) return '';
+
+               const refNum = baseType.match(/ref(\d+)/)?.[1] || baseType.replace(/\D/g, '');
+               let text = processInlineMarkup(value, data);
+               
+               // Icono de enlace externo (Amboss style)
+               const externalIcon = `
+                 <span class="reference-link-icon">
+                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                     <path d="M13 9v2.667c0 .736-.597 1.333-1.333 1.333H4.333A1.333 1.333 0 0 1 3 11.667V4.333C3 3.597 3.597 3 4.333 3H7"></path>
+                     <path d="M10 2h4v4M8 8l6-6"></path>
+                   </svg>
+                 </span>`;
+
+               // Si el texto contiene DOI o URL, añadir icono (pero solo si no lo tiene ya procesado)
+               if ((text.toLowerCase().includes('doi:') || text.toLowerCase().includes('http')) && !text.includes('reference-link-icon')) {
+                  // Si tenemos un link explícito (extra), envolver el DOI/URL
+                  if (link) {
+                     const doiPattern = /(10\.\d{4,}\/[-._;()/:a-zA-Z0-9]+|https?:\/\/[^\s<]+)/g;
+                     text = text.replace(doiPattern, `<a href="${link}" target="_blank" style="color: inherit; text-decoration: underline;">$1</a>`);
+                  }
+                  
+                  // Si hay un enlace <a>, meter el icono dentro o al lado
+                  if (text.includes('</a>')) {
+                     text = text.replace('</a>', ` ${externalIcon}</a>`);
+                  } else {
+                     text += ` ${externalIcon}`;
+                  }
+               }
+
+               return `
+                 <div class="reference-item" id="ref${refNum}"${idAttr}>
+                   <div class="reference-number">${refNum}.</div>
+                   <div class="reference-text">${text}</div>
+                 </div>`;
+            }
+            
+            return '';
+        }
+      }
+
+      /**
+       * Render table from tabla_* fields
+       */
+      function renderTableFromFields(data, suffix = '') {
+        const totalRowsKey = 'tabla_totalfilas' + suffix;
+        if (!data[totalRowsKey]) return '';
+        
+        const totalRows = parseInt(data[totalRowsKey], 10);
+        if (isNaN(totalRows) || totalRows === 0) return '';
+        
+        let tableHTML = '<table class="amboss-table" style="margin: 16px 0;">';
+        
+        for (let r = 1; r <= totalRows; r++) {
+          tableHTML += '<tr>';
+          let c = 1;
+          
+          while (true) {
+            // Build base prefix for the cell: e.g. tabla_f1_c1
+            const cellPrefix = `tabla_f${r}_c${c}`;
+            
+            // Check if either the direct key or the first sequential key exists
+            const directKey = cellPrefix + suffix;
+            const firstSeqKey = cellPrefix + '_001' + suffix;
+            
+            if (data[directKey] === undefined && data[firstSeqKey] === undefined && 
+                data[cellPrefix + '_colspan' + suffix] === undefined && 
+                data[cellPrefix + '_header' + suffix] === undefined &&
+                data[cellPrefix + '_rowspan' + suffix] === undefined) break;
+
+            const colspan = data[`${cellPrefix}_colspan${suffix}`] || 1;
+            const rowspan = data[`${cellPrefix}_rowspan${suffix}`] || 1;
+            const isHeader = data[`${cellPrefix}_header${suffix}`] || false;
+            const tag = isHeader ? 'th' : 'td';
+            
+            let cellContent = '';
+            if (data[directKey] !== undefined) {
+              cellContent = processInlineMarkup(data[directKey], data);
+            } else {
+              // Gather all sequential items: _001, _002...
+              let idx = 1;
+              let items = [];
+              while (data[`${cellPrefix}_${idx.toString().padStart(3, '0')}${suffix}`] !== undefined) {
+                items.push(processInlineMarkup(data[`${cellPrefix}_${idx.toString().padStart(3, '0')}${suffix}`], data));
+                idx++;
+              }
+              cellContent = items.join('');
+              if (cellContent.includes('<li')) {
+                cellContent = `<ul style="list-style-type: disc; padding-left: 20px; margin: 0;">${cellContent}</ul>`;
+              }
+            }
+            
+            tableHTML += `<${tag}${colspan > 1 ? ` colspan="${colspan}"` : ''}${rowspan > 1 ? ` rowspan="${rowspan}"` : ''}>${cellContent}</${tag}>`;
+            c++;
+          }
+          tableHTML += '</tr>';
+        }
+        
+        tableHTML += '</table>';
+        return tableHTML;
+      }
+
+      /**
+       * Generate complete HTML from grouped sequential fields
+       */
+      function generateHTMLFromFields(data, sectionData = null, idPrefix = '') {
+        const groups = groupFieldsByBase(data);
+        
+        // Reunir todos los items secuenciales y ordenarlos por su sufijo numérico
+        const allItems = [];
+        Object.keys(groups).forEach(base => {
+          groups[base].forEach(item => {
+            allItems.push({ ...item, base });
+          });
+        });
+        // Ordenar estrictamente por el número que define su posición en el texto original
+        allItems.sort((a,b) => a.num - b.num);
+
+        let html = '';
+        
+        // Track if we're in a list to wrap with <ul>
+        let inList = false;
+        let inImageGroup = false;
+        let currentListType = null;
+        const processedTables = new Set();
+        
+        // Helper to close list if needed
+        const closeListIfOpen = () => {
+          if (inList) {
+            html += '</ul>';
+            inList = false;
+            currentListType = null;
+          }
+        };
+
+        const closeImageGroupIfOpen = () => {
+          if (inImageGroup) {
+            html += '</div>';
+            inImageGroup = false;
+          }
+        };
+
+        let inGuideBox = false;
+        const closeGuideBoxIfOpen = () => {
+          if (inGuideBox) {
+            html += '</div>';
+            inGuideBox = false;
+          }
+        };
+        
+        allItems.forEach(item => {
+          const baseName = item.base;
+          
+          // Especial: Referencias se manejan al final (opcional, si queremos mantenerlas al final)
+          // Si el usuario quiere orden estricto, las referencias aparecerán donde se definan.
+          if (baseName.startsWith('ref') || baseName.startsWith('textoimagen')) return; 
+
+          // Check if this is a guide header
+          if (baseName.startsWith('SUBTITULOGUIDE')) {
+            closeListIfOpen();
+            closeImageGroupIfOpen();
+            closeGuideBoxIfOpen();
+            html += '<div class="guide-box-wrapper">';
+            inGuideBox = true;
+          }
+
+          // Check if this is a list type
+          const isListType = ['LISTA1', 'LISTA2', 'LISTA3', 'LISTA1B', 'LISTA1_TABLA', 'LISTA2_TABLA'].some(l => baseName.includes(l));
+          
+          if (isListType) {
+            // Start list if not already in one
+            if (!inList) {
+              closeImageGroupIfOpen();
+              html += '<ul style="list-style-type: disc; padding-left: 20px;">';
+              inList = true;
+            }
+          } else {
+            // Check for image grouping
+            const isImageItem = baseName.startsWith('imagen') || baseName.startsWith('textoimagen') || baseName.startsWith('video');
+            if (isImageItem) {
+               if (!inImageGroup) {
+                  closeListIfOpen();
+                  closeGuideBoxIfOpen();
+                  html += '<div style="display: flex; flex-wrap: wrap; gap: 4px; margin: 16px 0;">';
+                  inImageGroup = true;
+               }
+            } else if (!baseName.startsWith('SUBTITULOGUIDE') && baseName !== 'boxgris') {
+               // Close everything if it's a regular element or table (but not if it just started a guide box or is internal)
+               closeListIfOpen();
+               closeImageGroupIfOpen();
+               closeGuideBoxIfOpen();
+            }
+          }
+
+          if (baseName.startsWith('tabla_')) {
+             if (!processedTables.has(item.num)) {
+                html += renderTableFromFields(data, '_' + String(item.num).padStart(3, '0'));
+                processedTables.add(item.num);
+             }
+          } else {
+              // ✅ Para imagenNlink o videoNlink, pasar el ID real y el texto (para mediavisor)
+              let imageId = null;
+              let imageTitle = null;
+              const isImage = baseName.match(/^imagen\d+link$/);
+              const isVideo = baseName.match(/^video\d+link$/);
+              
+              if (isImage || isVideo) {
+                const prefix = isImage ? 'imagen' : 'video';
+                const idBase = baseName.replace('link', 'id');
+                const textBase = baseName.replace(new RegExp(`^${prefix}(\\d+)link`), `texto${prefix}$1`);
+                const thumbBase = baseName.replace('link', 'thumb');
+                const smallBase = baseName.replace('link', 'small');
+                
+                imageId = groups[idBase]?.[0]?.value || null;
+                imageTitle = groups[textBase]?.[0]?.value || null;
+                
+                // Si hay un thumb o small explícito, lo usamos como fuente de la imagen (src)
+                // pero pasamos el link original como parámetro adicional (para miamed-video o visualización big)
+                const thumbValue = groups[thumbBase]?.[0]?.value || groups[smallBase]?.[0]?.value;
+                if (thumbValue) {
+                  html += renderFieldAsHTML(baseName, thumbValue, data, idPrefix + item.key, item.value, imageId, imageTitle);
+                  return;
+                }
+              }
+              html += renderFieldAsHTML(baseName, item.value, data, idPrefix + item.key, null, imageId, imageTitle);
+          }
+        });
+        
+        // Close groups if still open at the end
+        closeListIfOpen();
+        closeImageGroupIfOpen();
+        closeGuideBoxIfOpen();
+
+        // Dynamic References Section
+        const refKeys = Object.keys(groups).filter(k => k.startsWith('ref') && !k.includes('link'));
+        if (refKeys.length > 0) {
+            // Sort numerically
+            refKeys.sort((a,b) => {
+                const na = parseInt(a.replace(/\D/g, ''), 10);
+                const nb = parseInt(b.replace(/\D/g, ''), 10);
+                return na - nb;
+            });
+            
+            html += '<div style="margin-top: 2px; padding-top: 2px;">';
+            
+            refKeys.forEach(baseName => {
+                 groups[baseName].forEach(item => {
+                      const linkBase = baseName.replace('cita', 'link');
+                      const linkItem = groups[linkBase] ? groups[linkBase][0] : null;
+                       html += renderFieldAsHTML(baseName, item.value, data, idPrefix + item.key, linkItem ? linkItem.value : null);
+                 });
+            });
+            html += '</div>';
+        }
+        
+        return html;
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // End of sequential field helpers
+      // ═══════════════════════════════════════════════════════════════════
+
+
+      function renderSectionedContent(data) {
+        const { sections, sectionOrder } = data;
+
+        // Create article wrapper
+        const article = document.createElement("article");
+
+        // Render each section with collapsed content initially
+        sectionOrder.forEach((sectionId, index) => {
+          const sectionData = sections[sectionId];
+          if (!sectionData) return;
+
+          const sectionElement = createSectionElement(
+            sectionId,
+            sectionData.title
+          );
+
+          if (index === 0) {
+            sectionElement.classList.add("a19c2cb9aca4d5ec--hideTopBorder");
+          }
+
+          article.appendChild(sectionElement);
+        });
+
+        container.innerHTML = "";
+        container.appendChild(article);
+
+        // Attach click handlers for lazy loading
+        attachSectionHandlers();
+
+        // ✅ NUEVO: Toggle ALL sections (si hay alguna abierta → cierra todas; si todas cerradas → abre todas)
+        attachToggleAllSectionsHandler();
+      }
+
+      function createSectionElement(sectionId, title) {
+        const section = document.createElement("div");
+        section.innerHTML = `
+          <section class="a19c2cb9aca4d5ec--container" id="${sectionId}" data-section-id="${sectionId}">
+            <div class="cebd2a302a3552c4--headerContainer" role="button" data-section-header="${sectionId}">
+                <div class="d7af962a6244a4b8--container">
+                    <div class="d7af962a6244a4b8--title">
+                        <div class="css-13j1u6m-InlineContainer e6i75dx0">
+                            <div class="css-h0nko7-StyledInlineItem e6i75dx1"></div>
+                            <div class="css-h0nko7-StyledInlineItem e6i75dx1"></div>
+                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                <h4 class="d7af962a6244a4b8--expanded" data-section-title="${sectionId}">${processInlineMarkup(title)}</h4>
+                                <div class="d7af962a6244a4b8--reference"></div>
+                            </div>
+                            <div class="css-h0nko7-StyledInlineItem e6i75dx1"></div>
+                        </div>
+                        <div class="css-qh8u1a-StyledBox ebcgi2u0">
+                            <div class="d7af962a6244a4b8--bookmarkButton"><span><button type="button"
+                                        aria-label="Save to collection" name="save_button"
+                                        class="css-f83uhv-StyledPictogramButton ej9y1j50">
+                                        <div class="css-mgid52-InlineContainer e6i75dx0">
+                                            <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg
+                                                        xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                                        viewBox="0 0 16 16">
+                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="m13 14-5-3.333L3 14V3.333C3 2.597 3.64 2 4.429 2h7.142C12.361 2 13 2.597 13 3.333z"
+                                                            clip-rule="evenodd"></path>
+                                                    </svg></div>
+                                            </div>
+                                        </div>
+                                    </button></span></div>
+                        </div>
+                    </div>
+                    <div></div>
+                </div>
+                <div color="quaternary" class="css-2vq6ya-StyledIcon e1kkd7uc0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                        height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="2" viewBox="0 0 24 24">
+                        <path d="m6 9 6 6 6-6"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="cebd2a302a3552c4--contentContainer" data-section-content="${sectionId}" style="display: none;">
+              <div class="a19c2cb9aca4d5ec--baseStyles a19c2cb9aca4d5ec--disableImagePointerEventOnTutorial a19c2cb9aca4d5ec--anchorLinkStyles a19c2cb9aca4d5ec--content _843a18d838954f85--userHighlightsActiveOnArticle">
+                <p style="color: #999; font-style: italic;">Loading section...</p>
+              </div>
+
+
+
+
+              <div class="css-10tzyyx-StyledBox ebcgi2u0">
+                <div class="css-1ox6j4a-StyledBox ebcgi2u0">
+                    <div class="css-1isf9yl-InlineContainer e6i75dx0 custom-toolbar-flex">
+                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                          
+                          <button type="button"
+                                class="css-e9wdc6-StyledButton ejph2fy0">
+                                <div class="css-c3523d-StyledInner ejph2fy1">
+                                    <div class="css-mgid52-InlineContainer e6i75dx0">
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                            <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"
+                                                    viewBox="0 0 16 16">
+                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="bevel"
+                                                        stroke-width="2" d="M3 6h10M3 10h10"></path>
+                                                    <path fill="currentColor" d="m8 12 3 3H5zm0-8L5 1h6z"></path>
+                                                </svg></div>
+                                        </div>
+                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">COLLAPSE</div>
+                                    </div>
+                                </div>
+                            </button></div>
+
+
+                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                            <div class="css-17dkjqr-InlineContainer e6i75dx0 custom-toolbar-row">
+                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                    <div class="css-1yxslas-InlineContainer e6i75dx0">
+                                        
+                                      
+                                      <div class="css-h0nko7-StyledInlineItem e6i75dx1"><button type="button"
+                                                class="css-e9wdc6-StyledButton ejph2fy0">
+                                                <div class="css-c3523d-StyledInner ejph2fy1">
+                                                    <div class="css-mgid52-InlineContainer e6i75dx0">
+                                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                                            <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0"><svg
+                                                                    xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                                    fill="none" viewBox="0 0 16 16">
+                                                                    <path stroke="currentColor" stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M9 14h6M10.45 3.438a1.494 1.494 0 1 1 2.113 2.112l-7.746 7.746L2 14l.704-2.817z">
+                                                                    </path>
+                                                                </svg></div>
+                                                        </div>
+                                                        <div class="css-h0nko7-StyledInlineItem e6i75dx1">NOTES</div>
+                                                    </div>
+                                                </div>
+                                            </button></div>
+                                    </div>
+                                </div>
+                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+                                  
+                                  <button type="button"
+                                        class="css-e9wdc6-StyledButton ejph2fy0">
+                                        <div class="css-c3523d-StyledInner ejph2fy1">
+                                            <div class="css-mgid52-InlineContainer e6i75dx0">
+                                                <div class="css-h0nko7-StyledInlineItem e6i75dx1">FEEDBACK</div>
+                                            </div>
+                                        </div>
+                                    </button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                
+            </div>
+            </div>
+          </section>
+        `;
+        return section.firstElementChild;
+      }
+
+      function attachSectionHandlers() {
+        document.querySelectorAll("[data-section-header]").forEach((header) => {
+          header.addEventListener("click", function (e) {
+            // Prevent toggling if clicking the bookmark button
+            if (e.target.closest('button[name="save_button"]')) {
+              e.stopPropagation();
+              return;
+            }
+            const sectionId = this.dataset.sectionHeader;
+            toggleSection(sectionId);
+          });
+        });
+
+        // NUEVO: Handler para el botón "COLLAPSE" dentro del contenido
+        document.querySelectorAll('.css-e9wdc6-StyledButton').forEach(btn => {
+           if(btn.textContent.includes('COLLAPSE')) {
+             btn.addEventListener('click', function(e) {
+               // Buscar el contenedor de sección padre más cercano
+               const sectionContainer = this.closest('[data-section-content]');
+               if (sectionContainer) {
+                  const sectionId = sectionContainer.getAttribute('data-section-content');
+                  // Colapsar la sección (usamos toggleSection que ya maneja el estado)
+                  toggleSection(sectionId);
+               }
+             });
+           }
+        });
+      }
+
+
+
+      function getAllSectionIds() {
+        return Array.from(document.querySelectorAll("[data-section-id]"))
+          .map(el => el.getAttribute("data-section-id"))
+          .filter(Boolean);
+      }
+
+      function isSectionExpanded(sectionId) {
+        const content = document.querySelector(`[data-section-content="${sectionId}"]`);
+        if (!content) return false;
+        return content.style.display !== "none";
+      }
+
+      function collapseSection(sectionId) {
+        if (isSectionExpanded(sectionId)) toggleSection(sectionId);
+      }
+
+      function expandSection(sectionId) {
+        if (!isSectionExpanded(sectionId)) toggleSection(sectionId);
+      }
+
+      function attachToggleAllSectionsHandler() {
+        const btns = document.querySelectorAll('button[aria-label="Toggle all sections"]');
+        if (!btns.length) return;
+        const btn = btns[0]; 
+
+        const ICON_EXPAND = `
+    <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+      <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+        <div data-e2e-test-id="expand" data-testid="expand" data-ds-id="Icon"
+          data-variant="inherit" aria-hidden="true"
+          class="css-10pd6gh-StyledIcon e1tsg83e0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="bevel" stroke-width="2" d="M3 6h10M3 10h10"></path>
+            <path fill="currentColor" d="m8 16-3-3h6zM8 0l3 3H5z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  `;
+
+        const ICON_COLLAPSE = `
+    <div data-ds-id="Inline" class="css-mgid52-InlineContainer e6i75dx0">
+      <div class="css-h0nko7-StyledInlineItem e6i75dx1">
+        <div data-e2e-test-id="collapse" data-testid="collapse" data-ds-id="Icon"
+          data-variant="inherit" aria-hidden="true"
+          class="css-10pd6gh-StyledIcon e1tsg83e0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="bevel" stroke-width="2" d="M3 6h10M3 10h10"></path>
+            <path fill="currentColor" d="m8 12 3 3H5zm0-8L5 1h6z"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  `;
+
+        // dónde pintar el ícono (si existe tu wrapper), o fallback al 1er icon container
+        const iconRoot =
+          document.getElementById("toggleAllSectionsIconRoot") ||
+          btn.querySelector(".css-mgid52-InlineContainer") ||
+          btn;
+
+        function setToggleAllIcon(mode) {
+          // mode: "expand" | "collapse"
+          iconRoot.innerHTML = (mode === "collapse") ? ICON_COLLAPSE : ICON_EXPAND;
+        }
+
+        // estado inicial (si hay alguna abierta → mostrar COLLAPSE, si no → EXPAND)
+        const idsInit = getAllSectionIds();
+        const anyExpandedInit = idsInit.some(id => isSectionExpanded(id));
+        setToggleAllIcon(anyExpandedInit ? "collapse" : "expand");
+
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const ids = getAllSectionIds();
+          if (!ids.length) return;
+
+          const anyExpanded = ids.some(id => isSectionExpanded(id));
+
+          if (anyExpanded) {
+            ids.forEach(id => collapseSection(id));
+            setToggleAllIcon("expand");
+
+            // Reset selector en la barra TOC 2 de títulos (limpiar clase activa)
+            const activeTocItems = document.querySelectorAll('.da40ddcfaa7e54bc--section.bancomicina-active, .da40ddcfaa7e54bc--subsection.bancomicina-active');
+            activeTocItems.forEach(el => el.classList.remove('bancomicina-active'));
+
+          } else {
+            ids.forEach(id => expandSection(id));
+            setToggleAllIcon("collapse");
+          }
+
+          // Emitir evento para que el TOC recalcule posiciones (extensión de contenido)
+          window.dispatchEvent(new CustomEvent('amboss:sections-toggled'));
+          if (window.parent) window.parent.dispatchEvent(new CustomEvent('amboss:sections-toggled'));
+        });
+      }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      function toggleSection(sectionId) {
+        const contentContainer = document.querySelector(
+          `[data-section-content="${sectionId}"]`
+        );
+        const headerContainer = document.querySelector(
+          `[data-section-header="${sectionId}"]`
+        );
+
+        if (!contentContainer) return;
+
+        const isExpanded = contentContainer.style.display !== "none";
+        const iconPath = headerContainer.querySelector(
+          ".css-2vq6ya-StyledIcon svg path"
+        );
+        const titleElement = headerContainer.querySelector(
+          "[data-section-title]"
+        );
+
+        if (isExpanded) {
+          // Collapse section
+          contentContainer.style.display = "none";
+          headerContainer.classList.remove(
+            "cebd2a302a3552c4--headerContainerActive"
+          );
+          contentContainer.classList.remove(
+            "cebd2a302a3552c4--contentContainerActive"
+          );
+          // Set icon to point down
+          if (iconPath) iconPath.setAttribute("d", "m6 9 6 6 6-6");
+          // Change h3 to h4
+          if (titleElement && titleElement.tagName === "H3") {
+            const newTitle = document.createElement("h4");
+            newTitle.className = titleElement.className;
+            newTitle.setAttribute("data-section-title", sectionId);
+            newTitle.innerHTML = titleElement.innerHTML;
+            titleElement.parentNode.replaceChild(newTitle, titleElement);
+          }
+        } else {
+          // Expand section
+          contentContainer.style.display = "block";
+          headerContainer.classList.add(
+            "cebd2a302a3552c4--headerContainerActive"
+          );
+          contentContainer.classList.add(
+            "cebd2a302a3552c4--contentContainerActive"
+          );
+          // Set icon to point up
+          if (iconPath) iconPath.setAttribute("d", "m18 15-6-6-6 6");
+          // Change h4 to h3
+          if (titleElement && titleElement.tagName === "H4") {
+            const newTitle = document.createElement("h3");
+            newTitle.className = titleElement.className;
+            newTitle.setAttribute("data-section-title", sectionId);
+            newTitle.innerHTML = titleElement.innerHTML;
+            titleElement.parentNode.replaceChild(newTitle, titleElement);
+          }
+
+          // Load content if not already loaded
+          if (!loadedSections.has(sectionId)) {
+            loadSectionContent(sectionId, contentContainer);
+          }
+        }
+      }
+
+      function applyDynamicStyling(container) {
+        // 1. Párrafos (Amboss usa .paragraph para el espaciado y márgenes)
+        // Aplicamos .paragraph a los divs y p dentro del contenido
+        container.querySelectorAll('div, p').forEach(el => {
+  if (el.closest('label, input[type="checkbox"]') ) return;
+  if (el.children.length === 0 || (el.tagName === 'P')) {
+    el.classList.add('paragraph');
+  }
+});
+
+        // 2. Leitwort y Negritas (Refinado)
+        // Ya no aplicamos 'leitwort' a todo span en LI para evitar negritas excesivas.
+        // Solo lo dejamos si el elemento ya traía una clase de énfasis de Amboss.
+        container.querySelectorAll('.leitwort, .bold').forEach(el => {
+           el.style.fontWeight = '600'; // Un semi-bold más elegante que el bold estándar
+        });
+
+        // 3. Popups y enlaces funcionales
+        container.querySelectorAll('a[data-type], span.api').forEach(el => {
+          el.classList.add('api');
+          if (el.tagName === 'A' || el.classList.contains('dictionary')) {
+            el.classList.add('tooltip__link');
+          }
+        });
+
+
+
+        // 4. Imágenes y Figuras (Galería 110x110)
+        container.querySelectorAll('span[data-type="image"]').forEach(el => {
+          el.style.display = 'inline-flex';
+          el.style.flexDirection = 'column';
+          el.style.alignItems = 'flex-start';
+          el.style.width = '110px';
+          el.style.margin = '8px';
+          el.style.verticalAlign = 'top';
+          el.classList.add('thumbnail__image'); // ✅ Clase al contenedor
+
+          const img = el.querySelector('img');
+          if (img) {
+            img.style.width = '110px'; // ✅ Error corregido (1100px -> 110px)
+            img.style.height = '110px';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '4px';
+          }
+
+          // Mover caption hermano dentro si existe (para formato de campos secuenciales)
+          let next = el.nextElementSibling;
+          if (next && next.id && (next.id.includes('textoimagen') || next.id.includes('texto-imagen'))) {
+             el.appendChild(next);
+          }
+
+          const caption = el.querySelector('span:not(.api)');
+          if (caption) {
+            caption.style.fontSize = '12px';
+            caption.style.marginTop = '4px';
+            caption.style.textAlign = 'left';
+            caption.style.lineHeight = '1.2';
+            caption.style.display = '-webkit-box';
+            caption.style.webkitLineClamp = '3';
+            caption.style.webkitBoxOrient = 'vertical';
+            caption.style.overflow = 'hidden';
+            caption.style.width = '110px';
+            caption.style.hyphens = 'auto';
+            caption.style.webkitHyphens = 'auto'; // Soporte para Safari
+            caption.style.overflowWrap = 'anywhere'; // Permite romper palabras largas
+          }
+        });
+
+        // Estilo especial para "Quick guide"
+        container.querySelectorAll('.d7af962a6244a4b8--expanded').forEach(el => {
+          if (el.textContent.trim().toLowerCase() === 'quick guide') {
+            el.classList.add('quick-guide-accent');
+            const header = el.closest('.cebd2a302a3552c4--headerContainer');
+            if (header) header.classList.add('quick-guide-container');
+            if (!el.querySelector('svg')) {
+              el.insertAdjacentHTML('afterbegin', `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 16 16" style="flex-shrink:0;"><path fill="currentColor" fill-rule="evenodd" d="M15.994 3.785 8.061 11.72a1.5 1.5 0 0 1-2.121 0L2.28 8.06l2.122-2.12L7 8.537 14.587.949A3.98 3.98 0 0 0 12 0H4a4 4 0 0 0-4 4v8a4 4 0 0 0 4 4h8a4 4 0 0 0 4-4V4a4 4 0 0 0-.006-.215" clip-rule="evenodd"></path></svg>`);
+            }
+          }
+        });
+
+        container.querySelectorAll('figure').forEach(el => {
+          el.classList.add('thumbnail__image');
+        });
+        
+        // 5. Soporte para impact markers (si se detectan por estructura)
+        // Por ahora lo dejamos preparado para futuras marcas semánticas
+        
+        // 6. Alineación de referencias (índice + contenido en la misma línea)
+        container.querySelectorAll('div > span:first-child + div').forEach(contentDiv => {
+          const parent = contentDiv.parentElement;
+          if (parent.children.length === 2 && parent.children[0].tagName === 'SPAN') {
+            parent.style.display = 'flex';
+            parent.style.gap = '6px';
+            parent.style.alignItems = 'baseline';
+          }
+        });
+
+        // 7. ✅ Renderizar iconos SVG para elementos content-box (merkspruch, merke, cave)
+        const ICON_SVGS = {
+          merkspruch: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 32 32"><path fill="currentColor" d="m26.335 3.893 1.508 1.462-2.734 2.733-1.507-1.461zM17 0v4h-2V0zM5.63 3.904l2.75 2.751-1.46 1.461-2.798-2.704zM5 13v1.982H1V13zm26 1.982V13h-4v1.982z"></path><path fill="currentColor" fill-rule="evenodd" d="M11 24.074a2 2 0 0 0 .614 1.442l2.003 1.926a2 2 0 0 0 1.386.558h1.994a2 2 0 0 0 1.386-.558l2.003-1.926A2 2 0 0 0 21 24.074V20.94l.004-.01a.2.2 0 0 1 .043-.052C22.732 19.447 24 17.169 24 14.786 24 10.456 20.389 7 16 7s-8 3.457-8 7.786c0 2.383 1.268 4.66 2.953 6.09a.2.2 0 0 1 .043.052l.004.011zM16 9c-3.343 0-6 2.62-6 5.786 0 1.701.932 3.45 2.247 4.566.437.37.753.934.753 1.586V22h2v-6h-1a1 1 0 1 1 0-2h4a1 1 0 1 1 0 2h-1v6h2v-1.062c0-.652.316-1.215.753-1.586C21.067 18.236 22 16.487 22 14.786 22 11.619 19.343 9 16 9m-3 15v.074L15.003 26h1.994L19 24.074V24z" clip-rule="evenodd"></path></svg>`,
+          merke: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 32 32"><path fill="currentColor" d="M16 10a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1m0 10a1 1 0 1 0 0 2 1 1 0 0 0 0-2"></path><path fill="currentColor" fill-rule="evenodd" d="M2 16C2 8.268 8.268 2 16 2s14 6.268 14 14-6.268 14-14 14S2 23.732 2 16M16 4C9.373 4 4 9.373 4 16s5.373 12 12 12 12-5.373 12-12S22.627 4 16 4" clip-rule="evenodd"></path></svg>`,
+          cave: `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 32 32"><path fill="currentColor" d="M16 10a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1m0 10a1 1 0 1 0 0 2 1 1 0 0 0 0-2"></path><path fill="currentColor" fill-rule="evenodd" d="M2 16C2 8.268 8.268 2 16 2s14 6.268 14 14-6.268 14-14 14S2 23.732 2 16M16 4C9.373 4 4 9.373 4 16s5.373 12 12 12 12-5.373 12-12S22.627 4 16 4" clip-rule="evenodd"></path></svg>`
+        };
+
+
+
+
+        
+        container.querySelectorAll('.content-box').forEach(box => {
+          let iconType = null;
+          if (box.classList.contains('merkspruch') || box.classList.contains('blue')) {
+            iconType = 'merkspruch';
+          } else if (box.classList.contains('merke') || box.classList.contains('green')) {
+            iconType = 'merke';
+          } else if (box.classList.contains('cave') || box.classList.contains('red')) {
+            iconType = 'cave';
+          }
+
+          if (iconType && !box.querySelector('.icon')) {
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'icon';
+            iconSpan.innerHTML = ICON_SVGS[iconType];
+            box.insertBefore(iconSpan, box.firstChild);
+          }
+        });
+
+
+
+
+
+
+
+        // 8. Callouts / Cuadros de alerta (Verde y Azul)
+       // 8. Callouts / Cuadros de alerta (Verde y Azul)
+container.querySelectorAll('div > div > span:first-child > svg').forEach(svg => {
+  const contentWrapper = svg.closest('div');
+  
+  // ✅ Saltear si ya es un content-box (merkspruch/merke/cave) — ya fue procesado
+  if (contentWrapper && contentWrapper.closest('.content-box')) return;
+          const outerContainer = contentWrapper.parentElement; // El div exterior
+          
+          const isWarning = svg.innerHTML.includes('M16 10a1 1 0 0 1 1 1');
+          const isTip = svg.innerHTML.includes('M11 24.074');
+
+          if (isWarning || isTip) {
+            contentWrapper.style.display = 'flex';
+            contentWrapper.style.alignItems = 'center';
+            contentWrapper.style.padding = '12px';
+            contentWrapper.style.borderRadius = '8px';
+            contentWrapper.style.gap = '15px';
+            contentWrapper.style.border = '1px solid';
+            contentWrapper.style.marginBottom = '16px';
+            contentWrapper.style.fontSize = '14px';
+            contentWrapper.style.lineHeight = '1.5';
+            
+            const iconSpan = svg.parentElement;
+            iconSpan.style.flexShrink = '0';
+            iconSpan.style.marginTop = '2px';
+            iconSpan.style.display = 'flex';
+
+            // Agrupar todo el contenido restante en un solo div para que flexbox no lo separe
+            if (contentWrapper.childNodes.length > 1 && !contentWrapper.querySelector('.callout-body')) {
+              const body = document.createElement('div');
+              body.className = 'callout-body';
+              body.style.flex = '1';
+              // Mover todos los nodos excepto el icono (primer hijo) al body
+              while (contentWrapper.childNodes.length > 1) {
+                body.appendChild(contentWrapper.childNodes[1]);
+              }
+              contentWrapper.appendChild(body);
+            }
+
+            if (isWarning) {
+              contentWrapper.style.backgroundColor = '#edf9f7';
+              contentWrapper.style.borderColor = '#c7ebe1';
+              contentWrapper.style.color = '#00635d';
+              iconSpan.style.color = '#02a892';
+            } else if (isTip) {
+              contentWrapper.style.backgroundColor = '#f0f5ff';
+              contentWrapper.style.borderColor = '#dce6ff';
+              contentWrapper.style.color = '#1d4078';
+              iconSpan.style.color = '#3066be';
+            }
+          }
+        });
+
+        // ✅ Checkboxes con diseño personalizado
+        container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+          if (checkbox.parentElement.classList && checkbox.parentElement.classList.contains('css-ynjq41-StyledInputContainer')) return;
+          
+          const wrapper = document.createElement('div');
+          wrapper.className = 'css-h0nko7-StyledInlineItem e6i75dx1';
+          
+          const inputContainer = document.createElement('div');
+          inputContainer.className = 'css-ynjq41-StyledInputContainer eify5ws0';
+          inputContainer.style.transform = 'scale(0.85)';
+          inputContainer.style.transformOrigin = 'left center';
+          
+          const fakeInput = document.createElement('span');
+          fakeInput.className = 'css-1rvd4z6-StyledFakeInput eify5ws2';
+          fakeInput.innerHTML = `
+            <div color="inherit" class="css-cjtild-StyledIcon e1kkd7uc0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14 4-8.25 8L2 8.364"></path>
+              </svg>
+            </div>
+          `;
+
+          // Preservar funcionalidad: mover el input dentro del container y añadirle las clases
+          const parent = checkbox.parentNode;
+          parent.insertBefore(wrapper, checkbox);
+          inputContainer.appendChild(checkbox); 
+          inputContainer.appendChild(fakeInput);
+          wrapper.appendChild(inputContainer);
+
+          checkbox.classList.add('css-oww8b1-StyledRealInput', 'eify5ws1');
+          checkbox.name = 'learned-checkbox';
+
+          // Ajustes al label padre para alineación
+          const label = wrapper.closest('label');
+          if (label) {
+            label.style.display = 'flex';
+            label.style.alignItems = 'flex-start';
+            label.style.gap = '8px';
+            label.style.marginBottom = '8px';
+            label.querySelectorAll('div, p, span').forEach(el => {
+                 if (!el.contains(wrapper) && !wrapper.contains(el)) {
+                     el.style.display = 'inline';
+                     el.style.margin = '0'; 
+                 }
+            });
+          }
+        });
+
+
+        container.querySelectorAll('.content-box:not(.two-cols)').forEach(b=>{
+  const i=b.querySelector('.icon'); if(!i) return;
+  const r=document.createElement('div'); r.className='content-box-body';
+  [...b.childNodes].forEach(n=>n!==i&&r.appendChild(n));
+  b.replaceChildren(i,r);
+  Object.assign(b.style,{display:'flex',alignItems:'center',gap:'12px'});
+  b.classList.add('two-cols');
+});
+      }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+      function loadSectionContent(sectionId, contentContainer) {
+        // ✅ Ultra-short fix: if content is already there (sequential format), just return
+        if (articleData && articleData.secciones) {
+          loadedSections.add(sectionId);
+          return;
+        }
+
+        if (
+          !articleData ||
+          !articleData.sections ||
+          !articleData.sections[sectionId]
+        ) {
+          const baseEl = contentContainer.querySelector(".a19c2cb9aca4d5ec--baseStyles");
+          if (baseEl) baseEl.innerHTML = '<p style="color:red">Section content not found.</p>';
+          return;
+        }
+
+        const sectionContent = articleData.sections[sectionId].html;
+  const baseEl = contentContainer.querySelector(
+    ".a19c2cb9aca4d5ec--baseStyles"
+  );
+  if (!baseEl) return; // ✅ Ultra-short fix: skip if already rendered or structure mismatch
+  
+  // Renderizado recursivo: Suporta Monolítico (string), Arrays, y Mapas (objetos con claves 01_Nombre)
+  const renderItem = (item) => {
+    if (!item) return '';
+    if (typeof item === 'string') return item === 'no-condensed' ? '' : item;
+    
+    if (Array.isArray(item)) {
+      return item.map(renderItem).join('');
+    }
+    
+    if (typeof item === 'object') {
+      // Caso: Tabla estructurada
+      if (item.type === 'table' && item.rows) {
+        let tableHtml = '<table class="amboss-table">';
+        const rowKeys = Object.keys(item.rows).sort();
+        rowKeys.forEach(rKey => {
+          tableHtml += '<tr>';
+          const rowData = item.rows[rKey];
+          const cellKeys = Object.keys(rowData).sort();
+          cellKeys.forEach(cKey => {
+            const tag = cKey.split('_')[1] || 'td';
+            const cellData = rowData[cKey];
+            
+            // Reconstruir atributos si existen
+            let attrs = '';
+            let content = cellData;
+            
+            if (cellData && typeof cellData === 'object' && cellData.content !== undefined) {
+              content = cellData.content;
+              if (cellData.rowspan) attrs += ` rowspan="${cellData.rowspan}"`;
+              if (cellData.colspan) attrs += ` colspan="${cellData.colspan}"`;
+              if (cellData.class) attrs += ` class="${cellData.class}"`;
+            }
+            
+            tableHtml += `<${tag}${attrs}>${renderItem(content)}</${tag}>`;
+          });
+          tableHtml += '</tr>';
+        });
+        tableHtml += '</table>';
+        return tableHtml;
+      }
+
+      // Si es un bloque de Firestore { blocks: [...] }
+      if (item.blocks) return renderItem(item.blocks);
+      // Si es un contenido completo { html: [...] } (legacy)
+      if (item.html) return renderItem(item.html);
+      
+      // Si es el nuevo mapa jerárquico { "01_Intro": {blocks: [...]}, ... }
+      // Ordenamos las claves alfabéticamente para mantener el orden (01, 02...)
+      return Object.keys(item)
+        .sort()
+        .map(key => renderItem(item[key]))
+        .join('');
+    }
+    
+    return '';
+  };
+
+  baseEl.innerHTML = renderItem(sectionContent);
+
+        // Aplicar estilos dinámicamente
+        applyDynamicStyling(baseEl);
+
+        // Añadir controles a tablas dentro de esta sección
+        enhanceTables(contentContainer);
+
+        loadedSections.add(sectionId);
+        console.log(`✅ Loaded section: ${sectionId}`);
+      }
+
+      document.addEventListener("click", function(e) {
+        if (e.target.closest(".btn-minimize-table") || e.target.closest(".exit-modal-btn") || e.target.id === "table-modal-overlay") {
+          if (window.closeTableModal) window.closeTableModal();
+        }
+        
+        // Inline Table Quiz trigger
+        const inlineQuizBtn = e.target.closest(".table-control-btn:not(.btn-maximize-table)");
+        if (inlineQuizBtn) {
+          const tableWrapper = inlineQuizBtn.closest(".table-wrapper");
+          const table = tableWrapper ? (tableWrapper.nextElementSibling?.tagName === "TABLE" ? tableWrapper.nextElementSibling : tableWrapper.querySelector("table")) : null;
+          if (table) {
+            if (window.openTableModal) window.openTableModal(table);
+            if (window.enableTableQuiz) window.enableTableQuiz();
+            const quizToggleBtn = document.getElementById('global-quiz-toggle-btn');
+            if (quizToggleBtn) {
+              const textNode = [...quizToggleBtn.childNodes].find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
+              if (textNode) textNode.textContent = " FINISH QUIZ";
+            }
+          }
+        }
+
+        const maximizeBtn = e.target.closest(".btn-maximize-table");
+        if (maximizeBtn) {
+          const tableWrapper = maximizeBtn.closest(".table-wrapper");
+          const table = tableWrapper ? (tableWrapper.nextElementSibling?.tagName === "TABLE" ? tableWrapper.nextElementSibling : tableWrapper.querySelector("table")) : null;
+          if (table && window.openTableModal) window.openTableModal(table);
+        }
+      });
+    })();
+
+    // ===== THUMBNAIL CLICK HANDLER (moved here to guarantee execution) =====
+    // Click en imagen o video → abre mediavisor2 con galería mixta desde Firestore
+    if (!window._thumbnailClickAttached) {
+      window._thumbnailClickAttached = true;
+      console.log("🖼️ Thumbnail click handler REGISTERED");
+      document.addEventListener("click", async (e) => {
+        const span = e.target.closest(".thumbnail__image, .thumbnail__video");
+        const img = span?.querySelector("img") ||
+                    (e.target.tagName === 'IMG' && e.target.closest(".thumbnail__image, .thumbnail__video") ? e.target : null);
+        if (!img || !span) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        console.log("🖼️ Thumbnail clicked!", { span, img, src: img.src, type: span.getAttribute("data-type") || "image" });
+
+        try {
+          const fixDriveThumb = (url) => (url || "").replace(/^.*(?:\/file\/d\/|id=)([^\/&?]+).*$/, 'https://drive.google.com/thumbnail?id=$1&sz=w1000');
+          const sectionContainer = img.closest('[data-section-id]') || img.closest('.f9cf365808f534a0--articlePageWidth') || document.body;
+          const allSpans = Array.from(sectionContainer.querySelectorAll(".thumbnail__image, .thumbnail__video"));
+          const currentIndex = allSpans.indexOf(span);
+
+          // ⚡ PASO 1: Abrir mediavisor AL INSTANTE (muestra "loading...")
+          if (window.closeTableModal) window.closeTableModal();
+          const opener = window.parent?.openMediaViewer2 || window.openMediaViewer2;
+          if (opener) {
+            opener('mediavisor2.html', [], currentIndex);
+          }
+
+          // 🔄 PASO 2: Cargar Firestore en background
+          const gallery = await Promise.all(allSpans.map(async sp => {
+            const el = sp.querySelector("img");
+            const type = sp.classList.contains("thumbnail__video") || sp.getAttribute("data-type") === "video" ? "video" : "image";
+
+            if (type === "video") {
+              const videoId = sp.getAttribute("data-video-id");
+              let src = fixDriveThumb(el?.getAttribute("src") || "");
+              let title = el?.getAttribute("title") || "";
+              let link = el?.getAttribute("miamed-video") || "";
+              let linkBackup = "";
+
+              if (videoId && window.db) {
+                try {
+                  const snap = await window.db.collection("bancovideos").doc(videoId).get();
+                  if (snap.exists) {
+                    const d = snap.data() || {};
+                    src = fixDriveThumb(d.small || src);
+                    title = d.title || title;
+                    link = d.link || link;
+                    linkBackup = d.linkBackup || d.link || "";
+                  }
+                } catch (err) {
+                  console.warn("🎬 Firestore video error:", err);
+                }
+              }
+
+              return {
+                type: "video",
+                id: videoId || "",
+                src,
+                title,
+                link,
+                linkBackup,
+                videoUrl: link || linkBackup
+              };
+            }
+
+            const imageId = sp.getAttribute("data-image-id");
+            let src = el?.getAttribute("src") || "";
+            let title = el?.getAttribute("title") || "";
+            let description = "";
+            let copyright = "";
+            let overlay = "";
+            let labelsStat = false;
+            let smartStat = false;
+
+            if (imageId && window.db) {
+              try {
+                const snap = await window.db.collection("bancoimagenes").doc(imageId).get();
+                if (snap.exists) {
+                  const d = snap.data() || {};
+                  src = fixDriveThumb(d.urls?.big || src);
+                  title = d.textoimagen1 || title;
+                  description = d.descripcion || "";
+                  copyright = d.copyright || "";
+                  overlay = fixDriveThumb(d.urls?.overlay || "");
+                  labelsStat = d.labels || false;
+                  smartStat = d.smartzoom || false;
+                }
+              } catch (err) {
+                console.warn("🖼️ Firestore image error:", err);
+              }
+            }
+
+            const item = {
+              type: "image",
+              id: imageId || "",
+              src,
+              title,
+              description,
+              copyright,
+              labels: labelsStat,
+              smartzoom: smartStat
+            };
+            if (overlay && overlay.trim() !== "") {
+              item.overlay = overlay;
+            }
+            return item;
+          }));
+
+          // ⚡ PASO 3: Enviar datos completos al mediavisor ya abierto
+          const pd = window.parent?.document || document;
+          const mv2f = pd.getElementById("mv2f");
+          if (mv2f?.contentWindow) {
+            mv2f.contentWindow.postMessage({ type:'INIT_GALLERY', gallery, index: currentIndex }, '*');
+          }
+        } catch (err) {
+          console.error("🖼️ Error en thumbnail click handler:", err);
+        }
+      });
+    }
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+  <script>
+    
+    // ✅ NUEVO: fallback por docId exacto (y si no existe, por fields)
+    async function getPhrasionaryTermByDocIdOrTitle(key) {
+      if (!key) throw new Error("No key");
+      const k = String(key).trim();
+
+      // 1) Intentar docId directo
+      const direct = await db.collection("phrasionaryTerms").doc(k).get();
+      if (direct.exists) return direct.data();
+
+      // 2) Intentar por fields comunes
+      const tryFields = ["tooltipTitle", "phrasionaryTitle", "title", "id"];
+      for (const field of tryFields) {
+        const snap = await db.collection("phrasionaryTerms").where(field, "==", k).limit(1).get();
+        if (!snap.empty) return snap.docs[0].data();
+      }
+
+      throw new Error("Term not found for key: " + k);
+    }
+
+    function getExtraExplanationImageIds(el) {
+      if (!el) return [];
+
+      const directId = (el.getAttribute("id") || "").trim();
+      const fallbackIds = (el.getAttribute("data-img-ids") || "")
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean);
+
+      const ids = directId ? [directId, ...fallbackIds] : fallbackIds;
+      return [...new Set(ids)];
+    }
+
+    function getExtraExplanationImageId(el) {
+      return getExtraExplanationImageIds(el)[0] || "";
+    }
+
+    function fixDriveThumb(url, size = "w1000") {
+      const raw = String(url || "").trim();
+      if (!raw) return "";
+
+      const match = raw.match(/(?:\/file\/d\/|id=)([^\/&?]+)/);
+      return match ? `https://drive.google.com/thumbnail?id=${match[1]}&sz=${size}` : raw;
+    }
+
+    function pickBancoImagenUrl(urls = {}, size = "w1000") {
+      const candidate = urls.small || urls.thumb || urls.medium || urls.big || "";
+      return fixDriveThumb(candidate, size);
+    }
+
+    async function fetchBancoImagenData(id, size = "w1000") {
+      if (!id) return null;
+
+      const snap = await db.collection("bancoimagenes").doc(id).get();
+      if (!snap.exists) return null;
+
+      const data = snap.data() || {};
+      const urls = data.urls || {};
+      const src = fixDriveThumb(urls.big || urls.medium || urls.small || urls.thumb || "", size);
+      const title = data.textoimagen1 || data.title || data.id || "";
+      const description = data.descripcion || "";
+      const copyright = data.copyright || "";
+      const overlayUrl = fixDriveThumb(urls.overlay || "", "w2000");
+      const labels = !!data.labels;
+      const smartzoom = !!data.smartzoom;
+
+      return {
+        type: "image",
+        id,
+        src,
+        title,
+        description,
+        copyright,
+        labels,
+        smartzoom,
+        ...(overlayUrl ? { overlay: overlayUrl } : {})
+      };
+    }
+
+    // Prevent duplicate listeners
+    if (!window._popupListenerAttached) {
+      window._popupListenerAttached = true;
+      document.addEventListener("click", async (e) => {
+      // ✅ MISMO DISEÑO: solo ampliamos qué elementos disparan el popup
+      // ✅ IMPORTANTE: el bonus real es span.api.explanation[data-type="bonus"]
+      const trigger = e.target.closest(
+        "a.tooltip__link, a.api[data-type='link'], span.api.dictionary, span.api.dictionary[data-type], span.api.explanation[data-type='bonus'], span.api.extraExplanation, [data-type='dosageEntity'], sup[data-type='Reference']"
+      );
+      if (!trigger) return;
+
+      // ✅ igual que antes: evitar navegación SOLO si es <a>
+      if (trigger.tagName === "A" || trigger.getAttribute('data-type') === 'dosageEntity') e.preventDefault();
+      e.stopPropagation();
+
+      // =========================
+      // 1) BONUS (data-type="bonus")
+      // =========================
+      if (trigger.matches("span.api.explanation[data-type='bonus']")) {
+        const explId = (trigger.getAttribute("id") || "").trim();
+
+        const overlay = document.createElement("div");
+        overlay.style.cssText = `
+        position: fixed;
+        inset: 0;
+        background: transparent;
+        z-index: 99999;
+      `;
+
+        const bonusPopup = document.createElement("div");
+        bonusPopup.style.cssText = `
+        position: fixed;
+        overflow: visible;
+        background: #ffffff;
+        padding: 0;
+        border-radius: 8px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        z-index: 100000;
+        width: auto;
+        max-width: 482px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.5;
+        color: #1a1a1a;
+      `;
+
+        const bonusArrowBorder = document.createElement("div");
+        bonusArrowBorder.style.cssText = `
+        position: absolute;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+        transform: translateX(-50%);
+      `;
+        const bonusArrow = document.createElement("div");
+        bonusArrow.style.cssText = `
+        position: absolute;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+        transform: translateX(-50%);
+      `;
+
+        bonusPopup.appendChild(bonusArrowBorder);
+        bonusPopup.appendChild(bonusArrow);
+
+        document.body.appendChild(overlay);
+        document.body.appendChild(bonusPopup);
+
+        function positionBonusPopup() {
+          const rect = trigger.getBoundingClientRect();
+          const vw = window.innerWidth;
+          const vh = window.innerHeight;
+          const margin = 8;
+
+          const popupRect = bonusPopup.getBoundingClientRect();
+          const spaceBelow = vh - rect.bottom;
+          const spaceAbove = rect.top;
+
+          let placeAbove = false;
+          if (spaceBelow < popupRect.height + margin && spaceAbove > spaceBelow) placeAbove = true;
+
+          let top;
+          if (placeAbove) {
+            top = rect.top - popupRect.height - 8;
+            if (top < margin) top = margin;
+          } else {
+            top = rect.bottom + 8;
+            if (top + popupRect.height > vh - margin) top = vh - margin - popupRect.height;
+          }
+
+          let left = rect.left + rect.width / 2 - popupRect.width / 2;
+          left = Math.max(margin, Math.min(left, vw - popupRect.width - margin));
+
+          bonusPopup.style.top = `${top}px`;
+          bonusPopup.style.left = `${left}px`;
+
+          const anchorX = rect.left + rect.width / 2;
+          let arrowX = anchorX - left;
+
+          const half = 9;
+          const pad = 6;
+          arrowX = Math.max(half + pad, Math.min(arrowX, popupRect.width - half - pad));
+
+          bonusArrowBorder.style.left = `${arrowX}px`;
+          bonusArrow.style.left = `${arrowX}px`;
+
+          if (placeAbove) {
+            const h = popupRect.height;
+
+            bonusArrowBorder.style.top = `${h - 1}px`;
+            bonusArrow.style.top = `${h - 2}px`;
+
+            bonusArrowBorder.style.borderLeft = "9px solid transparent";
+            bonusArrowBorder.style.borderRight = "9px solid transparent";
+            bonusArrowBorder.style.borderTop = "9px solid rgba(15,23,42,0.08)";
+            bonusArrowBorder.style.borderBottom = "none";
+
+            bonusArrow.style.borderLeft = "8px solid transparent";
+            bonusArrow.style.borderRight = "8px solid transparent";
+            bonusArrow.style.borderTop = "8px solid #ffffff";
+            bonusArrow.style.borderBottom = "none";
+          } else {
+            bonusArrowBorder.style.top = "-9px";
+            bonusArrow.style.top = "-8px";
+
+            bonusArrowBorder.style.borderLeft = "9px solid transparent";
+            bonusArrowBorder.style.borderRight = "9px solid transparent";
+            bonusArrowBorder.style.borderTop = "none";
+            bonusArrowBorder.style.borderBottom = "9px solid rgba(15,23,42,0.08)";
+
+            bonusArrow.style.borderLeft = "8px solid transparent";
+            bonusArrow.style.borderRight = "8px solid transparent";
+            bonusArrow.style.borderTop = "none";
+            bonusArrow.style.borderBottom = "8px solid #ffffff";
+          }
+        }
+
+        const closeBonus = () => {
+          overlay.remove();
+          bonusPopup.remove();
+          document.removeEventListener("keydown", onEsc);
+          window.removeEventListener("resize", positionBonusPopup);
+        };
+
+        const onEsc = (ev) => {
+          if (ev.key === "Escape") closeBonus();
+        };
+
+        document.addEventListener("keydown", onEsc);
+        overlay.addEventListener("click", closeBonus);
+        bonusPopup.addEventListener("click", (ev) => ev.stopPropagation());
+
+        // 🔄 Loading con spinner (BONUS)
+        bonusPopup.innerHTML = `
+        <div style="
+          padding:20px;
+          min-width:220px;
+          min-height:120px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+        ">
+          <div data-loading-spinner data-size="60"></div>
+        </div>
+      `;
+        bonusPopup.appendChild(bonusArrowBorder);
+        bonusPopup.appendChild(bonusArrow);
+
+        if (window.AmbossUI && typeof AmbossUI.initLoadingSpinners === "function") {
+          AmbossUI.initLoadingSpinners();
+        }
+
+        requestAnimationFrame(positionBonusPopup);
+        window.addEventListener("resize", positionBonusPopup);
+
+        try {
+          if (!explId) throw new Error("bonus explanation sin id");
+
+          const snap = await db.collection("extraExplanations").doc(explId).get();
+          if (!snap.exists) throw new Error("No existe doc /extraExplanations/" + explId);
+
+          const data = snap.data() || {};
+          const html = data.popoverHtml || data.rawHtml || "";
+          const text = data.text || "";
+
+          if (html) {
+            bonusPopup.innerHTML = html;
+          } else {
+            bonusPopup.innerHTML = `
+            <div style="padding:16px;">
+              <div style="font-size:14px;line-height:1.6;">${text || "No content."}</div>
+            </div>
+          `;
+          }
+
+          bonusPopup.appendChild(bonusArrowBorder);
+          bonusPopup.appendChild(bonusArrow);
+          requestAnimationFrame(positionBonusPopup);
+          return;
+        } catch (err) {
+          console.error("bonus Firestore error:", err);
+          bonusPopup.innerHTML = `
+          <div style="padding:16px;font-size:13px;color:#b91c1c;">
+            Error loading bonus: ${err.message}
+          </div>
+        `;
+          bonusPopup.appendChild(bonusArrowBorder);
+          bonusPopup.appendChild(bonusArrow);
+          requestAnimationFrame(positionBonusPopup);
+          return;
+        }
+      }
+
+      // =========================
+      // 2) POPUPS NORMALES / References / extraExplanation
+      // =========================
+
+      // Branch para REFERENCIAS
+      if (trigger.getAttribute('data-type') === 'Reference') {
+        const refIndex = trigger.textContent.replace(/[\[\]]/g, '').trim();
+        let refContent = "";
+
+        // Buscar el contenido de la referencia en el DOM
+        // El formato esperado es un div con un span que contiene "N."
+        const allReferenceSpans = document.querySelectorAll('span');
+        let targetSpan = null;
+        for (const s of allReferenceSpans) {
+          if (s.textContent.trim() === `${refIndex}.`) {
+            targetSpan = s;
+            break;
+          }
+        }
+
+        if (targetSpan) {
+          // El contenido suele estar en el siguiente div o hermano
+          const refContainer = targetSpan.closest('div[style*="display: flex"]');
+          if (refContainer) {
+            // Clonamos para no alterar el original y removemos el número
+            const clone = refContainer.cloneNode(true);
+            const numSpan = clone.querySelector('span');
+            if (numSpan) numSpan.remove();
+            refContent = clone.innerHTML;
+          } else {
+            // Fallback: siguiente hermano
+            refContent = targetSpan.nextElementSibling ? targetSpan.nextElementSibling.innerHTML : targetSpan.parentElement.innerHTML;
+          }
+        }
+
+        if (!refContent) {
+          // Intentar buscar por texto si no se encontró el span exacto
+          const allText = document.body.innerText;
+          if (allText.includes(`${refIndex}. `)) {
+            refContent = `Reference ${refIndex} content found in text, but structure mismatch.`;
+          } else {
+            refContent = `Reference ${refIndex} not found in the current document view.`;
+          }
+        }
+
+        // Reutilizar el sistema de popups para mostrar la referencia
+        const overlay = document.createElement("div");
+        overlay.style.cssText = `position: fixed; inset: 0; background: transparent; z-index: 99999;`;
+        const popup = document.createElement("div");
+        popup.style.cssText = `
+          position: fixed; overflow: visible; background: #ffffff; padding: 16px 20px;
+          border-radius: 12px; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+          border: 1px solid rgba(15, 23, 42, 0.08); z-index: 100000;
+          width: auto; max-width: 482px; font-family: inherit; line-height: 1.5; color: #1a1a1a;
+        `;
+
+        const arrowBorder = document.createElement("div");
+        arrowBorder.style.cssText = `position: absolute; width: 0; height: 0; pointer-events: none; transform: translateX(-50%);`;
+        const arrow = document.createElement("div");
+        arrow.style.cssText = `position: absolute; width: 0; height: 0; pointer-events: none; transform: translateX(-50%);`;
+
+        popup.innerHTML = `<div class="reference-popup-content" style="font-size: 14px; color: #334155;">${refContent}</div>`;
+        popup.appendChild(arrowBorder);
+        popup.appendChild(arrow);
+        document.body.appendChild(overlay);
+        document.body.appendChild(popup);
+
+        const closePopup = () => { overlay.remove(); popup.remove(); };
+        overlay.addEventListener("click", closePopup);
+        
+        function positionRefPopup() {
+          const rect = trigger.getBoundingClientRect();
+          const vw = window.innerWidth;
+          const vh = window.innerHeight;
+          const margin = 8;
+          const pRect = popup.getBoundingClientRect();
+          const placeAbove = (vh - rect.bottom < pRect.height + margin && rect.top > vh - rect.bottom);
+          
+          let top = placeAbove ? rect.top - pRect.height - 8 : rect.bottom + 8;
+          let left = rect.left + rect.width / 2 - pRect.width / 2;
+          left = Math.max(margin, Math.min(left, vw - pRect.width - margin));
+          
+          popup.style.top = `${top}px`;
+          popup.style.left = `${left}px`;
+
+          const arrowX = Math.max(15, Math.min(rect.left + rect.width / 2 - left, pRect.width - 15));
+          arrowBorder.style.left = arrow.style.left = `${arrowX}px`;
+
+          if (placeAbove) {
+            arrowBorder.style.top = `${pRect.height - 1}px`;
+            arrow.style.top = `${pRect.height - 2}px`;
+            arrowBorder.style.borderTop = "9px solid rgba(15,23,42,0.08)";
+            arrowBorder.style.borderLeft = arrowBorder.style.borderRight = "9px solid transparent";
+            arrow.style.borderTop = "8px solid #ffffff";
+            arrow.style.borderLeft = arrow.style.borderRight = "8px solid transparent";
+          } else {
+            arrowBorder.style.top = "-9px";
+            arrow.style.top = "-8px";
+            arrowBorder.style.borderBottom = "9px solid rgba(15,23,42,0.08)";
+            arrowBorder.style.borderLeft = arrowBorder.style.borderRight = "9px solid transparent";
+            arrow.style.borderBottom = "8px solid #ffffff";
+            arrow.style.borderLeft = arrow.style.borderRight = "8px solid transparent";
+          }
+        }
+
+        requestAnimationFrame(positionRefPopup);
+        window.addEventListener("resize", positionRefPopup);
+        return;
+      }
+
+      // 1) Obtener el término desde Firestore
+      let termPromise = null;
+      const termId = trigger.dataset.termId;
+
+      if (termId) {
+        termPromise = getPhrasionaryTerm(termId);
+      } else if (trigger.getAttribute('data-type') === 'dosageEntity') {
+        // --- LOGICA DE DOSAGE ---
+        let drugName = "";
+        if (trigger.previousElementSibling) {
+          drugName = trigger.previousElementSibling.textContent.trim();
+        } else if (trigger.previousSibling && trigger.previousSibling.nodeType === 3) {
+          drugName = trigger.previousSibling.textContent
+            .trim().replace(/^(or|o|y)\s+/i, '').trim();
+        }
+        
+        if (!drugName) drugName = (trigger.textContent || "").replace(/DOSAGE/i, "").trim();
+        termPromise = getDosageData(drugName);
+      } else {
+        const fromDataAnker = trigger.dataset.anker || "";
+        let fromHrefHash = "";
+
+        const href = (trigger.getAttribute("href") || "").trim();
+
+        if (href) {
+          termPromise = getPhrasionaryTermByHref(href);
+        } else {
+          const anchorId = fromDataAnker || fromHrefHash;
+
+          if (anchorId) {
+            termPromise = getPhrasionaryTermByAnchor(anchorId);
+          } else {
+            const linkText = (trigger.textContent || "").trim();
+            if (!linkText) {
+              if (!trigger.classList.contains("extraExplanation")) {
+                console.warn("Trigger sin termId/href/anchor/texto utilizable", trigger);
+                return;
+              }
+            }
+            termPromise = getPhrasionaryTermByDocIdOrTitle(linkText);
+          }
+        }
+      }
+
+      // Overlay + contenedor del popup
+      const overlay = document.createElement("div");
+      overlay.style.cssText = `
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      z-index: 99999;
+    `;
+
+      const popup = document.createElement("div");
+      popup.style.cssText = `
+      position: fixed;
+      overflow: visible;
+      background: #ffffff;
+      padding: 0;
+      border-radius: 8px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      z-index: 100000;
+      width: auto;
+      max-width: 482px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.5;
+      color: #1a1a1a;
+    `;
+
+      const arrowBorder = document.createElement("div");
+      arrowBorder.style.cssText = `
+      position: absolute;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+      transform: translateX(-50%);
+    `;
+      const arrow = document.createElement("div");
+      arrow.style.cssText = `
+      position: absolute;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+      transform: translateX(-50%);
+    `;
+      popup.appendChild(arrowBorder);
+      popup.appendChild(arrow);
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(popup);
+
+      const closePopup = () => {
+        overlay.remove();
+        popup.remove();
+        document.removeEventListener("keydown", onEsc);
+        window.removeEventListener("resize", positionPopup);
+      };
+
+      const onEsc = (ev) => {
+        if (ev.key === "Escape") closePopup();
+      };
+      document.addEventListener("keydown", onEsc);
+      overlay.addEventListener("click", closePopup);
+
+      popup.addEventListener("click", (ev) => {
+        // 1. Check if clicked element is a thumbnail image inside the popup
+        const img = ev.target.closest(".thumbnail__image img");
+        
+        
+        if (img) {
+          ev.preventDefault();
+          ev.stopPropagation(); 
+          console.log("Popup thumbnail clicked! Opening MediaViewer Overlay...");
+          
+          const src = img.getAttribute("src");
+          const title = img.getAttribute("title") || "";
+          
+          // Gather all images in this popup context
+          const sectionContainer = popup; 
+          const allImages = Array.from(sectionContainer.querySelectorAll(".thumbnail__image img"));
+          
+          const gallery = allImages.map(el => ({
+            src: el.getAttribute("src"),
+            title: el.getAttribute("title") || ""
+          }));
+          
+          const currentIndex = allImages.indexOf(img);
+          const targetUrl = `mediavisor2.html?src=${encodeURIComponent(src)}&title=${encodeURIComponent(title)}`;
+          
+          // Close table modal if it's open
+          if (window.closeTableModal) window.closeTableModal();
+          
+          // Open viewer
+          if (window.parent && window.parent.openMediaViewer2) {
+            window.parent.openMediaViewer2(targetUrl, gallery, currentIndex);
+          } else if (window.openMediaViewer2) {
+            window.openMediaViewer2(targetUrl, gallery, currentIndex);
+          }
+          
+          // Close the popup itself
+          closePopup();
+          return;
+        }
+
+        // Default behavior for other clicks: just stop propagation so popup doesn't close
+        ev.stopPropagation();
+      }, true);
+
+      // =========================
+      // 🔄 ESTADO INICIAL: LOADING PARA TODOS LOS POPUPS NORMALES
+      // =========================
+      function positionPopup() {
+        const rect = trigger.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const margin = 8;
+
+        const popupRect = popup.getBoundingClientRect();
+        const spaceBelow = vh - rect.bottom;
+        const spaceAbove = rect.top;
+
+        let placeAbove = false;
+        if (spaceBelow < popupRect.height + margin && spaceAbove > spaceBelow) {
+          placeAbove = true;
+        }
+
+        let top;
+        if (placeAbove) {
+          top = rect.top - popupRect.height - 8;
+          if (top < margin) top = margin;
+        } else {
+          top = rect.bottom + 8;
+          if (top + popupRect.height > vh - margin) {
+            top = vh - margin - popupRect.height;
+          }
+        }
+
+        let left = rect.left + rect.width / 2 - popupRect.width / 2;
+        left = Math.max(margin, Math.min(left, vw - popupRect.width - margin));
+
+        popup.style.top = `${top}px`;
+        popup.style.left = `${left}px`;
+
+        const anchorX = rect.left + rect.width / 2;
+        let arrowX = anchorX - left;
+
+        const half = 9;
+        const pad = 6;
+
+        arrowX = Math.max(half + pad, Math.min(arrowX, popupRect.width - half - pad));
+
+        arrowBorder.style.left = `${arrowX}px`;
+        arrow.style.left = `${arrowX}px`;
+
+        if (placeAbove) {
+          const h = popupRect.height;
+
+          arrowBorder.style.top = `${h - 1}px`;
+          arrow.style.top = `${h - 2}px`;
+
+          arrowBorder.style.borderLeft = "9px solid transparent";
+          arrowBorder.style.borderRight = "9px solid transparent";
+          arrowBorder.style.borderTop = "9px solid rgba(15,23,42,0.08)";
+          arrowBorder.style.borderBottom = "none";
+
+          arrow.style.borderLeft = "8px solid transparent";
+          arrow.style.borderRight = "8px solid transparent";
+          arrow.style.borderTop = "8px solid #ffffff";
+          arrow.style.borderBottom = "none";
+        } else {
+          arrowBorder.style.top = "-9px";
+          arrow.style.top = "-8px";
+
+          arrowBorder.style.borderLeft = "9px solid transparent";
+          arrowBorder.style.borderRight = "9px solid transparent";
+          arrowBorder.style.borderTop = "none";
+          arrowBorder.style.borderBottom = "9px solid rgba(15,23,42,0.08)";
+
+          arrow.style.borderLeft = "8px solid transparent";
+          arrow.style.borderRight = "8px solid transparent";
+          arrow.style.borderTop = "none";
+          arrow.style.borderBottom = "8px solid #ffffff";
+        }
+      }
+
+      // ⬇️ Loading inmediato
+      popup.innerHTML = `
+      <div style="
+        padding:20px;
+        min-width:220px;
+        min-height:120px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+      ">
+        <div data-loading-spinner data-size="60"></div>
+      </div>
+    `;
+      popup.appendChild(arrowBorder);
+      popup.appendChild(arrow);
+
+      if (window.AmbossUI && typeof AmbossUI.initLoadingSpinners === "function") {
+        AmbossUI.initLoadingSpinners();
+      }
+
+      requestAnimationFrame(positionPopup);
+      window.addEventListener("resize", positionPopup);
+
+      // =========================
+      // extraExplanation con imagen (usa el MISMO popup y loading)
+      // =========================
+      // =========================
+      // extraExplanation con imagen (usa el MISMO popup y loading)
+      // =========================
+      if (trigger.classList.contains("extraExplanation")) {
+        const imgDocIds = getExtraExplanationImageIds(trigger);
+        let imageItems = [];
+
+        try {
+          if (!imgDocIds.length) throw new Error("extraExplanation sin id ni data-img-ids");
+
+          const results = await Promise.all(imgDocIds.map((id) => fetchBancoImagenData(id, "w600")));
+          imageItems = results.filter((item) => item && item.src);
+          if (!imageItems.length) {
+            throw new Error("No existe ninguna imagen válida en /bancoimagenes para " + imgDocIds.join(", "));
+          }
+        } catch (err) {
+          console.error("extraExplanation Firestore error:", err);
+          imageItems = [{
+            id: "",
+            title: "Image info not found",
+            src: ""
+          }];
+        }
+
+        const fallbackSvg =
+          "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='110'%20height='110'%20viewBox='0%200%20110%20110'%3E%3Crect%20width='110'%20height='110'%20fill='%23f3f4f6'/%3E%3Ctext%20x='50%25'%20y='50%25'%20dominant-baseline='middle'%20text-anchor='middle'%20font-size='14'%20fill='%236b7280'%20font-family='Arial'%3EIMG%3C/text%3E%3C/svg%3E";
+
+        const wrapper = document.createElement("div");
+        wrapper.style.cssText = "padding:16px; display:flex; flex-direction:column; gap:12px;";
+
+        imageItems.forEach((item) => {
+          const row = document.createElement("div");
+          row.style.cssText = "display:flex; align-items:flex-start; gap:12px;";
+
+          const img = document.createElement("img");
+          img.src = item.src || fallbackSvg;
+          img.alt = "Imagen";
+          img.width = 110;
+          img.height = 110;
+          img.style.cssText = "width:110px;height:110px;object-fit:cover;border-radius:8px;border:1px solid rgba(15,23,42,0.08);background:#f5f5f5;flex:0 0 auto;display:block;cursor:pointer;";
+
+          img.addEventListener("click", async (e) => {
+             e.stopPropagation();
+             console.log("Thumbnail clicked! Fetching all segment images...");
+
+             const section = trigger.closest('[data-section-id]') || trigger.closest('.f9cf365808f534a0--articlePageWidth') || document.body;
+             const allTriggers = Array.from(section.querySelectorAll('span.extraExplanation'));
+             const allIds = [...new Set(allTriggers.flatMap((t) => getExtraExplanationImageIds(t)))];
+
+             const results = await Promise.all(allIds.map((id) => fetchBancoImagenData(id, "w1000").catch((err) => {
+               console.error("Error fetching image " + id, err);
+               return null;
+             })));
+             const gallery = results.filter((galleryItem) => galleryItem && galleryItem.src);
+
+             let currentIndex = gallery.findIndex((galleryItem) => galleryItem.id === item.id);
+             if (currentIndex === -1) currentIndex = 0;
+
+             const currentItem = gallery[currentIndex] || item;
+             const targetUrl = `mediavisor2.html?src=${encodeURIComponent(currentItem.src || item.src || "")}&title=${encodeURIComponent(currentItem.title || item.title || "")}&desc=${encodeURIComponent(currentItem.description || item.description || "")}&copy=${encodeURIComponent(currentItem.copyright || item.copyright || "")}`;
+
+             if (window.closeTableModal) window.closeTableModal();
+
+             if (window.parent && window.parent.openMediaViewer2) {
+                 window.parent.openMediaViewer2(targetUrl, gallery, currentIndex);
+             } else if (window.openMediaViewer2) {
+                 window.openMediaViewer2(targetUrl, gallery, currentIndex);
+             } else {
+                 console.warn("No openMediaViewer2 function found.");
+             }
+
+             closePopup();
+          });
+
+          const textDiv = document.createElement("div");
+          textDiv.style.cssText = "font-size:14px; color:#1a1a1a; line-height:1.4; font-weight:400; margin:0; padding:0;";
+          textDiv.textContent = item.title || "";
+
+          row.appendChild(img);
+          row.appendChild(textDiv);
+          wrapper.appendChild(row);
+        });
+
+        popup.innerHTML = "";
+        popup.appendChild(wrapper);
+
+        popup.appendChild(arrowBorder);
+        popup.appendChild(arrow);
+
+        requestAnimationFrame(positionPopup);
+        return;
+      }
+      // =========================
+      // 3) Cargar datos del término (phrasionary)
+      // =========================
+      let term;
+      try {
+        term = await termPromise;
+      } catch (err) {
+        console.error(err);
+        popup.innerHTML = `<div style="padding:16px;font-size:13px;color:#b91c1c">
+        Error loading term: ${err.message}
+      </div>`;
+        popup.appendChild(arrowBorder);
+        popup.appendChild(arrow);
+        requestAnimationFrame(positionPopup);
+        return;
+      }
+
+      const articleInfo = term.article || {};
+      const linkText = (trigger.textContent || "").trim();
+
+      const mainTitle =
+        term.tooltipTitle ||
+        term.phrasionaryTitle ||
+        term.title ||
+        term.label ||
+        linkText;
+
+      const synonym = term.synonym || term.synonyms || "";
+
+      let abbreviation = term.abbreviation || term.abbreviations || "";
+      if (Array.isArray(abbreviation)) abbreviation = abbreviation.join(", ");
+
+      const definition = term.definition || term.previewHtml || "";
+
+      const imagesNew = Array.isArray(term.images)
+        ? term.images.map(img => ({
+          src: img.url,
+          alt: img.alt || mainTitle,
+          title: img.title || mainTitle,
+        }))
+        : [];
+
+      const thumbnailsOld = Array.isArray(term.thumbnails)
+        ? term.thumbnails.map(t => ({
+          src: t.urlSmall,
+          alt: t.alt || mainTitle,
+          title: t.title || mainTitle,
+        }))
+        : [];
+
+      const singleThumbOld = (term.thumbnail && term.thumbnail.urlSmall)
+        ? [{
+          src: term.thumbnail.urlSmall,
+          alt: term.thumbnail.alt || mainTitle,
+          title: term.thumbnail.title || mainTitle,
+        }]
+        : [];
+
+      const allThumbs = imagesNew.length
+        ? imagesNew
+        : (thumbnailsOld.length ? thumbnailsOld : singleThumbOld);
+
+      let thumbsHtml = "";
+      if (allThumbs.length) {
+        thumbsHtml = `
+        <div style="
+          display:flex;
+          overflow-x:auto;
+          gap:12px;
+          margin-top:12px;
+          margin-bottom:12px;
+          justify-content:start;
+        ">
+          ${allThumbs.map(t => `
+            <div class="thumbnail__image"
+                 style="background:#f5f5f5;border: 1px solid #e6e6e6;border-radius:8px;width:86px;height:86px;min-width:86px;min-height:86px;overflow:hidden;margin:0;">
+              <img src="${t.src}"
+                   alt="${t.alt}"
+                   title="${t.title}"
+                   style="width:100%;height:100%;object-fit:contain;border-radius:4px;" />
+            </div>
+          `).join("")}
+        </div>`;
+      }
+
+      const articleTitle = articleInfo.title || mainTitle || "View article";
+
+      const articleUrl =
+        term.fullUrl ||
+        articleInfo.url ||
+        articleInfo.href ||
+        "#";
+
+      const urlAbs = (articleUrl || "#").startsWith("http")
+        ? articleUrl
+        : ("https://next.amboss.com" + articleUrl);
+
+      function stripHtml(s) {
+        return (s || "")
+          .replace(/<script[\s\S]*?<\/script>/gi, "")
+          .replace(/<style[\s\S]*?<\/style>/gi, "")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/&nbsp;/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function isMeaningfulDefinition(defPlain, { mainTitlePlain, articleTitlePlain, linkPlain }) {
+        if (!defPlain) return false;
+
+        const d = defPlain.trim();
+        if (d.length < 3) return false;
+
+        if (d === mainTitlePlain) return false;
+        if (d === articleTitlePlain) return false;
+        if (linkPlain && d === linkPlain) return false;
+
+        if (d.includes("›") && articleTitlePlain && d === articleTitlePlain) return false;
+
+        return true;
+      }
+
+      function renderDosagePopover({ title, definition, url, drugName, titutlopie }) {
+        popup.style.width = "auto";
+        popup.style.maxWidth = "min(520px, calc(100vw - 16px))";
+        popup.style.borderRadius = "12px";
+
+        popup.innerHTML = `
+          <div style="padding: 20px 24px;">
+            <div style="font-size: 16px; line-height: 1.5; color: #1a1a1a; font-weight: 400;">
+              ${definition}
+            </div>
+          </div>
+          <div style="height: 1px; background: #eaedf0; margin: 0;"></div>
+          <div style="
+            padding: 12px 18px 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+          ">
+            <div style="display: flex; align-items: center; gap: 12px; color: #1a1a1a; font-size: 15px; font-weight: 500;">
+              <div data-ds-id="Icon" data-variant="quaternary" class="css-1v6n0lo-StyledIcon e1tsg83e0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.222 12.707a5 5 0 0 0 7.071 7.071l4.243-4.242-7.071-7.072z">
+                </path>
+                <path fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.707 4.222 8.465 8.464l7.07 7.072 4.244-4.243a5 5 0 1 0-7.072-7.071"></path></svg></div>
+              <span>${titutlopie || drugName || title}</span>
+            </div>
+            <button type="button"
+              onclick="if('${url}'.startsWith('/supracategorias')){ sessionStorage.setItem('currentDocPath', '${url}'); if(window.loadMainContent) loadMainContent('subcategoriacontent.html'); else location.reload(); } else { window.location.href='${url}'; }"
+              style="
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 6px 12px;
+                background: transparent;
+                border: none;
+                border-radius: 6px;
+                font-size: 13px;
+                font-weight: 600;
+                color: #475569;
+                cursor: pointer;
+                transition: background 0.15s;
+              "
+              onmouseover="this.style.backgroundColor='#f1f5f9';"
+              onmouseout="this.style.backgroundColor='transparent';"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 16 16">
+                <path fill="currentColor" fill-rule="evenodd" d="M11 3h2v10h-2zM9 3H3v10h6zM1 3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2z" clip-rule="evenodd"></path>
+              </svg>
+              SPLIT VIEW
+            </button>
+          </div>
+        `;
+
+        popup.appendChild(arrowBorder);
+        popup.appendChild(arrow);
+      }
+
+      function renderCompactPopover({ breadcrumb, url }) {
+        popup.style.width = "auto";
+        popup.style.maxWidth = "min(482px, calc(100vw - 16px))";
+        popup.style.borderRadius = "10px";
+
+        popup.innerHTML = `
+        <div style="
+          display:flex; align-items:center; gap:12px;
+          padding:12px 14px;
+          min-width:320px;
+        ">
+          <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1; cursor:pointer;"
+               onclick="if('${url}'.startsWith('/supracategorias')){ sessionStorage.setItem('currentDocPath', '${url}'); if(window.loadMainContent) loadMainContent('subcategoriacontent.html'); else location.reload(); } else { window.location.href='${url}'; }">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="22" height="22" fill="none" stroke="currentColor"
+                 stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                 viewBox="0 0 24 24" style="color:#0f6774; flex:0 0 auto;">
+              <path d="M4 2h16v20H4z"></path>
+              <path d="M12 6H8"></path>
+              <path d="M14 10H8"></path>
+              <path d="M8 14h8v4H8z"></path>
+            </svg>
+
+            <div style="min-width:0;">
+              <div style="
+                font-size:14px; font-weight:400; color:#111;
+                white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+              ">${breadcrumb}</div>
+            </div>
+          </div>
+
+          <button type="button" aria-label="Split view"
+            onclick="if('${url}'.startsWith('/supracategorias')){ sessionStorage.setItem('currentDocPath', '${url}'); if(window.loadMainContent) loadMainContent('subcategoriacontent.html'); else location.reload(); } else { window.location.href='${url}'; }"
+            style="
+              width:38px; height:34px;
+              border:0; background:transparent; cursor:pointer;
+              border-radius:8px;
+              display:flex; align-items:center; justify-content:center;
+              color:#111;
+            ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 16 16">
+              <path fill="currentColor" fill-rule="evenodd"
+                d="M11 3h2v10h-2zM9 3H3v10h6zM1 3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2z"
+                clip-rule="evenodd"></path>
+            </svg>
+          </button>
+        </div>
+      `;
+
+        popup.appendChild(arrowBorder);
+        popup.appendChild(arrow);
+      }
+
+      // --- BRANCH: SPECIAL DOSAGE DESIGN ---
+      if (trigger.getAttribute('data-type') === 'dosageEntity') {
+        renderDosagePopover({
+          title: term.title || linkText || "Dosage",
+          definition: term.definition || "No dosage info.",
+          url: urlAbs,
+          drugName: term.drugName || linkText,
+          titutlopie: term.titutlopie
+        });
+        requestAnimationFrame(positionPopup);
+        window.addEventListener("resize", positionPopup);
+        return;
+      }
+
+      const mainTitlePlain = stripHtml(mainTitle);
+      const articleTitlePlain = stripHtml(articleTitle);
+      const linkPlain = stripHtml(linkText);
+      const defPlain = stripHtml(definition);
+
+      const hasDefinition = isMeaningfulDefinition(defPlain, { mainTitlePlain, articleTitlePlain, linkPlain });
+      const hasSyn = (String(synonym || "")).trim().length > 0;
+      const hasAbbrev = (String(abbreviation || "")).trim().length > 0;
+      const hasImages = Array.isArray(allThumbs) && allThumbs.length > 0;
+
+      const shouldUseCompact = !hasDefinition && !hasSyn && !hasAbbrev && !hasImages;
+
+      if (shouldUseCompact) {
+        const currentArticleTitle =
+          document.querySelector('h1._62af53fea5b31646--headerTitle')?.textContent?.trim() || "";
+
+        const breadcrumb =
+          (currentArticleTitle && linkText)
+            ? `${currentArticleTitle} \u203A ${linkText}`
+            : (articleTitle || mainTitle);
+
+        renderCompactPopover({ breadcrumb, url: urlAbs });
+
+        requestAnimationFrame(positionPopup);
+        window.addEventListener("resize", positionPopup);
+        return;
+      }
+
+      const definitionHtml = hasDefinition
+        ? `<p style="margin:4px 0 0 0;font-size:14px;color:#1a1a1a;line-height:1.6;">
+           ${definition}
+         </p>`
+        : "";
+
+      const hasRealUrl = urlAbs && urlAbs !== "https://next.amboss.com#" && urlAbs !== "#";
+
+      popup.innerHTML = `
+      <div style="padding:16px 16px 16px 16px;">
+        <h2 style="margin:0 0 4px 0;font-size:16px;font-weight:600;color:#1a1a1a;line-height:1.2;">
+          ${mainTitle}
+        </h2>
+
+        ${hasSyn ? `<p style="margin:0 0 2px 0;font-size:14px;color:#6b7280;">${synonym}</p>` : ""}
+
+        ${hasAbbrev ? `<p style="margin:0 0 8px 0;font-size:13px;color:#6b7280;">
+          <span style="font-style:italic;">Abbreviations:</span> ${abbreviation}
+        </p>` : ""}
+
+        ${thumbsHtml}
+
+        ${definitionHtml}
+      </div>
+
+      ${hasRealUrl ? `
+      <div style="
+        border-top:1px solid #e5e5e5;
+        height:56px;
+        padding:0 18px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        transition:background-color 0.15s ease;
+        cursor:pointer;
+      "
+      onmouseover="this.style.backgroundColor='#f9fafb';"
+      onmouseout="this.style.backgroundColor='transparent';"
+      onclick="if('${articleUrl}'.startsWith('/supracategorias')){ sessionStorage.setItem('currentDocPath', '${articleUrl}'); if(window.loadMainContent) loadMainContent('subcategoriacontent.html'); else location.reload(); } else { window.location.href='${urlAbs}'; }"
+      >
+        <div style="display:flex;align-items:center;gap:12px;">
+          <svg xmlns="http://www.w3.org/2000/svg"
+               width="24" height="24" fill="none" stroke="currentColor"
+               stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+               viewBox="0 0 24 24"
+               style="color:#0f6774;">
+            <path d="M4 2h16v20H4z"></path>
+            <path d="M12 6H8"></path>
+            <path d="M14 10H8"></path>
+            <path d="M8 14h8v4H8z"></path>
+          </svg>
+          <span style="font-size:15px;font-weight:500;color:#1a1a1a;">
+            ${articleTitle}
+          </span>
+        </div>
+
+        <button type="button"
+          style="
+            display:flex;
+            align-items:center;
+            gap:8px;
+            padding:8px 8px;
+            background:transparent;
+            border:none;
+            border-radius:4px;
+            font-size:12px;
+            font-weight:500;
+            color:#1a1a1a;
+            cursor:pointer;
+            font-family:inherit;
+            white-space:nowrap;
+            flex-shrink:0;
+            transition:background-color .15s ease;
+          "
+          onclick="if('${articleUrl}'.startsWith('/supracategorias')){ sessionStorage.setItem('currentDocPath', '${articleUrl}'); if(window.loadMainContent) loadMainContent('subcategoriacontent.html'); else location.reload(); } else { window.location.href='${urlAbs}'; }"
+          onmouseover="this.style.backgroundColor='#f2f3f5';"
+          onmouseout="this.style.backgroundColor='transparent';"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg"
+               width="16" height="16" fill="none" viewBox="0 0 16 16"
+               style="flex-shrink:0;">
+            <path fill="currentColor" fill-rule="evenodd"
+              d="M11 3h2v10h-2zM9 3H3v10h6zM1 3a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2z"
+              clip-rule="evenodd"></path>
+          </svg>
+          SPLIT VIEW
+        </button>
+      </div>
+      ` : ""}
+    `;
+
+      popup.appendChild(arrowBorder);
+      popup.appendChild(arrow);
+
+      requestAnimationFrame(positionPopup);
+      window.addEventListener("resize", positionPopup);
+    });
+    }
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- Thumbnail click handler moved to main rendering script above -->
+
+
+
+
+<script>
+(function () {
+  if (document.getElementById('font-size-popover')) return;
+  // ========= CONFIG =========
+  const TRIGGER_SEL = 'button[aria-label="Change font size"]';
+  const MIN = 0.80;
+  const MAX = 1.15;
+  const STEP = 0.05;
+  const DEFAULT = 1.00;
+
+  const TARGET_ROOT = document.documentElement;
+  const STORAGE_KEY = 'bancomicina_library_fontScale';
+
+  let isOpen = false;
+  let currentTrigger = null;
+
+  function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+
+  function getScale() {
+    const saved = Number(localStorage.getItem(STORAGE_KEY));
+    if (Number.isFinite(saved) && saved > 0) return clamp(saved, MIN, MAX);
+    const fromCss = Number(TARGET_ROOT.style.getPropertyValue('--banco-font-scale'));
+    if (Number.isFinite(fromCss) && fromCss > 0) return clamp(fromCss, MIN, MAX);
+    return DEFAULT;
+  }
+
+  function setScale(v) {
+    const scale = clamp(Number(v), MIN, MAX);
+    TARGET_ROOT.style.setProperty('--lib-font-scale', String(scale));
+    localStorage.setItem(STORAGE_KEY, String(scale));
+    updateUI(scale);
+    
+    if (isOpen && currentTrigger) {
+      requestAnimationFrame(() => {
+        positionPopover(currentTrigger);
+      });
+    }
+  }
+
+  // ========= INJECT CSS =========
+  const style = document.createElement('style');
+  style.textContent = `
+    :root { --lib-font-scale: ${DEFAULT}; }
+
+    /* Apply scale ONLY to container to let children inherit without compounding */
+    .a2e0dbc7f6affd28--baseStyles {
+      font-size: calc(1em * var(--lib-font-scale));
+    }
+
+    .a2e0dbc7f6affd28--baseStyles h1 {
+      /* Use 1.828em relative to the container, which is already scaled */
+      font-size: 1.828em;
+    }
+
+    .a2e0dbc7f6affd28--baseStyles h3 {
+      font-size: calc(1.375em * var(--lib-font-scale));
+    }
+
+    .a2e0dbc7f6affd28--baseStyles h4 {
+      font-size: calc(1.05em * var(--lib-font-scale));
+    }
+
+    ._62af53fea5b31646--synonymText {
+      font-size: calc(1.2em * (1 + (var(--lib-font-scale) - 1) * 0.4)) !important;
+    }
+
+
+
+    
+
+    #font-size-popover{
+      position: fixed;
+      z-index: 20050;
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      border-radius: 6px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+      width: 112px;
+      height: 48px;
+      padding: 8px;
+      box-sizing: border-box;
+      /* ✅ Sin transición al abrir para evitar glitch */
+      transition: none;
+      /* ✅ Oculto e invisible inicialmente */
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* ✅ Estado visible */
+    #font-size-popover.is-visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      /* ✅ Transición suave SOLO cuando ya está visible */
+      transition: top 0.15s ease, left 0.15s ease;
+    }
+
+    #font-size-popover .banco-font-controls{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 100%;
+    }
+
+    #font-size-popover .banco-font-btn{
+      width: 32px;
+      height: 32px;
+      border: 0;
+      background: transparent;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #0f172a;
+      transition: all 0.2s ease;
+    }
+
+    #font-size-popover .banco-font-btn:hover:not([disabled]){
+      background: rgba(15, 23, 42, 0.06);
+    }
+
+    #font-size-popover .banco-font-btn:active:not([disabled]){
+      background: rgba(15, 23, 42, 0.10);
+    }
+
+    #font-size-popover .banco-font-btn[disabled]{
+      cursor: not-allowed;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    #font-size-popover .banco-font-btn[disabled] svg path[stroke]{
+      stroke: #9ca3af;
+    }
+
+    #font-size-popover .banco-font-btn[disabled] svg path[fill]{
+      fill: #9ca3af;
+    }
+
+    #font-size-popover .banco-font-btn:not([disabled]) svg path[stroke]{
+      stroke: #0f172a;
+      transition: stroke 0.2s ease;
+    }
+
+    #font-size-popover .banco-font-btn:not([disabled]):hover svg path[stroke]{
+      stroke: #2563eb;
+    }
+
+    #font-size-popover .banco-font-btn:not([disabled]) svg path[fill]{
+      fill: #1f2937;
+      transition: fill 0.2s ease;
+    }
+
+    #font-size-popover .banco-font-btn:not([disabled]):hover svg path[fill]{
+      fill: #2563eb;
+    }
+
+    #font-size-popover [data-e2e-test-id="font-size-popover_arrow"]{ 
+      display: none !important; 
+    }
+  `;
+  document.head.appendChild(style);
+
+  // ========= CREATE POPOVER =========
+  const popover = document.createElement('div');
+  popover.setAttribute('data-ds-id', 'Popover');
+  popover.id = 'font-size-popover';
+  popover.setAttribute('aria-hidden', 'true');
+
+  popover.innerHTML = `
+    <div class="banco-font-controls">
+      <button
+        data-e2e-test-id="decrease-font-size-button"
+        type="button"
+        aria-label="Decrease font size"
+        class="banco-font-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" fill="none" viewBox="0 0 16 16" aria-hidden="true">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="bevel" stroke-width="2" d="M4 8h8"></path>
+        </svg>
+      </button>
+
+      <button
+        data-e2e-test-id="reset-font-size-button"
+        type="button"
+        aria-label="Reset font size"
+        class="banco-font-btn"
+        disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16">
+          <path fill="currentColor" fill-rule="evenodd"
+            d="M8.372 13h-2.81l-.596-1.6H2.293L1.697 13H0l2.885-7.75h1.488l2.32 6.231L10.063 3h1.967L16 13h-2.282l-.848-2.134H9.22zM3.63 7.81 4.47 10H2.79zM12.15 9l-1.105-2.73L9.92 9z"
+            clip-rule="evenodd">
+          </path>
+        </svg>
+      </button>
+
+      <button
+        data-e2e-test-id="increase-font-size-button"
+        type="button"
+        aria-label="Increase font size"
+        class="banco-font-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="16" fill="none" viewBox="0 0 16 16" aria-hidden="true">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="bevel" stroke-width="2" d="M4 8h8M8 4v8"></path>
+        </svg>
+      </button>
+    </div>
+  `;
+  document.body.appendChild(popover);
+
+  function updateUI(scale) {
+    const decreaseBtn = popover.querySelector('[data-e2e-test-id="decrease-font-size-button"]');
+    const increaseBtn = popover.querySelector('[data-e2e-test-id="increase-font-size-button"]');
+    const resetBtn = popover.querySelector('[data-e2e-test-id="reset-font-size-button"]');
+
+    if (decreaseBtn) decreaseBtn.disabled = (scale <= MIN);
+    if (increaseBtn) increaseBtn.disabled = (scale >= MAX);
+    if (resetBtn) {
+      const isDefault = Math.abs(scale - DEFAULT) < 0.0001;
+      resetBtn.disabled = isDefault;
+    }
+  }
+
+  function positionPopover(triggerEl) {
+    if (!triggerEl) return;
+    
+    const r = triggerEl.getBoundingClientRect();
+    const margin = 8;
+    const pr = popover.getBoundingClientRect();
+    const width = pr.width;
+
+    const top = r.bottom + 10;
+    let left = (r.left + r.width / 2) - (width / 2);
+
+    left = Math.max(margin, Math.min(left, window.innerWidth - width - margin));
+
+    popover.style.top = `${Math.round(top)}px`;
+    popover.style.left = `${Math.round(left)}px`;
+  }
+
+  function open(triggerEl) {
+    if (!triggerEl) return;
+    currentTrigger = triggerEl;
+    
+    // ✅ 1. Posicionar mientras está invisible
+    positionPopover(triggerEl);
+    
+    // ✅ 2. Esperar 1 frame para que el posicionamiento se aplique
+    requestAnimationFrame(() => {
+      // ✅ 3. Hacer visible con fade-in suave
+      popover.classList.add('is-visible');
+      popover.setAttribute('aria-hidden', 'false');
+      isOpen = true;
+    });
+  }
+
+  function close() {
+    popover.classList.remove('is-visible');
+    popover.setAttribute('aria-hidden', 'true');
+    isOpen = false;
+    currentTrigger = null;
+  }
+
+  function toggle(triggerEl) {
+    if (isOpen) close();
+    else open(triggerEl);
+  }
+
+  // ========= EVENTS =========
+  document.addEventListener('click', function (e) {
+    // Only handle clicks on the Library font size button (inside .c64ffd7459a27da8--itemWrapper)
+    const trigger = e.target.closest('.c64ffd7459a27da8--itemWrapper button[aria-label="Change font size"]');
+    if (trigger) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggle(trigger);
+      return;
+    }
+    if (isOpen && !e.target.closest('#font-size-popover')) close();
+  }, true);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && isOpen) close();
+  });
+
+  popover.addEventListener('click', function (e) {
+    const dec = e.target.closest('[data-e2e-test-id="decrease-font-size-button"]');
+    const inc = e.target.closest('[data-e2e-test-id="increase-font-size-button"]');
+    const rst = e.target.closest('[data-e2e-test-id="reset-font-size-button"]');
+
+    if (dec && !dec.disabled) { 
+      e.preventDefault(); 
+      setScale(getScale() - STEP); 
+    }
+    if (inc && !inc.disabled) { 
+      e.preventDefault(); 
+      setScale(getScale() + STEP); 
+    }
+    if (rst && !rst.disabled) { 
+      e.preventDefault(); 
+      setScale(DEFAULT); 
+    }
+  });
+
+  window.addEventListener('resize', function () {
+    if (!isOpen || !currentTrigger) return;
+    positionPopover(currentTrigger);
+  }, { passive: true });
+
+  window.addEventListener('scroll', function () {
+    if (!isOpen || !currentTrigger) return;
+    positionPopover(currentTrigger);
+  }, { passive: true, capture: true });
+
+  // ========= INIT =========
+  updateUI(getScale());
+  setScale(getScale());
+})();
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  <script>
+  (function() {
+    const b = document.getElementById('sticky-breadcrumbs');
+    if (!b) return;
+    const main = document.getElementById('bc-main');
+    const sub = document.getElementById('bc-sub');
+    const arr = document.getElementById('bc-arrow');
+    const cnt = document.getElementById('bc-sub-container');
+    const scroller = window.parent.document.getElementById('main-content') || window;
+
+    const updateBC = () => {
+      const st = (scroller === window) ? window.scrollY : scroller.scrollTop;
+      const show = st > 180;
+      
+      if (show) {
+        b.style.opacity = '1';
+        b.style.zIndex = '1000';
+        b.style.visibility = 'visible';
+        b.style.pointerEvents = 'auto';
+        b.classList.add('f9cf365808f534a0--breadcrumbsContainerVisible');
+      } else {
+        b.style.opacity = '0';
+        b.style.zIndex = '-1';
+        b.style.visibility = 'hidden';
+        b.style.pointerEvents = 'none';
+        b.classList.remove('f9cf365808f534a0--breadcrumbsContainerVisible');
+      }
+      
+      if(show) {
+        const h1 = document.getElementById('article-title');
+        if(h1 && main) main.textContent = h1.textContent;
+        let activeSec = null;
+        document.querySelectorAll('[data-section-id]').forEach(s => {
+          const rect = s.getBoundingClientRect();
+          if(rect.top < 150 && rect.bottom > 150) {
+            activeSec = s.querySelector('[data-section-title]')?.textContent;
+          }
+        });
+        if(activeSec && sub) {
+          sub.textContent = activeSec;
+          arr.style.display = cnt.style.display = 'block';
+        } else {
+          arr.style.display = cnt.style.display = 'none';
+        }
+      }
+    };
+    scroller.addEventListener('scroll', updateBC, { passive: true });
+    // Initial check
+    setTimeout(updateBC, 500);
+
+
+  })();
+  </script>
+<script src="global-shortcuts.js"></script>
+</body>
+
+<!-- 4 enero -->
